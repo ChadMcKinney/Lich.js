@@ -1,0 +1,796 @@
+<!-- 
+    Lich.js - JavaScript audio/visual live coding language
+    Copyright (C) 2012 Chad McKinney
+	
+	http://chadmckinneyaudio.com/
+	seppukuzombie@gmail.com
+	
+	All rights reserved.
+	
+	Licensed under the Modified BSD License
+
+	Redistribution and use in source and binary forms, with or without
+	modification, are permitted provided that the following conditions are met:
+	    * Redistributions of source code must retain the above copyright
+	      notice, this list of conditions and the following disclaimer.
+	    * Redistributions in binary form must reproduce the above copyright
+	      notice, this list of conditions and the following disclaimer in the
+	      documentation and/or other materials provided with the distribution.
+	    * Neither the name of the <organization> nor the
+	      names of its contributors may be used to endorse or promote products
+	      derived from this software without specific prior written permission.
+
+	THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+	ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+	WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+	DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+	DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+	(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+	LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+	ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+	(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+-->
+
+<!DOCTYPE html>
+
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Lich.js</title>
+	<meta name="keywords" content="Experimental, Computer Music, Multimedia, Live Coding" />
+	<meta name="description" contexnt="Lich.js is a very simple live coding audio and visual language implemented in javascript." />
+	<link rel="stylesheet" type="text/css" href="WP-Content/LichStyle.css" media="all" />
+	<script type="text/javascript" src="Lich.js"></script>
+	<script type="text/javascript" src="LichParser.js"></script>
+</head>
+
+<body>
+	
+	<textarea 
+		id="terminal"
+		contenteditable="true"
+		rows="33" 
+		spellcheck="false" 
+		onkeydown="javascript:return keyDown(event);" 
+		onkeyup="javascript:return keyUp(event);"
+	>
+// Lich.js
+
+This is a short work in progress demo.
+Play with the language and let me know what you think! 
+
+A brief intro:
+Lich is a functional language implemented in javascript Because of this extra layer, it is pretty sludgey, though we do get some nice things in return.
+
+In Lich we have 7 types. 
+
+Floats
+Lich has no ints; all numbers are floats. Just type a number and it's a float object. ex: 666 or 7.7709
+
+Strings
+Normal text string. Strings can be created with ' ' or " ".
+
+Arrays
+Holds any other types including other Arrays. Declared using [].
+
+Signals
+Continuous float containers similar to SC envelopes, although they are created with [time level] pairs and can have new points added at any time as well as indexed at any point in 'time'. You can use $ or Signal to create a new signal. More on this later.
+
+Variables
+Can be assigned to anything else except for Primitives. You have to assign a variable using the assign operator => otherwise you'll get an undefined error.
+
+Functions Functions are first class citizens, as in SC and can be called directly or passed as arguments and assigned to variables. Functions are defined using
+: someArg someOtherArg thisCanGoOnForever { do someArg }
+More on this later.
+
+Primitives
+Primitives are functions written in Javascript. They can't be assigned to variables and they are always resolved on call. These include operators such as +, -, /, *, as well as some other important functions. You can't create a primitive, however they are called constantly.
+
+The goal of the language is to keep the list short in the hopes that they can be used in any combination (although this isn't quite the case yet).
+
+Here's the catch. Everything is written with prefix notation. What the means is there is no operator precedence and everything is executed from the left. This takes some getting used to with most of the common operators like math, but actually makes alot of sense from a functional perspective and It also allows us to forgo any parentheses. It was also much easier for me to make and given this is my first language I didn't want to make it harder than it already was.
+
+Ok some code:
+To execute a line of code put your cursor on the line the use ctrl-enter or ctrl-return. You will see the result printed to the post pane on the right. Also, spaces are the only important syntax marker. You don't have to use commas in arrays for instance.
+
++ 1 1 // The plus goes on the left. Weird?
+add 1 1 // All operators have a text equivalent!
+- 1 1
+subtract 1 1
+* 2 1
+/ 1 2
+% 5 3
+
++ 1 [2 2] // Any two types can be added. Arrays expand other types. No commas!
++ 1 [2, 2] // Of course if that freaks you out, you can always use them anyways.
++ [2 2]  [3 3 3] // Like in SC, arrays wrap when combined.
+- [0 1 2] [3 3 3 3] // Effectively 0 - 3, 1 - 3, 2 - 3, 0 - 3
+
+=> two + 1 1 // Assign variables using =>
++ [two 3 3] [two two] // Variables can be added too!
++ 1 [0 1 2] 
+
+[[0 1 2] [1 2 3] [2 3 4]] // Arrays can be multidimensional
++ [1 2 3] [[1 2 3] [1 1 1]] // Multidimensional arrays can be added!
+
+// Notice the String in the array below. What happens when these add?
++ [1 2 3 4 5 '!'] [[[0 1 2] [1 2 3]] [[3 4 5] [6 7 8] [9 0 9]]]
+
+// Function definition and variable assignment.
+// Functions use : to signify argument declarations and {} for the body
+// This function simply adds the given arguments together.
+=> myAdd : arg1 arg2 { + arg1 arg2 } 
+::myAdd 1 1 // Call the function using ::
+call myAdd 1 1 // All operators have a text equivalents!!
+::myAdd ::myAdd 1 1 1 // Functions can be chained. Anything can be chained.
+
+// Function definition that calls another function.
+=> myFuncCall : arg2 operator arg3 { ::operator arg2 arg3 }
+::myFuncCall [0.5 0.5] myAdd 2 // Pass our earlier function as an argument (no ::)
+
+// You can declare a function without arguments by just using { }
+=> onePlusOne { + 1 1 }
+::onePlusOne
++ ::onePlusOne ::onePlusOne
+=> otherTwo { + 1 1 }
+=> alsoTwo { + ::otherTwo 0 }
++ ::alsoTwo 3
+
+== 1 1 // Booleans are just floats: 1 is true, 0 is false.
+equivalent 1 1 // All operators have text equivalents!!!
+== 1 0
+== [2 2] [2 2]
+== [2 2] [3 3]
+!= 1 1
+!= 1 0
+!= [2 2] [2 2]
+!= [2 2] [3 3]
+
+
+// If statements are primitives. if float { trueFunction } { falseFunction }
+if == 1 1 { print true } { print false } // true and false are predefined constants
+if != 1 1 { print true } { print false }
+
+// You can print anything. This is important later when using loops or other things
+// which just post a final result.
+print 1.655123 
+=> myPrint : arg1 { print arg1 } 
+::myPrint true
+=> myString "YO!"
+print myString
+=> myString2 'yo yo yo'
+print myString2
+
+// if statements can use if bool trueFunc falseFunc 
+// OR if bool trueFunc else falseFunc syntax
+if == 1 1 { print 'TRUE!' } else { print 'false.' }
+if != 1 1 { print "TRUE!" } else { print "false." }
+if > 1 1 { print 'true' } { print 'false' }
+if >= 1 1 { print 'true' } { print 'false' }
+if < 1 1 { print 'true' } else { print 'false' }
+if >= 1 1 { print 'true' } else{ print 'false' }
+
+// You can use if statements inside of function definitions.
+=> ifInFunc : arg { if arg { print 'true' } { print 'false' } }
+::ifInFunc 1
+::ifInFunc 0
+
+// Functions defined inside of arrays or other functions are not called.
+=> myArray ['Yo!' 2 { print 'This should not print!'}]
+print myArray
+
+// To redefine a variable, simply use => on it again
+=> redefine 1
+redefine
+=> redefine 2
+redefine
+
+// Do loops don't have a built in i argument. 
+// You'll need to make it yourself if you want to use it.
+=> i 0 
+do 5 { print ++ i } // The ++ operator redefines a variable to itself plus one.
+
+// Note that 1 - 5 was posted, if you want the tradition 0 - 4 you'll need to
+// declare i as -1 so that the first increment brings it to 0.
+=> i -1 
+do 5 { print ++ i } // The ++ operator redefines a variable to itself plus one.
+
+
+// Index anything (ANYTHING!) with the @ operator
+=> anArray [90 91 92 93 94 95]
+@ anArray 4 // @ variable index
++ @ anArray 2 1 // You can chain anything. Example 92 + 1
+=> doomString "This is about doom god damnit!"
+@ doomString 5 // Index a string
+at doomString 5 // All operators have text equivalents!!!!
+=> i -1
+do 30 { print @ doomString ++ i } // Do print and incrementing!
+
+// Signals are defined using $ or Signal. 
+// The first argument is an array of [time, value] pairs and an interpolation type
+=> mySignal Signal [[0 0.0001] [0.1 1] [1 0.0001]] 'linear'
+=> i -1
+do 30 { print @ mySignal / ++ i 30 } // Signals can be indexed at any point in time.
+=> mySignal2 + mySignal 1 // define mySignal2 as mySignal + 1.
+
+=> mySignal3 Signal [[0.5 5] [0.8 2] [3 0.1] [5 0]] 'linear'
++ mySignal mySignal3 // You can add signals (actually anything) together.
+
+// Insert a value using the -> operator
+=> myArray [0 1 2 3 4 5]
+-> myArray 1 111
+insert myArray 2 222 // All operators have text equivalents!!!!!
+-> myArray 3 333
+-> myArray 999 999 // Anything after the final index just pushes.
+
+// You can insert in a signal too! It takes time and value as seperate args.
+-> mySignal 3 0.6666
+-> mySignal 0.25 7.7
+-> mySignal 10 999
+
+// You can insert in strings too!
+=> myString "Doom"
+-> myString 0 'Hey'
+-> myString 5 '!!!?!?!?!'
+-> myString 999 '999'
+
+
+// If you're very you can see how all the types can be combined together.
+// Below is a type by type procession through several operators.
+
+// DECLARE VARIABLES FOR TESTING. YOU MUST DO THIS FIRST
+
+=> myTestFunc { + 1 1 }
+=> someVar 'other string'
+
+// STRINGS
+
++ 'Yo!' 'Yo2!' 
++ 'Yo!' 1
++ 'Yo!' ::myTestFunc
++ 'Yo!' + 1 1
++ 'Yo!' [1 2 3]
++ 'Yo!' someVar
++ 'Yo!' Signal [[0 0] [0.1 1] [1 0]] 'linear'
+
+- 'Yo!' 'Yo!2' 
+- 'Yo!' 1
+- 'Yo!' ::myTestFunc
+- 'Yo!' + 1 1
+- 'Yo!' [1 2 3]
+- 'Yo!' someVar
+- 'Yo!' Signal [[0 0] [0.1 1] [1 0]] 'linear'
+
+* 'Yo!' 'Yo2!' 
+* 'Yo!' 1
+* 'Yo!' ::myTestFunc
+* 'Yo!' + 1 1
+* 'Yo!' [1 2 3]
+* 'Yo!' someVar
+* 'Yo!' Signal [[0 0] [0.1 1] [1 0]] 'linear'
+
+/ 'Yo!' 'Yo2!' 
+/ 'Yo!' 1
+/ 'Yo!' ::myTestFunc
+/ 'Yo!' + 1 1
+/ 'Yo!' [1 2 3]
+/ 'Yo!' someVar
+/ 'Yo!' Signal [[0 0] [0.1 1] [1 0]] 'linear'
+
+% 'Yo!' 'Yo2!' 
+% 'Yo!' 1
+% 'Yo!' ::myTestFunc
+% 'Yo!' + 1 1
+% 'Yo!' [1 2 3]
+% 'Yo!' someVar
+% 'Yo!' Signal [[0 0] [0.1 1] [1 0]] 'linear'
+
+== 'Yo!' 'Yo2!' 
+== 'Yo!' 1
+== 'Yo!' ::myTestFunc
+== 'Yo!' + 1 1
+== 'Yo!' [1 2 3]
+== 'Yo!' someVar
+== 'Yo!' Signal [[0 0] [0.1 1] [1 0]] 'linear'
+
+!= 'Yo!' 'Yo2!' 
+!= 'Yo!' 1
+!= 'Yo!' ::myTestFunc
+!= 'Yo!' + 1 1
+!= 'Yo!' [1 2 3]
+!= 'Yo!' someVar
+!= 'Yo!' Signal [[0 0] [0.1 1] [1 0]] 'linear'
+
+> 'Yo!' 'Yo2!' 
+> 'Yo!' 1
+> 'Yo!' ::myTestFunc
+> 'Yo!' + 1 1
+> 'Yo!' [1 2 3]
+> 'Yo!' someVar
+> 'Yo!' Signal [[0 0] [0.1 1] [1 0]] 'linear'
+
+< 'Yo!' 'Yo2!' 
+< 'Yo!' 1
+< 'Yo!' ::myTestFunc
+< 'Yo!' + 1 1
+< 'Yo!' [1 2 3]
+< 'Yo!' someVar
+< 'Yo!' Signal [[0 0] [0.1 1] [1 0]] 'linear'
+
+>= 'Yo!' 'Yo2!' 
+>= 'Yo!' 1
+>= 'Yo!' ::myTestFunc
+>= 'Yo!' + 1 1
+>= 'Yo!' [1 2 3]
+>= 'Yo!' someVar
+>= 'Yo!' Signal [[0 0] [0.1 1] [1 0]] 'linear'
+
+<= 'Yo!' 'Yo2!' 
+<= 'Yo!' 1
+<= 'Yo!' ::myTestFunc
+<= 'Yo!' + 1 1
+<= 'Yo!' [1 2 3]
+<= 'Yo!' someVar
+<= 'Yo!' Signal [[0 0] [0.1 1] [1 0]] 'linear'
+
+// FLOATS
+
++ 1 'Yo!' 
++ 1 1
++ 1 ::myTestFunc
++ 1 + 1 1
++ 1 [1 2 3]
++ 1 someVar
++ 1 Signal [[0 0] [0.1 1] [1 0]] 'linear'
+
+- 1 'Yo!' 
+- 1 1
+- 1 ::myTestFunc
+- 1 + 1 1
+- 1 [1 2 3]
+- 1 someVar
+- 1 Signal [[0 0] [0.1 1] [1 0]] 'linear'
+
+* 1 'Yo!' 
+* 1 1
+* 1 ::myTestFunc
+* 1 + 1 1
+* 1 [1 2 3]
+* 1 someVar
+* 1 Signal [[0 0] [0.1 1] [1 0]] 'linear'
+
+/ 1 'Yo!' 
+/ 1 1
+/ 1 ::myTestFunc
+/ 1 + 1 1
+/ 1 [1 2 3]
+/ 1 someVar
+/ 1 Signal [[0 0] [0.1 1] [1 0]] 'linear'
+
+% 1 'Yo!' 
+% 1 1
+% 1 ::myTestFunc
+% 1 + 1 1
+% 1 [1 2 3]
+% 1 someVar
+% 1 Signal [[0 0] [0.1 1] [1 0]] 'linear'
+
+== 1 'Yo!' 
+== 1 1
+== 1 ::myTestFunc
+== 1 + 1 1
+== 1 [1 2 3]
+== 1 someVar
+== 1 Signal [[0 0] [0.1 1] [1 0]] 'linear'
+
+!= 1 'Yo!' 
+!= 1 1
+!= 1 ::myTestFunc
+!= 1 + 1 1
+!= 1 [1 2 3]
+!= 1 someVar
+!= 1 Signal [[0 0] [0.1 1] [1 0]] 'linear'
+
+> 1 'Yo!' 
+> 1 1
+> 1 ::myTestFunc
+> 1 + 1 1
+> 1 [1 2 3]
+> 1 someVar
+> 1 Signal [[0 0] [0.1 1] [1 0]] 'linear'
+
+< 1 'Yo!' 
+< 1 1
+< 1 ::myTestFunc
+< 1 + 1 1
+< 1 [1 2 3]
+< 1 someVar
+< 1 Signal [[0 0] [0.1 1] [1 0]] 'linear'
+
+>= 1 'Yo!' 
+>= 1 1
+>= 1 ::myTestFunc
+>= 1 + 1 1
+>= 1 [1 2 3]
+>= 1 someVar
+>= 1 Signal [[0 0] [0.1 1] [1 0]] 'linear'
+
+<= 1 'Yo!' 
+<= 1 1
+<= 1 ::myTestFunc
+<= 1 + 1 1
+<= 1 [1 2 3]
+<= 1 someVar
+<= 1 Signal [[0 0] [0.1 1] [1 0]] 'linear'
+
+// Function
+
++ ::myTestFunc 'Yo2!' 
++ ::myTestFunc 1
++ ::myTestFunc ::myTestFunc
++ ::myTestFunc + 1 1
++ ::myTestFunc [1 2 3]
++ ::myTestFunc someVar
++ ::myTestFunc Signal [[0 0] [0.1 1] [1 0]] 'linear'
+
+- ::myTestFunc 'Yo!2' 
+- ::myTestFunc 1
+- ::myTestFunc ::myTestFunc
+- ::myTestFunc + 1 1
+- ::myTestFunc [1 2 3]
+- ::myTestFunc someVar
+- ::myTestFunc Signal [[0 0] [0.1 1] [1 0]] 'linear'
+
+* ::myTestFunc 'Yo2!' 
+* ::myTestFunc 1
+* ::myTestFunc ::myTestFunc
+* ::myTestFunc + 1 1
+* ::myTestFunc [1 2 3]
+* ::myTestFunc someVar
+* ::myTestFunc Signal [[0 0] [0.1 1] [1 0]] 'linear'
+
+/ ::myTestFunc 'Yo2!' 
+/ ::myTestFunc 1
+/ ::myTestFunc ::myTestFunc
+/ ::myTestFunc + 1 1
+/ ::myTestFunc [1 2 3]
+/ ::myTestFunc someVar
+/ ::myTestFunc Signal [[0 0] [0.1 1] [1 0]] 'linear'
+
+% ::myTestFunc 'Yo2!' 
+% ::myTestFunc 1
+% ::myTestFunc ::myTestFunc
+% ::myTestFunc + 1 1
+% ::myTestFunc [1 2 3]
+% ::myTestFunc someVar
+% ::myTestFunc Signal [[0 0] [0.1 1] [1 0]] 'linear'
+
+== ::myTestFunc 'Yo2!' 
+== ::myTestFunc 1
+== ::myTestFunc ::myTestFunc
+== ::myTestFunc + 1 1
+== ::myTestFunc [1 2 3]
+== ::myTestFunc someVar
+== ::myTestFunc Signal [[0 0] [0.1 1] [1 0]] 'linear'
+
+!= ::myTestFunc 'Yo2!' 
+!= ::myTestFunc 1
+!= ::myTestFunc ::myTestFunc
+!= ::myTestFunc + 1 1
+!= ::myTestFunc [1 2 3]
+!= ::myTestFunc someVar
+!= ::myTestFunc Signal [[0 0] [0.1 1] [1 0]] 'linear'
+
+> ::myTestFunc 'Yo2!' 
+> ::myTestFunc 1
+> ::myTestFunc ::myTestFunc
+> ::myTestFunc + 1 1
+> ::myTestFunc [1 2 3]
+> ::myTestFunc someVar
+> ::myTestFunc Signal [[0 0] [0.1 1] [1 0]] 'linear'
+
+< ::myTestFunc 'Yo2!' 
+< ::myTestFunc 1
+< ::myTestFunc ::myTestFunc
+< ::myTestFunc + 1 1
+< ::myTestFunc [1 2 3]
+< ::myTestFunc someVar
+< ::myTestFunc Signal [[0 0] [0.1 1] [1 0]] 'linear'
+
+>= ::myTestFunc 'Yo2!' 
+>= ::myTestFunc 1
+>= ::myTestFunc ::myTestFunc
+>= ::myTestFunc + 1 1
+>= ::myTestFunc [1 2 3]
+>= ::myTestFunc someVar
+>= ::myTestFunc Signal [[0 0] [0.1 1] [1 0]] 'linear'
+
+<= ::myTestFunc 'Yo2!' 
+<= ::myTestFunc 1
+<= ::myTestFunc ::myTestFunc
+<= ::myTestFunc + 1 1
+<= ::myTestFunc [1 2 3]
+<= ::myTestFunc someVar
+<= ::myTestFunc Signal [[0 0] [0.1 1] [1 0]] 'linear'
+
+// Arrays
+
++ [1 2 3] 'Yo2!' 
++ [1 2 3] 1
++ [1 2 3] ::myTestFunc
++ [1 2 3] + 1 1
++ [1 2 3] [1 2 3]
++ [1 2 3] someVar
++ [1 2 3] Signal [[0 0] [0.1 1] [1 0]] 'linear'
+
+- [1 2 3] 'Yo!2' 
+- [1 2 3] 1
+- [1 2 3] ::myTestFunc
+- [1 2 3] + 1 1
+- [1 2 3] [1 2 3]
+- [1 2 3] someVar
+- [1 2 3] Signal [[0 0] [0.1 1] [1 0]] 'linear'
+
+* [1 2 3] 'Yo2!' 
+* [1 2 3] 1
+* [1 2 3] ::myTestFunc
+* [1 2 3] + 1 1
+* [1 2 3] [1 2 3]
+* [1 2 3] someVar
+* [1 2 3] Signal [[0 0] [0.1 1] [1 0]] 'linear'
+
+/ [1 2 3] 'Yo2!' 
+/ [1 2 3] 1
+/ [1 2 3] ::myTestFunc
+/ [1 2 3] + 1 1
+/ [1 2 3] [1 2 3]
+/ [1 2 3] someVar
+/ [1 2 3] Signal [[0 0] [0.1 1] [1 0]] 'linear'
+
+% [1 2 3] 'Yo2!' 
+% [1 2 3] 1
+% [1 2 3] ::myTestFunc
+% [1 2 3] + 1 1
+% [1 2 3] [1 2 3]
+% [1 2 3] someVar
+% [1 2 3] Signal [[0 0] [0.1 1] [1 0]] 'linear'
+
+== [1 2 3] 'Yo2!' 
+== [1 2 3] 1
+== [1 2 3] ::myTestFunc
+== [1 2 3] + 1 1
+== [1 2 3] [1 2 3]
+== [1 2 3] someVar
+== [1 2 3] Signal [[0 0] [0.1 1] [1 0]] 'linear'
+
+!= [1 2 3] 'Yo2!' 
+!= [1 2 3] 1
+!= [1 2 3] ::myTestFunc
+!= [1 2 3] + 1 1
+!= [1 2 3] [1 2 3]
+
+!= [1 2 3] someVar
+!= [1 2 3] Signal [[0 0] [0.1 1] [1 0]] 'linear'
+
+> [1 2 3] 'Yo2!' 
+> [1 2 3] 1
+> [1 2 3] ::myTestFunc
+> [1 2 3] + 1 1
+> [1 2 3] [1 2 3]
+> [1 2 3] someVar
+> [1 2 3] Signal [[0 0] [0.1 1] [1 0]] 'linear'
+
+< [1 2 3] 'Yo2!' 
+< [1 2 3] 1
+< [1 2 3] ::myTestFunc
+< [1 2 3] + 1 1
+< [1 2 3] [1 2 3]
+< [1 2 3] someVar
+< [1 2 3] Signal [[0 0] [0.1 1] [1 0]] 'linear'
+
+>= [1 2 3] 'Yo2!' 
+>= [1 2 3] 1
+>= [1 2 3] ::myTestFunc
+>= [1 2 3] + 1 1
+>= [1 2 3] [1 2 3]
+>= [1 2 3] someVar
+>= [1 2 3] Signal [[0 0] [0.1 1] [1 0]] 'linear'
+
+<= [1 2 3] 'Yo2!' 
+<= [1 2 3] 1
+<= [1 2 3] ::myTestFunc
+<= [1 2 3] + 1 1
+<= [1 2 3] [1 2 3]
+<= [1 2 3] someVar
+<= [1 2 3] Signal [[0 0] [0.1 1] [1 0]] 'linear'
+
+// Variable
+
++ someVar 'Yo2!' 
++ someVar 1
++ someVar ::myTestFunc
++ someVar + 1 1
++ someVar [1 2 3]
++ someVar someVar
++ someVar Signal [[0 0] [0.1 1] [1 0]] 'linear'
+
+- someVar 'Yo!2' 
+- someVar 1
+- someVar ::myTestFunc
+- someVar + 1 1
+- someVar [1 2 3]
+- someVar someVar
+- someVar Signal [[0 0] [0.1 1] [1 0]] 'linear'
+
+* someVar 'Yo2!' 
+* someVar 1
+* someVar ::myTestFunc
+* someVar + 1 1
+* someVar [1 2 3]
+* someVar someVar
+* someVar Signal [[0 0] [0.1 1] [1 0]] 'linear'
+
+/ someVar 'Yo2!' 
+/ someVar 1
+/ someVar ::myTestFunc
+/ someVar + 1 1
+/ someVar [1 2 3]
+/ someVar someVar
+/ someVar Signal [[0 0] [0.1 1] [1 0]] 'linear'
+
+% someVar 'Yo2!' 
+% someVar 1
+% someVar ::myTestFunc
+% someVar + 1 1
+% someVar [1 2 3]
+% someVar someVar
+% someVar Signal [[0 0] [0.1 1] [1 0]] 'linear'
+
+== someVar 'Yo2!' 
+== someVar 1
+== someVar ::myTestFunc
+== someVar + 1 1
+== someVar [1 2 3]
+== someVar someVar
+== someVar Signal [[0 0] [0.1 1] [1 0]] 'linear'
+
+!= someVar 'Yo2!' 
+!= someVar 1
+!= someVar ::myTestFunc
+!= someVar + 1 1
+!= someVar [1 2 3]
+!= someVar someVar
+!= someVar Signal [[0 0] [0.1 1] [1 0]] 'linear'
+
+> someVar 'Yo2!' 
+> someVar 1
+> someVar ::myTestFunc
+> someVar + 1 1
+> someVar [1 2 3]
+> someVar someVar
+> someVar Signal [[0 0] [0.1 1] [1 0]] 'linear'
+
+< someVar 'Yo2!' 
+< someVar 1
+< someVar ::myTestFunc
+< someVar + 1 1
+< someVar [1 2 3]
+< someVar someVar
+< someVar Signal [[0 0] [0.1 1] [1 0]] 'linear'
+
+>= someVar 'Yo2!' 
+>= someVar 1
+>= someVar ::myTestFunc
+>= someVar + 1 1
+>= someVar [1 2 3]
+>= someVar someVar
+>= someVar Signal [[0 0] [0.1 1] [1 0]] 'linear'
+
+<= someVar 'Yo2!' 
+<= someVar 1
+<= someVar ::myTestFunc
+<= someVar + 1 1
+<= someVar [1 2 3]
+<= someVar someVar
+<= someVar Signal [[0 0] [0.1 1] [1 0]] 'linear'
+
+// Signals
+
++ Signal [[0 0] [0.1 1] [1 0]] 'linear' 'Yo2!' 
++ Signal [[0 0] [0.1 1] [1 0]] 'linear' 1
++ Signal [[0 0] [0.1 1] [1 0]] 'linear' ::myTestFunc
++ Signal [[0 0] [0.1 1] [1 0]] 'linear' + 1 1
++ Signal [[0 0] [0.1 1] [1 0]] 'linear' [1 2 3]
++ Signal [[0 0] [0.1 1] [1 0]] 'linear' someVar
++ Signal [[0 0] [0.1 1] [1 0]] 'linear' Signal [[0 0] [0.1 1] [1 0]] 'linear'
+
+- Signal [[0 0] [0.1 1] [1 0]] 'linear' 'Yo!2' 
+- Signal [[0 0] [0.1 1] [1 0]] 'linear' 1
+- Signal [[0 0] [0.1 1] [1 0]] 'linear' ::myTestFunc
+- Signal [[0 0] [0.1 1] [1 0]] 'linear' + 1 1
+- Signal [[0 0] [0.1 1] [1 0]] 'linear' [1 2 3]
+- Signal [[0 0] [0.1 1] [1 0]] 'linear' someVar
+- Signal [[0 0] [0.1 1] [1 0]] 'linear' Signal [[0 0] [0.1 1] [1 0]] 'linear'
+
+* Signal [[0 0] [0.1 1] [1 0]] 'linear' 'Yo2!' 
+* Signal [[0 0] [0.1 1] [1 0]] 'linear' 1
+* Signal [[0 0] [0.1 1] [1 0]] 'linear' ::myTestFunc
+* Signal [[0 0] [0.1 1] [1 0]] 'linear' + 1 1
+* Signal [[0 0] [0.1 1] [1 0]] 'linear' [1 2 3]
+* Signal [[0 0] [0.1 1] [1 0]] 'linear' someVar
+* Signal [[0 0] [0.1 1] [1 0]] 'linear' Signal [[0 0] [0.1 1] [1 0]] 'linear'
+
+/ Signal [[0 0] [0.1 1] [1 0]] 'linear' 'Yo2!' 
+/ Signal [[0 0] [0.1 1] [1 0]] 'linear' 1
+/ Signal [[0 0] [0.1 1] [1 0]] 'linear' ::myTestFunc
+/ Signal [[0 0] [0.1 1] [1 0]] 'linear' + 1 1
+/ Signal [[0 0] [0.1 1] [1 0]] 'linear' [1 2 3]
+/ Signal [[0 0] [0.1 1] [1 0]] 'linear' someVar
+/ Signal [[0 0] [0.1 1] [1 0]] 'linear' Signal [[0 0] [0.1 1] [1 0]] 'linear'
+
+% Signal [[0 0] [0.1 1] [1 0]] 'linear' 'Yo2!' 
+% Signal [[0 0] [0.1 1] [1 0]] 'linear' 1
+% Signal [[0 0] [0.1 1] [1 0]] 'linear' ::myTestFunc
+% Signal [[0 0] [0.1 1] [1 0]] 'linear' + 1 1
+% Signal [[0 0] [0.1 1] [1 0]] 'linear' [1 2 3]
+% Signal [[0 0] [0.1 1] [1 0]] 'linear' someVar
+% Signal [[0 0] [0.1 1] [1 0]] 'linear' Signal [[0 0] [0.1 1] [1 0]] 'linear'
+
+== Signal [[0 0] [0.1 1] [1 0]] 'linear' 'Yo2!' 
+== Signal [[0 0] [0.1 1] [1 0]] 'linear' 1
+== Signal [[0 0] [0.1 1] [1 0]] 'linear' ::myTestFunc
+== Signal [[0 0] [0.1 1] [1 0]] 'linear' + 1 1
+== Signal [[0 0] [0.1 1] [1 0]] 'linear' [1 2 3]
+== Signal [[0 0] [0.1 1] [1 0]] 'linear' someVar
+== Signal [[0 0] [0.1 1] [1 0]] 'linear' Signal [[0 0] [0.1 1] [1 0]] 'linear'
+
+!= Signal [[0 0] [0.1 1] [1 0]] 'linear' 'Yo2!' 
+!= Signal [[0 0] [0.1 1] [1 0]] 'linear' 1
+!= Signal [[0 0] [0.1 1] [1 0]] 'linear' ::myTestFunc
+!= Signal [[0 0] [0.1 1] [1 0]] 'linear' + 1 1
+!= Signal [[0 0] [0.1 1] [1 0]] 'linear' [1 2 3]
+!= Signal [[0 0] [0.1 1] [1 0]] 'linear' someVar
+!= Signal [[0 0] [0.1 1] [1 0]] 'linear' Signal [[0 0] [0.1 1] [1 0]] 'linear'
+
+> Signal [[0 0] [0.1 1] [1 0]] 'linear' 'Yo2!' 
+> Signal [[0 0] [0.1 1] [1 0]] 'linear' 1
+> Signal [[0 0] [0.1 1] [1 0]] 'linear' ::myTestFunc
+> Signal [[0 0] [0.1 1] [1 0]] 'linear' + 1 1
+> Signal [[0 0] [0.1 1] [1 0]] 'linear' [1 2 3]
+> Signal [[0 0] [0.1 1] [1 0]] 'linear' someVar
+> Signal [[0 0] [0.1 1] [1 0]] 'linear' Signal [[0 0] [0.1 1] [1 0]] 'linear'
+
+< Signal [[0 0] [0.1 1] [1 0]] 'linear' 'Yo2!' 
+< Signal [[0 0] [0.1 1] [1 0]] 'linear' 1
+< Signal [[0 0] [0.1 1] [1 0]] 'linear' ::myTestFunc
+< Signal [[0 0] [0.1 1] [1 0]] 'linear' + 1 1
+< Signal [[0 0] [0.1 1] [1 0]] 'linear' [1 2 3]
+< Signal [[0 0] [0.1 1] [1 0]] 'linear' someVar
+< Signal [[0 0] [0.1 1] [1 0]] 'linear' Signal [[0 0] [0.1 1] [1 0]] 'linear'
+
+>= Signal [[0 0] [0.1 1] [1 0]] 'linear' 'Yo2!' 
+>= Signal [[0 0] [0.1 1] [1 0]] 'linear' 1
+>= Signal [[0 0] [0.1 1] [1 0]] 'linear' ::myTestFunc
+>= Signal [[0 0] [0.1 1] [1 0]] 'linear' + 1 1
+>= Signal [[0 0] [0.1 1] [1 0]] 'linear' [1 2 3]
+>= Signal [[0 0] [0.1 1] [1 0]] 'linear' someVar
+>= Signal [[0 0] [0.1 1] [1 0]] 'linear' Signal [[0 0] [0.1 1] [1 0]] 'linear'
+
+<= Signal [[0 0] [0.1 1] [1 0]] 'linear' 'Yo2!' 
+<= Signal [[0 0] [0.1 1] [1 0]] 'linear' 1
+<= Signal [[0 0] [0.1 1] [1 0]] 'linear' ::myTestFunc
+<= Signal [[0 0] [0.1 1] [1 0]] 'linear' + 1 1
+<= Signal [[0 0] [0.1 1] [1 0]] 'linear' [1 2 3]
+<= Signal [[0 0] [0.1 1] [1 0]] 'linear' someVar
+<= Signal [[0 0] [0.1 1] [1 0]] 'linear' Signal [[0 0] [0.1 1] [1 0]] 'linear'
+	</textarea>
+	
+	<textarea id="post" cols="62" rows="33" spellcheck="false" readonly="true">Lich.js&#10;</textarea>
+
+	<script LANGUAGE="JavaScript" type="text/javascript">
+		compileLich();
+	</script>
+	
+</body>
+
+</html>
