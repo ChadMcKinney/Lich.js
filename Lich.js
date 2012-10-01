@@ -2266,7 +2266,7 @@ function LichArray(_arrayVar) {
 			break;
 			
 		case 'Variable':
-			return this.equivalent(object.call());
+			return this.equivalent(object.object);
 			break;
 
 		case 'Signal':
@@ -2333,7 +2333,7 @@ function LichArray(_arrayVar) {
 			break;
 			
 		case 'Variable':
-			return this.inequivalent(object.call());
+			return this.inequivalent(object.object);
 			break;
 
 		case 'Signal':

@@ -1,6 +1,30 @@
 // Lich Dev Notes
 
-// 09/24/2013
+// 10/01/2012
+
+Updated the evaluation code to use shift enter, alt enter, command enter, etc...
+The cursor now automatically moves to the next line
+
+Booleans automatically do if statements?
+
+if == 1 1 { print true } { print false } 
+
+would just shortened to
+
+== 1 1 { print true } { print false } 
+
+Not sure. I'll have to think about it. Couldn't be both ways I think. It would have to be one or the other. And you would lose the ability for the booleans to just represent floats.
+
+Maybe nice if the cursor jumps down a line after evaluating as SC does? DONE!
+
+Array and string eqvuivalent broken?  == AND != FIXED!
+
+Return should make a new line in the text area if it's at the end of the document
+
+bitwise
+boolean && || ! 
+
+// 09/24/2012
 
 add alt-enter for an execute command combo.
 For primitive that takes anything, a number, a string, whatever, and does something according to it's length.

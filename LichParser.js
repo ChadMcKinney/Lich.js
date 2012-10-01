@@ -143,14 +143,14 @@ function setCaretPosition(pos)
 	if(ctrl.setSelectionRange)
 	{
 		ctrl.focus();
-		ctrl.setSelectionRange(pos,pos + 1);
+		ctrl.setSelectionRange(pos,pos);
 	}
 	
 	else if(ctrl.createTextRange) 
 	{
 		var range = ctrl.createTextRange();
 		// range.collapse(true);
-		range.moveEnd('character', pos + 1); // for a terminal style caret
+		range.moveEnd('character', pos);
 		range.moveStart('character', pos);
 		range.select();
 	}
@@ -190,7 +190,10 @@ function currentLine()
 		end = terminal.selectionEnd;
 	}
 	
-	return terminal.value.substring(start, end); // Return the subtring of the text area, which is the currently selected line
+	return  {
+		line: terminal.value.substring(start, end), // Return the subtring of the text area, which is the currently selected line
+		end: end
+	};
 }
 
 function parseArray(token)
@@ -479,8 +482,9 @@ function tokenize(string) // Break up a string into an array of tokens
 function parseCurrentLine()
 {	
 	// Tokenize current line
-	var tokens, objects;
-	tokens = tokenize(currentLine());
+	var tokens, objects, line;
+	line = currentLine();
+	tokens = tokenize(line.line);
 	objects = new Array();
 	
 	for(var i = 0; i < tokens.length; ++i) // populate the objects array
@@ -499,6 +503,8 @@ function parseCurrentLine()
 		LichVM.interpretStack();
 		LichVM.printState();
 	}
+
+	setCaretPosition(line.end + 1); // Move the cursor to the next line
 }
 
 function keyDown(thisEvent)
@@ -514,18 +520,14 @@ function keyDown(thisEvent)
 		}
 	
 		break;
-		
-	case 17: // Ctrl key
+
+	case 16: // shift
+	case 17: // Ctrl
+	case 18: // alt
+	case 91: // Webkit left command
+	case 93: // Webkit right command
+	case 224: // Firefox command
 		ctrlDown = true;
-		break;
-		
-	case 82: // r key
-		if(ctrlDown)
-		{
-			parseCurrentLine();
-        	return false; // do nothing
-		}
-	
 		break;
 	}
 }
@@ -534,8 +536,13 @@ function keyUp(thisEvent)
 {
 	switch(thisEvent.keyCode)
 	{
-	case 17: // Ctrl key
+	case 16: // shift
+	case 17: // Ctrl
+	case 18: // alt
+	case 91: // Webkit left command
+	case 93: // Webkit right command
+	case 224: // Firefox command
 		ctrlDown = false;
-	 	break;
+		break;
 	}
 }
