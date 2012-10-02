@@ -3,7 +3,7 @@
 // 10/02/2012
 
 Need to finish &&, ||, and ! operators DONE!
-Arrays should multichannel expand to an array of booleans when doing boolean operations
+Arrays should multichannel expand to an array of booleans when doing boolean operations DONE!
 Insert should support strings for map type insertion in ANY object
 Definitely need autocomplete for "", ''.  [], and {}. 
 Might be a good idea to have default arguments for certain things like signals and functions to help speed up the process. 

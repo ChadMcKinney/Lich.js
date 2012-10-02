@@ -818,9 +818,7 @@ function LichString(_stringVar) {
 			break;
 			
 		case 'Array':
-			result = new LichFloat(0);
-			LichVM.push(result);
-			return result.value();
+			return object.equivalent(this);
 			break;
 			
 		case 'Variable':
@@ -871,9 +869,7 @@ function LichString(_stringVar) {
 			break;
 			
 		case 'Array':
-			result = new LichFloat(1);
-			LichVM.push(result);
-			return result.value();
+			return object.inequivalent(this);
 			break;
 			
 		case 'Variable':
@@ -924,9 +920,7 @@ function LichString(_stringVar) {
 			break;
 			
 		case 'Array':
-			result = new LichFloat(0);
-			LichVM.push(result);
-			return result.value();
+			return object.lessThan(this);
 			break;
 			
 		case 'Variable':
@@ -977,9 +971,7 @@ function LichString(_stringVar) {
 			break;
 			
 		case 'Array':
-			result = new LichFloat(0);
-			LichVM.push(result);
-			return result.value();
+			return object.greaterThan(this);
 			break;
 			
 		case 'Variable':
@@ -1030,9 +1022,7 @@ function LichString(_stringVar) {
 			break;
 			
 		case 'Array':
-			result = new LichFloat(0);
-			LichVM.push(result);
-			return result.value();
+			return object.lessThanEqual(this);
 			break;
 			
 		case 'Variable':
@@ -1083,9 +1073,7 @@ function LichString(_stringVar) {
 			break;
 			
 		case 'Array':
-			result = new LichFloat(0);
-			LichVM.push(result);
-			return result.value();
+			return object.greaterThanEqual(this);
 			break;
 			
 		case 'Variable':
@@ -1500,8 +1488,7 @@ function LichFloat(_floatVar) {
 			break;
 			
 		case 'Array':
-			LichVM.push(new LichFloat(0));
-			return 0;
+			return object.equivalent(this);
 			break;
 			
 		case 'Variable':
@@ -1550,8 +1537,7 @@ function LichFloat(_floatVar) {
 			break;
 			
 		case 'Array':
-			LichVM.push(new LichFloat(1));
-			return 1;
+			return object.inequivalent(this);
 			break;
 			
 		case 'Variable':
@@ -1600,8 +1586,7 @@ function LichFloat(_floatVar) {
 			break;
 			
 		case 'Array':
-			LichVM.push(new LichFloat(0));
-			return 0;
+			return object.lessThan(this);
 			break;
 			
 		case 'Variable':
@@ -1650,8 +1635,7 @@ function LichFloat(_floatVar) {
 			break;
 			
 		case 'Array':
-			LichVM.push(new LichFloat(0));
-			return 0;
+			return object.greaterThan(this);
 			break;
 			
 		case 'Variable':
@@ -1700,8 +1684,7 @@ function LichFloat(_floatVar) {
 			break;
 			
 		case 'Array':
-			LichVM.push(new LichFloat(0));
-			return 0;
+			return object.lessThanEqual(this);
 			break;
 			
 		case 'Variable':
@@ -1750,8 +1733,7 @@ function LichFloat(_floatVar) {
 			break;
 			
 		case 'Array':
-			LichVM.push(new LichFloat(0));
-			return 0;
+			return object.greaterThanEqual(this);
 			break;
 			
 		case 'Variable':
@@ -2216,375 +2198,308 @@ function LichArray(_arrayVar) {
 	
 	this.equivalent = function(object)
 	{
-		switch(object.type())
+		if(object.type() != undefined)
 		{
-		case 'String':
-			LichVM.push(new LichFloat(0));
-			return 0;
-			break;
-			
-		case 'Float':
-			LichVM.push(new LichFloat(0));
-			return 0;
-			break;
-			
-		case 'Function':
-			return this.equivalent(object.call());
-			break;
-			
-		case 'Primitive':
-			return this.equivalent(object.call());
-			break;
-			
-		case 'Array':
-			var objectArray = object.value();
-			var result = new Array();
-			var lichResult, length, bool;
-			length = this.arrayVar.length;
-			bool = 1;
-			
-			if(objectArray.length > length)
+			if(object.type() == 'Array')
 			{
-				length = objectArray.length;
-			}
-			
-			for(var i = 0; i < length; ++i)
-			{
-				var tempResult;
-				this.arrayVar[i % this.arrayVar.length].equivalent(objectArray[i % objectArray.length]); // Pushes result onto the stack
-				tempResult = LichVM.pop(); // Pop the result off the stack
-				if(tempResult.value() == 0) // If only one isn't equivalent, we can stop
+				var objectArray = object.value();
+				var result = new Array();
+				var lichResult, length;
+				length = this.arrayVar.length;
+				
+				if(objectArray.length > length)
 				{
-					bool = 0;
-					break;
+					length = objectArray.length;
 				}
+				
+				for(var i = 0; i < length; ++i)
+				{
+					this.arrayVar[i % this.arrayVar.length].equivalent(objectArray[i % objectArray.length]); // Pushes result onto the stack
+					result.push(LichVM.pop()); // Pop the result off the stack
+				}
+				
+				lichResult = new LichArray(result);
+				LichVM.push(lichResult);
+				return lichResult.value();
 			}
-			
-			lichResult = new LichFloat(bool);
-			LichVM.push(lichResult);
-			return lichResult.value();
-			break;
-			
-		case 'Variable':
-			return this.equivalent(object.object);
-			break;
 
-		case 'Signal':
-			LichVM.push(new LichFloat(0));
-			return 0;
-			break;
-			
-		default:
-			LichVM.push(new LichFloat(0));
-			return 0;
-			break;
+			else
+			{
+				var result = new Array();
+				var lichResult;
+				
+				for(var i = 0; i < this.arrayVar.length; ++i)
+				{
+					this.arrayVar[i].equivalent(object); // Pushes result onto the stack
+					result.push(LichVM.pop()); // Pop the result off the stack
+				}
+				
+				lichResult = new LichArray(result);
+				LichVM.push(lichResult);
+				return lichResult.value();
+			}
 		}
+
+		else
+		{
+			LichVM.push(new LichFloat(0));
+			return 0;
+		}
+
 	}
 	
 	this.inequivalent = function(object)
 	{
-		switch(object.type())
+		if(object.type() != undefined)
 		{
-		case 'String':
-			LichVM.push(new LichFloat(1));
-			return 0;
-			break;
-			
-		case 'Float':
-			LichVM.push(new LichFloat(1));
-			return 0;
-			break;
-			
-		case 'Function':
-			return this.inequivalent(object.call());
-			break;
-			
-		case 'Primitive':
-			return this.inequivalent(object.call());
-			break;
-			
-		case 'Array':
-			var objectArray = object.value();
-			var result = new Array();
-			var lichResult, length, bool;
-			length = this.arrayVar.length;
-			bool = 0;
-			
-			if(objectArray.length > length)
+			if(object.type() == 'Array')
 			{
-				length = objectArray.length;
-			}
-			
-			for(var i = 0; i < length; ++i)
-			{
-				var tempResult;
-				this.arrayVar[i % this.arrayVar.length].inequivalent(objectArray[i % objectArray.length]); // Pushes result onto the stack
-				tempResult = LichVM.pop(); // Pop the result off the stack
-				if(tempResult.value() == 1) // If only one is inequivalent, we can stop
+				var objectArray = object.value();
+				var result = new Array();
+				var lichResult, length;
+				length = this.arrayVar.length;
+				
+				if(objectArray.length > length)
 				{
-					bool = 1;
-					break;
+					length = objectArray.length;
 				}
+				
+				for(var i = 0; i < length; ++i)
+				{
+					this.arrayVar[i % this.arrayVar.length].inequivalent(objectArray[i % objectArray.length]); // Pushes result onto the stack
+					result.push(LichVM.pop()); // Pop the result off the stack
+				}
+				
+				lichResult = new LichArray(result);
+				LichVM.push(lichResult);
+				return lichResult.value();
 			}
-			
-			lichResult = new LichFloat(bool);
-			LichVM.push(lichResult);
-			return lichResult.value();
-			break;
-			
-		case 'Variable':
-			return this.inequivalent(object.object);
-			break;
 
-		case 'Signal':
-			LichVM.push(new LichFloat(1));
-			return 1;
-			break;
-			
-		default:
-			LichVM.push(new LichFloat(1));
-			return 1;
-			break;
+			else
+			{
+				var result = new Array();
+				var lichResult;
+				
+				for(var i = 0; i < this.arrayVar.length; ++i)
+				{
+					this.arrayVar[i].inequivalent(object); // Pushes result onto the stack
+					result.push(LichVM.pop()); // Pop the result off the stack
+				}
+				
+				lichResult = new LichArray(result);
+				LichVM.push(lichResult);
+				return lichResult.value();
+			}
+		}
+
+		else
+		{
+			LichVM.push(new LichFloat(0));
+			return 0;
 		}
 	}
 	
 	this.greaterThan = function(object)
 	{
-		switch(object.type())
+		if(object.type() != undefined)
 		{
-		case 'String':
-			LichVM.push(new LichFloat(0));
-			return 0;
-			break;
-			
-		case 'Float':
-			LichVM.push(new LichFloat(0));
-			return 0;
-			break;
-			
-		case 'Function':
-			return this.greaterThan(object.call());
-			break;
-			
-		case 'Primitive':
-			return this.greaterThan(object.call());
-			break;
-			
-		case 'Array':
-			var objectArray = object.value();
-			var result = new Array();
-			var lichResult, length;
-			length = this.arrayVar.length;
-			
-			if(objectArray.length > length)
+			if(object.type() == 'Array')
 			{
-				length = objectArray.length;
+				var objectArray = object.value();
+				var result = new Array();
+				var lichResult, length;
+				length = this.arrayVar.length;
+				
+				if(objectArray.length > length)
+				{
+					length = objectArray.length;
+				}
+				
+				for(var i = 0; i < length; ++i)
+				{
+					this.arrayVar[i % this.arrayVar.length].greaterThan(objectArray[i % objectArray.length]); // Pushes result onto the stack
+					result.push(LichVM.pop()); // Pop the result off the stack
+				}
+				
+				lichResult = new LichArray(result);
+				LichVM.push(lichResult);
+				return lichResult.value();
 			}
-			
-			for(var i = 0; i < length; ++i)
-			{
-				this.arrayVar[i % this.arrayVar.length].greaterThan(objectArray[i % objectArray.length]); // Pushes result onto the stack
-				result.push(LichVM.pop()); // Pop the result off the stack
-			}
-			
-			lichResult = new LichArray(result);
-			LichVM.push(lichResult);
-			return lichResult.value();
-			break;
-			
-		case 'Variable':
-			return this.greaterThan(object.object);
-			break;
 
-		case 'Signal':
+			else
+			{
+				var result = new Array();
+				var lichResult;
+				
+				for(var i = 0; i < this.arrayVar.length; ++i)
+				{
+					this.arrayVar[i].greaterThan(object); // Pushes result onto the stack
+					result.push(LichVM.pop()); // Pop the result off the stack
+				}
+				
+				lichResult = new LichArray(result);
+				LichVM.push(lichResult);
+				return lichResult.value();
+			}
+		}
+
+		else
+		{
 			LichVM.push(new LichFloat(0));
 			return 0;
-			break;
-			
-		default:
-			LichVM.push(new LichFloat(0));
-			return 0;
-			break;
 		}
 	}
 	
 	this.lessThan = function(object)
 	{
-		switch(object.type())
+		if(object.type() != undefined)
 		{
-		case 'String':
-			LichVM.push(new LichFloat(0));
-			return 0;
-			break;
-			
-		case 'Float':
-			LichVM.push(new LichFloat(0));
-			return 0;
-			break;
-			
-		case 'Function':
-			return this.lessThan(object.call());
-			break;
-			
-		case 'Primitive':
-			return this.lessThan(object.call());
-			break;
-			
-		case 'Array':
-			var objectArray = object.value();
-			var result = new Array();
-			var lichResult, length;
-			length = this.arrayVar.length;
-			
-			if(objectArray.length > length)
+			if(object.type() == 'Array')
 			{
-				length = objectArray.length;
+				var objectArray = object.value();
+				var result = new Array();
+				var lichResult, length;
+				length = this.arrayVar.length;
+				
+				if(objectArray.length > length)
+				{
+					length = objectArray.length;
+				}
+				
+				for(var i = 0; i < length; ++i)
+				{
+					this.arrayVar[i % this.arrayVar.length].lessThan(objectArray[i % objectArray.length]); // Pushes result onto the stack
+					result.push(LichVM.pop()); // Pop the result off the stack
+				}
+				
+				lichResult = new LichArray(result);
+				LichVM.push(lichResult);
+				return lichResult.value();
 			}
-			
-			for(var i = 0; i < length; ++i)
-			{
-				this.arrayVar[i % this.arrayVar.length].lessThan(objectArray[i % objectArray.length]); // Pushes result onto the stack
-				result.push(LichVM.pop()); // Pop the result off the stack
-			}
-			
-			lichResult = new LichArray(result);
-			LichVM.push(lichResult);
-			return lichResult.value();
-			break;
-			
-		case 'Variable':
-			return this.lessThan(object.object);
-			break;
 
-		case 'Signal':
+			else
+			{
+				var result = new Array();
+				var lichResult;
+				
+				for(var i = 0; i < this.arrayVar.length; ++i)
+				{
+					this.arrayVar[i].lessThan(object); // Pushes result onto the stack
+					result.push(LichVM.pop()); // Pop the result off the stack
+				}
+				
+				lichResult = new LichArray(result);
+				LichVM.push(lichResult);
+				return lichResult.value();
+			}
+		}
+
+		else
+		{
 			LichVM.push(new LichFloat(0));
 			return 0;
-			break;
-			
-		default:
-			LichVM.push(new LichFloat(0));
-			return 0;
-			break;
 		}
 	}
 	
 	this.greaterThanEqual = function(object)
 	{
-		switch(object.type())
+		if(object.type() != undefined)
 		{
-		case 'String':
-			LichVM.push(new LichFloat(0));
-			return 0;
-			break;
-			
-		case 'Float':
-			LichVM.push(new LichFloat(0));
-			return 0;
-			break;
-			
-		case 'Function':
-			return this.greaterThanEqual(object.call());
-			break;
-			
-		case 'Primitive':
-			return this.greaterThanEqual(object.call());
-			break;
-			
-		case 'Array':
-			var objectArray = object.value();
-			var result = new Array();
-			var lichResult, length;
-			length = this.arrayVar.length;
-			
-			if(objectArray.length > length)
+			if(object.type() == 'Array')
 			{
-				length = objectArray.length;
+				var objectArray = object.value();
+				var result = new Array();
+				var lichResult, length;
+				length = this.arrayVar.length;
+				
+				if(objectArray.length > length)
+				{
+					length = objectArray.length;
+				}
+				
+				for(var i = 0; i < length; ++i)
+				{
+					this.arrayVar[i % this.arrayVar.length].greaterThanEqual(objectArray[i % objectArray.length]); // Pushes result onto the stack
+					result.push(LichVM.pop()); // Pop the result off the stack
+				}
+				
+				lichResult = new LichArray(result);
+				LichVM.push(lichResult);
+				return lichResult.value();
 			}
-			
-			for(var i = 0; i < length; ++i)
-			{
-				this.arrayVar[i % this.arrayVar.length].greaterThanEqual(objectArray[i % objectArray.length]); // Pushes result onto the stack
-				result.push(LichVM.pop()); // Pop the result off the stack
-			}
-			
-			lichResult = new LichArray(result);
-			LichVM.push(lichResult);
-			return lichResult.value();
-			break;
-			
-		case 'Variable':
-			return this.greaterThanEqual(object.object);
-			break;
 
-		case 'Signal':
+			else
+			{
+				var result = new Array();
+				var lichResult;
+				
+				for(var i = 0; i < this.arrayVar.length; ++i)
+				{
+					this.arrayVar[i].greaterThanEqual(object); // Pushes result onto the stack
+					result.push(LichVM.pop()); // Pop the result off the stack
+				}
+				
+				lichResult = new LichArray(result);
+				LichVM.push(lichResult);
+				return lichResult.value();
+			}
+		}
+
+		else
+		{
 			LichVM.push(new LichFloat(0));
 			return 0;
-			break;
-			
-		default:
-			LichVM.push(new LichFloat(0));
-			return 0;
-			break;
 		}
 	}
 	
 	this.lessThanEqual = function(object)
 	{
-		switch(object.type())
+		if(object.type() != undefined)
 		{
-		case 'String':
-			LichVM.push(new LichFloat(0));
-			return 0;
-			break;
-			
-		case 'Float':
-			LichVM.push(new LichFloat(0));
-			return 0;
-			break;
-			
-		case 'Function':
-			return this.lessThanEqual(object.call());
-			break;
-			
-		case 'Primitive':
-			return this.lessThanEqual(object.call());
-			break;
-			
-		case 'Array':
-			var objectArray = object.value();
-			var result = new Array();
-			var lichResult, length;
-			length = this.arrayVar.length;
-			
-			if(objectArray.length > length)
+			if(object.type() == 'Array')
 			{
-				length = objectArray.length;
+				var objectArray = object.value();
+				var result = new Array();
+				var lichResult, length;
+				length = this.arrayVar.length;
+				
+				if(objectArray.length > length)
+				{
+					length = objectArray.length;
+				}
+				
+				for(var i = 0; i < length; ++i)
+				{
+					this.arrayVar[i % this.arrayVar.length].lessThanEqual(objectArray[i % objectArray.length]); // Pushes result onto the stack
+					result.push(LichVM.pop()); // Pop the result off the stack
+				}
+				
+				lichResult = new LichArray(result);
+				LichVM.push(lichResult);
+				return lichResult.value();
 			}
-			
-			for(var i = 0; i < length; ++i)
-			{
-				this.arrayVar[i % this.arrayVar.length].lessThanEqual(objectArray[i % objectArray.length]); // Pushes result onto the stack
-				result.push(LichVM.pop()); // Pop the result off the stack
-			}
-			
-			lichResult = new LichArray(result);
-			LichVM.push(lichResult);
-			return lichResult.value();
-			break;
-			
-		case 'Variable':
-			return this.lessThanEqual(object.object);
-			break;
 
-		case 'Signal':
+			else
+			{
+				var result = new Array();
+				var lichResult;
+				
+				for(var i = 0; i < this.arrayVar.length; ++i)
+				{
+					this.arrayVar[i].lessThanEqual(object); // Pushes result onto the stack
+					result.push(LichVM.pop()); // Pop the result off the stack
+				}
+				
+				lichResult = new LichArray(result);
+				LichVM.push(lichResult);
+				return lichResult.value();
+			}
+		}
+
+		else
+		{
 			LichVM.push(new LichFloat(0));
 			return 0;
-			break;
-			
-		default:
-			LichVM.push(new LichFloat(0));
-			return 0;
-			break;
 		}
 	}
 	
@@ -3877,8 +3792,7 @@ function LichSignal(_points, _shape) {
 			break;
 			
 		case 'Array':
-			LichVM.push(new LichFloat(0));
-			return 0;
+			return object.equivalent(this);
 			break;
 			
 		case 'Variable':
@@ -3941,8 +3855,7 @@ function LichSignal(_points, _shape) {
 			break;
 			
 		case 'Array':
-			LichVM.push(new LichFloat(1));
-			return 1;
+			return object.inequivalent(this);
 			break;
 			
 		case 'Variable':
@@ -4004,8 +3917,7 @@ function LichSignal(_points, _shape) {
 			break;
 			
 		case 'Array':
-			LichVM.push(new LichFloat(0));
-			return 0;
+			return object.lessThan(this);
 			break;
 			
 		case 'Variable':
@@ -4054,8 +3966,7 @@ function LichSignal(_points, _shape) {
 			break;
 			
 		case 'Array':
-			LichVM.push(new LichFloat(0));
-			return 0;
+			return object.greaterThan(this);
 			break;
 			
 		case 'Variable':
@@ -4104,8 +4015,7 @@ function LichSignal(_points, _shape) {
 			break;
 			
 		case 'Array':
-			LichVM.push(new LichFloat(0));
-			return 0;
+			return object.greaterThanEqual(this);
 			break;
 			
 		case 'Variable':
@@ -4154,8 +4064,7 @@ function LichSignal(_points, _shape) {
 			break;
 			
 		case 'Array':
-			LichVM.push(new LichFloat(0));
-			return 0;
+			return object.greaterThanEqual(this);
 			break;
 			
 		case 'Variable':
