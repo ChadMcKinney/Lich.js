@@ -8,7 +8,7 @@ Insert should support strings for map type insertion in ANY object
 Definitely need autocomplete for "", ''.  [], and {}. 
 Might be a good idea to have default arguments for certain things like signals and functions to help speed up the process. 
 You could use tab to jump between them.
-Need to add tab over support in the document.
+Need to add tab over support in the document. DONE!
 Need to make buffer type, which is just a chunk of memory?
 Change Signal to Break Points?
 When adding floats and strings, if the float comes first, it should be on the left side of the string, not conctatenated

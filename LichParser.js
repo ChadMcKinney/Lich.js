@@ -156,6 +156,21 @@ function setCaretPosition(pos)
 	}
 }
 
+// http://css-tricks.com/snippets/javascript/support-tabs-in-textareas/
+function tab()
+{	
+	var currentCaretPosition, newCaretPosition, textarea;
+	currentCaretPosition = getCaretPosition();
+	textarea = document.getElementById("terminal");
+    newCaretPosition = currentCaretPosition + "    ".length;
+    
+    textarea.value = textarea.value.substring(0, currentCaretPosition) + "    " 
+    	+ textarea.value.substring(currentCaretPosition, textarea.value.length);
+
+    setCaretPosition(newCaretPosition);
+    return false;
+}
+
 function post(text)
 {
 	var obj = document.getElementById("post");
@@ -511,6 +526,10 @@ function keyDown(thisEvent)
 {	
 	switch(thisEvent.keyCode)
 	{
+	case 9: // Tab key
+		return tab();
+		break;
+
 	case 13: // Enter key
 	
 		if(ctrlDown)

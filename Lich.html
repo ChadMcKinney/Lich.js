@@ -173,7 +173,12 @@ if != 1 1 { print "TRUE!" } else { print "false." }
 if > 1 1 { print 'true' } { print 'false' }
 if >= 1 1 { print 'true' } { print 'false' }
 if < 1 1 { print 'true' } else { print 'false' }
-if >= 1 1 { print 'true' } else{ print 'false' }
+if >= 1 1 { print 'true' } else { print 'false' }
+if ! true { print 'true' } { print 'false' }
+if ! false { print 'true' } { print 'false' }
+if && == 1 1 != 1 0 { print 'true' } { print 'false' }
+if && == 1 1 != 1 1 { print 'true' } { print 'false' }
+if || == 1 1 != 1 1 { print 'true' } { print 'false' }
 
 // You can use if statements inside of function definitions.
 => ifInFunc : arg { if arg { print 'true' } { print 'false' } }
