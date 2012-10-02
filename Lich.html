@@ -49,18 +49,22 @@
 	<textarea 
 		id="terminal"
 		contenteditable="true"
-		rows="33" 
+		rows="28" 
 		spellcheck="false" 
 		onkeydown="javascript:return keyDown(event);" 
 		onkeyup="javascript:return keyUp(event);"
 	>
 // Lich.js
 
+If you're interested in the source you can find it on github:
+https://github.com/ChadMcKinney/Lich.js
+
 ///////////////////////////////////////////////////////////////////////
 RECENT CHANGES
 
 If you're not interested in the recent change log skip this section
 
+Changed the document layout
 Updated the evaluation code to use shift enter, alt enter, command enter, etc...
 The cursor now automatically moves to the next line
 added && || ! operators
@@ -290,7 +294,7 @@ insert myArray 2 222 // All operators have text equivalents!!!!!
 @ sig 'key'
 
 
-// If you're very you can see how all the types can be combined together.
+// If you're curious you can see how all the types can be combined together.
 // Below is a type by type procession through several operators.
 
 // DECLARE VARIABLES FOR TESTING. YOU MUST DO THIS FIRST
@@ -840,7 +844,7 @@ insert myArray 2 222 // All operators have text equivalents!!!!!
 <= Signal [[0 0] [0.1 1] [1 0]] 'linear' Signal [[0 0] [0.1 1] [1 0]] 'linear'
 	</textarea>
 	
-	<textarea id="post" cols="62" rows="33" spellcheck="false" readonly="true">Lich.js&#10;</textarea>
+	<textarea id="post" rows="6" spellcheck="false" readonly="true">Lich.js&#10;</textarea>
 
 	<script LANGUAGE="JavaScript" type="text/javascript">
 		compileLich();

@@ -112,7 +112,7 @@ function lichVirtualMachine() {
 	
 	this.clearStack = function()
 	{
-		post("DOOM!");
+		post("STACK CLEARED. APOCALYPSE.\n");
 		while(this.stack.length > 0)
 		{
 			this.stack.pop();
@@ -434,7 +434,7 @@ function LichString(_stringVar) {
 			else
 			{
 				var error = "YOU CAN'T INSERT A ";
-				error = error.concat(value.type()).concat(" BY INDEX INTO A STRING. OBVIOUSLY.");
+				error = error.concat(value.type()).concat(" BY INDEX INTO A STRING. LAMENTABLY LAME.");
 				post(error);
 				LichVM.push(this);
 				return this;

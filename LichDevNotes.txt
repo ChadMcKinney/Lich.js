@@ -4,6 +4,16 @@
 
 
 // To do
+Compile code based on tabbing?
+Like this:
+
+=> StartSome Code
+	-> but then it keeps going
+	&& you can execut at + any point
+	up to the point that it returns to a line beginning
+	or just hits the end of the document
+
+
 Might be a good idea to have default automatically populated arguments for certain things like signals and functions to help speed up coding. 
 You could use tab to jump between them.
 
@@ -14,6 +24,7 @@ Change Signal to Break Points??
 
 
 // DONE
+Changed the document layout
 Removed duplicates from signal arrays DONE!
 Inserting by index non-strings into strings breaks DONE!
 Insert should support strings for map type insertion in ANY object DONE !
