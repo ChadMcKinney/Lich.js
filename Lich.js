@@ -4332,6 +4332,63 @@ function compileLich()
 	
 	LichVM.reserveVar('lessThanEqual', new LichPrimitive(lessThanEqual, 2));
 	LichVM.reserveVar('<=', new LichPrimitive(lessThanEqual, 2));
+
+	function booleanAnd(argArray) // && float anotherfloat
+	{
+		if(argArray[0].type() == 'Float' && argArray[1].type() == 'Float')
+		{
+			var bool = argArray[0].value() && argArray[1].value();
+			LichVM.push(new LichFloat(bool));
+			return bool;
+		}
+
+		else // If not a boolean, return 0
+		{
+			LichVM.push(new LichFloat(0));
+			return 0;
+		}
+	}
+
+	LichVM.reserveVar('and', new LichPrimitive(booleanAnd, 2));
+	LichVM.reserveVar('&&', new LichPrimitive(booleanAnd, 2));
+
+	function booleanOr(argArray) // || float anotherfloat
+	{
+		if(argArray[0].type() == 'Float' && argArray[1].type() == 'Float')
+		{
+			var bool = argArray[0].value() || argArray[1].value();
+			LichVM.push(new LichFloat(bool));
+			return bool;
+		}
+
+		else // If not a boolean, return 0
+		{
+			LichVM.push(new LichFloat(0));
+			return 0;
+		}
+	}
+
+	LichVM.reserveVar('or', new LichPrimitive(booleanOr, 2));
+	LichVM.reserveVar('||', new LichPrimitive(booleanOr, 2));
+
+	function booleanNot(argArray) // ! float
+	{
+		if(argArray[0].type() == 'Float')
+		{
+			var bool = !argArray[0].value();
+			LichVM.push(new LichFloat(bool));
+			return bool;
+		}
+
+		else // If not a boolean, return 0
+		{
+			LichVM.push(new LichFloat(0));
+			return 0;
+		}
+	}
+
+	LichVM.reserveVar('not', new LichPrimitive(booleanNot, 1));
+	LichVM.reserveVar('!', new LichPrimitive(booleanNot, 1));
 	
 	function ifControl(argArray) // Takes 3 arguments: [0] conditional [1] trueFunction [2] falseFunction 
 	{

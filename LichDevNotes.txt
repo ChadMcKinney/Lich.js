@@ -1,5 +1,19 @@
 // Lich Dev Notes
 
+// 10/02/2012
+
+Need to finish &&, ||, and ! operators DONE!
+Arrays should multichannel expand to an array of booleans when doing boolean operations
+Insert should support strings for map type insertion in ANY object
+Definitely need autocomplete for "", ''.  [], and {}. 
+Might be a good idea to have default arguments for certain things like signals and functions to help speed up the process. 
+You could use tab to jump between them.
+Need to add tab over support in the document.
+Need to make buffer type, which is just a chunk of memory?
+Change Signal to Break Points?
+When adding floats and strings, if the float comes first, it should be on the left side of the string, not conctatenated
+
+
 // 10/01/2012
 
 Updated the evaluation code to use shift enter, alt enter, command enter, etc...
@@ -23,6 +37,13 @@ Return should make a new line in the text area if it's at the end of the documen
 
 bitwise
 boolean && || ! 
+String booleans?
+
+Arrays should return boolean arrays
+'' "" [] {} should all auto enclose when typing
+Arrays as maps functionality?
+insert with string adds it as a key, value
+ANY object can have variables inserted into them?
 
 // 09/24/2012
 
