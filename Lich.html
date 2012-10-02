@@ -56,6 +56,27 @@
 	>
 // Lich.js
 
+///////////////////////////////////////////////////////////////////////
+RECENT CHANGES
+
+If you're not interested in the recent change log skip this section
+
+Updated the evaluation code to use shift enter, alt enter, command enter, etc...
+The cursor now automatically moves to the next line
+added && || ! operators
+Removed duplicates from signal arrays after combining
+Inserting by index non-strings into strings now throws an error instead of breaking
+Insert supports strings for map type insertion in ANY object
+Fixed breaks on printing undefined states, but there are still alot of parse errors to to suss out
+Fixed breaks because of no enclosing '', "", [], or {}
+Autocomplete added for "", ''.  [], and {}
+Added tabbing in the document. 
+Arrays multichannel expand to an array of booleans when doing boolean operations
+When adding floats and strings, if the float comes first, it goes on the left side of the string, not concatenated
+
+///////////////////////////////////////////////////////////////////////
+
+
 This is a short work in progress demo.
 Play with the language and let me know what you think! 
 
@@ -283,7 +304,7 @@ insert myArray 2 222 // All operators have text equivalents!!!!!
 + 'Yo!' 1
 + 'Yo!' ::myTestFunc
 + 'Yo!' + 1 1
-+ 'Yo!' [1 2 3]
++ 'Yo!' [1 2 3] // Multichannel expansion
 + 'Yo!' someVar
 + 'Yo!' Signal [[0 0] [0.1 1] [1 0]] 'linear'
 

@@ -405,25 +405,37 @@ function LichString(_stringVar) {
 	{
 		if(index.type() == 'Float')
 		{
-			if(index.value() == 0)
+			if(value.type() == 'String' || value.type() == 'Float')
 			{
-				this.stringVar = value.value().concat(this.stringVar.substring(1, this.stringVar.length));
-				LichVM.push(this);
-				return this;
+				if(index.value() == 0)
+				{
+					this.stringVar = String(value.value()).concat(this.stringVar.substring(1, this.stringVar.length));
+					LichVM.push(this);
+					return this;
+				}
+				
+				else if(index.value() >= this.stringVar.length)
+				{
+					this.stringVar = this.stringVar.concat(value.value());
+					LichVM.push(this);
+					return this;
+				}
+				
+				else
+				{
+					var sub1 = this.stringVar.substring(0, index.value() - 1);
+					var sub2 = this.stringVar.substring(index.value(), this.stringVar.length);
+					this.stringVar = sub1.concat(value.value()).concat(sub2);
+					LichVM.push(this);
+					return this;
+				}
 			}
-			
-			else if(index.value() >= this.stringVar.length)
-			{
-				this.stringVar = this.stringVar.concat(value.value());
-				LichVM.push(this);
-				return this;
-			}
-			
+
 			else
 			{
-				var sub1 = this.stringVar.substring(0, index.value() - 1);
-				var sub2 = this.stringVar.substring(index.value(), this.stringVar.length);
-				this.stringVar = sub1.concat(value.value()).concat(sub2);
+				var error = "YOU CAN'T INSERT A ";
+				error = error.concat(value.type()).concat(" BY INDEX INTO A STRING. OBVIOUSLY.");
+				post(error);
 				LichVM.push(this);
 				return this;
 			}
@@ -3489,6 +3501,37 @@ function LichSignal(_points, _shape) {
 			}
 		}
 	}
+
+	this.comparePoints = function(point0, point1)
+	{
+		if(point0.arrayVar[0].value() == point1.arrayVar[0].value() && point0.arrayVar[1].value() == point1.arrayVar[1].value())
+		{
+			return 1;
+		}
+
+		else
+		{
+			return 0;
+		}
+	}
+
+	this.removeDuplicates = function(pointArray)
+	{
+		for(var i = 1; i < pointArray.length; )
+		{
+            if(this.comparePoints(pointArray[i-1], pointArray[i]))
+            {
+                pointArray.splice(i, 1);
+            } 
+
+            else 
+            {
+                ++i;
+            }
+        }
+
+        return pointArray;
+	}
 	
 	this.combine = function(object, operatorFunction) // Used for combining two LichSignals
 	{
@@ -3521,6 +3564,7 @@ function LichSignal(_points, _shape) {
 		}
 		
 		newPoints = newPoints.sort(function(a,b){return a.front().value() - b.front().value()}); // Sort the array according to time
+		newPoints = this.removeDuplicates(newPoints); // Remove duplicates from the points array
 		result = new LichSignal(new LichArray(newPoints), this.shape);
 		LichVM.push(result);
 		return result.value();

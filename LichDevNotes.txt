@@ -4,8 +4,6 @@
 
 
 // To do
-Inserting by index non-strings into strings breaks
-Remove duplicates from signal arrays
 Might be a good idea to have default automatically populated arguments for certain things like signals and functions to help speed up coding. 
 You could use tab to jump between them.
 
@@ -16,6 +14,8 @@ Change Signal to Break Points??
 
 
 // DONE
+Removed duplicates from signal arrays DONE!
+Inserting by index non-strings into strings breaks DONE!
 Insert should support strings for map type insertion in ANY object DONE !
 Fix break on printing undefined states DONE, but there are still alot of parse errors to to suss out
 Fixed breaks because of no enclosing '', "", [], or {} DONE!
