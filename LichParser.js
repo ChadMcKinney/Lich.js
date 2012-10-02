@@ -33,6 +33,7 @@
 */
 
 var ctrlDown = false; // Global for input commands
+var shiftDown = false; // Global for input commands
 
 function colorize(str)
 {
@@ -156,19 +157,24 @@ function setCaretPosition(pos)
 	}
 }
 
-// http://css-tricks.com/snippets/javascript/support-tabs-in-textareas/
-function tab()
-{	
+function insertText(text, caretOffset) // Text to insert, offset for caret after insertion
+{
 	var currentCaretPosition, newCaretPosition, textarea;
 	currentCaretPosition = getCaretPosition();
 	textarea = document.getElementById("terminal");
-    newCaretPosition = currentCaretPosition + "    ".length;
+    newCaretPosition = currentCaretPosition + text.length;
     
-    textarea.value = textarea.value.substring(0, currentCaretPosition) + "    " 
+    textarea.value = textarea.value.substring(0, currentCaretPosition) + text 
     	+ textarea.value.substring(currentCaretPosition, textarea.value.length);
 
-    setCaretPosition(newCaretPosition);
+    setCaretPosition(newCaretPosition + caretOffset);
     return false;
+}
+
+// http://css-tricks.com/snippets/javascript/support-tabs-in-textareas/
+function tab()
+{	
+	return insertText("    ", 0);
 }
 
 function post(text)
@@ -325,10 +331,14 @@ function tokenizeString(string, currentIndex)
 		++currentIndex;
 	}
 
-	if(arrayStart == arrayEnd) // If no closing bracket is found, post error
+	if(arrayStart == (arrayEnd - 1)) // If no closing bracket is found, post error
 	{
 		post("ERROR: NO CLOSING STRING ' FOUND. YOU ARE WEAK MINDED.\n");
-		return "' '";
+		
+		return {
+			string: "'YOU ARE WEAK MINDED.'", // Return an insulting string for their punishment
+			index: currentIndex
+		}
 	}
 }
 
@@ -364,10 +374,14 @@ function tokenizeArray(string, currentIndex)
 		}
 	}
 
-	if(arrayStart == arrayEnd) // If no closing bracket is found, post error
+	if(arrayStart == (arrayEnd - 1)) // If no closing bracket is found, post error
 	{
 		post("ERROR: NO CLOSING ARRAY BRACKET FOUND. YOU ARE WEAK MINDED.\n");
-		return "[ ]";
+		
+		return {
+			string: "[ 0 ]",
+			index: currentIndex
+		}
 	}
 }
 
@@ -415,7 +429,11 @@ function tokenizeFunctionDefinition(string, currentIndex)
 	if(functionStart == functionEnd) // If no closing bracket is found, post error
 	{
 		post("ERROR: NO CLOSING FUNCTION BRACKET FOUND IN FUNCTION DEFINITION. STOP BEING SUCH A FAIL FACE.\n");
-		return "{ }";
+		
+		return {
+			string: ": { + 0 0 }", // Return a 0 returning function token
+			index: currentIndex
+		}
 	}
 }
 
@@ -541,12 +559,44 @@ function keyDown(thisEvent)
 		break;
 
 	case 16: // shift
+		ctrlDown = true;
+		shiftDown = true;
+		break;
+
 	case 17: // Ctrl
 	case 18: // alt
 	case 91: // Webkit left command
 	case 93: // Webkit right command
 	case 224: // Firefox command
 		ctrlDown = true;
+		break;
+
+	case 219: // Left bracket
+		
+		if(shiftDown) // { curly bracket
+		{
+			return insertText("{}", -1);
+		}
+
+		else // [ square bracket
+		{
+			return insertText("[]", -1);
+		}
+		
+		break;
+
+	case 222: // Quotation marks
+		
+		if(shiftDown) // " double 
+		{
+			return insertText("\"\"", -1);
+		}
+
+		else // ' single
+		{
+			return insertText("''", -1);
+		}
+		
 		break;
 	}
 }
@@ -556,6 +606,10 @@ function keyUp(thisEvent)
 	switch(thisEvent.keyCode)
 	{
 	case 16: // shift
+		ctrlDown = false;
+		shiftDown = false;
+		break;
+
 	case 17: // Ctrl
 	case 18: // alt
 	case 91: // Webkit left command

@@ -123,34 +123,42 @@ function lichVirtualMachine() {
 	
 	this.printState = function()
 	{
-		if(this.state.constructor == Array) // Print Array
+		if(this.state == undefined)
 		{
-			post(arrayToPrintString(this.state));
+			post("undefined");
 		}
-		
-		else if(this.state == '__LICH_PRINT_VALUE__') // Ignore the print value, it prints on it's own
-		{
-			
-		}
-		
-		 // If a Lich Object
-		else if(this.state.constructor == LichFunction || this.state.constructor == LichPrimitive || this.state.constructor == LichSignal)
-		{
-			if(this.state.type() == "Signal")
-			{
-				var printString = arrayToPrintString(this.state.points.value());
-				printString = printString.concat(" ").concat(this.state.shape);
-				post(printString);
-			}
-			else
-			{
-				post(this.state.type());
-			}
-		}
-		
+
 		else
 		{
-			post(this.state);
+			if(this.state.constructor == Array) // Print Array
+			{
+				post(arrayToPrintString(this.state));
+			}
+			
+			else if(this.state == '__LICH_PRINT_VALUE__') // Ignore the print value, it prints on it's own
+			{
+				
+			}
+			
+			// If a Lich Object
+			else if(this.state.constructor == LichFunction || this.state.constructor == LichPrimitive || this.state.constructor == LichSignal)
+			{
+				if(this.state.type() == "Signal")
+				{
+					var printString = arrayToPrintString(this.state.points.value());
+					printString = printString.concat(" ").concat(this.state.shape);
+					post(printString);
+				}
+				else
+				{
+					post(this.state.type());
+				}
+			}
+			
+			else
+			{
+				post(this.state);
+			}
 		}
 	}
 	
@@ -395,26 +403,35 @@ function LichString(_stringVar) {
 	
 	this.insert = function(index, value)
 	{
-		if(index.value() == 0)
+		if(index.type() == 'Float')
 		{
-			post("Insert 0");
-			this.stringVar = value.value().concat(this.stringVar.substring(1, this.stringVar.length));
-			LichVM.push(this);
-			return this;
+			if(index.value() == 0)
+			{
+				this.stringVar = value.value().concat(this.stringVar.substring(1, this.stringVar.length));
+				LichVM.push(this);
+				return this;
+			}
+			
+			else if(index.value() >= this.stringVar.length)
+			{
+				this.stringVar = this.stringVar.concat(value.value());
+				LichVM.push(this);
+				return this;
+			}
+			
+			else
+			{
+				var sub1 = this.stringVar.substring(0, index.value() - 1);
+				var sub2 = this.stringVar.substring(index.value(), this.stringVar.length);
+				this.stringVar = sub1.concat(value.value()).concat(sub2);
+				LichVM.push(this);
+				return this;
+			}
 		}
-		
-		else if(index.value() >= this.stringVar.length)
-		{
-			this.stringVar = this.stringVar.concat(value.value());
-			LichVM.push(this);
-			return this;
-		}
-		
+
 		else
 		{
-			var sub1 = this.stringVar.substring(0, index.value() - 1);
-			var sub2 = this.stringVar.substring(index.value(), this.stringVar.length);
-			this.stringVar = sub1.concat(value.value()).concat(sub2);
+			this.namespace[index.value()] = value;
 			LichVM.push(this);
 			return this;
 		}
@@ -422,8 +439,26 @@ function LichString(_stringVar) {
 	
 	this.at = function(index)
 	{
-		LichVM.push(new LichString(this.stringVar[index % this.stringVar.length]));
-		return this.stringVar[index % this.stringVar.length];
+		if(index.type() == 'Float')
+		{
+			LichVM.push(new LichString(this.stringVar[index.value() % this.stringVar.length]));
+			return this.stringVar[index.value() % this.stringVar.length];	
+		}
+
+		else
+		{
+			if(this.namespace.hasOwnProperty(index.value()))
+			{
+				LichVM.push(this.namespace[index.value()]);
+				return this.namespace[index.value()].value();
+			}
+
+			else
+			{
+				LichVM.push(this);
+				return undefined;
+			}
+		}
 	}
 	
 	
@@ -1093,6 +1128,7 @@ function LichString(_stringVar) {
 	
 	// Member vars
 	this.stringVar = _stringVar;
+	this.namespace = {};
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1131,15 +1167,35 @@ function LichFloat(_floatVar) {
 		
 		else
 		{
-			LichVM.push(this);
-			return this;
+			this.namespace[index.value()] = value;
 		}
+
+		LichVM.push(this);
+		return this;
 	}
 	
 	this.at = function(index)
 	{
-		LichVM.push(new LichFloat(this.floatVar));
-		return this.floatVar;
+		if(index.type() == 'Float')
+		{
+			LichVM.push(this);
+			return this.value();
+		}
+
+		else
+		{
+			if(this.namespace.hasOwnProperty(index.value()))
+			{
+				LichVM.push(this.namespace[index.value()]);
+				return this.namespace[index.value()].value();
+			}
+
+			else
+			{
+				LichVM.push(this);
+				return undefined;
+			}
+		}
 	}
 	
 	
@@ -1148,7 +1204,9 @@ function LichFloat(_floatVar) {
 		switch(object.type())
 		{
 		case 'String':
-			return object.add(this);
+			var newString = String(this.floatVar).concat(object.value());
+			//LichVM.push(new LichString(newString));
+			return newString;
 			break;
 			
 		case 'Float':
@@ -1754,6 +1812,7 @@ function LichFloat(_floatVar) {
 	
 	// Member vars
 	this.floatVar = _floatVar;
+	this.namespace = {};
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1785,25 +1844,51 @@ function LichArray(_arrayVar) {
 	
 	this.insert = function(index, value)
 	{
-		if(index.value() >= this.length())
+		if(index.type() == 'Float')
 		{
-			this.push(value.value());
+			if(index.value() >= this.length())
+			{
+				this.push(value);
+			}
+			
+			else
+			{
+				this.arrayVar[index.value()] = value;
+			}
 		}
-		
+
 		else
 		{
-			this.arrayVar[index.value()] = value.value();
+			this.namespace[index.value()] = value;
 		}
-		
+
 		LichVM.push(this);
 		return this;
 	}
 	
 	this.at = function(index)
 	{
-		var object = this.arrayVar[index % this.arrayVar.length];
-		LichVM.push(object);
-		return object;
+		if(index.type() == 'Float')
+		{
+			var object = this.arrayVar[index.value() % this.arrayVar.length];
+			LichVM.push(object);
+			return object;
+		}
+
+		else
+		{
+			if(this.namespace.hasOwnProperty(index.value()))
+			{
+				LichVM.push(this.namespace[index.value()]);
+				return this.namespace[index.value()].value();
+			}
+
+			else
+			{
+				LichVM.push(this);
+				return undefined;
+			}
+		}
 	}
 	
 	this.front = function()
@@ -2505,6 +2590,7 @@ function LichArray(_arrayVar) {
 	
 	// Member vars
 	this.arrayVar = _arrayVar;
+	this.namespace = {};
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -3295,10 +3381,13 @@ function LichSignal(_points, _shape) {
 		return this.points.back().front(); // Returns the last time, which is the length of the Signal
 	}
 	
-	this.insert = function(time, level) // Insert a point into the signal using seperate time and level arguments
+	this.insert = function(index, value) // Insert a point into the signal using seperate time and level arguments
 	{
-		if(time.type() == 'Float' && level.type() == 'Float')
+		if(index.type() == 'Float' && value.type() == 'Float')
 		{
+			var time = index;
+			var level = value;
+
 			var newPoint = new LichArray(new Array());
 			newPoint.push(time);
 			newPoint.push(level);
@@ -3311,74 +3400,94 @@ function LichSignal(_points, _shape) {
 		
 		else
 		{
-			post("YOU HAVE TO INSERT A FLOATS IN A SIGNAL. MUAHAHAHA DIE FOOL.");
-			LichVM.clearStack();
+			this.namespace[index.value()] = value;
+			LichVM.push(this);
+			return this;
 		}
 	}
 	
-	this.at = function(time) // Interpolate the value at any point in time based on our interpolation time
+	this.at = function(index) // Interpolate the value at any point in time based on our interpolation time
 	{
-		var interpolatedValue = this.points.front().back().value(); // The first level
-		
-		if(time > this.points.front().front().value())
+		if(index.type() == 'Float')
 		{
-			var pointOne = this.points.front();
-			var pointTwo = pointOne;
-			
-			for(var i = 0; i < this.points.length(); ++i)
+			var time = index.value();
+			var interpolatedValue = this.points.front().back().value(); // The first level
+		
+			if(time > this.points.front().front().value())
 			{
-				if(time == this.points.arrayVar[i].front().value()) // If we have an perfect match, use that for both points
+				var pointOne = this.points.front();
+				var pointTwo = pointOne;
+				
+				for(var i = 0; i < this.points.length(); ++i)
 				{
-					pointOne = this.points.arrayVar[i];
-					pointTwo = pointOne;
-					break;
+					if(time == this.points.arrayVar[i].front().value()) // If we have an perfect match, use that for both points
+					{
+						pointOne = this.points.arrayVar[i];
+						pointTwo = pointOne;
+						break;
+					}
+					
+					else if(time < this.points.arrayVar[i].front().value()) // Otherwise check to see if we've found the interpolation points
+					{
+						pointOne = this.points.arrayVar[i - 1];
+						pointTwo = this.points.arrayVar[i];
+						break;
+					}
 				}
 				
-				else if(time < this.points.arrayVar[i].front().value()) // Otherwise check to see if we've found the interpolation points
+				var timeOne = pointOne.front().value();
+				var timeTwo = pointTwo.front().value();
+				var amount = 0;
+				
+				if(timeOne != timeTwo) // If we have two different times
+				{	
+					amount = (time - timeOne) / (timeTwo - timeOne); // Calculate the interpolation amount based on proximity
+
+					switch(this.shape)
+					{
+					case 'none':
+						interpolatedValue = pointOne.back().value();
+						post("InterpolatedValue!: " + interpolatedValue);
+						break;
+
+					case 'linear':
+						interpolatedValue = lerp(pointOne.back().value(), pointTwo.back().value(), amount);
+						break;
+
+					case 'exponential':
+						interpolatedValue = exerp(pointOne.back().value(), pointTwo.back().value(), amount);
+						break;
+
+					default:
+						interpolatedValue = pointOne.back().value();
+						break;
+					}
+				}
+				
+				else // Otherwise just pick the first one and take it's value
 				{
-					pointOne = this.points.arrayVar[i - 1];
-					pointTwo = this.points.arrayVar[i];
-					break;
+					interpolatedValue = pointOne.back().value();
 				}
 			}
 			
-			var timeOne = pointOne.front().value();
-			var timeTwo = pointTwo.front().value();
-			var amount = 0;
-			
-			if(timeOne != timeTwo) // If we have two different times
-			{	
-				amount = (time - timeOne) / (timeTwo - timeOne); // Calculate the interpolation amount based on proximity
+			LichVM.push(new LichFloat(interpolatedValue));
+			return interpolatedValue;
+		}
 
-				switch(this.shape)
-				{
-				case 'none':
-					interpolatedValue = pointOne.back().value();
-					post("InterpolatedValue!: " + interpolatedValue);
-					break;
-
-				case 'linear':
-					interpolatedValue = lerp(pointOne.back().value(), pointTwo.back().value(), amount);
-					break;
-
-				case 'exponential':
-					interpolatedValue = exerp(pointOne.back().value(), pointTwo.back().value(), amount);
-					break;
-
-				default:
-					interpolatedValue = pointOne.back().value();
-					break;
-				}
-			}
-			
-			else // Otherwise just pick the first one and take it's value
+		else
+		{
+			if(this.namespace.hasOwnProperty(index.value()))
 			{
-				interpolatedValue = pointOne.back().value();
+				LichVM.push(this.namespace[index.value()]);
+				return this.namespace[index.value()].value();
+			}
+
+			else
+			{
+				LichVM.push(this);
+				return undefined;
 			}
 		}
-		
-		LichVM.push(new LichFloat(interpolatedValue));
-		return interpolatedValue;
 	}
 	
 	this.combine = function(object, operatorFunction) // Used for combining two LichSignals
@@ -3391,7 +3500,7 @@ function LichSignal(_points, _shape) {
 		{
 			var thisTime = this.points.arrayVar[i].front().value();
 			var newPoint = new LichArray(new Array());
-			var objectLevel = object.at(thisTime);
+			var objectLevel = object.at(new LichFloat(thisTime));
 			LichVM.pop(); // pop the results off the stack;
 			var level = operatorFunction(this.points.arrayVar[i].back().value(), objectLevel);
 			newPoint.push(new LichFloat(thisTime));
@@ -3403,7 +3512,7 @@ function LichSignal(_points, _shape) {
 		{
 			var objectTime = object.points.arrayVar[i].front().value();
 			var newPoint = new LichArray(new Array());
-			var thisLevel = this.at(objectTime);
+			var thisLevel = this.at(new LichFloat(objectTime));
 			LichVM.pop(); // pop the results off the stack;
 			var level = operatorFunction(object.points.arrayVar[i].back().value(), thisLevel);
 			newPoint.push(new LichFloat(objectTime));
@@ -4094,6 +4203,7 @@ function LichSignal(_points, _shape) {
 	this.points = _points;
 	this.points.arrayVar = this.points.arrayVar.sort(function(a,b){return a.front().value() - b.front().value()}); // Sort by time
 	this.shape = _shape;
+	this.namespace = {};
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -4396,7 +4506,7 @@ function compileLich()
 	
 	function atObject(argArray) // 2 arguments: [0] object [1] index
 	{
-		return argArray[0].at(argArray[1].value());
+		return argArray[0].at(argArray[1]);
 	}
 	
 	LichVM.reserveVar("at", new LichPrimitive(atObject, 2));

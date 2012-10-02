@@ -244,6 +244,30 @@ insert myArray 2 222 // All operators have text equivalents!!!!!
 -> myString 5 '!!!?!?!?!'
 -> myString 999 '999'
 
+// Every object has it's own internal namespace.
+// This allows any object to store information of any type.
+// This way you can easily create maps.
+// You can also create class like objects using maps of functions.
+
+=> myString 'MetaDoom' 
+-> myString 0 '666' // inserting string into another string by index
+-> myString 'doom' 'internal doom' // inserting using a string
+@ myString 'doom' // access by string
+@ myString 0 // access by index
+=> myInt 1
+-> myInt 'something' 'internal' // insert by string
+@ myInt 'something' // access by string
+=> myArray [0 1 2 3]
+-> myArray 0 666 // insert by index
+@ myArray 0 // access by index
+-> myArray 'key' 'value' // insert by string
+@ myArray 'key' // access by string
+=> sig $ [[0.1 1] [0.5 0]] 'linear'
+-> sig 0.7 5
+@ sig 0.6
+-> sig 'key' 'value'
+@ sig 'key'
+
 
 // If you're very you can see how all the types can be combined together.
 // Below is a type by type procession through several operators.
