@@ -365,6 +365,84 @@ function exerp(value1, value2, amount)
 	return Math.pow(value2 / value1, amount) * value1;
 }
 
+function deserializeLichObjectNamespace(serializedNamespace)
+{
+	var namespace = {};
+
+	for(key in serializedNamespace)
+	{
+		if(serializedNamespace.hasOwnProperty(key))
+		{
+			namespace[key] = deserializeLichObject(serializedNamespace[key]);
+		}
+	}
+
+	return namespace;
+}
+
+function deserializeLichObject(serializedObject)
+{
+	var object;
+
+	switch(serializedObject.type)
+	{
+	case 'String':
+		object = new LichString(serializedObject.value);
+		object.namespace = deserializeLichObjectNamespace(serializedObject.namespace);
+		break;
+
+	case 'Float':
+		object = new LichFloat(parseFloat(serializedObject.value));
+		object.namespace = deserializeLichObjectNamespace(serializedObject.namespace);
+		break;
+
+	case 'Array':
+		var objectArray = new Array();
+
+		for(var i = 0; i < serializedObject.value.length; ++i)
+		{
+			objectArray.push(deserializeLichObject(serliazedObject.value[i]));
+		}
+
+		object = new LichArray(objectArray);
+		object.namespace = deserializeLichObjectNamespace(serializedObject.namespace);
+		break;
+
+	case 'Function':
+		var objectFunctionArray = new Array();
+
+		for(var i = 0; i < serializedObject.value.function.length; ++i)
+		{
+			objectFunctionArray.push(deserializeLichObject(serializedObject.value.function[i]));
+		}
+
+		object = new LichFunction(serializedObject.value.argNames, objectFunctionArray);
+		object.namespace = deserializeLichObjectNamespace(serializedObject.namespace);
+		break;
+
+	case 'Primitive':
+		var func = eval(serializedObject.value);
+		object = new LichPrimitive(func, serializedObject.numArgs);
+		break;
+
+	case 'Variable': // Deserialize variable here
+		object = new LichVariable(serializedObject.objectName);
+		object.object = deserializeLichObject(serializedObject.value);
+		break;
+
+	case 'Signal':
+		object = new LichSignal(deserializeLichObject(serializedObject.value.points), deserializeLichObject(serializedObject.value.shape));
+		object.namespace = deserializeLichObjectNamespace(serializedObject.namespace);
+		break;
+
+	default:
+		object = new LichString("COULD NOT SERIALIZE THIS OBJECT"); // Should probably come up with a better error method
+		break;
+	}
+
+	return object;
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Lich Classes 
@@ -372,7 +450,7 @@ function exerp(value1, value2, amount)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // All classes must have the following methods value, call, type, length, at, insert, add, subtract, multiply, divide, modulus, equivalent, 
-// inequivalent, greater than, less than, greater than equal, and less than equal
+// inequivalent, greater than, less than, greater than equal, and less than equal, serialize, deserialize
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // LichString
@@ -1138,6 +1216,25 @@ function LichString(_stringVar) {
 		}
 	}
 	
+
+	this.serialize = function() // Serialize the object into a JSON representation
+	{
+		var serialized = {};
+		serialized.namespace = {};
+
+		for(var key in this.namespace)
+		{
+			if(this.namespace.hasOwnProperty(key))
+			{
+				serialized.namespace[key] = this.namespace[key].serialize();
+			}
+		}
+
+		serialized.value = this.stringVar;
+		serialized.type = this.type();
+		return serialized;
+	}
+
 	// Member vars
 	this.stringVar = _stringVar;
 	this.namespace = {};
@@ -1820,6 +1917,24 @@ function LichFloat(_floatVar) {
 			return 0;
 			break;
 		}
+	}
+
+	this.serialize = function() // Serialize the object into a JSON representation
+	{
+		var serialized = {};
+		serialized.namespace = {};
+
+		for(var key in this.namespace)
+		{
+			if(this.namespace.hasOwnProperty(key))
+			{
+				serialized.namespace[key] = this.namespace[key].serialize();
+			}
+		}
+
+		serialized.value = this.floatVar;
+		serialized.type = this.type();
+		return serialized;
 	}
 	
 	// Member vars
@@ -2599,6 +2714,31 @@ function LichArray(_arrayVar) {
 			return 0;
 		}
 	}
+
+	this.serialize = function() // Serialize the object into a JSON representation
+	{
+		var serialized = {};
+		serialized.namespace = {};
+
+		for(var key in this.namespace)
+		{
+			if(this.namespace.hasOwnProperty(key))
+			{
+				serialized.namespace[key] = this.namespace[key].serialize();
+			}
+		}
+
+		var serialArray = new Array();
+
+		for(var i = 0; i < this.arrayVar.length; ++i)
+		{
+			serialArray.push(this.arrayVar[i].serialize());
+		}
+
+		serialized.value = serialArray;
+		serialized.type = this.type();
+		return serialized;
+	}
 	
 	// Member vars
 	this.arrayVar = _arrayVar;
@@ -2823,6 +2963,28 @@ function LichPrimitive(_primitive, _numArgs) {
 		{
 			return this.call().lessThanEqual(object);
 		}
+	}
+
+	this.serialize = function() // Serialize the object into a JSON representation
+	{
+		var serialized = {};
+		var serialFunc = value = this.primitive + ''; // Stringify the primitive
+		var prepend = "DESERIALPRIMITIVE = function(argArray) ";
+
+		for(var i = 0; i < serialFunc.length; ++i)
+		{
+			if(serialFunc[i] == "{")
+			{
+				serialFunc = serialFunc.substring(i, serialFunc.length);
+				break;
+			}
+		}
+
+		serialFunc = prepend.concat(serialFunc);
+		serialized.value = serialFunc;
+		serialized.numArgs = this.numArgs;
+		serialized.type = this.type();
+		return serialized;
 	}
 	
 	// Member vars
@@ -3092,6 +3254,32 @@ function LichFunction(_argNames, _functionObjects) {
 			return this.call().lessThanEqual(object);
 		}
 	}
+
+	this.serialize = function() // Serialize the object into a JSON representation
+	{
+		var serialized = {};
+		serialized.namespace = {};
+		var serializedValueFunction = new Array();
+
+		for(var key in this.namespace)
+		{
+			if(this.namespace.hasOwnProperty(key))
+			{
+				serialized.namespace[key] = this.namespace[key].serialize();
+			}
+		}
+
+		for(var i = 0; i < this.functionObjects.length; ++i)
+		{
+			serializedValueFunction.push(this.functionObjects[i].serialize());
+		}
+
+		serialized.value = {};
+		serialized.value.argNames = this.argNames;
+		serialized.value.function = serializedValueFunction;
+		serialized.type = this.type();
+		return serialized;
+	}
 	
 	this.argObjects = {};
 	this.argNames = _argNames;
@@ -3350,6 +3538,15 @@ function LichVariable(_objectName) {
 		
 		LichVM.addVar(this.objectName, this);
 		return this.objectName;
+	}
+
+	this.serialize = function() // Serialize the object into a JSON representation
+	{
+		var serialized = {};
+		serialized.value = this.object.serialize();
+		serialized.objectName = this.objectName;
+		serialized.type = this.type();
+		return serialized;
 	}
 	
 	this.objectName = _objectName;
@@ -4242,6 +4439,26 @@ function LichSignal(_points, _shape) {
 			break;
 		}
 	}
+
+	this.serialize = function() // Serialize the object into a JSON representation
+	{
+		var serialized = {};
+		serialized.namespace = {};
+
+		for(var key in this.namespace)
+		{
+			if(this.namespace.hasOwnProperty(key))
+			{
+				serialized.namespace[key] = this.namespace[key].serialize();
+			}
+		}
+
+		serialized.value = {};
+		serialized.value.points = this.points.serialize();
+		serialized.value.shape = this.shape;
+		serialized.type = this.type();
+		return serialized;
+	}
 	
 	// Member vars
 	this.points = _points;
@@ -4260,8 +4477,8 @@ function compileLich()
 {
 	LichVM = new lichVirtualMachine();
 	
-	var add, subtract, multiply, divide, modulus, assign, equivalent, inequivalent, ifControl, println, callFunction, incrementOne, decrementOne;
-	var newSignal, doFunction;
+	// var add, subtract, multiply, divide, modulus, assign, equivalent, inequivalent, ifControl, println, callFunction, incrementOne, decrementOne;
+	// var newSignal, doFunction;
 	
 	function add(argArray)
 	{
@@ -4488,7 +4705,7 @@ function compileLich()
 		for(var i = 0; i < argArray[0].value(); ++i)
 		{
 			LichVM.push(argArray[1]);
-			LichVM.push(new LichPrimitive(callFunction, 1));
+			LichVM.push(LichVM.get("call"));
 		}
 		
 		return LichVM.pop().call();
@@ -4513,9 +4730,8 @@ function compileLich()
 		
 		else if(argArray[0].type() == 'Variable')
 		{
-			var printArray = new Array();
-			printArray.push(argArray[0].object);
-			return println(printArray);
+			LichVM.push(argArray[0].object);
+			return LichVM.get('print').value();
 		}
 		
 		else
@@ -4563,6 +4779,41 @@ function compileLich()
 	
 	LichVM.reserveVar("->", new LichPrimitive(insertValue, 3));
 	LichVM.reserveVar("insert", new LichPrimitive(insertValue, 3));
+
+	function spawn(argArray) // 1 argument: [0] function
+	{
+		// LichVM.push(argArray[0]);
+		// return argArray[0].value();
+		var worker = new Worker("LichThread.js");
+		
+		worker.addEventListener(
+			"message",
+			function(event)
+			{
+				if(event.data.message != undefined)
+					post(event.data.message);
+				else if(event.data.print != undefined)
+					post(event.data.print);
+			},
+			false
+		);
+
+		worker.addEventListener(
+			"error",
+			function(event)
+			{
+				post(event.message);
+			},
+			false
+		);
+
+		worker.postMessage({ function: argArray[0].serialize() });
+
+		return 'thread spawned';
+	}
+
+	LichVM.reserveVar(">>", new LichPrimitive(spawn, 1));
+	LichVM.reserveVar("spawn", new LichPrimitive(spawn, 1));
 	
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Constants

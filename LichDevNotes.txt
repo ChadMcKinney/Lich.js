@@ -1,9 +1,160 @@
 // Lich Dev Notes
 
-// 10/02/2012
 
+// 10/05/2012
+
+Got threads starting to work. you now thread a function just being calling >> or spawn
+Example:
+>> { do 99 { print + 1 1 } }
+spawn { do 99 { print + 1 1 } }
+
+Interestingly Chrome seems to get locked up MUCH more than Fire Fox when printing, BUT without printing seems to be much more efficient. In general printing should be avoided because it's massively ineficient.
+
+// Send a serialized version of the fucking world?!!? --> No. All variables referenced from the main VM and are set there. Use deferred call backs to sychronize between threads.
+
+// 10/03/2012
+
+will need to start chrome using /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --allow-file-access-from-files &> /dev/null &
+This will allow for local files to be used for web workers. 
 
 // To do
+Make threads:
+	Threads could be created using a primitive that takes a function ( or anything else and creates a new function from it).
+	Conversely functions could be threads as well. IE they're one in the same, but at any time you can call them scheduled.
+	They maintain an internal stack, but access the VM for variables and such.
+	When the thread ends the stack needs to be cleared.
+
+	functions can be ran in which a thread spawns and calls the function.
+	The function maintains an internal stack. Anytime anything references the running function it returns the top of the stack.
+	at anytime the function can be stopped, interrupting it's execution.
+	The idea is that the function is an object existing in time that can be interacted with during execution either by referencing
+	it's current state or stopping it before it has finished.
+	Functions need to be able to be recursive.
+	Run can run functions that take arguments, but when they are ran, the arguments need to be on the stack for execution to begin.
+	new operator for running a function
+	run : { }
+	>> { }
+	<< { } // reverse function?!
+
+	Threads and coroutines? Threads have higher overhead, coroutines better for lower overhead simple time based actions?
+	Threads with interaction might be difficult. They need to be spawned indirectly by other functions.
+	Coroutines may be the only way we can "thread" things with functions
+
+
+	Maybe I can do this with Web workers. Will need to be able to have a serialize function for all the data types that turns them into
+	JSON structures (These will need to support multiple levels). In this way objects will be serialized and passed back and forth between
+	the web worker and the main thread. They will need to be able to get and set objects in the VM however they maintain their own internal stack.
+	Lich objects are represents as arrays of data. Use JSON.parse and JSON.stringify. Uses promises in combination with web workers?
+	How to allow for sleep times?? This will undoubtedbly be unreliable as fuck for timing.
+	Use importScripts() to get Lich.js in the worker.js file so it can now about the lich classes and shit. Gonna be slow as hell to start threads. 
+
+	// JSON serialized Examples
+
+	// Variable
+	[
+		type: 'Variable',
+		value: 'myObject', // object name
+		namespace: [ // namespace array
+
+		]
+	]
+
+	// Float
+	[
+		type: 'Float',
+		value: 5.0,
+		namespace: [ // namespace array
+
+		]
+	]
+
+	// String 
+	[
+		type:  "String",
+		value: "My string value.",
+		namespace: [ // namespace array
+
+		]
+	]
+
+	// Function
+	[
+		type: 'Function',
+		value: 
+		[
+			args: 
+			[
+				argName0: arg0,
+				argName1: arg1,
+				argName2: arg2 // etc...
+			],
+
+			function: 'function(object) { doSomethingWith(object) };', // Object stringified with .toString() and callable using .eval(args??)
+		],
+
+		namespace: // namespace array
+		[ 
+
+		]
+	]
+
+	// Primitive
+	[
+		type: 'Primitive',
+		value: 'function(object) { doSomethingWith(object) };' // Object stringified with .toString() and callable using .eval(args??)
+	]
+
+	// Array
+	[
+		type: 'Array',
+		value: [
+			/* other serialized objects */
+		],
+
+		namespace: [ // namespace array
+
+		]
+	]
+
+	// Signal
+	[
+		type: 'Signal',
+		value: 
+		[
+			points: 
+			[
+				[
+					time: 0,
+					level: 0
+				],
+				
+				[
+					time: 0.1,
+					level: 1
+				],
+
+				[
+					time: 1,
+					level: 0
+				]
+			],
+
+			interpolation: 'linear'
+		],
+
+		namespace: [ // namespace array
+
+		]
+	]
+
+	For .wait functionality will need to make a clock and scheduler.
+	Have a timeout function?! Might need a dedicated pop function. funciton stackPop() { stack.pop() };
+	setTimeOut(stackPop(), time); 
+	This could allow for a sleep time function.
+
+
+
+Recursion isn't working. Need to think about this.
 Compile code based on tabbing?
 Like this:
 
@@ -21,6 +172,8 @@ You could use tab to jump between them.
 // Maybe
 Need to make buffer type, which is just a chunk of memory?
 Change Signal to Break Points??
+
+// 10/02/12
 
 
 // DONE
