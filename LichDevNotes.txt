@@ -1,5 +1,29 @@
 // Lich Dev Notes
 
+// 10/26/2012
+
+Work begins on audio! 
+
+Goals: 
+	Mainly buffer playback based
+	Abuses glitchiness and quirks of the API
+	Attempt to get garbage from the system for playback
+	Develop a more general framework that can be used in subsequent code
+
+
+URL playback works! 
+Need to add Source class or make signal source, basically something that represents a Web Audio source
+Lich has playback!
+summon "myurl.com/some.mp3"
+Once I make the Signal/Source type then this will return one of those. Also it should take one more argument for destination. There should be a reserveVar for the Soliton.context.destination. Perhaps it could be called mainOut or something.
+
+// 10/06/2012
+Variable assignment in functions is a bit wonky. Need to work that out.
+This SHOULD work
+
+Need to implement sleep!
+Everything should have a cast method to all the other types.
+
 
 // 10/05/2012
 
@@ -9,6 +33,8 @@ Example:
 spawn { do 99 { print + 1 1 } }
 
 Interestingly Chrome seems to get locked up MUCH more than Fire Fox when printing, BUT without printing seems to be much more efficient. In general printing should be avoided because it's massively ineficient.
+
+No nested threads????????????? WTF??
 
 // Send a serialized version of the fucking world?!!? --> No. All variables referenced from the main VM and are set there. Use deferred call backs to sychronize between threads.
 

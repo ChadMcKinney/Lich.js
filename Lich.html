@@ -40,6 +40,7 @@
 	<meta name="keywords" content="Experimental, Computer Music, Multimedia, Live Coding" />
 	<meta name="description" contexnt="Lich.js is a very simple live coding audio and visual language implemented in javascript." />
 	<link rel="stylesheet" type="text/css" href="WP-Content/LichStyle.css" media="all" />
+	<script type="text/javascript" src="Soliton.js/Soliton.js"></script>
 	<script type="text/javascript" src="Lich.js"></script>
 	<script type="text/javascript" src="LichParser.js"></script>
 </head>
@@ -55,6 +56,10 @@
 		onkeyup="javascript:return keyUp(event);"
 	>
 // Lich.js
+
+summon "http://chadmckinneyaudio.com/ChadWP-Content/resources/music/Dragon%20Quest%20Slime.mp3"
+
+garbage 5
 
 If you're interested in the source you can find it on github:
 https://github.com/ChadMcKinney/Lich.js
@@ -292,6 +297,11 @@ insert myArray 2 222 // All operators have text equivalents!!!!!
 @ sig 0.6
 -> sig 'key' 'value'
 @ sig 'key'
+
+// Threading works by using the spawn primitive and supplying a function. Unforunately you can't spawn threads inside threads.
+spawn { print 'threading is easy!' }
+=> i 0
+spawn { do 50 { sleep 1 print ++ i } }
 
 
 // If you're curious you can see how all the types can be combined together.

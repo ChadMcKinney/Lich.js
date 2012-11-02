@@ -32,6 +32,7 @@
 	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Lich Virtual Machine
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -102,11 +103,13 @@ function lichVirtualMachine() {
 	
 	this.interpretStack = function()
 	{		
-		while(this.stack.length > 0)
+		this.sleep = 0;
+
+		while(this.stack.length > 0 && this.sleep == 0)
 		{
 			var pointer = this.stack.pop();
 			var value = pointer.value();
-			this.state = value;
+			this.state = value;	
 		}
 	}
 	
@@ -166,6 +169,8 @@ function lichVirtualMachine() {
 	this.stack = new Array();
 	this.state = 0;
 	this.namespace = {};
+	this.thread = "main";
+	this.sleep = 0;
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -4476,6 +4481,8 @@ function LichSignal(_points, _shape) {
 function compileLich()
 {
 	LichVM = new lichVirtualMachine();
+	Soliton.print = post; // Set Soliton.print to our post function
+	Soliton.printError = post; // Set Soliton.print to our post function
 	
 	// var add, subtract, multiply, divide, modulus, assign, equivalent, inequivalent, ifControl, println, callFunction, incrementOne, decrementOne;
 	// var newSignal, doFunction;
@@ -4814,6 +4821,48 @@ function compileLich()
 
 	LichVM.reserveVar(">>", new LichPrimitive(spawn, 1));
 	LichVM.reserveVar("spawn", new LichPrimitive(spawn, 1));
+
+	function wakeupVM()
+	{
+		LichVM.sleep = 0;
+		LichVM.interpretStack();
+	}
+
+	LichVM.reserveVar("__WAKE_UP_VM__", wakeupVM);
+
+
+	function sleep(argArray) // argArray[0] amount of time to sleep in seconds
+	{
+		if(argArray[0].type() == 'Float')
+		{
+			setTimeout(LichVM.get("__WAKE_UP_VM__"), argArray[0].value() * 1000); // multiplied by 1000 to translate from seconds to milliseconds
+			LichVM.sleep = 1;
+			var sleeping = "sleep: ";
+			return sleeping.concat(argArray[0].value());
+		}
+	}
+
+	LichVM.reserveVar("sleep", new LichPrimitive(sleep, 1));
+
+	function summon(argArray) // argArray[0] input, url, file, etc...
+	{
+		if(argArray[0].type() == 'String')
+		{
+			Soliton.playURL(argArray[0].value());
+		}
+	}
+
+	LichVM.reserveVar("summon", new LichPrimitive(summon, 1));
+
+	function garbage(argArray) // argArray[0] size
+	{
+		if(argArray[0].type() == 'Float')
+		{
+			Soliton.playGarbage(argArray[0].value());
+		}
+	}
+
+	LichVM.reserveVar("garbage", new LichPrimitive(garbage, 1));
 	
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Constants

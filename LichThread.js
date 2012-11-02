@@ -34,8 +34,10 @@
 
 // LichThread.js
 
-importScripts('Lich.js');
+importScripts('Soliton.js');
 compileLich();
+LichVM.thread = 'worker'; // Not the main thread
+LichVM.sleep = 0;
 
 function post(message)
 {
