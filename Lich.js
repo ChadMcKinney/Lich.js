@@ -4483,6 +4483,7 @@ function compileLich()
 	LichVM = new lichVirtualMachine();
 	Soliton.print = post; // Set Soliton.print to our post function
 	Soliton.printError = post; // Set Soliton.print to our post function
+	CloudChamber.setup("canvas", 0, undefined, post); // Create the CloudChamber instance
 	
 	// var add, subtract, multiply, divide, modulus, assign, equivalent, inequivalent, ifControl, println, callFunction, incrementOne, decrementOne;
 	// var newSignal, doFunction;
