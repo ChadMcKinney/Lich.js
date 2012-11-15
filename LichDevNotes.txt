@@ -1,5 +1,10 @@
 // Lich Dev Notes
 
+// 11/13/2012
+Continuing work on Audio and graphics
+summon shouldn't redownload the audio file if the buffer is already present, it shoudl just immediately play it back
+
+
 // 10/26/2012
 
 Work begins on audio! 

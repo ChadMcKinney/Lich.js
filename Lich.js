@@ -4483,7 +4483,7 @@ function compileLich()
 	LichVM = new lichVirtualMachine();
 	Soliton.print = post; // Set Soliton.print to our post function
 	Soliton.printError = post; // Set Soliton.print to our post function
-	CloudChamber.setup("canvas", 0, undefined, post); // Create the CloudChamber instance
+	// CloudChamber.setup("canvas", 0, undefined, post); // Create the CloudChamber instance
 	
 	// var add, subtract, multiply, divide, modulus, assign, equivalent, inequivalent, ifControl, println, callFunction, incrementOne, decrementOne;
 	// var newSignal, doFunction;
@@ -4857,7 +4857,7 @@ function compileLich()
 
 	function garbage(argArray) // argArray[0] size
 	{
-		if(argArray[0].type() == 'Float')
+		if(argArray[0].type() == 'Float' || argArray[0].type() == 'Variable')
 		{
 			Soliton.playGarbage(argArray[0].value());
 		}

@@ -191,7 +191,10 @@ CloudChamber.checkGLError = function()
 
 CloudChamber.draw = function(time)
 {
-		CloudChamber.gl.clear(CloudChamber.gl.COLOR_BUFFER_BIT);
+		CloudChamber.gl.bindFramebuffer(CloudChamber.gl.FRAMEBUFFER, null);		
+    	CloudChamber.gl.viewport(0, 0, CloudChamber.gl.viewportWidth, CloudChamber.gl.viewportHeight);
+    	CloudChamber.gl.clear(CloudChamber.gl.COLOR_BUFFER_BIT);
+		
 		mat4.identity(CloudChamber.modelMatrix);
 		
 		CloudChamber.gl.enableVertexAttribArray(CloudChamber.positionHandle);
@@ -267,7 +270,7 @@ CloudChamber.setup = function(canvasElementName, framerate, drawCallback, printC
 	var near = 1.0;
 	var far = 10.0;
 	mat4.frustum(left, right, bottom, top, near, far, CloudChamber.projectionMatrix);
-	CloudChamber.gl.clearColor(0, 0.2, 0.5, 1);
+	CloudChamber.gl.clearColor(0.9, 0.9, 0.9, 1);
 
 	var eye = vec3.create();
 	eye[0] = 0;

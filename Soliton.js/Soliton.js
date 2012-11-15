@@ -83,35 +83,46 @@ Soliton.playBuffer = function(buffer, destination)
 // Buffer a url with an optional name for storage, callback on finish, and optional destination (for callback function)
 Soliton.bufferURL = function(url, name, callback, callbackDestination)
 {
-	var request = new XMLHttpRequest();
-	request.open('GET', url, true);
-	request.responseType = 'arraybuffer';
-
-	// Decode asychronously
-	request.onload = function()
+	if(!Soliton.buffers.hasOwnProperty(name))
 	{
-		Soliton.context.decodeAudioData(
-			request.response, 
-			
-			function(buffer)
-			{
-				if(name != undefined)
-					Soliton.buffers[name] = buffer;
+		Soliton.print("Downloading audio...");
+		var request = new XMLHttpRequest();
+		request.open('GET', url, true);
+		request.responseType = 'arraybuffer';
 
-				if(callback != undefined)
-					callback(buffer, callbackDestination);
-			}, 
+		// Decode asychronously
+		request.onload = function()
+		{
+			Soliton.context.decodeAudioData(
+				request.response, 
+				
+				function(buffer)
+				{
+					if(name != undefined)
+						Soliton.buffers[name] = buffer;
 
-			function()
-			{
-				var errorString = "Unable to load URL: ";
-				errorString = errorString.concat(url);
-				Soliton.printError(errorString);
-			}
-		);
+					if(callback != undefined)
+						callback(buffer, callbackDestination);
+				}, 
+
+				function()
+				{
+					var errorString = "Unable to load URL: ";
+					errorString = errorString.concat(url);
+					Soliton.printError(errorString);
+				}
+			);
+		}
+
+		request.send();
 	}
 
-	request.send();
+	else
+	{
+		Soliton.print("Already Downloaded!");
+		if(callback != undefined)
+			callback(Soliton.buffers[name], callbackDestination);
+	}
 }
 
 Soliton.bufferGarbage = function(size, name, callback, callbackDestination)
