@@ -326,22 +326,22 @@ spawn { print 'threading is easy!' }
 => i 0
 spawn { do 50 { sleep 1 print ++ i } }
 
-summon "http://chadmckinneyaudio.com/ChadWP-Content/resources/music/Dragon%20Quest%20Slime.mp3"
+// Some brief audio examples, this is VERY early in development.
+
+// Play back an audio file on the server
 summon "http://chadmckinneyaudio.com/ChadWP-Content/resources/music/Inventions(excerpt).mp3"
 
-garbage 5
+garbage 2 // 2 seconds of a really simple oscillator
 
-=> i 0.0025
+// Play with some trash
+=> i 0.025
 do 5000 { garbage i sleep * i 1.1 }
-=> i2 0.0125
+=> i2 0.075
 do 5000 { garbage i2 sleep * i2 1.1 }
-=> i3 0.003
+=> i3 0.03
 do 5000 { garbage i3 sleep * i3 1.1 }
-=> i4 0.001
+=> i4 0.01
 do 5000 { garbage i4 sleep * i4 1.1 }
-do 50 { => i + i i sleep * i print i print 'MUAHAHAH'}
-print i
-garbage i
 
 
 // If you're curious you can see how all the types can be combined together.
