@@ -11,7 +11,7 @@
 			"file": "Lich.html",
 			"settings":
 			{
-				"buffer_size": 2638,
+				"buffer_size": 26231,
 				"line_ending": "Unix"
 			}
 		},
@@ -19,7 +19,7 @@
 			"file": "Lich.js",
 			"settings":
 			{
-				"buffer_size": 83954,
+				"buffer_size": 100311,
 				"line_ending": "Unix"
 			}
 		},
@@ -27,7 +27,7 @@
 			"file": "LichParser.js",
 			"settings":
 			{
-				"buffer_size": 13186,
+				"buffer_size": 15767,
 				"line_ending": "Unix"
 			}
 		},
@@ -35,7 +35,7 @@
 			"file": "WP-Content/LichStyle.css",
 			"settings":
 			{
-				"buffer_size": 2424,
+				"buffer_size": 2820,
 				"line_ending": "Unix"
 			}
 		},
@@ -43,7 +43,7 @@
 			"file": "LichDevNotes.txt",
 			"settings":
 			{
-				"buffer_size": 25299,
+				"buffer_size": 42831,
 				"line_ending": "Unix"
 			}
 		}
@@ -115,15 +115,15 @@
 					"file": "Lich.html",
 					"settings":
 					{
-						"buffer_size": 2638,
+						"buffer_size": 26231,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								405,
-								405
+								0,
+								0
 							]
 						],
 						"settings":
@@ -142,7 +142,7 @@
 					"file": "Lich.js",
 					"settings":
 					{
-						"buffer_size": 83954,
+						"buffer_size": 100311,
 						"regions":
 						{
 						},
@@ -169,7 +169,7 @@
 					"file": "LichParser.js",
 					"settings":
 					{
-						"buffer_size": 13186,
+						"buffer_size": 15767,
 						"regions":
 						{
 						},
@@ -196,7 +196,7 @@
 					"file": "WP-Content/LichStyle.css",
 					"settings":
 					{
-						"buffer_size": 2424,
+						"buffer_size": 2820,
 						"regions":
 						{
 						},
@@ -209,7 +209,8 @@
 						],
 						"settings":
 						{
-							"syntax": "Packages/CSS/CSS.tmLanguage"
+							"syntax": "Packages/CSS/CSS.tmLanguage",
+							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
@@ -222,7 +223,7 @@
 					"file": "LichDevNotes.txt",
 					"settings":
 					{
-						"buffer_size": 25299,
+						"buffer_size": 42831,
 						"regions":
 						{
 						},

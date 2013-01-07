@@ -1,8 +1,57 @@
 // Lich Dev Notes
 
+// 01/07/13
+Relicensed under gpl v2+ because of translated SuperCollider code. 
+
+// 12/14/12
+
+Continuing work on Pbind. Implementing coroutine emulation. Pwhite needs stream implementation of numbers as these could be streams themselves!
+
+.embedInStream returns a stream, but it needs a .play method?????? Possibly get it from Object::play?
+
+
+// 12/12/12
+
+Working on Pbind. Need to make Environment and have event subclass it.
+
+processRest
+
+Need to make Soliton.Rest? for .processRest
+
+loop += yield1?!?
+HOW TO RECONCILE THIS?!?!
+
+// 12/05/2012
+
+Clock now holds a scheduler and I moved the run command to clock which advances it's internal scheduler.
+
+Scheduler tasks should return their next delta when .next is called on them
+EvenStream: this.stream and this.originalStream to be be sorted out!
+
+// 12/04/2012
+
+Soliton.Scheduler is a new class that allows for scheduling with an adjustable resolution. 
+Added also Soliton.EventStream, Soliton.Quant, Soliton.Clock, Soliton.TimeQueue
+
+MUST ADD .toString(), .toFloat(), etc... for all the types to allow for complete mutability between all types.
+
+Need to add New Lich type: LichPattern
+
+TO DO IN SOLITON: 
+Define Soliton.Clock.start, .sched, .schedAbs
+Define 
+
+// 12/03/2012
+Work beginning on scheduler.
+
+Use setInterval? Possibly use WebAudio loop instead?
+
+Have a function that iteratively checks an elapsed time against a collection of scheduled items. If they are ready (time has passed since they should be triggered), call them. 
+
+
 // 11/13/2012
 Continuing work on Audio and graphics
-summon shouldn't redownload the audio file if the buffer is already present, it shoudl just immediately play it back
+summon shouldn't redownload the audio file if the buffer is already present, it should just immediately play it back
 
 
 // 10/26/2012
