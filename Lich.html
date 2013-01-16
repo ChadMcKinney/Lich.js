@@ -97,6 +97,12 @@ void main()                    // The entry point for our fragment shader.
 
 // New update!
 
+// BloodStreams allow for sequencing and modularity.
+// Anything can be passed to them including strings and functions
+// Currently there's a few bugs and performance isn't great.
+// Anytime you start a BloodStream it has to "catch up" to the current time
+// It takes a few seconds for it to work right. This will be fixed soon.
+
 => stream0 BloodStream [ 1 0.5 0.25 ] [ { garbage 0.5 } { garbage 0.125 } ]
 => stream1 BloodStream 1.0 { garbage 0.1 }
 => stream2 BloodStream 0.75 { garbage 0.1 }
