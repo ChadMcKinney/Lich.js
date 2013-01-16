@@ -565,12 +565,12 @@ function keyDown(thisEvent)
 		
 		if(shiftDown) // { curly bracket
 		{
-			return insertText("{}", -1);
+			return insertText("{  }", -2);
 		}
 
 		else // [ square bracket
 		{
-			return insertText("[]", -1);
+			return insertText("[  ]", -2);
 		}
 		
 		break;

@@ -134,7 +134,8 @@ function lichVirtualMachine() {
 			}
 			
 			// If a Lich Object
-			else if(this.state.constructor == LichFunction || this.state.constructor == LichPrimitive || this.state.constructor == LichSignal)
+			else if(this.state.constructor == LichFunction || this.state.constructor == LichPrimitive 
+				|| this.state.constructor == LichSignal || this.state.constructor == LichBloodStream)
 			{
 				if(this.state.type() == "Signal")
 				{
@@ -305,7 +306,7 @@ function arrayToPrintString(array) // Creates a printable string which represent
 		
 		else if(array[i].constructor == LichFunction || array[i].constructor == LichPrimitive || array[i].constructor == LichArray 
 			|| array[i].constructor == LichFloat || array[i].constructor == LichString || array[i].constructor == LichSignal
-			|| array[i].constructor == LichVariable) // Lich Object
+			|| array[i].constructor == LichVariable || array[i].constructor == LichBloodStream) // Lich Object
 		{			
 			switch(array[i].type())
 			{
@@ -428,6 +429,11 @@ function deserializeLichObject(serializedObject)
 	case 'Signal':
 		object = new LichSignal(deserializeLichObject(serializedObject.value.points), deserializeLichObject(serializedObject.value.shape));
 		object.namespace = deserializeLichObjectNamespace(serializedObject.namespace);
+		break;
+
+	case 'BloodStream':
+		object = new LichBloodStream(deserializeLichObject(serializedObject.value.durations), deserializeLichObject(serializedObject.value.values));
+		object.namespace = deserializeLichObject(serializedObject.namespace);
 		break;
 
 	default:
@@ -603,6 +609,10 @@ function LichString(_stringVar) {
 			LichVM.push(this);
 			return this.value();
 			break;
+
+		case 'BloodStream':
+			return this.add(object.value());
+			break;
 			
 		default:
 			LichVM.push(this);
@@ -674,6 +684,10 @@ function LichString(_stringVar) {
 
 			LichVM.push(this);
 			return this.value();
+			break;
+
+		case 'BloodStream':
+			return this.subtract(object.value());
 			break;
 		
 		default:
@@ -747,6 +761,10 @@ function LichString(_stringVar) {
 
 			LichVM.push(this);
 			return this.value();
+			break;
+
+		case 'BloodStream':
+			return this.divide(object.value());
 			break;
 			
 		default:
@@ -825,6 +843,10 @@ function LichString(_stringVar) {
 			LichVM.push(this);
 			return this.value();
 			break;
+
+		case 'BloodStream':
+			return this.multiply(object.value());
+			break;
 			
 		default:
 			LichVM.push(this);
@@ -898,6 +920,10 @@ function LichString(_stringVar) {
 			LichVM.push(this);
 			return this.value();
 			break;
+
+		case 'BloodStream':
+			return this.modulus(object.value());
+			break;
 			
 		default:
 			LichVM.push(this);
@@ -948,6 +974,10 @@ function LichString(_stringVar) {
 		case 'Signal':
 			LichVM.push(new LichFloat(0));
 			return 0;
+			break;
+
+		case 'BloodStream':
+			return this.equivalent(object.value());
 			break;
 			
 		default:
@@ -1000,6 +1030,10 @@ function LichString(_stringVar) {
 			LichVM.push(new LichFloat(1));
 			return 1;
 			break;
+
+		case 'BloodStream':
+			return this.inequivalent(object.value());
+			break;
 			
 		default:
 			LichVM.push(new LichFloat(1));
@@ -1050,6 +1084,10 @@ function LichString(_stringVar) {
 		case 'Signal':
 			LichVM.push(new LichFloat(0));
 			return 0;
+			break;
+
+		case 'BloodStream':
+			return this.greaterThan(object.value());
 			break;
 			
 		default:
@@ -1102,6 +1140,10 @@ function LichString(_stringVar) {
 			LichVM.push(new LichFloat(0));
 			return 0;
 			break;
+
+		case 'BloodStream':
+			return this.lessThan(object.value());
+			break;
 			
 		default:
 			LichVM.push(new LichFloat(0));
@@ -1152,6 +1194,10 @@ function LichString(_stringVar) {
 		case 'Signal':
 			LichVM.push(new LichFloat(0));
 			return 0;
+			break;
+
+		case 'BloodStream':
+			return this.greaterThanEqual(object.value());
 			break;
 			
 		default:
@@ -1204,11 +1250,92 @@ function LichString(_stringVar) {
 			LichVM.push(new LichFloat(0));
 			return 0;
 			break;
+
+		case 'BloodStream':
+			return this.lessThanEqual(object.value());
+			break;
 			
 		default:
 			LichVM.push(new LichFloat(0));
 			return 0;
 		}
+	}
+
+	this.to = function(lichType)
+	{
+		switch(lichType)
+		{
+		case 'String':
+			return this;
+			break;
+			
+		case 'Float':
+			return new LichFloat(stringToAscii(this.stringVar)[0]);
+			break;
+			
+		case 'Function':
+			return new LichFunction(new Array(), [this]);
+			break;
+			
+		case 'Primitive':
+			post("OBVIOUSLY you can't cast to a primtive, OBVIOUSLY.")
+			break;
+			
+		case 'Array':
+			var charArray = new Array();
+			for(var i = 0; i < this.length(); ++i)
+			{
+				charArray.push(new LichString(this.stringVar[i]));
+			}
+			return new LichArray(charArray);
+			break;
+			
+		case 'Variable':
+			post("WTF. Casting to a Variable is like translating to vapid programmer speak.");
+			break;
+
+		case 'Signal':
+			var charArray = this.to('Array');
+			var points = new Array();
+
+			for(var i = 0; i < charArray; ++i)
+			{
+				var point = new Array();
+				point.push(new LichFloat(i));
+				point.push(charArray.arrayVar[i].to('Float'));
+				points.push(new LichArray(point));
+			}
+
+			return new LichSignal(points, new LichString('linear'));
+			break;
+
+		case 'BloodStream':
+			var asciiArray = stringToAscii(this.stringVar);
+			var durations = new Array();
+
+			for(var i = 0; i < asciiArray.length; ++i)
+			{
+				durations.push(new LichFloat(asciiArray[i]));
+			}
+
+			return new LichBloodStream(new LichArray(durations), this);
+			break;
+			
+		default:
+			return this;
+		}
+	}
+
+	this.play = function()
+	{
+		var newBloodStream = this.to('BloodStream');
+		LichVM.push(newBloodStream);
+		return newBloodStream;
+	}
+
+	this.stop = function()
+	{
+		return this;
 	}
 	
 
@@ -1338,6 +1465,10 @@ function LichFloat(_floatVar) {
 		case 'Signal':
 			return object.add(this);
 			break;
+
+		case 'BloodStream':
+			return this.add(object.value());
+			break;
 			
 		default:
 			LichVM.push(this);
@@ -1403,6 +1534,10 @@ function LichFloat(_floatVar) {
 			var result = new LichSignal(newPoints, object.shape);
 			LichVM.push(result);
 			return result.value();
+			break;
+
+		case 'BloodStream':
+			return this.subtract(object.value());
 			break;
 			
 		default:
@@ -1478,6 +1613,10 @@ function LichFloat(_floatVar) {
 			LichVM.push(result);
 			return result.value();
 			break;
+
+		case 'BloodStream':
+			return this.divide(object.value());
+			break;
 			
 		default:
 			LichVM.push(this);
@@ -1530,6 +1669,10 @@ function LichFloat(_floatVar) {
 
 		case 'Signal':
 			return object.multiply(this);
+			break;
+
+		case 'BloodStream':
+			return this.multiply(object.value());
 			break;
 			
 		default:
@@ -1612,6 +1755,10 @@ function LichFloat(_floatVar) {
 			LichVM.push(result);
 			return result.value();
 			break;
+
+		case 'BloodStream':
+			return this.modulus(object.value());
+			break;
 			
 		default:
 			LichVM.push(this);
@@ -1662,6 +1809,10 @@ function LichFloat(_floatVar) {
 			return 0;
 			break;
 
+		case 'BloodStream':
+			return this.equivalent(object.value());
+			break;
+
 		default:
 			LichVM.push(new LichFloat(0));
 			return 0;
@@ -1709,6 +1860,10 @@ function LichFloat(_floatVar) {
 		case 'Signal':
 			LichVM.push(new LichFloat(1));
 			return 1;
+			break;
+
+		case 'BloodStream':
+			return this.inequivalent(object.value());
 			break;
 			
 		default:
@@ -1759,6 +1914,10 @@ function LichFloat(_floatVar) {
 			LichVM.push(new LichFloat(0));
 			return 0;
 			break;
+
+		case 'BloodStream':
+			return this.greaterThan(object.value());
+			break;
 			
 		default:
 			LichVM.push(new LichFloat(0));
@@ -1807,6 +1966,10 @@ function LichFloat(_floatVar) {
 		case 'Signal':
 			LichVM.push(new LichFloat(0));
 			return 0;
+			break;
+
+		case 'BloodStream':
+			return this.lessThan(object.value());
 			break;
 			
 		default:
@@ -1857,6 +2020,10 @@ function LichFloat(_floatVar) {
 			LichVM.push(new LichFloat(0));
 			return 0;
 			break;
+
+		case 'BloodStream':
+			return this.greaterThanEqual(object.value());
+			break;
 			
 		default:
 			LichVM.push(new LichFloat(0));
@@ -1906,12 +2073,70 @@ function LichFloat(_floatVar) {
 			LichVM.push(new LichFloat(0));
 			return 0;
 			break;
+
+		case 'BloodStream':
+			return this.lessThanEqual(object.value());
+			break;
 			
 		default:
 			LichVM.push(new LichFloat(0));
 			return 0;
 			break;
 		}
+	}
+
+	this.to = function(lichType)
+	{
+		switch(lichType)
+		{
+		case 'String':
+			return new LichString(asciiToString(this.floatVar));
+			break;
+			
+		case 'Float':
+			return this;
+			break;
+			
+		case 'Function':
+			return new LichFunction(new Array(), [this]);
+			break;
+			
+		case 'Primitive':
+			post("OBVIOUSLY you can't cast to a primtive, OBVIOUSLY.")
+			break;
+			
+		case 'Array':
+			return new LichArray([this]);
+			break;
+			
+		case 'Variable':
+			post("WTF. Casting to a Variable is like translating to vapid programmer speak.");
+			break;
+
+		case 'Signal':
+			var point = new LichArray([new LichFloat(0), this]);
+			return new LichSignal(new LichArray([point]), new LichString('linear'));
+			break;
+
+		case 'BloodStream':
+			return new LichBloodStream(this, this);
+			break;
+			
+		default:
+			return this;
+		}
+	}
+
+	this.play = function()
+	{
+		var newBloodStream = this.to('BloodStream');
+		LichVM.push(newBloodStream);
+		return newBloodStream;
+	}
+
+	this.stop = function()
+	{
+		return this;
 	}
 
 	this.serialize = function() // Serialize the object into a JSON representation
@@ -2088,6 +2313,10 @@ function LichArray(_arrayVar) {
 		case 'Signal':
 			return object.add(this);
 			break;
+
+		case 'BloodStream':
+			return this.add(object.value());
+			break;
 			
 		default:
 			LichVM.push(this);
@@ -2166,6 +2395,10 @@ function LichArray(_arrayVar) {
 			lichResult = new LichArray(result);
 			LichVM.push(lichResult);
 			return lichResult.value();
+			break;
+
+		case 'BloodStream':
+			return this.subtract(object.value());
 			break;
 			
 		default:
@@ -2247,6 +2480,10 @@ function LichArray(_arrayVar) {
 			LichVM.push(lichResult);
 			return lichResult.value();
 			break;
+
+		case 'BloodStream':
+			return this.divide(object.value());
+			break;
 			
 		default:
 			LichVM.push(this);
@@ -2314,6 +2551,10 @@ function LichArray(_arrayVar) {
 
 		case 'Signal':
 			return object.multiply(this);
+			break;
+
+		case 'BloodStream':
+			return this.multiply(object.value());
 			break;
 			
 		default:
@@ -2394,6 +2635,10 @@ function LichArray(_arrayVar) {
 			lichResult = new LichArray(result);
 			LichVM.push(lichResult);
 			return lichResult.value();
+			break;
+
+		case 'BloodStream':
+			return this.modulus(object.value());
 			break;
 			
 		default:
@@ -2710,6 +2955,100 @@ function LichArray(_arrayVar) {
 		}
 	}
 
+	this.to = function(lichType)
+	{
+		switch(lichType)
+		{
+		case 'String':
+			var stringSum = "";
+
+			// Iterate through the array index by index casting to string and concating with our sum
+			for(var i = 0; i < this.arrayVar.length; ++i)
+			{
+				stringSum = stringSum.concat(this.arrayVar[i].to('String').stringVar);
+			}
+
+			return new LichString(stringSum);
+			break;
+			
+		case 'Float':
+			return new LichFloat(this.length());
+			break;
+			
+		case 'Function':
+			return new LichFunction(new Array(), [this]);
+			break;
+			
+		case 'Primitive':
+			post("OBVIOUSLY you can't cast to a primtive, OBVIOUSLY.")
+			break;
+			
+		case 'Array':
+			return this;
+			break;
+			
+		case 'Variable':
+			post("WTF. Casting to a Variable is like translating to vapid programmer speak.");
+			break;
+
+		case 'Signal':
+			
+			var points = new Array();
+			var popBack = false;
+
+			if(this.arrayVar.length % 2 != 0)
+			{
+				this.arrayVar.push(this.arrayVar[this.arrayVar.length - 1]);
+				popBack = true;
+			}
+
+			for(var i = 0; i < this.arrayVar.length; i += 2)
+			{
+				var point = new Array();
+				point.push(this.arrayVar[i].to('Float'));
+				point.push(this.arrayVar[i + 1]).to('Float');
+				points.push(new LichArray(point));
+			}
+
+			if(popBack)
+				this.arrayVar.pop();
+
+			return new LichSignal(new LichArray(points), new LichString('linear'));
+			break;
+
+		case 'BloodStream':
+			return new LichBloodStream(this, this);
+			break;
+			
+		default:
+			return this;
+		}
+	}
+
+	this.play = function()
+	{
+		var streamArray = new Array();
+
+		for(var i = 0; i < this.arrayVar.length; ++i)
+		{
+			streamArray.push(this.arrayVar[i].play());
+		}
+
+		streamArray = new LichArray(LichArray);
+		LichVM.push(streamArray);
+		return streamArray;
+	}
+
+	this.stop = function()
+	{
+		for(var i = 0; i < this.arrayVar.length; ++i)
+		{
+			this.arrayVar[i].stop();
+		}
+
+		return this;
+	}
+
 	this.serialize = function() // Serialize the object into a JSON representation
 	{
 		var serialized = {};
@@ -2958,6 +3297,23 @@ function LichPrimitive(_primitive, _numArgs) {
 		{
 			return this.call().lessThanEqual(object);
 		}
+	}
+
+	this.to = function(lichType)
+	{
+		post("YOU CAN'T CAST A PRIMITIVE. Your computer will explode in 3...2...1...");
+	}
+
+	this.play = function()
+	{
+		post("Penguins can't fly and you can't play a primitive.");
+		return this;
+	}
+
+	this.stop = function()
+	{
+		post("Stop trying to stop a primitive. It doesn't work. Get out of my face.");
+		return this;
 	}
 
 	this.serialize = function() // Serialize the object into a JSON representation
@@ -3250,6 +3606,21 @@ function LichFunction(_argNames, _functionObjects) {
 		}
 	}
 
+	this.to = function(lichType)
+	{
+		return this.call().to(lichType);
+	}
+
+	this.play = function()
+	{
+		return this.call().play();
+	}
+
+	this.stop = function()
+	{
+		return this.call().stop();
+	}
+
 	this.serialize = function() // Serialize the object into a JSON representation
 	{
 		var serialized = {};
@@ -3533,6 +3904,21 @@ function LichVariable(_objectName) {
 		
 		LichVM.addVar(this.objectName, this);
 		return this.objectName;
+	}
+
+	this.to = function(lichType)
+	{
+		return this.object.to(lichType);
+	}
+
+	this.play = function()
+	{
+		return this.object.play();
+	}
+
+	this.stop = function()
+	{
+		return this.object.stop();
 	}
 
 	this.serialize = function() // Serialize the object into a JSON representation
@@ -3843,6 +4229,10 @@ function LichSignal(_points, _shape) {
 		case 'Signal':
 			return this.combine(object, this.addFunction);
 			break;
+
+		case 'BloodStream':
+			return this.add(object.value());
+			break;
 			
 		default:
 			LichVM.push(this);
@@ -3906,6 +4296,10 @@ function LichSignal(_points, _shape) {
 			
 		case 'Signal':
 			return this.combine(object, this.subtractFunction);
+			break;
+
+		case 'BloodStream':
+			return this.subtract(object.value());
 			break;
 			
 		default:
@@ -3977,6 +4371,10 @@ function LichSignal(_points, _shape) {
 		case 'Signal':
 			return this.combine(object, this.divideFunction);
 			break;
+
+		case 'BloodStream':
+			return this.divide(object.value());
+			break;
 			
 		default:
 			LichVM.push(this);
@@ -4040,6 +4438,10 @@ function LichSignal(_points, _shape) {
 			
 		case 'Signal':
 			return this.combine(object, this.multiplyFunction);
+			break;
+
+		case 'BloodStream':
+			return this.multiply(object.value());
 			break;
 			
 		default:
@@ -4106,6 +4508,10 @@ function LichSignal(_points, _shape) {
 		case 'Signal':
 			return this.combine(object, this.modulusFunction);
 			break;
+
+		case 'BloodStream':
+			return this.modulus(object.value());
+			break;
 			
 		default:
 			LichVM.push(this);
@@ -4169,6 +4575,10 @@ function LichSignal(_points, _shape) {
 			LichVM.push(new LichFloat(bool));
 			return bool;
 			break;
+
+		case 'BloodStream':
+			return this.equivalent(object.value());
+			break;
 			
 		default:
 			LichVM.push(new LichFloat(0));
@@ -4231,6 +4641,10 @@ function LichSignal(_points, _shape) {
 			LichVM.push(new LichFloat(bool));
 			return bool;
 			break;
+
+		case 'BloodStream':
+			return this.inequivalent(object.value());
+			break;
 			
 		default:
 			LichVM.push(new LichFloat(1));
@@ -4279,6 +4693,10 @@ function LichSignal(_points, _shape) {
 			
 			LichVM.push(new LichFloat(bool));
 			return bool;
+			break;
+
+		case 'BloodStream':
+			return this.greaterThan(object.value());
 			break;
 			
 		default:
@@ -4329,6 +4747,10 @@ function LichSignal(_points, _shape) {
 			LichVM.push(new LichFloat(bool));
 			return bool;
 			break;
+
+		case 'BloodStream':
+			return this.lessThan(object.value());
+			break;
 			
 		default:
 			LichVM.push(new LichFloat(0));
@@ -4377,6 +4799,10 @@ function LichSignal(_points, _shape) {
 
 			LichVM.push(new LichFloat(bool));
 			return bool;
+			break;
+
+		case 'BloodStream':
+			return this.greaterThanEqual(object.value());
 			break;
 			
 		default:
@@ -4427,12 +4853,87 @@ function LichSignal(_points, _shape) {
 			LichVM.push(new LichFloat(bool));
 			return bool;
 			break;
+
+		case 'BloodStream':
+			return this.lessThanEqual(object.value());
+			break;
 			
 		default:
 			LichVM.push(new LichFloat(0));
 			return 0;
 			break;
 		}
+	}
+
+	this.to = function(lichType)
+	{
+		switch(lichType)
+		{
+		case 'String':
+			
+			var asciiArray = new Array();
+
+			for(var i = 0; i < this.points.arrayVar.length; ++i)
+			{
+				// grab the values of each point and push them into our ascii array
+				asciiArray.push(this.points.arrayVar[i].arrayVar[1].to('Float').floatVar);
+			}
+
+			// Translate the ascii array to a string
+			return new LichString(asciiToString(asciiArray));
+			break;
+			
+		case 'Float':
+			return new LichFloat(this.length());
+			break;
+			
+		case 'Function':
+			return new LichFunction(new Array(), [this]);
+			break;
+			
+		case 'Primitive':
+			post("OBVIOUSLY you can't cast to a primtive, OBVIOUSLY.")
+			break;
+			
+		case 'Array':
+			return this.points;
+			break;
+			
+		case 'Variable':
+			post("WTF. Casting to a Variable is like translating to vapid programmer speak.");
+			break;
+
+		case 'Signal':
+			return this;
+			break;
+
+		case 'BloodStream':
+
+			var times = new Array();
+
+			for(var i = 0; i < this.points.arrayVar.length; ++i)
+			{
+				times.push(this.points.arrayVar[i].arrayVar[0].to('Float'));
+			}
+
+			return new LichBloodStream(new LichArray(times), this);
+			break;
+			
+		default:
+			return this;
+		}
+	}
+
+	this.play = function()
+	{
+		var newBloodStream = this.to('BloodStream');
+		LichVM.push(newBloodStream);
+		return newBloodStream;
+	}
+
+	this.stop = function()
+	{
+		return this;
 	}
 
 	this.serialize = function() // Serialize the object into a JSON representation
@@ -4463,6 +4964,293 @@ function LichSignal(_points, _shape) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// LichBloodStream
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/*
+
+A stream of values at given intervals. Useful for sequencing, modulation, playback, etc...
+Everything is quantized to beats and aligned.
+
+[0] _durations: An array (although it doesn't have to be, it can be anything!) of durations, can be other BloodStreams or anything
+[1] _values: An Array (although it doesn't have to be, it can be anything!) of values, can be other BloodStreams or anything
+
+example:
+BloodStream [ 0.1 0.2 1.0 ] [ { print '1' } { print '2' } { print '3' } { print '4' } ]
+
+*/
+
+function LichBloodStream(_durations, _values) {
+		
+	// Public methods
+	this.value = function()
+	{
+		return this.currentValue.value();
+	}
+	
+	this.call = function()
+	{
+		return this.value();
+	}
+	
+	this.type = function()
+	{
+		return 'BloodStream';
+	}
+	
+	this.length = function()
+	{	
+		return this.values.length();
+	}
+	
+	this.insert = function(index, value) // Insert a value
+	{
+		this.values.insert(index, value);
+	}
+	
+	this.at = function(index) // Interpolate the value at any point in time based on our interpolation time
+	{
+		return this.values.at(index);
+	}
+	
+	this.add = function(object)
+	{
+		return this.currentValue.add(object);
+	}
+	
+	this.subtract = function(object)
+	{
+		return this.currentValue.subtract(object);
+	}
+	
+	this.divide = function(object)
+	{
+		return this.currentValue.divide(object);
+	}
+	
+	this.multiply = function(object)
+	{
+		return this.currentValue.multiply(object);
+	}
+	
+	this.modulus = function(object)
+	{
+		return this.currentValue.modulus(object);
+	}
+	
+	this.equivalent = function(object)
+	{
+		return this.currentValue.equivalent(object);
+	}
+	
+	this.inequivalent = function(object)
+	{
+		return this.currentValue.inequivalent(object);
+	}
+	
+	this.greaterThan = function(object)
+	{
+		return this.currentValue.greaterThan(object);
+	}
+	
+	this.lessThan = function(object)
+	{
+		return this.currentValue.lessThan(object);
+	}
+	
+	this.greaterThanEqual = function(object)
+	{
+		return this.currentValue.greaterThanEqual(object);
+	}
+	
+	this.lessThanEqual = function(object)
+	{
+		return this.currentValue.lessThanEqual(object);
+	}
+
+	this.to = function(lichType)
+	{
+		switch(lichType)
+		{
+		case 'String':
+			return this.currentValue.to('String');
+			break;
+			
+		case 'Float':
+			return this.currentValue.to('Float');
+			break;
+			
+		case 'Function':
+			return this.currentValue.to('Function');
+			break;
+			
+		case 'Primitive':
+			post("OBVIOUSLY you can't cast to a primtive, OBVIOUSLY.")
+			break;
+			
+		case 'Array':
+			return this.currentValue.to('Array');
+			break;
+			
+		case 'Variable':
+			post("WTF. Casting to a Variable is like translating to vapid programmer speak.");
+			break;
+
+		case 'Signal':
+			return this.currentValue.to('Signal');
+			break;
+
+		case 'BloodStream':
+			return this;
+			break;
+			
+		default:
+			return this;
+		}
+	}
+
+	this.serialize = function() // Serialize the object into a JSON representation
+	{
+		var serialized = {};
+		serialized.namespace = {};
+
+		for(var key in this.namespace)
+		{
+			if(this.namespace.hasOwnProperty(key))
+			{
+				serialized.namespace[key] = this.namespace[key].serialize();
+			}
+		}
+
+		serialized.value = {};
+		serialized.value.durations = this.durations.serialize();
+		serialized.value.values = this.values.serialize();
+		serialized.type = this.type();
+		return serialized;
+	}
+
+	this.play = function()
+	{
+		this.playing = true;
+		this.pbind.play();
+		return this;
+	}
+
+	this.stop = function()
+	{
+		this.playing = false;
+		return this;
+	}
+
+	this.nextDuration = function(inval)
+	{
+		// post("BloodStream.nextDuration!!!");
+		if(this.playing)
+		{
+			// post("BloodStream.nextDuration.playing == true");
+			var duration;
+
+			if(this.durations.type() == 'Array')
+			{
+				duration = this.durations.arrayVar[this.durationArrayIndex % this.durations.length()];
+				// post("BloodStream.nextDuration this.durations.type() == Array");
+				this.durationArrayIndex = (this.durationArrayIndex + 1) % this.durations.length();
+			}
+
+			else
+			{
+				// post("BloodStream.nextDuration this.durations.type() != Array");
+				duration = this.durations;	
+				// post("BloodStream.nextDuration duration is assigned");
+			}
+
+			switch(duration.type())
+			{
+			case 'Function':
+				duration = duration.call().to('Float').value();
+				break;
+
+			case 'Float':
+				duration = duration.value();
+				break;
+
+			default:
+				duration = duration.to('Float').value();
+			}
+
+			// post("BloodStream.nextDuration: " + duration);
+			return duration;
+		}
+		
+		else
+		{
+			// post("BloodStream.nextDuration: null");
+			return null;	
+		}
+	}
+
+	this.nextValue = function(inval)
+	{
+		var value;
+
+		if(this.values.type() == 'Array')
+		{
+			value = this.values.arrayVar[this.valuesArrayIndex % this.values.length()];
+			this.valuesArrayIndex = (this.valuesArrayIndex + 1) % this.values.length();
+		}
+
+		else
+		{
+			value = this.values;	
+		}
+
+
+		if(value.type() == 'Function')
+			value = value.call();
+
+		// post("BloodStream.nextValue: " + value);
+
+		// LichVM.push(value);
+		this.currentValue = value;
+		return value.value();
+	}
+	
+	// Member vars
+	this.durations = _durations;
+	this.values = _values;
+	this.currentValue = new LichFloat(0);
+	this.durationRepeatNum = 0;
+	this.durationArrayIndex = 0;
+	this.valuesArrayIndex = 0;
+	this.playing = true;
+	this.namespace = {};
+
+	// Pbind is used to create a sequence with bindings for duration and "value" which just calls its contenxts
+	// it also calls any contained functions which can have external side effects as well as setting this.currentValue
+	
+	(
+		function(self)
+		{
+			self.pbind = new Soliton.Pbind(
+				'dur', new Soliton.Pfunc(function(inval)
+				{
+					return self.nextDuration(inval);
+				}),
+
+				'value', new Soliton.Pfunc(function(inval)
+				{
+					return self.nextValue(inval);
+				})
+			)	
+		}
+	)(this);
+
+	this.play();
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Lich Primitives: Predefined functions written in javascript
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -4471,19 +5259,7 @@ function LichSignal(_points, _shape) {
 function compileLich()
 {
 	LichVM = new lichVirtualMachine();
-	Soliton.print = post; // Set Soliton.print to our post function
-	Soliton.printError = post; // Set Soliton.print to our post function
-	LichVM.scheduler = Soliton.Clock.default.scheduler;
-	// var white = new Soliton.Pwhite(0, 666).asStream();
-	// white.next();
-	// white.next();
-	// white.next();
 
-	var white = new Soliton.Pbind('freq', new Soliton.Pwhite(0, 1), 'dur', 0.5);
-	white.play();
-
-	// CloudChamber.setup("canvas", 0, undefined, post); // Create the CloudChamber instance
-	
 	// var add, subtract, multiply, divide, modulus, assign, equivalent, inequivalent, ifControl, println, callFunction, incrementOne, decrementOne;
 	// var newSignal, doFunction;
 	
@@ -4770,6 +5546,30 @@ function compileLich()
 	
 	LichVM.reserveVar("Signal", new LichPrimitive(newSignal, 2));
 	LichVM.reserveVar("$", new LichPrimitive(newSignal, 2));
+
+	function newBloodStream(argArray)
+	{
+		var bloodStream = new LichBloodStream(argArray[0], argArray[1]);
+		LichVM.push(bloodStream);
+	}
+
+	LichVM.reserveVar("BloodStream", new LichPrimitive(newBloodStream, 2));
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// NEED TO ADD SUPPORT FOR OTHER TYPES NOT JUST BLOOD STREAM. Perhaps by casting them to a blood stream
+	function playBloodStream(argArray)
+	{
+		argArray[0].play();
+	}
+
+	LichVM.reserveVar("play", new LichPrimitive(playBloodStream, 1));
+
+	function stopBloodStream(argArray)
+	{
+		argArray[0].stop();
+	}
+
+	LichVM.reserveVar("stop", new LichPrimitive(stopBloodStream, 1));
 	
 	function atObject(argArray) // 2 arguments: [0] object [1] index
 	{
@@ -4871,4 +5671,38 @@ function compileLich()
 	LichVM.reserveVar('true', new LichFloat(1));
 	LichVM.reserveVar('false', new LichFloat(0));
 	LichVM.reserveVar('pi', new LichFloat(3.141592654));
+
+	/////////////////////////
+	// Soliton
+	/////////////////////////
+
+	Soliton.print = post; // Set Soliton.print to our post function
+	Soliton.printError = post; // Set Soliton.print to our post function
+	LichVM.scheduler = Soliton.Clock.default.scheduler;
+
+	/*
+	var white = new Soliton.Pwhite(0, 666).asStream();
+	white.next();
+	white.next();
+	white.next();
+
+	// 'freq', new Soliton.Pwhite(0, 1), 
+	// 'dur', new Soliton.Pwhite(new Soliton.Pwhite(0, 0.001), new Soliton.Pwhite(0.1, 5.0))
+
+
+	var someFunc = function(inval)
+	{
+		var random = Math.random();
+		post("Pfunc: " + random);
+		return random;
+	}
+
+	var bind = new Soliton.Pbind(
+		// 'dur', new Soliton.Pseq([0.5, new Soliton.Pseq([new Soliton.Pwhite(0, 1), 0.5, new Soliton.Pwhite(0, 1)], Infinity)], Infinity)
+		'dur', new Soliton.Pfunc(someFunc)
+	);
+
+	bind.play();*/
+	
+	// CloudChamber.setup("canvas", 0, undefined, post); // Create the CloudChamber instance
 }

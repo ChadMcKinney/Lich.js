@@ -1,5 +1,44 @@
 // Lich Dev Notes
 
+// 01/16/13
+Patterns seem to be starting form zero and then have to catch up to the current time. Need to get them to have a current time stamp for their initial delta
+
+// 01/15/13
+ListPattern and Pseq have been implemented. Pseq is working! Repeats works as well. However the problem now is that the Pbind doesn't stop playing once it's reached the end of a sequence. Need to fix EventStreamPlayer.removedFromScheduler
+
+removedFromScheduler fixed! Repeats now work correctly!
+
+I need to switch the embedAsStream functionality in Pbind and Pwhite to just be a .next() and keep track of iterations internally. The function as stream trick is unnecessary, we can simply not return a Routine for .asStream and simply return itself with .next functionality because coroutines don't work anyways, no need to jump through hoops.
+
+Lich Implementation begins!
+
+Should I have a torrent based function? Data from torrenting? Can I get browser based torrent info?
+
+// 01/14/13
+continuing work on Pbind
+Pbind .embedInSteam routines a coroutine style loop. But how do We return it and the values we want at the interval we want? Where does 'dur' fit in? 
+
+The Steps of a Pbind playback:
+1. Create the Pbind.
+2. Call play on the Pbind
+3. Internally the Pbind calls this.asEventStreamPlayer(protoEvent).play(clock, false, quant);
+4. this.eventStreamPlayer returns new Soliton.EventStreamPlayer(this.asStream(), protoEvent);
+5. this.asStream returns return new Soliton.Routine(function(inval) { self.embedInStream(inval); }); 
+6. self.embedInStream is dependant on the Pattern subclass, however it should support streaming and yielding
+7. EventStreamPlayer is then .played (shown in step 3)
+8. EventStreamPlayer.play does several things but essentially it creates a function that is scheduled to land on the next beat which then schedules the EventStreamPlayer so that playback is properly quantized and aligned.
+9. When the Scheduler updates itself the EventStreamPlayer will have .awake called. This function will return a delta, which if the delta is not null, the EventStreamPlayer will be scheduled again at the next delta.
+10. EventStreamPlayer.awake calls this.stream.beats = beats; return this.next(beats)
+11. EventStreamPlayer.next calls var outEvent = this.stream.next(this.event.copy()); which calls .next on our Pbind which is embedded as a stream. Pbind.next returns an Event which is a special kind of environment with playback support. If outEvent == null then the EventStreamPlayer is unscheduled from the scheduler.
+12. Otherwise the outevent has .playAndDelta called on it which returns the delta for the next playback to be scheduled for.
+13. Internally Event.playAndDelta checks itself to see if it's muted otherwise it calls this.play(), which internally calls this.at('play').value(), and then returns this.delta(), which returns return this.at('dur') * this.at('stretch');
+14. If all goes well the EventStreamPlayer will be rescheduled according to the delta or removed from the scheduler if the delta is null
+
+
+...success! Pbind is playing back correctly at the designated intervals! Now to test patterns like pwhite as parameters passed to arguments such as duration
+
+Currently, as coroutines aren't supported in javascript I'm doing a small hack to get this to work. I need to clean it up to properly track iterations to implement repetition assignment. 
+
 // 01/07/13
 Relicensed under gpl v2+ because of translated SuperCollider code. 
 

@@ -279,6 +279,32 @@ Soliton.Object = function() // Abstract class for Soliton objects. Override thes
 	{
 		return this;
 	}
+
+	this.eventAt = function(key)
+	{
+		return null;
+	}
+
+	this.do = function(func)
+	{
+		func(this, 0);
+	}
+
+	this.processRest = function(inval)
+	{
+		return this;
+	}
+}
+
+/////////////////////
+// Array (extension)
+/////////////////////
+Array.prototype.do = function(func)
+{
+	for(var i = 0; i < this.length; ++i)
+	{
+		func(this[i], i);
+	}
 }
 
 /////////////
@@ -612,7 +638,7 @@ Soliton.Event = function(n, proto, parent, know)
 		'freq': 440,
 		'amp': 1,
 		'pan': 0,
-		'play': null,
+		'play': { value: function() { return null } }, // null play
 		'tempo': null,
 		'dur': 1.0,
 		'stretch': 1.0,
@@ -639,7 +665,11 @@ Soliton.Event = function(n, proto, parent, know)
 
 		else
 		{
-			return this.at('dur') * this.at('stretch');
+			// Soliton.print("STEP 13: Event.delta");
+			if(this.at('dur') == null)
+				return null;
+			else
+				return this.at('dur') * this.at('stretch');
 		}
 	}
 	
@@ -659,6 +689,7 @@ Soliton.Event = function(n, proto, parent, know)
 	}
 	this.playAndDelta = function(cleanup, mute)
 	{
+		// Soliton.print("STEP 12: Event.playAndDelta");
 		if(mute) { this.put('type', 'rest') };
 		// cleanup.update(this);
 		this.play();
@@ -743,6 +774,19 @@ Number.prototype.next = function(inval)
 Number.prototype.asStream = function()
 {
 	return this;
+}
+
+Number.prototype.embedInStream = function(inval)
+{
+	return this;
+}
+
+Number.prototype.do = function(func)
+{
+	for(var i = 0; i < this; ++i)
+	{
+		func(i, i);
+	}
 }
 
 // Soliton.Number.inheritsFrom(Soliton.Object);
@@ -841,7 +885,7 @@ Soliton.Scheduler = function(clock, drift, recursive)
 		
 		if(delta != null)
 		{
-			this.sched(delta, task);
+			this.sched(task, delta);
 		}
 	}
 
@@ -1096,16 +1140,17 @@ Soliton.Stream.inheritsFrom(Soliton.Object);
 Soliton.FuncStream = function(nextFunc, resetFunc)
 {
 	this.nextFunc = typeof nextFunc !== 'undefined' ? nextFunc : null;
-	this.nextFunc = typeof resetFunc !== 'undefined' ? resetFunc : null;
+	this.resetFunc = typeof resetFunc !== 'undefined' ? resetFunc : null;
 	this.envir = Soliton.Environment.currentEnvironment;
 
 	this.next = function(inval)
 	{
 		return this.envir.use(function(self)
 		{
-			return function()
+			return function(envir)
 			{
-				return self.nextFunc(inval).processRest(inval);
+				// return self.nextFunc(inval).processRest(inval);
+				return self.nextFunc(inval)
 			}
 		}(this));
 	}
@@ -1400,6 +1445,7 @@ Soliton.EventStreamPlayer = function(stream, event)
 
 	this.awake = function(beats, seconds, inClock)
 	{
+		// Soliton.print("STEP 9: EventStreamPlayer.awake");
 		this.stream.beats = beats;
 		return this.next(beats)
 	}
@@ -1440,6 +1486,7 @@ Soliton.EventStreamPlayer = function(stream, event)
 
 	this.play = function(clock, doReset, quant)
 	{
+		// Soliton.print("STEP 7: EventStreamPlayer.play");
 		doReset = typeof doReset !== 'undefined' ? doReset : false;
 		quant = typeof quant !== 'undefined' ? new Soliton.Quant(quant) : Soliton.Quant.default;
 
@@ -1477,6 +1524,7 @@ Soliton.EventStreamPlayer = function(stream, event)
 			{
 				var taskFunc = function(beats, seconds, inClock) // Start our EventStream on a downbeat
 				{
+					// Soliton.print("STEP 8: EventStreamPlayer taskFunc");
 					if(_self.isWaiting && (_self.nextBeat == null))
 					{
 						inClock.sched(_self, new Soliton.Quant(0));
@@ -1493,11 +1541,13 @@ Soliton.EventStreamPlayer = function(stream, event)
 
 	this.next = function(inval)
 	{
+		// Soliton.print("STEP 10: EventStreamPlayer.next");
 		var nextTime;
 		var outEvent = this.stream.next(this.event.copy());
 
 		if(outEvent == null)
 		{
+			// Soliton.print("STEP 11A: outEvent == Null: GAMEOVER MAN");
 			this.streamHasEnded = this.stream != null;
 			// EventStreamClean?!?!?
 			this.removedFromScheduler();
@@ -1506,14 +1556,17 @@ Soliton.EventStreamPlayer = function(stream, event)
 
 		else
 		{
+			// Soliton.print("STEP 11B: outEvent != Null");
 			nextTime = outEvent.playAndDelta(this.cleanup, this.muteCount > 0);
 			
 			if(nextTime == null)
 			{
+				// Soliton.print("STEP 14A: nextTime == null EventStreamPlayer.removedFromScheduler");
 				this.removedFromScheduler();
 				return null;
 			}
 
+			// Soliton.print("STEP 14B: nextTime != null this.nextBeat = inval + nextTime");
 			this.nextBeat = inval + nextTime; // inval is current logical beat
 			return nextTime;
 		}
@@ -1542,6 +1595,7 @@ Soliton.Pattern = function()
 {
 	this.play = function(clock, protoEvent, quant)
 	{
+		// Soliton.print("STEP 2: Play the Pbind");
 		return this.asEventStreamPlayer(protoEvent).play(clock, false, quant);
 	}
 
@@ -1551,13 +1605,15 @@ Soliton.Pattern = function()
 
 	this.asStream = function()
 	{
+		// Soliton.print("STEP 4: this.asStream");
 		// Create an anonymous function to transfer 'this' correctly, creating a routine to call embedInsStream
 		return (
-				function(self) 
-				{
-    				return new Soliton.Routine(function(inval) { self.embedInStream(inval); }); 
-    			}
-    		)(this); 
+			function(self) 
+			{
+				// Soliton.print("STEP 5: new Soliton.Routine()");
+				return new Soliton.Routine(function(inval) { return self.embedInStream(inval); }); 
+			}
+		)(this); 
 	}
 
 	this.iter = function()
@@ -1567,6 +1623,7 @@ Soliton.Pattern = function()
 
 	this.asEventStreamPlayer = function(protoEvent)
 	{
+		// Soliton.print("STEP 3: this.asEventStreamPlayer");
 		return new Soliton.EventStreamPlayer(this.asStream(), protoEvent);
 	}
 	
@@ -1606,7 +1663,8 @@ Soliton.Pfunc.inheritsFrom(Soliton.Pattern);
 
 Soliton.Pbind = function()
 {
-	this.patternpairs;
+	// Soliton.print("STEP 1: Create the Pbind");
+	this.patternpairs = {};
 
 	if(arguments.length % 2 != 0)
 	{
@@ -1632,6 +1690,7 @@ Soliton.Pbind = function()
 
 	this.embedInStream = function(inevent)
 	{
+		// Soliton.print("STEP 6: Pbind.embedInStream");
 		var event;
 		var sawNil = false;
 		var streampairs = this.copyPairs();
@@ -1646,56 +1705,63 @@ Soliton.Pbind = function()
 		var index = 0;
 	    var thisRef = this;
 
-		var loop = {
-
-			next: function() 
+	    var nextFunc = function(inevent) 
+		{
+			// Soliton.print("Pbind::loop.next()");
+			if(inevent == null)
 			{
-				if(inevent == null)
+				return null;
+			}
+
+			event = inevent.copy();
+			for(var i = 0; i < endval; i += 2)
+			{
+				var name = streampairs[i];
+				var stream = streampairs[i + 1];
+				var streamout = stream.next(event);
+
+				if(stream == null)
 				{
-					return null;
+					Soliton.print("NULL!");
+					return inevent;
 				}
 
-				event = inevent.copy();
-				for(var i = 0; i < endval; i += 2)
+				if(typeof name !== 'string')
 				{
-					var name = streampairs[i];
-					var stream = streampairs[i + 1];
-					var streamout = stream.next(event);
-
-					if(stream == null)
+					for(var i = 0; i < name.size; ++i)
 					{
-						return inevent;
-					}
-
-					if(name.isArray())
-					{
-						for(var i = 0; i < name.size; ++i)
-						{
-							event.put(name[i], streamout[i]);
-						}
-					}
-
-					else
-					{
-						event.put(name, streamout);
+						event.put(name[i], streamout[i]);
 					}
 				}
 
-				inevent = event;
-				index++;
-				Soliton.print(event);
-				return event;
-			},
+				else
+				{
+					event.put(name, streamout);
+				}
+			}
 
+			inevent = event;
+			index++;
+			// Soliton.print(event);
+			return event;
+		}
+
+		var loop = {
+			next: nextFunc,
+			value: nextFunc,
 			hasNext: function()
 			{
+				Soliton.print("Pbind::loop.hasNext()");
 				return true;
 			}
 		}
 
 		loop.asStream = loop;
-
-		return loop;
+		
+		if(inevent == null)
+			return null;
+		else
+			return loop.next(inevent);
 	}
 }
 
@@ -1713,9 +1779,8 @@ Soliton.Pwhite = function(lo, hi, length)
 	this.embedInStream = function(inval)
 	{
 		// inval = new Soliton.Number((Math.random() * (this.hi - this.lo)) + this.lo);
-		inval = (Math.random() * (this.hi - this.lo)) + this.lo;
-		Soliton.print(inval.value());
-
+		// inval = (Math.random() * (this.hi - this.lo)) + this.lo;
+		// Soliton.print(inval.value());
 
 		// Loop/coroutine-style yield support
 		var index = 0;
@@ -1724,41 +1789,157 @@ Soliton.Pwhite = function(lo, hi, length)
 		var hiStr = thisRef.hi.asStream();
 		var hiVal, loVal;
 
+		var nextFunc = function() 
+		{
+			// Soliton.print("Pwhite::loop.next()");
+			if(index < thisRef.length)
+			{
+				hiVal = hiStr.next(inval);
+				loVal = loStr.next(inval);
+
+				if(hiVal == null || loVal == null)
+				{
+					Soliton.print("hiVal == null || loVal == null");
+					return inval;
+				}
+
+				inval = (Math.random() * (hiVal - loVal)) + loVal;
+
+				index++;	
+			}
+			
+			Soliton.print(inval.value());
+			return inval;
+		}
+
 
 		var loop = {
-
-			next: function() 
-			{
-				if(index < thisRef.length)
-				{
-					hiVal = hiStr.next(inval);
-					loVal = loStr.next(inval);
-
-					if(hiVal == null || loVal == null)
-					{
-						return inval;
-					}
-
-					inval = (Math.random() * (this.hi - this.lo)) + this.lo;
-
-					index++;	
-				}
-				
-				return inval;
-			},
-
+			next: nextFunc,
+			value: nextFunc,
 			hasNext: function()
 			{
+				Soliton.print("Pwhite::loop.hasNext()");
 				return index < thisRef.length;
 			}
 		}
 
 		loop.asStream = loop;
-		return inval;
+		return loop.next();
 	}
 }
 
 Soliton.Pwhite.inheritsFrom(Soliton.Pattern);
+
+////////////////////
+// ListPattern
+////////////////////
+
+Soliton.ListPattern = function() // list, repeats
+{
+	// this.list = list;
+	// this.repeats = repeats;
+
+	this.prConstructor = function()
+	{
+		if(this.list.length == 0)
+		{
+			Soliton.print("ListPattern requires a non empty collection");
+			Soliton.print("Replacing with [0]");
+			this.list = new Array(0);
+		}
+
+		this.repeats = typeof this.repeats !== 'undefined' ? this.repeats : 1;
+	}
+
+	this.copyList = function()
+	{
+		var newList = new Array();
+
+		for(var i = 0; i < this.list.length; ++i)
+		{
+			newList.push(this.list[i]);
+		}
+
+		return newList;
+	}
+
+	this.copy = function()
+	{
+		return new Soliton.ListPattern(copyList(), this.repeats);
+	}
+}
+
+Soliton.ListPattern.inheritsFrom(Soliton.Pattern);
+
+
+////////////////////
+// Pseq
+////////////////////
+
+Soliton.Pseq = function(list, repeats, offset)
+{
+	this.list = list;
+	this.repeats = repeats;
+	this.offset = typeof offset !== 'undefined' ? offset : 0;
+	this.repeatNum = 0;
+	this.listIndex = 0;
+
+	this.embedInStream = function(inval)
+	{
+		var item, offsetValue;
+		offsetValue = this.offset.value(inval);
+
+		/* No reverse support current, maybe later
+		if(inval.eventAt('reverse') == true)
+		{
+			this.repeats.value(inval).do(
+				function()
+				{
+	
+				}
+			)
+		}*/
+
+		/* Original way with Coroutines, but we don't have generators yet
+		// We'll have to settle fo coroutine emulation
+		repeats.value(inval).do(
+			function(j)
+			{
+				this.list.length.do(
+					function(i)
+					{
+						item = this.list.
+					}
+				)
+			}
+		)*/
+
+		if(this.repeatNum < this.repeats)
+		{
+			item = this.list[(this.listIndex + offsetValue) % this.list.length];
+			inval = item.embedInStream(inval);
+			++this.listIndex;
+			
+			if(this.listIndex >= this.list.length)
+			{
+				this.listIndex = 0;
+				++this.repeatNum;
+			}
+		}
+
+		else
+		{
+			return null;
+		}
+
+		Soliton.print(inval);
+		return inval;
+	}
+
+	this.prConstructor();
+}
+
+Soliton.Pseq.inheritsFrom(Soliton.ListPattern);
 
 ////////////////////
 // DEFAULTS
