@@ -3904,7 +3904,7 @@ function LichVariable(_objectName) {
 	{
 		if(this.object)
 				this.object.stop();
-			
+
 		var object = LichVM.pop();
 		
 		if(object.type() == 'Primitive')
@@ -5154,7 +5154,6 @@ function LichStream(_durations, _values) {
 
 	this.stop = function()
 	{
-		post("LichStream.stop()");
 		this.playing = false;
 		return this;
 	}
