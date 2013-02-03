@@ -103,7 +103,7 @@ void main()                    // The entry point for our fragment shader.
 // Anytime you start a Stream it has to "catch up" to the current time
 // It takes a few seconds for it to work right. This will be fixed soon.
 
-=> stream0 Stream [ 1 0.5 0.25 ] [ { garbage 0.5 } { garbage 0.125 } ]
+=> stream0 Stream [ 0.5 0.25 0.1 ] [ { garbage 0.5 } { garbage 0.125 } ]
 => stream1 Stream 1.0 { garbage 0.1 }
 => stream2 Stream 0.75 { garbage 0.1 }
 => stream3 Stream [ 0.125 0.25 0.5 0.75 1.0 ] { garbage 0.1 }
@@ -920,6 +920,12 @@ do 5000 { garbage i4 sleep * i4 1.1 }
 	<script LANGUAGE="JavaScript" type="text/javascript">
 		compileLich();
 	</script>
+
+	<SCRIPT SRC="http://mobwrite3.appspot.com/static/compressed_form.js"></SCRIPT>`
+	<SCRIPT>
+	  mobwrite.syncGateway = 'http://mobwrite3.appspot.com/scripts/q.py';
+	</SCRIPT>
+	<BODY ONLOAD="mobwrite.share('terminal');">
 	
 </body>
 

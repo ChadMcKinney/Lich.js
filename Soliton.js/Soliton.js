@@ -803,7 +803,7 @@ Soliton.Quant = function(quant, phase, timingOffset)
 
 	this.nextTimeOnGrid = function(clock)
 	{
-		Soliton.print("Quant.nextTimeOnGrid: clock.nextTimeOnGrid");
+		// Soliton.print("Quant.nextTimeOnGrid: clock.nextTimeOnGrid");
 		return new Soliton.Quant(clock.nextTimeOnGrid(this.quant, this.phase - this.timingOffset));;
 	}
 
@@ -1581,7 +1581,7 @@ Soliton.EventStreamPlayer = function(stream, event)
 
 			// Soliton.print("STEP 14B: nextTime != null this.nextBeat = inval + nextTime");
 			this.nextBeat = inval + nextTime; // inval is current logical beat
-			Soliton.print("EventStreamPlayer.inval: " + inval);
+			// Soliton.print("EventStreamPlayer.inval: " + inval);
 			return nextTime;
 		}
 

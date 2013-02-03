@@ -3,10 +3,13 @@
 // 02/03/13
 To Do TODAY:
 1. Get Streams to line up: Solved this by assigning Clock.beats every update and using a default Quant of 1.
-2. Network in some fasion.
+2. Network in some fasion: Surpringly, an easy fix with  mobwrite. Will need tuning and refinement in the future.
 3. Add more samples to the server
 4. Add ability to play back only part of a sample
 5. Sample/Buffer Manipulation
+
+
+FUTURE WORK: ADD SECURITY FEATURES
 
 // 01/27/13
 I fixed the problem with Quant / Clock .nextTimeOnGrid always returning zero. I'm not sure if there's not timing issues because the pbinds are no longer correctly starting on a quantized beat. This will require further investigation
