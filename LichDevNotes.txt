@@ -1,7 +1,31 @@
 // Lich Dev Notes
 
+// 02/03/13
+To Do TODAY:
+1. Get Streams to line up: Solved this by assigning Clock.beats every update and using a default Quant of 1.
+2. Network in some fasion.
+3. Add more samples to the server
+4. Add ability to play back only part of a sample
+5. Sample/Buffer Manipulation
+
+// 01/27/13
+I fixed the problem with Quant / Clock .nextTimeOnGrid always returning zero. I'm not sure if there's not timing issues because the pbinds are no longer correctly starting on a quantized beat. This will require further investigation
+
+// 01/26/13
+The scheduling seems to be the problem. The scheduler is setup so that whenever something is scheduled it's always relative to the current time. However something is happening with Clock.play or EventStream.play possibly because of quant.nextTimeOnGrid which is causing a .schedAbs of 0 which subsequently sets the time to 0. It appears everytime that Scheduler.schedAbs is being called it's being set with a time of 0. There's something up with that. I think it's Quant.nextTimeOnGrid.
+
+// 01/22/13
+Changed BloodStream to just Stream and changed Signal to Envelope (also Env). Need to make Stream an actual Stream where value returns the current value, but next get's the next value out of the stream. Play can be used to start a Pbind inside the stream, but it will also allow for proper functionality of a stream, as well as correct behavior for it's name 'Stream'.
+
 // 01/16/13
 Patterns seem to be starting form zero and then have to catch up to the current time. Need to get them to have a current time stamp for their initial delta
+
+Performance needs work!!!!!!!!!!!!!
+
+Ideas: 
+	1. Macros for code generation. Both prefab and code saving.
+	2. A chat read that is a subsection of the post area. It will be a different color of text (brighter!) and you can print to it by calling chat 'some text here'.
+
 
 // 01/15/13
 ListPattern and Pseq have been implemented. Pseq is working! Repeats works as well. However the problem now is that the Pbind doesn't stop playing once it's reached the end of a sequence. Need to fix EventStreamPlayer.removedFromScheduler

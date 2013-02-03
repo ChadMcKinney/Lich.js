@@ -97,16 +97,16 @@ void main()                    // The entry point for our fragment shader.
 
 // New update!
 
-// BloodStreams allow for sequencing and modularity.
+// Streams allow for sequencing and modularity.
 // Anything can be passed to them including strings and functions
 // Currently there's a few bugs and performance isn't great.
-// Anytime you start a BloodStream it has to "catch up" to the current time
+// Anytime you start a Stream it has to "catch up" to the current time
 // It takes a few seconds for it to work right. This will be fixed soon.
 
-=> stream0 BloodStream [ 1 0.5 0.25 ] [ { garbage 0.5 } { garbage 0.125 } ]
-=> stream1 BloodStream 1.0 { garbage 0.1 }
-=> stream2 BloodStream 0.75 { garbage 0.1 }
-=> stream3 BloodStream [ 0.125 0.25 0.5 0.75 1.0 ] { garbage 0.1 }
+=> stream0 Stream [ 1 0.5 0.25 ] [ { garbage 0.5 } { garbage 0.125 } ]
+=> stream1 Stream 1.0 { garbage 0.1 }
+=> stream2 Stream 0.75 { garbage 0.1 }
+=> stream3 Stream [ 0.125 0.25 0.5 0.75 1.0 ] { garbage 0.1 }
 stop stream0
 stop stream1
 stop stream2
@@ -115,14 +115,14 @@ stop stream3
 play stream3
 stop stream3
 
-=> stream4 BloodStream 0.5 { garbage 0.1 }
-=> stream5 BloodStream 0.4 { garbage 0.1 }
+=> stream4 Stream 0.5 { garbage 0.1 }
+=> stream5 Stream 0.4 { garbage 0.1 }
 stop stream4
 stop stream5
 
-// BloodStreams can be passed to eachother!
-=> stream6 BloodStream [ 0.5 1.0 0.25 ] [ 0.5 0.125 ]
-=> stream7 BloodStream [ 0.25 0.5 ] { garbage stream6 }
+// Streams can be passed to eachother!
+=> stream6 Stream [ 0.5 1.0 0.25 ] [ 0.5 0.125 ]
+=> stream7 Stream [ 0.25 0.5 ] { garbage stream6 }
 stop stream6
 stop stream7
 
@@ -147,8 +147,8 @@ Normal text string. Strings can be created with ' ' or " ".
 Arrays
 Holds any other types including other Arrays. Declared using [].
 
-Signals
-Continuous float containers similar to SC envelopes, although they are created with [time level] pairs and can have new points added at any time as well as indexed at any point in 'time'. You can use $ or Signal to create a new signal. More on this later.
+Envelopes
+Continuous float containers similar to SC envelopes, although they are created with [time level] pairs and can have new points added at any time as well as indexed at any point in 'time'. You can use $ or Envelope to create a new Envelope. More on this later.
 
 Variables
 Can be assigned to anything else except for Primitives. You have to assign a variable using the assign operator => otherwise you'll get an undefined error.
@@ -290,15 +290,15 @@ at doomString 5 // All operators have text equivalents!!!!
 => i -1
 do 30 { print @ doomString ++ i } // Do print and incrementing!
 
-// Signals are defined using $ or Signal. 
+// Envelopes are defined using Env or Envelope. 
 // The first argument is an array of [time, value] pairs and an interpolation type
-=> mySignal Signal [[0 0.0001] [0.1 1] [1 0.0001]] 'linear'
+=> myEnvelope Envelope [[0 0.0001] [0.1 1] [1 0.0001]] 'linear'
 => i -1
-do 30 { print @ mySignal / ++ i 30 } // Signals can be indexed at any point in time.
-=> mySignal2 + mySignal 1 // define mySignal2 as mySignal + 1.
+do 30 { print @ myEnvelope / ++ i 30 } // Envelopes can be indexed at any point in time.
+=> myEnvelope2 + myEnvelope 1 // define myEnvelope2 as myEnvelope + 1.
 
-=> mySignal3 Signal [[0.5 5] [0.8 2] [3 0.1] [5 0]] 'linear'
-+ mySignal mySignal3 // You can add signals (actually anything) together.
+=> myEnvelope3 Env [[0.5 5] [0.8 2] [3 0.1] [5 0]] 'linear'
++ myEnvelope myEnvelope3 // You can add Envelopes (actually anything) together.
 
 // Insert a value using the -> operator
 => myArray [0 1 2 3 4 5]
@@ -307,10 +307,10 @@ insert myArray 2 222 // All operators have text equivalents!!!!!
 -> myArray 3 333
 -> myArray 999 999 // Anything after the final index just pushes.
 
-// You can insert in a signal too! It takes time and value as seperate args.
--> mySignal 3 0.6666
--> mySignal 0.25 7.7
--> mySignal 10 999
+// You can insert in a Envelope too! It takes time and value as seperate args.
+-> myEnvelope 3 0.6666
+-> myEnvelope 0.25 7.7
+-> myEnvelope 10 999
 
 // You can insert in strings too!
 => myString "Doom"
@@ -381,7 +381,7 @@ do 5000 { garbage i4 sleep * i4 1.1 }
 + 'Yo!' + 1 1
 + 'Yo!' [1 2 3] // Multichannel expansion
 + 'Yo!' someVar
-+ 'Yo!' Signal [[0 0] [0.1 1] [1 0]] 'linear'
++ 'Yo!' Env [[0 0] [0.1 1] [1 0]] 'linear'
 
 - 'Yo!' 'Yo!2' 
 - 'Yo!' 1
@@ -389,7 +389,7 @@ do 5000 { garbage i4 sleep * i4 1.1 }
 - 'Yo!' + 1 1
 - 'Yo!' [1 2 3]
 - 'Yo!' someVar
-- 'Yo!' Signal [[0 0] [0.1 1] [1 0]] 'linear'
+- 'Yo!' Env [[0 0] [0.1 1] [1 0]] 'linear'
 
 * 'Yo!' 'Yo2!' 
 * 'Yo!' 1
@@ -397,7 +397,7 @@ do 5000 { garbage i4 sleep * i4 1.1 }
 * 'Yo!' + 1 1
 * 'Yo!' [1 2 3]
 * 'Yo!' someVar
-* 'Yo!' Signal [[0 0] [0.1 1] [1 0]] 'linear'
+* 'Yo!' Env [[0 0] [0.1 1] [1 0]] 'linear'
 
 / 'Yo!' 'Yo2!' 
 / 'Yo!' 1
@@ -405,7 +405,7 @@ do 5000 { garbage i4 sleep * i4 1.1 }
 / 'Yo!' + 1 1
 / 'Yo!' [1 2 3]
 / 'Yo!' someVar
-/ 'Yo!' Signal [[0 0] [0.1 1] [1 0]] 'linear'
+/ 'Yo!' Env [[0 0] [0.1 1] [1 0]] 'linear'
 
 % 'Yo!' 'Yo2!' 
 % 'Yo!' 1
@@ -413,7 +413,7 @@ do 5000 { garbage i4 sleep * i4 1.1 }
 % 'Yo!' + 1 1
 % 'Yo!' [1 2 3]
 % 'Yo!' someVar
-% 'Yo!' Signal [[0 0] [0.1 1] [1 0]] 'linear'
+% 'Yo!' Env [[0 0] [0.1 1] [1 0]] 'linear'
 
 == 'Yo!' 'Yo2!' 
 == 'Yo!' 1
@@ -421,7 +421,7 @@ do 5000 { garbage i4 sleep * i4 1.1 }
 == 'Yo!' + 1 1
 == 'Yo!' [1 2 3]
 == 'Yo!' someVar
-== 'Yo!' Signal [[0 0] [0.1 1] [1 0]] 'linear'
+== 'Yo!' Env [[0 0] [0.1 1] [1 0]] 'linear'
 
 != 'Yo!' 'Yo2!' 
 != 'Yo!' 1
@@ -429,7 +429,7 @@ do 5000 { garbage i4 sleep * i4 1.1 }
 != 'Yo!' + 1 1
 != 'Yo!' [1 2 3]
 != 'Yo!' someVar
-!= 'Yo!' Signal [[0 0] [0.1 1] [1 0]] 'linear'
+!= 'Yo!' Env [[0 0] [0.1 1] [1 0]] 'linear'
 
 > 'Yo!' 'Yo2!' 
 > 'Yo!' 1
@@ -437,7 +437,7 @@ do 5000 { garbage i4 sleep * i4 1.1 }
 > 'Yo!' + 1 1
 > 'Yo!' [1 2 3]
 > 'Yo!' someVar
-> 'Yo!' Signal [[0 0] [0.1 1] [1 0]] 'linear'
+> 'Yo!' Env [[0 0] [0.1 1] [1 0]] 'linear'
 
 < 'Yo!' 'Yo2!' 
 < 'Yo!' 1
@@ -445,7 +445,7 @@ do 5000 { garbage i4 sleep * i4 1.1 }
 < 'Yo!' + 1 1
 < 'Yo!' [1 2 3]
 < 'Yo!' someVar
-< 'Yo!' Signal [[0 0] [0.1 1] [1 0]] 'linear'
+< 'Yo!' Env [[0 0] [0.1 1] [1 0]] 'linear'
 
 >= 'Yo!' 'Yo2!' 
 >= 'Yo!' 1
@@ -453,7 +453,7 @@ do 5000 { garbage i4 sleep * i4 1.1 }
 >= 'Yo!' + 1 1
 >= 'Yo!' [1 2 3]
 >= 'Yo!' someVar
->= 'Yo!' Signal [[0 0] [0.1 1] [1 0]] 'linear'
+>= 'Yo!' Env [[0 0] [0.1 1] [1 0]] 'linear'
 
 <= 'Yo!' 'Yo2!' 
 <= 'Yo!' 1
@@ -461,7 +461,7 @@ do 5000 { garbage i4 sleep * i4 1.1 }
 <= 'Yo!' + 1 1
 <= 'Yo!' [1 2 3]
 <= 'Yo!' someVar
-<= 'Yo!' Signal [[0 0] [0.1 1] [1 0]] 'linear'
+<= 'Yo!' Env [[0 0] [0.1 1] [1 0]] 'linear'
 
 // FLOATS
 
@@ -471,7 +471,7 @@ do 5000 { garbage i4 sleep * i4 1.1 }
 + 1 + 1 1
 + 1 [1 2 3]
 + 1 someVar
-+ 1 Signal [[0 0] [0.1 1] [1 0]] 'linear'
++ 1 Env [[0 0] [0.1 1] [1 0]] 'linear'
 
 - 1 'Yo!' 
 - 1 1
@@ -479,7 +479,7 @@ do 5000 { garbage i4 sleep * i4 1.1 }
 - 1 + 1 1
 - 1 [1 2 3]
 - 1 someVar
-- 1 Signal [[0 0] [0.1 1] [1 0]] 'linear'
+- 1 Env [[0 0] [0.1 1] [1 0]] 'linear'
 
 * 1 'Yo!' 
 * 1 1
@@ -487,7 +487,7 @@ do 5000 { garbage i4 sleep * i4 1.1 }
 * 1 + 1 1
 * 1 [1 2 3]
 * 1 someVar
-* 1 Signal [[0 0] [0.1 1] [1 0]] 'linear'
+* 1 Env [[0 0] [0.1 1] [1 0]] 'linear'
 
 / 1 'Yo!' 
 / 1 1
@@ -495,7 +495,7 @@ do 5000 { garbage i4 sleep * i4 1.1 }
 / 1 + 1 1
 / 1 [1 2 3]
 / 1 someVar
-/ 1 Signal [[0 0] [0.1 1] [1 0]] 'linear'
+/ 1 Env [[0 0] [0.1 1] [1 0]] 'linear'
 
 % 1 'Yo!' 
 % 1 1
@@ -503,7 +503,7 @@ do 5000 { garbage i4 sleep * i4 1.1 }
 % 1 + 1 1
 % 1 [1 2 3]
 % 1 someVar
-% 1 Signal [[0 0] [0.1 1] [1 0]] 'linear'
+% 1 Env [[0 0] [0.1 1] [1 0]] 'linear'
 
 == 1 'Yo!' 
 == 1 1
@@ -511,7 +511,7 @@ do 5000 { garbage i4 sleep * i4 1.1 }
 == 1 + 1 1
 == 1 [1 2 3]
 == 1 someVar
-== 1 Signal [[0 0] [0.1 1] [1 0]] 'linear'
+== 1 Env [[0 0] [0.1 1] [1 0]] 'linear'
 
 != 1 'Yo!' 
 != 1 1
@@ -519,7 +519,7 @@ do 5000 { garbage i4 sleep * i4 1.1 }
 != 1 + 1 1
 != 1 [1 2 3]
 != 1 someVar
-!= 1 Signal [[0 0] [0.1 1] [1 0]] 'linear'
+!= 1 Env [[0 0] [0.1 1] [1 0]] 'linear'
 
 > 1 'Yo!' 
 > 1 1
@@ -527,7 +527,7 @@ do 5000 { garbage i4 sleep * i4 1.1 }
 > 1 + 1 1
 > 1 [1 2 3]
 > 1 someVar
-> 1 Signal [[0 0] [0.1 1] [1 0]] 'linear'
+> 1 Env [[0 0] [0.1 1] [1 0]] 'linear'
 
 < 1 'Yo!' 
 < 1 1
@@ -535,7 +535,7 @@ do 5000 { garbage i4 sleep * i4 1.1 }
 < 1 + 1 1
 < 1 [1 2 3]
 < 1 someVar
-< 1 Signal [[0 0] [0.1 1] [1 0]] 'linear'
+< 1 Env [[0 0] [0.1 1] [1 0]] 'linear'
 
 >= 1 'Yo!' 
 >= 1 1
@@ -543,7 +543,7 @@ do 5000 { garbage i4 sleep * i4 1.1 }
 >= 1 + 1 1
 >= 1 [1 2 3]
 >= 1 someVar
->= 1 Signal [[0 0] [0.1 1] [1 0]] 'linear'
+>= 1 Env [[0 0] [0.1 1] [1 0]] 'linear'
 
 <= 1 'Yo!' 
 <= 1 1
@@ -551,7 +551,7 @@ do 5000 { garbage i4 sleep * i4 1.1 }
 <= 1 + 1 1
 <= 1 [1 2 3]
 <= 1 someVar
-<= 1 Signal [[0 0] [0.1 1] [1 0]] 'linear'
+<= 1 Env [[0 0] [0.1 1] [1 0]] 'linear'
 
 // Function
 
@@ -561,7 +561,7 @@ do 5000 { garbage i4 sleep * i4 1.1 }
 + ::myTestFunc + 1 1
 + ::myTestFunc [1 2 3]
 + ::myTestFunc someVar
-+ ::myTestFunc Signal [[0 0] [0.1 1] [1 0]] 'linear'
++ ::myTestFunc Env [[0 0] [0.1 1] [1 0]] 'linear'
 
 - ::myTestFunc 'Yo!2' 
 - ::myTestFunc 1
@@ -569,7 +569,7 @@ do 5000 { garbage i4 sleep * i4 1.1 }
 - ::myTestFunc + 1 1
 - ::myTestFunc [1 2 3]
 - ::myTestFunc someVar
-- ::myTestFunc Signal [[0 0] [0.1 1] [1 0]] 'linear'
+- ::myTestFunc Env [[0 0] [0.1 1] [1 0]] 'linear'
 
 * ::myTestFunc 'Yo2!' 
 * ::myTestFunc 1
@@ -577,7 +577,7 @@ do 5000 { garbage i4 sleep * i4 1.1 }
 * ::myTestFunc + 1 1
 * ::myTestFunc [1 2 3]
 * ::myTestFunc someVar
-* ::myTestFunc Signal [[0 0] [0.1 1] [1 0]] 'linear'
+* ::myTestFunc Env [[0 0] [0.1 1] [1 0]] 'linear'
 
 / ::myTestFunc 'Yo2!' 
 / ::myTestFunc 1
@@ -585,7 +585,7 @@ do 5000 { garbage i4 sleep * i4 1.1 }
 / ::myTestFunc + 1 1
 / ::myTestFunc [1 2 3]
 / ::myTestFunc someVar
-/ ::myTestFunc Signal [[0 0] [0.1 1] [1 0]] 'linear'
+/ ::myTestFunc Env [[0 0] [0.1 1] [1 0]] 'linear'
 
 % ::myTestFunc 'Yo2!' 
 % ::myTestFunc 1
@@ -593,7 +593,7 @@ do 5000 { garbage i4 sleep * i4 1.1 }
 % ::myTestFunc + 1 1
 % ::myTestFunc [1 2 3]
 % ::myTestFunc someVar
-% ::myTestFunc Signal [[0 0] [0.1 1] [1 0]] 'linear'
+% ::myTestFunc Env [[0 0] [0.1 1] [1 0]] 'linear'
 
 == ::myTestFunc 'Yo2!' 
 == ::myTestFunc 1
@@ -601,7 +601,7 @@ do 5000 { garbage i4 sleep * i4 1.1 }
 == ::myTestFunc + 1 1
 == ::myTestFunc [1 2 3]
 == ::myTestFunc someVar
-== ::myTestFunc Signal [[0 0] [0.1 1] [1 0]] 'linear'
+== ::myTestFunc Env [[0 0] [0.1 1] [1 0]] 'linear'
 
 != ::myTestFunc 'Yo2!' 
 != ::myTestFunc 1
@@ -609,7 +609,7 @@ do 5000 { garbage i4 sleep * i4 1.1 }
 != ::myTestFunc + 1 1
 != ::myTestFunc [1 2 3]
 != ::myTestFunc someVar
-!= ::myTestFunc Signal [[0 0] [0.1 1] [1 0]] 'linear'
+!= ::myTestFunc Env [[0 0] [0.1 1] [1 0]] 'linear'
 
 > ::myTestFunc 'Yo2!' 
 > ::myTestFunc 1
@@ -617,7 +617,7 @@ do 5000 { garbage i4 sleep * i4 1.1 }
 > ::myTestFunc + 1 1
 > ::myTestFunc [1 2 3]
 > ::myTestFunc someVar
-> ::myTestFunc Signal [[0 0] [0.1 1] [1 0]] 'linear'
+> ::myTestFunc Env [[0 0] [0.1 1] [1 0]] 'linear'
 
 < ::myTestFunc 'Yo2!' 
 < ::myTestFunc 1
@@ -625,7 +625,7 @@ do 5000 { garbage i4 sleep * i4 1.1 }
 < ::myTestFunc + 1 1
 < ::myTestFunc [1 2 3]
 < ::myTestFunc someVar
-< ::myTestFunc Signal [[0 0] [0.1 1] [1 0]] 'linear'
+< ::myTestFunc Env [[0 0] [0.1 1] [1 0]] 'linear'
 
 >= ::myTestFunc 'Yo2!' 
 >= ::myTestFunc 1
@@ -633,7 +633,7 @@ do 5000 { garbage i4 sleep * i4 1.1 }
 >= ::myTestFunc + 1 1
 >= ::myTestFunc [1 2 3]
 >= ::myTestFunc someVar
->= ::myTestFunc Signal [[0 0] [0.1 1] [1 0]] 'linear'
+>= ::myTestFunc Env [[0 0] [0.1 1] [1 0]] 'linear'
 
 <= ::myTestFunc 'Yo2!' 
 <= ::myTestFunc 1
@@ -641,7 +641,7 @@ do 5000 { garbage i4 sleep * i4 1.1 }
 <= ::myTestFunc + 1 1
 <= ::myTestFunc [1 2 3]
 <= ::myTestFunc someVar
-<= ::myTestFunc Signal [[0 0] [0.1 1] [1 0]] 'linear'
+<= ::myTestFunc Env [[0 0] [0.1 1] [1 0]] 'linear'
 
 // Arrays
 
@@ -651,7 +651,7 @@ do 5000 { garbage i4 sleep * i4 1.1 }
 + [1 2 3] + 1 1
 + [1 2 3] [1 2 3]
 + [1 2 3] someVar
-+ [1 2 3] Signal [[0 0] [0.1 1] [1 0]] 'linear'
++ [1 2 3] Env [[0 0] [0.1 1] [1 0]] 'linear'
 
 - [1 2 3] 'Yo!2' 
 - [1 2 3] 1
@@ -659,7 +659,7 @@ do 5000 { garbage i4 sleep * i4 1.1 }
 - [1 2 3] + 1 1
 - [1 2 3] [1 2 3]
 - [1 2 3] someVar
-- [1 2 3] Signal [[0 0] [0.1 1] [1 0]] 'linear'
+- [1 2 3] Env [[0 0] [0.1 1] [1 0]] 'linear'
 
 * [1 2 3] 'Yo2!' 
 * [1 2 3] 1
@@ -667,7 +667,7 @@ do 5000 { garbage i4 sleep * i4 1.1 }
 * [1 2 3] + 1 1
 * [1 2 3] [1 2 3]
 * [1 2 3] someVar
-* [1 2 3] Signal [[0 0] [0.1 1] [1 0]] 'linear'
+* [1 2 3] Env [[0 0] [0.1 1] [1 0]] 'linear'
 
 / [1 2 3] 'Yo2!' 
 / [1 2 3] 1
@@ -675,7 +675,7 @@ do 5000 { garbage i4 sleep * i4 1.1 }
 / [1 2 3] + 1 1
 / [1 2 3] [1 2 3]
 / [1 2 3] someVar
-/ [1 2 3] Signal [[0 0] [0.1 1] [1 0]] 'linear'
+/ [1 2 3] Env [[0 0] [0.1 1] [1 0]] 'linear'
 
 % [1 2 3] 'Yo2!' 
 % [1 2 3] 1
@@ -683,7 +683,7 @@ do 5000 { garbage i4 sleep * i4 1.1 }
 % [1 2 3] + 1 1
 % [1 2 3] [1 2 3]
 % [1 2 3] someVar
-% [1 2 3] Signal [[0 0] [0.1 1] [1 0]] 'linear'
+% [1 2 3] Env [[0 0] [0.1 1] [1 0]] 'linear'
 
 == [1 2 3] 'Yo2!' 
 == [1 2 3] 1
@@ -691,7 +691,7 @@ do 5000 { garbage i4 sleep * i4 1.1 }
 == [1 2 3] + 1 1
 == [1 2 3] [1 2 3]
 == [1 2 3] someVar
-== [1 2 3] Signal [[0 0] [0.1 1] [1 0]] 'linear'
+== [1 2 3] Env [[0 0] [0.1 1] [1 0]] 'linear'
 
 != [1 2 3] 'Yo2!' 
 != [1 2 3] 1
@@ -700,7 +700,7 @@ do 5000 { garbage i4 sleep * i4 1.1 }
 != [1 2 3] [1 2 3]
 
 != [1 2 3] someVar
-!= [1 2 3] Signal [[0 0] [0.1 1] [1 0]] 'linear'
+!= [1 2 3] Env [[0 0] [0.1 1] [1 0]] 'linear'
 
 > [1 2 3] 'Yo2!' 
 > [1 2 3] 1
@@ -708,7 +708,7 @@ do 5000 { garbage i4 sleep * i4 1.1 }
 > [1 2 3] + 1 1
 > [1 2 3] [1 2 3]
 > [1 2 3] someVar
-> [1 2 3] Signal [[0 0] [0.1 1] [1 0]] 'linear'
+> [1 2 3] Env [[0 0] [0.1 1] [1 0]] 'linear'
 
 < [1 2 3] 'Yo2!' 
 < [1 2 3] 1
@@ -716,7 +716,7 @@ do 5000 { garbage i4 sleep * i4 1.1 }
 < [1 2 3] + 1 1
 < [1 2 3] [1 2 3]
 < [1 2 3] someVar
-< [1 2 3] Signal [[0 0] [0.1 1] [1 0]] 'linear'
+< [1 2 3] Env [[0 0] [0.1 1] [1 0]] 'linear'
 
 >= [1 2 3] 'Yo2!' 
 >= [1 2 3] 1
@@ -724,7 +724,7 @@ do 5000 { garbage i4 sleep * i4 1.1 }
 >= [1 2 3] + 1 1
 >= [1 2 3] [1 2 3]
 >= [1 2 3] someVar
->= [1 2 3] Signal [[0 0] [0.1 1] [1 0]] 'linear'
+>= [1 2 3] Env [[0 0] [0.1 1] [1 0]] 'linear'
 
 <= [1 2 3] 'Yo2!' 
 <= [1 2 3] 1
@@ -732,7 +732,7 @@ do 5000 { garbage i4 sleep * i4 1.1 }
 <= [1 2 3] + 1 1
 <= [1 2 3] [1 2 3]
 <= [1 2 3] someVar
-<= [1 2 3] Signal [[0 0] [0.1 1] [1 0]] 'linear'
+<= [1 2 3] Env [[0 0] [0.1 1] [1 0]] 'linear'
 
 // Variable
 
@@ -742,7 +742,7 @@ do 5000 { garbage i4 sleep * i4 1.1 }
 + someVar + 1 1
 + someVar [1 2 3]
 + someVar someVar
-+ someVar Signal [[0 0] [0.1 1] [1 0]] 'linear'
++ someVar Env [[0 0] [0.1 1] [1 0]] 'linear'
 
 - someVar 'Yo!2' 
 - someVar 1
@@ -750,7 +750,7 @@ do 5000 { garbage i4 sleep * i4 1.1 }
 - someVar + 1 1
 - someVar [1 2 3]
 - someVar someVar
-- someVar Signal [[0 0] [0.1 1] [1 0]] 'linear'
+- someVar Env [[0 0] [0.1 1] [1 0]] 'linear'
 
 * someVar 'Yo2!' 
 * someVar 1
@@ -758,7 +758,7 @@ do 5000 { garbage i4 sleep * i4 1.1 }
 * someVar + 1 1
 * someVar [1 2 3]
 * someVar someVar
-* someVar Signal [[0 0] [0.1 1] [1 0]] 'linear'
+* someVar Env [[0 0] [0.1 1] [1 0]] 'linear'
 
 / someVar 'Yo2!' 
 / someVar 1
@@ -766,7 +766,7 @@ do 5000 { garbage i4 sleep * i4 1.1 }
 / someVar + 1 1
 / someVar [1 2 3]
 / someVar someVar
-/ someVar Signal [[0 0] [0.1 1] [1 0]] 'linear'
+/ someVar Env [[0 0] [0.1 1] [1 0]] 'linear'
 
 % someVar 'Yo2!' 
 % someVar 1
@@ -774,7 +774,7 @@ do 5000 { garbage i4 sleep * i4 1.1 }
 % someVar + 1 1
 % someVar [1 2 3]
 % someVar someVar
-% someVar Signal [[0 0] [0.1 1] [1 0]] 'linear'
+% someVar Env [[0 0] [0.1 1] [1 0]] 'linear'
 
 == someVar 'Yo2!' 
 == someVar 1
@@ -782,7 +782,7 @@ do 5000 { garbage i4 sleep * i4 1.1 }
 == someVar + 1 1
 == someVar [1 2 3]
 == someVar someVar
-== someVar Signal [[0 0] [0.1 1] [1 0]] 'linear'
+== someVar Env [[0 0] [0.1 1] [1 0]] 'linear'
 
 != someVar 'Yo2!' 
 != someVar 1
@@ -790,7 +790,7 @@ do 5000 { garbage i4 sleep * i4 1.1 }
 != someVar + 1 1
 != someVar [1 2 3]
 != someVar someVar
-!= someVar Signal [[0 0] [0.1 1] [1 0]] 'linear'
+!= someVar Env [[0 0] [0.1 1] [1 0]] 'linear'
 
 > someVar 'Yo2!' 
 > someVar 1
@@ -798,7 +798,7 @@ do 5000 { garbage i4 sleep * i4 1.1 }
 > someVar + 1 1
 > someVar [1 2 3]
 > someVar someVar
-> someVar Signal [[0 0] [0.1 1] [1 0]] 'linear'
+> someVar Env [[0 0] [0.1 1] [1 0]] 'linear'
 
 < someVar 'Yo2!' 
 < someVar 1
@@ -806,7 +806,7 @@ do 5000 { garbage i4 sleep * i4 1.1 }
 < someVar + 1 1
 < someVar [1 2 3]
 < someVar someVar
-< someVar Signal [[0 0] [0.1 1] [1 0]] 'linear'
+< someVar Env [[0 0] [0.1 1] [1 0]] 'linear'
 
 >= someVar 'Yo2!' 
 >= someVar 1
@@ -814,7 +814,7 @@ do 5000 { garbage i4 sleep * i4 1.1 }
 >= someVar + 1 1
 >= someVar [1 2 3]
 >= someVar someVar
->= someVar Signal [[0 0] [0.1 1] [1 0]] 'linear'
+>= someVar Env [[0 0] [0.1 1] [1 0]] 'linear'
 
 <= someVar 'Yo2!' 
 <= someVar 1
@@ -822,97 +822,97 @@ do 5000 { garbage i4 sleep * i4 1.1 }
 <= someVar + 1 1
 <= someVar [1 2 3]
 <= someVar someVar
-<= someVar Signal [[0 0] [0.1 1] [1 0]] 'linear'
+<= someVar Env [[0 0] [0.1 1] [1 0]] 'linear'
 
-// Signals
+// Envs
 
-+ Signal [[0 0] [0.1 1] [1 0]] 'linear' 'Yo2!' 
-+ Signal [[0 0] [0.1 1] [1 0]] 'linear' 1
-+ Signal [[0 0] [0.1 1] [1 0]] 'linear' ::myTestFunc
-+ Signal [[0 0] [0.1 1] [1 0]] 'linear' + 1 1
-+ Signal [[0 0] [0.1 1] [1 0]] 'linear' [1 2 3]
-+ Signal [[0 0] [0.1 1] [1 0]] 'linear' someVar
-+ Signal [[0 0] [0.1 1] [1 0]] 'linear' Signal [[0 0] [0.1 1] [1 0]] 'linear'
++ Env [[0 0] [0.1 1] [1 0]] 'linear' 'Yo2!' 
++ Env [[0 0] [0.1 1] [1 0]] 'linear' 1
++ Env [[0 0] [0.1 1] [1 0]] 'linear' ::myTestFunc
++ Env [[0 0] [0.1 1] [1 0]] 'linear' + 1 1
++ Env [[0 0] [0.1 1] [1 0]] 'linear' [1 2 3]
++ Env [[0 0] [0.1 1] [1 0]] 'linear' someVar
++ Env [[0 0] [0.1 1] [1 0]] 'linear' Env [[0 0] [0.1 1] [1 0]] 'linear'
 
-- Signal [[0 0] [0.1 1] [1 0]] 'linear' 'Yo!2' 
-- Signal [[0 0] [0.1 1] [1 0]] 'linear' 1
-- Signal [[0 0] [0.1 1] [1 0]] 'linear' ::myTestFunc
-- Signal [[0 0] [0.1 1] [1 0]] 'linear' + 1 1
-- Signal [[0 0] [0.1 1] [1 0]] 'linear' [1 2 3]
-- Signal [[0 0] [0.1 1] [1 0]] 'linear' someVar
-- Signal [[0 0] [0.1 1] [1 0]] 'linear' Signal [[0 0] [0.1 1] [1 0]] 'linear'
+- Env [[0 0] [0.1 1] [1 0]] 'linear' 'Yo!2' 
+- Env [[0 0] [0.1 1] [1 0]] 'linear' 1
+- Env [[0 0] [0.1 1] [1 0]] 'linear' ::myTestFunc
+- Env [[0 0] [0.1 1] [1 0]] 'linear' + 1 1
+- Env [[0 0] [0.1 1] [1 0]] 'linear' [1 2 3]
+- Env [[0 0] [0.1 1] [1 0]] 'linear' someVar
+- Env [[0 0] [0.1 1] [1 0]] 'linear' Env [[0 0] [0.1 1] [1 0]] 'linear'
 
-* Signal [[0 0] [0.1 1] [1 0]] 'linear' 'Yo2!' 
-* Signal [[0 0] [0.1 1] [1 0]] 'linear' 1
-* Signal [[0 0] [0.1 1] [1 0]] 'linear' ::myTestFunc
-* Signal [[0 0] [0.1 1] [1 0]] 'linear' + 1 1
-* Signal [[0 0] [0.1 1] [1 0]] 'linear' [1 2 3]
-* Signal [[0 0] [0.1 1] [1 0]] 'linear' someVar
-* Signal [[0 0] [0.1 1] [1 0]] 'linear' Signal [[0 0] [0.1 1] [1 0]] 'linear'
+* Env [[0 0] [0.1 1] [1 0]] 'linear' 'Yo2!' 
+* Env [[0 0] [0.1 1] [1 0]] 'linear' 1
+* Env [[0 0] [0.1 1] [1 0]] 'linear' ::myTestFunc
+* Env [[0 0] [0.1 1] [1 0]] 'linear' + 1 1
+* Env [[0 0] [0.1 1] [1 0]] 'linear' [1 2 3]
+* Env [[0 0] [0.1 1] [1 0]] 'linear' someVar
+* Env [[0 0] [0.1 1] [1 0]] 'linear' Env [[0 0] [0.1 1] [1 0]] 'linear'
 
-/ Signal [[0 0] [0.1 1] [1 0]] 'linear' 'Yo2!' 
-/ Signal [[0 0] [0.1 1] [1 0]] 'linear' 1
-/ Signal [[0 0] [0.1 1] [1 0]] 'linear' ::myTestFunc
-/ Signal [[0 0] [0.1 1] [1 0]] 'linear' + 1 1
-/ Signal [[0 0] [0.1 1] [1 0]] 'linear' [1 2 3]
-/ Signal [[0 0] [0.1 1] [1 0]] 'linear' someVar
-/ Signal [[0 0] [0.1 1] [1 0]] 'linear' Signal [[0 0] [0.1 1] [1 0]] 'linear'
+/ Env [[0 0] [0.1 1] [1 0]] 'linear' 'Yo2!' 
+/ Env [[0 0] [0.1 1] [1 0]] 'linear' 1
+/ Env [[0 0] [0.1 1] [1 0]] 'linear' ::myTestFunc
+/ Env [[0 0] [0.1 1] [1 0]] 'linear' + 1 1
+/ Env [[0 0] [0.1 1] [1 0]] 'linear' [1 2 3]
+/ Env [[0 0] [0.1 1] [1 0]] 'linear' someVar
+/ Env [[0 0] [0.1 1] [1 0]] 'linear' Env [[0 0] [0.1 1] [1 0]] 'linear'
 
-% Signal [[0 0] [0.1 1] [1 0]] 'linear' 'Yo2!' 
-% Signal [[0 0] [0.1 1] [1 0]] 'linear' 1
-% Signal [[0 0] [0.1 1] [1 0]] 'linear' ::myTestFunc
-% Signal [[0 0] [0.1 1] [1 0]] 'linear' + 1 1
-% Signal [[0 0] [0.1 1] [1 0]] 'linear' [1 2 3]
-% Signal [[0 0] [0.1 1] [1 0]] 'linear' someVar
-% Signal [[0 0] [0.1 1] [1 0]] 'linear' Signal [[0 0] [0.1 1] [1 0]] 'linear'
+% Env [[0 0] [0.1 1] [1 0]] 'linear' 'Yo2!' 
+% Env [[0 0] [0.1 1] [1 0]] 'linear' 1
+% Env [[0 0] [0.1 1] [1 0]] 'linear' ::myTestFunc
+% Env [[0 0] [0.1 1] [1 0]] 'linear' + 1 1
+% Env [[0 0] [0.1 1] [1 0]] 'linear' [1 2 3]
+% Env [[0 0] [0.1 1] [1 0]] 'linear' someVar
+% Env [[0 0] [0.1 1] [1 0]] 'linear' Env [[0 0] [0.1 1] [1 0]] 'linear'
 
-== Signal [[0 0] [0.1 1] [1 0]] 'linear' 'Yo2!' 
-== Signal [[0 0] [0.1 1] [1 0]] 'linear' 1
-== Signal [[0 0] [0.1 1] [1 0]] 'linear' ::myTestFunc
-== Signal [[0 0] [0.1 1] [1 0]] 'linear' + 1 1
-== Signal [[0 0] [0.1 1] [1 0]] 'linear' [1 2 3]
-== Signal [[0 0] [0.1 1] [1 0]] 'linear' someVar
-== Signal [[0 0] [0.1 1] [1 0]] 'linear' Signal [[0 0] [0.1 1] [1 0]] 'linear'
+== Env [[0 0] [0.1 1] [1 0]] 'linear' 'Yo2!' 
+== Env [[0 0] [0.1 1] [1 0]] 'linear' 1
+== Env [[0 0] [0.1 1] [1 0]] 'linear' ::myTestFunc
+== Env [[0 0] [0.1 1] [1 0]] 'linear' + 1 1
+== Env [[0 0] [0.1 1] [1 0]] 'linear' [1 2 3]
+== Env [[0 0] [0.1 1] [1 0]] 'linear' someVar
+== Env [[0 0] [0.1 1] [1 0]] 'linear' Env [[0 0] [0.1 1] [1 0]] 'linear'
 
-!= Signal [[0 0] [0.1 1] [1 0]] 'linear' 'Yo2!' 
-!= Signal [[0 0] [0.1 1] [1 0]] 'linear' 1
-!= Signal [[0 0] [0.1 1] [1 0]] 'linear' ::myTestFunc
-!= Signal [[0 0] [0.1 1] [1 0]] 'linear' + 1 1
-!= Signal [[0 0] [0.1 1] [1 0]] 'linear' [1 2 3]
-!= Signal [[0 0] [0.1 1] [1 0]] 'linear' someVar
-!= Signal [[0 0] [0.1 1] [1 0]] 'linear' Signal [[0 0] [0.1 1] [1 0]] 'linear'
+!= Env [[0 0] [0.1 1] [1 0]] 'linear' 'Yo2!' 
+!= Env [[0 0] [0.1 1] [1 0]] 'linear' 1
+!= Env [[0 0] [0.1 1] [1 0]] 'linear' ::myTestFunc
+!= Env [[0 0] [0.1 1] [1 0]] 'linear' + 1 1
+!= Env [[0 0] [0.1 1] [1 0]] 'linear' [1 2 3]
+!= Env [[0 0] [0.1 1] [1 0]] 'linear' someVar
+!= Env [[0 0] [0.1 1] [1 0]] 'linear' Env [[0 0] [0.1 1] [1 0]] 'linear'
 
-> Signal [[0 0] [0.1 1] [1 0]] 'linear' 'Yo2!' 
-> Signal [[0 0] [0.1 1] [1 0]] 'linear' 1
-> Signal [[0 0] [0.1 1] [1 0]] 'linear' ::myTestFunc
-> Signal [[0 0] [0.1 1] [1 0]] 'linear' + 1 1
-> Signal [[0 0] [0.1 1] [1 0]] 'linear' [1 2 3]
-> Signal [[0 0] [0.1 1] [1 0]] 'linear' someVar
-> Signal [[0 0] [0.1 1] [1 0]] 'linear' Signal [[0 0] [0.1 1] [1 0]] 'linear'
+> Env [[0 0] [0.1 1] [1 0]] 'linear' 'Yo2!' 
+> Env [[0 0] [0.1 1] [1 0]] 'linear' 1
+> Env [[0 0] [0.1 1] [1 0]] 'linear' ::myTestFunc
+> Env [[0 0] [0.1 1] [1 0]] 'linear' + 1 1
+> Env [[0 0] [0.1 1] [1 0]] 'linear' [1 2 3]
+> Env [[0 0] [0.1 1] [1 0]] 'linear' someVar
+> Env [[0 0] [0.1 1] [1 0]] 'linear' Env [[0 0] [0.1 1] [1 0]] 'linear'
 
-< Signal [[0 0] [0.1 1] [1 0]] 'linear' 'Yo2!' 
-< Signal [[0 0] [0.1 1] [1 0]] 'linear' 1
-< Signal [[0 0] [0.1 1] [1 0]] 'linear' ::myTestFunc
-< Signal [[0 0] [0.1 1] [1 0]] 'linear' + 1 1
-< Signal [[0 0] [0.1 1] [1 0]] 'linear' [1 2 3]
-< Signal [[0 0] [0.1 1] [1 0]] 'linear' someVar
-< Signal [[0 0] [0.1 1] [1 0]] 'linear' Signal [[0 0] [0.1 1] [1 0]] 'linear'
+< Env [[0 0] [0.1 1] [1 0]] 'linear' 'Yo2!' 
+< Env [[0 0] [0.1 1] [1 0]] 'linear' 1
+< Env [[0 0] [0.1 1] [1 0]] 'linear' ::myTestFunc
+< Env [[0 0] [0.1 1] [1 0]] 'linear' + 1 1
+< Env [[0 0] [0.1 1] [1 0]] 'linear' [1 2 3]
+< Env [[0 0] [0.1 1] [1 0]] 'linear' someVar
+< Env [[0 0] [0.1 1] [1 0]] 'linear' Env [[0 0] [0.1 1] [1 0]] 'linear'
 
->= Signal [[0 0] [0.1 1] [1 0]] 'linear' 'Yo2!' 
->= Signal [[0 0] [0.1 1] [1 0]] 'linear' 1
->= Signal [[0 0] [0.1 1] [1 0]] 'linear' ::myTestFunc
->= Signal [[0 0] [0.1 1] [1 0]] 'linear' + 1 1
->= Signal [[0 0] [0.1 1] [1 0]] 'linear' [1 2 3]
->= Signal [[0 0] [0.1 1] [1 0]] 'linear' someVar
->= Signal [[0 0] [0.1 1] [1 0]] 'linear' Signal [[0 0] [0.1 1] [1 0]] 'linear'
+>= Env [[0 0] [0.1 1] [1 0]] 'linear' 'Yo2!' 
+>= Env [[0 0] [0.1 1] [1 0]] 'linear' 1
+>= Env [[0 0] [0.1 1] [1 0]] 'linear' ::myTestFunc
+>= Env [[0 0] [0.1 1] [1 0]] 'linear' + 1 1
+>= Env [[0 0] [0.1 1] [1 0]] 'linear' [1 2 3]
+>= Env [[0 0] [0.1 1] [1 0]] 'linear' someVar
+>= Env [[0 0] [0.1 1] [1 0]] 'linear' Env [[0 0] [0.1 1] [1 0]] 'linear'
 
-<= Signal [[0 0] [0.1 1] [1 0]] 'linear' 'Yo2!' 
-<= Signal [[0 0] [0.1 1] [1 0]] 'linear' 1
-<= Signal [[0 0] [0.1 1] [1 0]] 'linear' ::myTestFunc
-<= Signal [[0 0] [0.1 1] [1 0]] 'linear' + 1 1
-<= Signal [[0 0] [0.1 1] [1 0]] 'linear' [1 2 3]
-<= Signal [[0 0] [0.1 1] [1 0]] 'linear' someVar
-<= Signal [[0 0] [0.1 1] [1 0]] 'linear' Signal [[0 0] [0.1 1] [1 0]] 'linear'
+<= Env [[0 0] [0.1 1] [1 0]] 'linear' 'Yo2!' 
+<= Env [[0 0] [0.1 1] [1 0]] 'linear' 1
+<= Env [[0 0] [0.1 1] [1 0]] 'linear' ::myTestFunc
+<= Env [[0 0] [0.1 1] [1 0]] 'linear' + 1 1
+<= Env [[0 0] [0.1 1] [1 0]] 'linear' [1 2 3]
+<= Env [[0 0] [0.1 1] [1 0]] 'linear' someVar
+<= Env [[0 0] [0.1 1] [1 0]] 'linear' Env [[0 0] [0.1 1] [1 0]] 'linear'
 	</textarea>
 	
 	<textarea id="post" rows="6" spellcheck="false" readonly="true">Lich.js&#10;</textarea>

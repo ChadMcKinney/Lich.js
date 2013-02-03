@@ -803,6 +803,7 @@ Soliton.Quant = function(quant, phase, timingOffset)
 
 	this.nextTimeOnGrid = function(clock)
 	{
+		Soliton.print("Quant.nextTimeOnGrid: clock.nextTimeOnGrid");
 		return new Soliton.Quant(clock.nextTimeOnGrid(this.quant, this.phase - this.timingOffset));;
 	}
 
@@ -850,16 +851,20 @@ Soliton.Scheduler = function(clock, drift, recursive)
 		if(delta != null)
 		{
 			if(drift)
-				fromTime = startTime;
+				fromTime = startTime; // Should be an equivalent to Main.ElapsedTime
 			else
 				fromTime = this.seconds;
 
+			// Soliton.print("Scheduler.sched: fromTime = " + fromTime);
+			// Soliton.print("Scheduler.sched: this.seconds = " + this.seconds);
+			// Soliton.print("Scheduler.sched: fromTime + delta.value(): " + (fromTime + delta.value()));
 			queue.put(fromTime + delta.value(), task);
 		}
 	}
 
 	this.schedAbs = function(task, delta)
 	{
+		// Soliton.print("Scheduler.schedAbs.delta: " + delta.value());
 		queue.put(delta.value(), task);
 	}
 
@@ -907,6 +912,8 @@ Soliton.Scheduler = function(clock, drift, recursive)
 			this.seconds = queue.topPriority();
 			while(this.seconds != null && this.seconds <= newSeconds)
 			{
+				// Soliton.print("Scheduler.setSeconds: this.seconds = " + this.seconds);
+
 				expired.push({
 					time: this.seconds,
 					value: queue.pop()
@@ -925,6 +932,7 @@ Soliton.Scheduler = function(clock, drift, recursive)
 		}
 
 		this.seconds = newSeconds;
+		// Soliton.print("Scheduler.setSeconds: this.seconds = " + this.seconds);
 		this.beats = this.clock.seconds2beats(newSeconds);
 	}
 
@@ -953,8 +961,8 @@ Soliton.Clock = function(tempo, beats, seconds, queueSize, sleepTime) // TempoCl
 	this.baseBarBeat = 0.0;
 	this.baseSeconds = 1.0;
 	this.baseBar = 0.0;
-	this.baseBeats = 0.0;
-	this.baseSeconds = 0.0;
+	this.baseBeats = beats;
+	this.baseSeconds = seconds;
 	this.permanent = false;
 	this.queue = new Array();
 
@@ -991,8 +999,7 @@ Soliton.Clock = function(tempo, beats, seconds, queueSize, sleepTime) // TempoCl
 
 		if(quant == 0)
 		{
-
-			return this.beats + phase;
+			return this.seconds2beats(this.seconds) + phase;;
 		}
 
 		if(quant < 0)
@@ -1013,6 +1020,8 @@ Soliton.Clock = function(tempo, beats, seconds, queueSize, sleepTime) // TempoCl
 		var time = new Date().getTime() - this.startTime;
 		this.scheduler.advance((time - this.lastElapsedTime) / 1000);
 		this.lastElapsedTime = time;
+		this.seconds = this.lastElapsedTime / 1000.0;
+		this.beats = this.seconds2beats(this.seconds);
 
 		// Soliton.print(time);
 	}
@@ -1039,12 +1048,14 @@ Soliton.Clock = function(tempo, beats, seconds, queueSize, sleepTime) // TempoCl
 
 	this.setTempoAtBeat = function(tempo, beats)
 	{
-
+		this.tempo = tempo;
+		Soliton.print("new Tempo: " + tempo);
 	}
 
 	this.setTempoAtTime = function(tempo, seconds)
 	{
-
+		this.tempo = tempo;
+		Soliton.print("new tempo: " + tempo);
 	}
 
 	this.setAll = function(tempo, beats, seconds)
@@ -1059,7 +1070,7 @@ Soliton.Clock = function(tempo, beats, seconds, queueSize, sleepTime) // TempoCl
 
 	this.elapsedBeats = function()
 	{
-		return this.seconds2beats(this.lastElapsedTime);
+		return this.seconds2beats(this.seconds);
 	}
 
 	this.clear = function()
@@ -1530,6 +1541,8 @@ Soliton.EventStreamPlayer = function(stream, event)
 						inClock.sched(_self, new Soliton.Quant(0));
 						_self.isWaiting = false;
 					}
+
+					return null;
 				}
 
     			return { awake: taskFunc };
@@ -1542,7 +1555,7 @@ Soliton.EventStreamPlayer = function(stream, event)
 	this.next = function(inval)
 	{
 		// Soliton.print("STEP 10: EventStreamPlayer.next");
-		var nextTime;
+		var nextTime = null;
 		var outEvent = this.stream.next(this.event.copy());
 
 		if(outEvent == null)
@@ -1568,6 +1581,7 @@ Soliton.EventStreamPlayer = function(stream, event)
 
 			// Soliton.print("STEP 14B: nextTime != null this.nextBeat = inval + nextTime");
 			this.nextBeat = inval + nextTime; // inval is current logical beat
+			Soliton.print("EventStreamPlayer.inval: " + inval);
 			return nextTime;
 		}
 
@@ -1947,8 +1961,8 @@ Soliton.Pseq.inheritsFrom(Soliton.ListPattern);
 
 Soliton.Event.defaultParentEvent = null;
 Soliton.Event.default = new Soliton.Event(8, null, Soliton.Event.defaultParentEvent, true);
-Soliton.Quant.default = new Soliton.Quant(0, 0, 0);
+Soliton.Quant.default = new Soliton.Quant(1, 0, 0);
 // tempo (beats per second), current beats , current seconds, queueSize, sleepTime (millis)
-Soliton.Clock.default = new Soliton.Clock(2, 0, 0, 256, 50); // default
+Soliton.Clock.default = new Soliton.Clock(1, 0, 0, 256, 1); // default
 Soliton.Clock.permanent = true;
 Soliton.Scheduler.default = Soliton.Clock.default.scheduler;

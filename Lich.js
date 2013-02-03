@@ -113,6 +113,19 @@ function lichVirtualMachine() {
 		
 		return undefined;
 	}
+
+	this.freeStack = function()
+	{
+		for(var i = 0; i < this.stack.length; ++i)
+		{
+			if(this.stack[i].type() == 'Stream')
+			{
+				this.stack[i].stop();
+			}
+		}
+
+		this.clearStack();
+	}
 	
 	this.printState = function()
 	{
@@ -135,9 +148,9 @@ function lichVirtualMachine() {
 			
 			// If a Lich Object
 			else if(this.state.constructor == LichFunction || this.state.constructor == LichPrimitive 
-				|| this.state.constructor == LichSignal || this.state.constructor == LichBloodStream)
+				|| this.state.constructor == LichEnvelope || this.state.constructor == LichStream)
 			{
-				if(this.state.type() == "Signal")
+				if(this.state.type() == "Envelope")
 				{
 					var printString = arrayToPrintString(this.state.points.value());
 					printString = printString.concat(" ").concat(this.state.shape);
@@ -305,8 +318,8 @@ function arrayToPrintString(array) // Creates a printable string which represent
 		}
 		
 		else if(array[i].constructor == LichFunction || array[i].constructor == LichPrimitive || array[i].constructor == LichArray 
-			|| array[i].constructor == LichFloat || array[i].constructor == LichString || array[i].constructor == LichSignal
-			|| array[i].constructor == LichVariable || array[i].constructor == LichBloodStream) // Lich Object
+			|| array[i].constructor == LichFloat || array[i].constructor == LichString || array[i].constructor == LichEnvelope
+			|| array[i].constructor == LichVariable || array[i].constructor == LichStream) // Lich Object
 		{			
 			switch(array[i].type())
 			{
@@ -322,7 +335,7 @@ function arrayToPrintString(array) // Creates a printable string which represent
 				printString = printString.concat(array[i].value());
 				break;
 
-			case 'Signal':
+			case 'Envelope':
 				printString = printString.concat(arrayToPrintString(array[i].points.value()));
 				printString = printString.concat(" ").concat(array[i].shape);
 				break;
@@ -426,13 +439,13 @@ function deserializeLichObject(serializedObject)
 		object.object = deserializeLichObject(serializedObject.value);
 		break;
 
-	case 'Signal':
-		object = new LichSignal(deserializeLichObject(serializedObject.value.points), deserializeLichObject(serializedObject.value.shape));
+	case 'Envelope':
+		object = new LichEnvelope(deserializeLichObject(serializedObject.value.points), deserializeLichObject(serializedObject.value.shape));
 		object.namespace = deserializeLichObjectNamespace(serializedObject.namespace);
 		break;
 
-	case 'BloodStream':
-		object = new LichBloodStream(deserializeLichObject(serializedObject.value.durations), deserializeLichObject(serializedObject.value.values));
+	case 'Stream':
+		object = new LichStream(deserializeLichObject(serializedObject.value.durations), deserializeLichObject(serializedObject.value.values));
 		object.namespace = deserializeLichObject(serializedObject.namespace);
 		break;
 
@@ -597,7 +610,7 @@ function LichString(_stringVar) {
 			return this.add(object.object);
 			break;
 
-		case 'Signal':
+		case 'Envelope':
 
 			for(var i = 0; i < object.points.length(); ++i)
 			{
@@ -610,7 +623,7 @@ function LichString(_stringVar) {
 			return this.value();
 			break;
 
-		case 'BloodStream':
+		case 'Stream':
 			return this.add(object.value());
 			break;
 			
@@ -673,7 +686,7 @@ function LichString(_stringVar) {
 			return this.subtract(object.object);
 			break;
 
-		case 'Signal':
+		case 'Envelope':
 
 			for(var i = 0; i < object.points.length(); ++i)
 			{
@@ -686,7 +699,7 @@ function LichString(_stringVar) {
 			return this.value();
 			break;
 
-		case 'BloodStream':
+		case 'Stream':
 			return this.subtract(object.value());
 			break;
 		
@@ -750,7 +763,7 @@ function LichString(_stringVar) {
 			return this.divide(object.object);
 			break;
 
-		case 'Signal':
+		case 'Envelope':
 
 			for(var i = 0; i < object.points.length(); ++i)
 			{
@@ -763,7 +776,7 @@ function LichString(_stringVar) {
 			return this.value();
 			break;
 
-		case 'BloodStream':
+		case 'Stream':
 			return this.divide(object.value());
 			break;
 			
@@ -831,7 +844,7 @@ function LichString(_stringVar) {
 			return this.multiply(object.object);
 			break;
 
-		case 'Signal':
+		case 'Envelope':
 
 			for(var i = 0; i < object.points.length(); ++i)
 			{
@@ -844,7 +857,7 @@ function LichString(_stringVar) {
 			return this.value();
 			break;
 
-		case 'BloodStream':
+		case 'Stream':
 			return this.multiply(object.value());
 			break;
 			
@@ -908,7 +921,7 @@ function LichString(_stringVar) {
 			return this.modulus(object.object);
 			break;
 
-		case 'Signal':
+		case 'Envelope':
 
 			for(var i = 0; i < object.points.length(); ++i)
 			{
@@ -921,7 +934,7 @@ function LichString(_stringVar) {
 			return this.value();
 			break;
 
-		case 'BloodStream':
+		case 'Stream':
 			return this.modulus(object.value());
 			break;
 			
@@ -971,12 +984,12 @@ function LichString(_stringVar) {
 			return this.equivalent(object.object);
 			break;
 
-		case 'Signal':
+		case 'Envelope':
 			LichVM.push(new LichFloat(0));
 			return 0;
 			break;
 
-		case 'BloodStream':
+		case 'Stream':
 			return this.equivalent(object.value());
 			break;
 			
@@ -1026,12 +1039,12 @@ function LichString(_stringVar) {
 			return this.inequivalent(object.object);
 			break;
 
-		case 'Signal':
+		case 'Envelope':
 			LichVM.push(new LichFloat(1));
 			return 1;
 			break;
 
-		case 'BloodStream':
+		case 'Stream':
 			return this.inequivalent(object.value());
 			break;
 			
@@ -1081,12 +1094,12 @@ function LichString(_stringVar) {
 			return this.greaterThan(object.object);
 			break;
 
-		case 'Signal':
+		case 'Envelope':
 			LichVM.push(new LichFloat(0));
 			return 0;
 			break;
 
-		case 'BloodStream':
+		case 'Stream':
 			return this.greaterThan(object.value());
 			break;
 			
@@ -1136,12 +1149,12 @@ function LichString(_stringVar) {
 			return this.lessThan(object.object);
 			break;
 
-		case 'Signal':
+		case 'Envelope':
 			LichVM.push(new LichFloat(0));
 			return 0;
 			break;
 
-		case 'BloodStream':
+		case 'Stream':
 			return this.lessThan(object.value());
 			break;
 			
@@ -1191,12 +1204,12 @@ function LichString(_stringVar) {
 			return this.greaterThanEqual(object.object);
 			break;
 
-		case 'Signal':
+		case 'Envelope':
 			LichVM.push(new LichFloat(0));
 			return 0;
 			break;
 
-		case 'BloodStream':
+		case 'Stream':
 			return this.greaterThanEqual(object.value());
 			break;
 			
@@ -1246,12 +1259,12 @@ function LichString(_stringVar) {
 			return this.lessThanEqual(object.object);
 			break;
 
-		case 'Signal':
+		case 'Envelope':
 			LichVM.push(new LichFloat(0));
 			return 0;
 			break;
 
-		case 'BloodStream':
+		case 'Stream':
 			return this.lessThanEqual(object.value());
 			break;
 			
@@ -1294,7 +1307,7 @@ function LichString(_stringVar) {
 			post("WTF. Casting to a Variable is like translating to vapid programmer speak.");
 			break;
 
-		case 'Signal':
+		case 'Envelope':
 			var charArray = this.to('Array');
 			var points = new Array();
 
@@ -1306,10 +1319,10 @@ function LichString(_stringVar) {
 				points.push(new LichArray(point));
 			}
 
-			return new LichSignal(points, new LichString('linear'));
+			return new LichEnvelope(points, new LichString('linear'));
 			break;
 
-		case 'BloodStream':
+		case 'Stream':
 			var asciiArray = stringToAscii(this.stringVar);
 			var durations = new Array();
 
@@ -1318,7 +1331,7 @@ function LichString(_stringVar) {
 				durations.push(new LichFloat(asciiArray[i]));
 			}
 
-			return new LichBloodStream(new LichArray(durations), this);
+			return new LichStream(new LichArray(durations), this);
 			break;
 			
 		default:
@@ -1328,9 +1341,9 @@ function LichString(_stringVar) {
 
 	this.play = function()
 	{
-		var newBloodStream = this.to('BloodStream');
-		LichVM.push(newBloodStream);
-		return newBloodStream;
+		var newStream = this.to('Stream');
+		LichVM.push(newStream);
+		return newStream;
 	}
 
 	this.stop = function()
@@ -1462,11 +1475,11 @@ function LichFloat(_floatVar) {
 			return this.add(object.object);
 			break;
 
-		case 'Signal':
+		case 'Envelope':
 			return object.add(this);
 			break;
 
-		case 'BloodStream':
+		case 'Stream':
 			return this.add(object.value());
 			break;
 			
@@ -1519,7 +1532,7 @@ function LichFloat(_floatVar) {
 			return this.subtract(object.object);
 			break;
 
-		case 'Signal':
+		case 'Envelope':
 			var newPoints = new LichArray(new Array());
 			
 			for(var i = 0; i < object.points.length(); ++i)
@@ -1531,12 +1544,12 @@ function LichFloat(_floatVar) {
 				newPoints.push(newPoint);
 			}
 		
-			var result = new LichSignal(newPoints, object.shape);
+			var result = new LichEnvelope(newPoints, object.shape);
 			LichVM.push(result);
 			return result.value();
 			break;
 
-		case 'BloodStream':
+		case 'Stream':
 			return this.subtract(object.value());
 			break;
 			
@@ -1597,7 +1610,7 @@ function LichFloat(_floatVar) {
 			return this.divide(object.object);
 			break;
 
-		case 'Signal':
+		case 'Envelope':
 			var newPoints = new LichArray(new Array());
 			
 			for(var i = 0; i < object.points.length(); ++i)
@@ -1609,12 +1622,12 @@ function LichFloat(_floatVar) {
 				newPoints.push(newPoint);
 			}
 		
-			var result = new LichSignal(newPoints, object.shape);
+			var result = new LichEnvelope(newPoints, object.shape);
 			LichVM.push(result);
 			return result.value();
 			break;
 
-		case 'BloodStream':
+		case 'Stream':
 			return this.divide(object.value());
 			break;
 			
@@ -1667,11 +1680,11 @@ function LichFloat(_floatVar) {
 			this.multiply(object.object);
 			break;
 
-		case 'Signal':
+		case 'Envelope':
 			return object.multiply(this);
 			break;
 
-		case 'BloodStream':
+		case 'Stream':
 			return this.multiply(object.value());
 			break;
 			
@@ -1739,7 +1752,7 @@ function LichFloat(_floatVar) {
 			return this.modulus(object.object);
 			break;
 
-		case 'Signal':
+		case 'Envelope':
 			var newPoints = new LichArray(new Array());
 			
 			for(var i = 0; i < object.points.length(); ++i)
@@ -1751,12 +1764,12 @@ function LichFloat(_floatVar) {
 				newPoints.push(newPoint);
 			}
 		
-			var result = new LichSignal(newPoints, object.shape);
+			var result = new LichEnvelope(newPoints, object.shape);
 			LichVM.push(result);
 			return result.value();
 			break;
 
-		case 'BloodStream':
+		case 'Stream':
 			return this.modulus(object.value());
 			break;
 			
@@ -1804,12 +1817,12 @@ function LichFloat(_floatVar) {
 			return this.equivalent(object.object);
 			break;
 			
-		case 'Signal':
+		case 'Envelope':
 			LichVM.push(new LichFloat(0));
 			return 0;
 			break;
 
-		case 'BloodStream':
+		case 'Stream':
 			return this.equivalent(object.value());
 			break;
 
@@ -1857,12 +1870,12 @@ function LichFloat(_floatVar) {
 			return this.inequivalent(object.object);
 			break;
 
-		case 'Signal':
+		case 'Envelope':
 			LichVM.push(new LichFloat(1));
 			return 1;
 			break;
 
-		case 'BloodStream':
+		case 'Stream':
 			return this.inequivalent(object.value());
 			break;
 			
@@ -1910,12 +1923,12 @@ function LichFloat(_floatVar) {
 			return this.greaterThan(object.object);
 			break;
 
-		case 'Signal':
+		case 'Envelope':
 			LichVM.push(new LichFloat(0));
 			return 0;
 			break;
 
-		case 'BloodStream':
+		case 'Stream':
 			return this.greaterThan(object.value());
 			break;
 			
@@ -1963,12 +1976,12 @@ function LichFloat(_floatVar) {
 			return this.lessThan(object.object);
 			break;
 
-		case 'Signal':
+		case 'Envelope':
 			LichVM.push(new LichFloat(0));
 			return 0;
 			break;
 
-		case 'BloodStream':
+		case 'Stream':
 			return this.lessThan(object.value());
 			break;
 			
@@ -2016,12 +2029,12 @@ function LichFloat(_floatVar) {
 			return this.greaterThanEqual(object.object);
 			break;
 
-		case 'Signal':
+		case 'Envelope':
 			LichVM.push(new LichFloat(0));
 			return 0;
 			break;
 
-		case 'BloodStream':
+		case 'Stream':
 			return this.greaterThanEqual(object.value());
 			break;
 			
@@ -2069,12 +2082,12 @@ function LichFloat(_floatVar) {
 			return this.lessThanEqual(object.object);
 			break;
 
-		case 'Signal':
+		case 'Envelope':
 			LichVM.push(new LichFloat(0));
 			return 0;
 			break;
 
-		case 'BloodStream':
+		case 'Stream':
 			return this.lessThanEqual(object.value());
 			break;
 			
@@ -2113,13 +2126,13 @@ function LichFloat(_floatVar) {
 			post("WTF. Casting to a Variable is like translating to vapid programmer speak.");
 			break;
 
-		case 'Signal':
+		case 'Envelope':
 			var point = new LichArray([new LichFloat(0), this]);
-			return new LichSignal(new LichArray([point]), new LichString('linear'));
+			return new LichEnvelope(new LichArray([point]), new LichString('linear'));
 			break;
 
-		case 'BloodStream':
-			return new LichBloodStream(this, this);
+		case 'Stream':
+			return new LichStream(this, this);
 			break;
 			
 		default:
@@ -2129,9 +2142,9 @@ function LichFloat(_floatVar) {
 
 	this.play = function()
 	{
-		var newBloodStream = this.to('BloodStream');
-		LichVM.push(newBloodStream);
-		return newBloodStream;
+		var newStream = this.to('Stream');
+		LichVM.push(newStream);
+		return newStream;
 	}
 
 	this.stop = function()
@@ -2310,11 +2323,11 @@ function LichArray(_arrayVar) {
 			return this.add(object.object);
 			break;
 
-		case 'Signal':
+		case 'Envelope':
 			return object.add(this);
 			break;
 
-		case 'BloodStream':
+		case 'Stream':
 			return this.add(object.value());
 			break;
 			
@@ -2382,7 +2395,7 @@ function LichArray(_arrayVar) {
 			return this.subtract(object.object);
 			break;
 
-		case 'Signal':
+		case 'Envelope':
 			var result = new Array();
 			var lichResult;
 			
@@ -2397,7 +2410,7 @@ function LichArray(_arrayVar) {
 			return lichResult.value();
 			break;
 
-		case 'BloodStream':
+		case 'Stream':
 			return this.subtract(object.value());
 			break;
 			
@@ -2465,7 +2478,7 @@ function LichArray(_arrayVar) {
 			return this.divide(object.object);
 			break;
 
-		case 'Signal':
+		case 'Envelope':
 			var objectArray = this.value();
 			var result = new Array();
 			var lichResult;
@@ -2481,7 +2494,7 @@ function LichArray(_arrayVar) {
 			return lichResult.value();
 			break;
 
-		case 'BloodStream':
+		case 'Stream':
 			return this.divide(object.value());
 			break;
 			
@@ -2549,11 +2562,11 @@ function LichArray(_arrayVar) {
 			return this.add(object.object);
 			break;
 
-		case 'Signal':
+		case 'Envelope':
 			return object.multiply(this);
 			break;
 
-		case 'BloodStream':
+		case 'Stream':
 			return this.multiply(object.value());
 			break;
 			
@@ -2621,7 +2634,7 @@ function LichArray(_arrayVar) {
 			return this.modulus(object.object);
 			break;
 
-		case 'Signal':
+		case 'Envelope':
 			var objectArray = this.value();
 			var result = new Array();
 			var lichResult;
@@ -2637,7 +2650,7 @@ function LichArray(_arrayVar) {
 			return lichResult.value();
 			break;
 
-		case 'BloodStream':
+		case 'Stream':
 			return this.modulus(object.value());
 			break;
 			
@@ -2991,7 +3004,7 @@ function LichArray(_arrayVar) {
 			post("WTF. Casting to a Variable is like translating to vapid programmer speak.");
 			break;
 
-		case 'Signal':
+		case 'Envelope':
 			
 			var points = new Array();
 			var popBack = false;
@@ -3013,11 +3026,11 @@ function LichArray(_arrayVar) {
 			if(popBack)
 				this.arrayVar.pop();
 
-			return new LichSignal(new LichArray(points), new LichString('linear'));
+			return new LichEnvelope(new LichArray(points), new LichString('linear'));
 			break;
 
-		case 'BloodStream':
-			return new LichBloodStream(this, this);
+		case 'Stream':
+			return new LichStream(this, this);
 			break;
 			
 		default:
@@ -3935,7 +3948,7 @@ function LichVariable(_objectName) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// LichSignal
+// LichEnvelope
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -3944,11 +3957,11 @@ function LichVariable(_objectName) {
 [1] _shape: 'none', 'linear', 'exponential' supplied as a string
 
 example:
-Signal [[0 0] [0.1 1] [1 0]] 'exponential'
+Envelope [[0 0] [0.1 1] [1 0]] 'exponential'
 
 */
 
-function LichSignal(_points, _shape) {
+function LichEnvelope(_points, _shape) {
 		
 	// Public methods
 	this.value = function()
@@ -3963,15 +3976,15 @@ function LichSignal(_points, _shape) {
 	
 	this.type = function()
 	{
-		return 'Signal';
+		return 'Envelope';
 	}
 	
 	this.length = function()
 	{	
-		return this.points.back().front(); // Returns the last time, which is the length of the Signal
+		return this.points.back().front(); // Returns the last time, which is the length of the Envelope
 	}
 	
-	this.insert = function(index, value) // Insert a point into the signal using seperate time and level arguments
+	this.insert = function(index, value) // Insert a point into the Envelope using seperate time and level arguments
 	{
 		if(index.type() == 'Float' && value.type() == 'Float')
 		{
@@ -4111,11 +4124,11 @@ function LichSignal(_points, _shape) {
         return pointArray;
 	}
 	
-	this.combine = function(object, operatorFunction) // Used for combining two LichSignals
+	this.combine = function(object, operatorFunction) // Used for combining two LichEnvelopes
 	{
 		var newPoints = new Array();
 		
-		// Iterate through each LichSignals points array, calling the operator function at each point
+		// Iterate through each LichEnvelopes points array, calling the operator function at each point
 		
 		for(var i = 0; i < this.points.length(); ++i)
 		{
@@ -4143,7 +4156,7 @@ function LichSignal(_points, _shape) {
 		
 		newPoints = newPoints.sort(function(a,b){return a.front().value() - b.front().value()}); // Sort the array according to time
 		newPoints = this.removeDuplicates(newPoints); // Remove duplicates from the points array
-		result = new LichSignal(new LichArray(newPoints), this.shape);
+		result = new LichEnvelope(new LichArray(newPoints), this.shape);
 		LichVM.push(result);
 		return result.value();
 	}
@@ -4193,7 +4206,7 @@ function LichSignal(_points, _shape) {
 				newPoints.push(newPoint);
 			}
 		
-			var result = new LichSignal(newPoints, this.shape);
+			var result = new LichEnvelope(newPoints, this.shape);
 			LichVM.push(result);
 			return result.value();
 			break;
@@ -4226,11 +4239,11 @@ function LichSignal(_points, _shape) {
 			return this.add(object.object);
 			break;
 			
-		case 'Signal':
+		case 'Envelope':
 			return this.combine(object, this.addFunction);
 			break;
 
-		case 'BloodStream':
+		case 'Stream':
 			return this.add(object.value());
 			break;
 			
@@ -4261,7 +4274,7 @@ function LichSignal(_points, _shape) {
 				newPoints.push(newPoint);
 			}
 		
-			var result = new LichSignal(newPoints, this.shape);
+			var result = new LichEnvelope(newPoints, this.shape);
 			LichVM.push(result);
 			return result.value();
 			break;
@@ -4294,11 +4307,11 @@ function LichSignal(_points, _shape) {
 			return this.subtract(object.object);
 			break;
 			
-		case 'Signal':
+		case 'Envelope':
 			return this.combine(object, this.subtractFunction);
 			break;
 
-		case 'BloodStream':
+		case 'Stream':
 			return this.subtract(object.value());
 			break;
 			
@@ -4335,7 +4348,7 @@ function LichSignal(_points, _shape) {
 				newPoints.push(newPoint);
 			}
 		
-			var result = new LichSignal(newPoints, this.shape);
+			var result = new LichEnvelope(newPoints, this.shape);
 			LichVM.push(result);
 			return result.value();
 			break;
@@ -4368,11 +4381,11 @@ function LichSignal(_points, _shape) {
 			return this.divide(object.object);
 			break;
 			
-		case 'Signal':
+		case 'Envelope':
 			return this.combine(object, this.divideFunction);
 			break;
 
-		case 'BloodStream':
+		case 'Stream':
 			return this.divide(object.value());
 			break;
 			
@@ -4403,7 +4416,7 @@ function LichSignal(_points, _shape) {
 				newPoints.push(newPoint);
 			}
 		
-			var result = new LichSignal(newPoints, this.shape);
+			var result = new LichEnvelope(newPoints, this.shape);
 			LichVM.push(result);
 			return result.value();
 			break;
@@ -4436,11 +4449,11 @@ function LichSignal(_points, _shape) {
 			this.multiply(object.object);
 			break;
 			
-		case 'Signal':
+		case 'Envelope':
 			return this.combine(object, this.multiplyFunction);
 			break;
 
-		case 'BloodStream':
+		case 'Stream':
 			return this.multiply(object.value());
 			break;
 			
@@ -4472,7 +4485,7 @@ function LichSignal(_points, _shape) {
 				newPoints.push(newPoint);
 			}
 		
-			var result = new LichSignal(newPoints, this.shape);
+			var result = new LichEnvelope(newPoints, this.shape);
 			LichVM.push(result);
 			return result.value();
 			break;
@@ -4505,11 +4518,11 @@ function LichSignal(_points, _shape) {
 			return this.modulus(object.object);
 			break;
 			
-		case 'Signal':
+		case 'Envelope':
 			return this.combine(object, this.modulusFunction);
 			break;
 
-		case 'BloodStream':
+		case 'Stream':
 			return this.modulus(object.value());
 			break;
 			
@@ -4550,7 +4563,7 @@ function LichSignal(_points, _shape) {
 			return this.equivalent(object.object);
 			break;
 			
-		case 'Signal':
+		case 'Envelope':
 			
 			var bool = 1;
 			
@@ -4576,7 +4589,7 @@ function LichSignal(_points, _shape) {
 			return bool;
 			break;
 
-		case 'BloodStream':
+		case 'Stream':
 			return this.equivalent(object.value());
 			break;
 			
@@ -4617,7 +4630,7 @@ function LichSignal(_points, _shape) {
 			return this.inequivalent(object.object);
 			break;
 			
-		case 'Signal':
+		case 'Envelope':
 			var bool = 0;
 			
 			if(this.points.length() == object.points.length())
@@ -4642,7 +4655,7 @@ function LichSignal(_points, _shape) {
 			return bool;
 			break;
 
-		case 'BloodStream':
+		case 'Stream':
 			return this.inequivalent(object.value());
 			break;
 			
@@ -4683,7 +4696,7 @@ function LichSignal(_points, _shape) {
 			return this.greaterThan(object.object);
 			break;
 			
-		case 'Signal':
+		case 'Envelope':
 			var bool = 0;
 			
 			if(this.length() > object.length())
@@ -4695,7 +4708,7 @@ function LichSignal(_points, _shape) {
 			return bool;
 			break;
 
-		case 'BloodStream':
+		case 'Stream':
 			return this.greaterThan(object.value());
 			break;
 			
@@ -4736,7 +4749,7 @@ function LichSignal(_points, _shape) {
 			return this.lessThan(object.object);
 			break;
 			
-		case 'Signal':
+		case 'Envelope':
 			var bool = 0;
 			
 			if(this.length() < object.length())
@@ -4748,7 +4761,7 @@ function LichSignal(_points, _shape) {
 			return bool;
 			break;
 
-		case 'BloodStream':
+		case 'Stream':
 			return this.lessThan(object.value());
 			break;
 			
@@ -4789,7 +4802,7 @@ function LichSignal(_points, _shape) {
 			return this.greaterThanEqual(object.object);
 			break;
 			
-		case 'Signal':
+		case 'Envelope':
 			var bool = 0;
 			
 			if(this.length() >= object.length())
@@ -4801,7 +4814,7 @@ function LichSignal(_points, _shape) {
 			return bool;
 			break;
 
-		case 'BloodStream':
+		case 'Stream':
 			return this.greaterThanEqual(object.value());
 			break;
 			
@@ -4842,7 +4855,7 @@ function LichSignal(_points, _shape) {
 			return this.lessThanEqual(object.object);
 			break;
 			
-		case 'Signal':
+		case 'Envelope':
 			var bool = 0;
 			
 			if(this.length() <= object.length())
@@ -4854,7 +4867,7 @@ function LichSignal(_points, _shape) {
 			return bool;
 			break;
 
-		case 'BloodStream':
+		case 'Stream':
 			return this.lessThanEqual(object.value());
 			break;
 			
@@ -4903,11 +4916,11 @@ function LichSignal(_points, _shape) {
 			post("WTF. Casting to a Variable is like translating to vapid programmer speak.");
 			break;
 
-		case 'Signal':
+		case 'Envelope':
 			return this;
 			break;
 
-		case 'BloodStream':
+		case 'Stream':
 
 			var times = new Array();
 
@@ -4916,7 +4929,7 @@ function LichSignal(_points, _shape) {
 				times.push(this.points.arrayVar[i].arrayVar[0].to('Float'));
 			}
 
-			return new LichBloodStream(new LichArray(times), this);
+			return new LichStream(new LichArray(times), this);
 			break;
 			
 		default:
@@ -4926,9 +4939,9 @@ function LichSignal(_points, _shape) {
 
 	this.play = function()
 	{
-		var newBloodStream = this.to('BloodStream');
-		LichVM.push(newBloodStream);
-		return newBloodStream;
+		var newStream = this.to('Stream');
+		LichVM.push(newStream);
+		return newStream;
 	}
 
 	this.stop = function()
@@ -4964,7 +4977,7 @@ function LichSignal(_points, _shape) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// LichBloodStream
+// LichStream
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -4972,15 +4985,15 @@ function LichSignal(_points, _shape) {
 A stream of values at given intervals. Useful for sequencing, modulation, playback, etc...
 Everything is quantized to beats and aligned.
 
-[0] _durations: An array (although it doesn't have to be, it can be anything!) of durations, can be other BloodStreams or anything
-[1] _values: An Array (although it doesn't have to be, it can be anything!) of values, can be other BloodStreams or anything
+[0] _durations: An array (although it doesn't have to be, it can be anything!) of durations, can be other Streams or anything
+[1] _values: An Array (although it doesn't have to be, it can be anything!) of values, can be other Streams or anything
 
 example:
-BloodStream [ 0.1 0.2 1.0 ] [ { print '1' } { print '2' } { print '3' } { print '4' } ]
+Stream [ 0.1 0.2 1.0 ] [ { print '1' } { print '2' } { print '3' } { print '4' } ]
 
 */
 
-function LichBloodStream(_durations, _values) {
+function LichStream(_durations, _values) {
 		
 	// Public methods
 	this.value = function()
@@ -4995,7 +5008,7 @@ function LichBloodStream(_durations, _values) {
 	
 	this.type = function()
 	{
-		return 'BloodStream';
+		return 'Stream';
 	}
 	
 	this.length = function()
@@ -5096,11 +5109,11 @@ function LichBloodStream(_durations, _values) {
 			post("WTF. Casting to a Variable is like translating to vapid programmer speak.");
 			break;
 
-		case 'Signal':
-			return this.currentValue.to('Signal');
+		case 'Envelope':
+			return this.currentValue.to('Envelope');
 			break;
 
-		case 'BloodStream':
+		case 'Stream':
 			return this;
 			break;
 			
@@ -5144,24 +5157,24 @@ function LichBloodStream(_durations, _values) {
 
 	this.nextDuration = function(inval)
 	{
-		// post("BloodStream.nextDuration!!!");
+		// post("Stream.nextDuration!!!");
 		if(this.playing)
 		{
-			// post("BloodStream.nextDuration.playing == true");
+			// post("Stream.nextDuration.playing == true");
 			var duration;
 
 			if(this.durations.type() == 'Array')
 			{
 				duration = this.durations.arrayVar[this.durationArrayIndex % this.durations.length()];
-				// post("BloodStream.nextDuration this.durations.type() == Array");
+				// post("Stream.nextDuration this.durations.type() == Array");
 				this.durationArrayIndex = (this.durationArrayIndex + 1) % this.durations.length();
 			}
 
 			else
 			{
-				// post("BloodStream.nextDuration this.durations.type() != Array");
+				// post("Stream.nextDuration this.durations.type() != Array");
 				duration = this.durations;	
-				// post("BloodStream.nextDuration duration is assigned");
+				// post("Stream.nextDuration duration is assigned");
 			}
 
 			switch(duration.type())
@@ -5178,13 +5191,13 @@ function LichBloodStream(_durations, _values) {
 				duration = duration.to('Float').value();
 			}
 
-			// post("BloodStream.nextDuration: " + duration);
+			// post("Stream.nextDuration: " + duration);
 			return duration;
 		}
 		
 		else
 		{
-			// post("BloodStream.nextDuration: null");
+			// post("Stream.nextDuration: null");
 			return null;	
 		}
 	}
@@ -5208,7 +5221,7 @@ function LichBloodStream(_durations, _values) {
 		if(value.type() == 'Function')
 			value = value.call();
 
-		// post("BloodStream.nextValue: " + value);
+		// post("Stream.nextValue: " + value);
 
 		// LichVM.push(value);
 		this.currentValue = value;
@@ -5261,7 +5274,7 @@ function compileLich()
 	LichVM = new lichVirtualMachine();
 
 	// var add, subtract, multiply, divide, modulus, assign, equivalent, inequivalent, ifControl, println, callFunction, incrementOne, decrementOne;
-	// var newSignal, doFunction;
+	// var newEnvelope, doFunction;
 	
 	function add(argArray)
 	{
@@ -5505,7 +5518,7 @@ function compileLich()
 			printString = arrayToPrintString(argArray[0].value());
 		}
 		
-		else if(argArray[0].type() == "Signal")
+		else if(argArray[0].type() == "Envelope")
 		{
 			var printString = arrayToPrintString(argArray[0].points.value());
 			printString = printString.concat(" ").concat(argArray[0].shape);
@@ -5538,38 +5551,36 @@ function compileLich()
 	LichVM.reserveVar('call', new LichPrimitive(callFunction, 1));
 	LichVM.reserveVar('::', new LichPrimitive(callFunction, 1));
 	
-	function newSignal(argArray)
+	function newEnvelope(argArray)
 	{
-		var signal = new LichSignal(argArray[0], argArray[1].value());
-		LichVM.push(signal);
+		var Envelope = new LichEnvelope(argArray[0], argArray[1].value());
+		LichVM.push(Envelope);
 	}
 	
-	LichVM.reserveVar("Signal", new LichPrimitive(newSignal, 2));
-	LichVM.reserveVar("$", new LichPrimitive(newSignal, 2));
+	LichVM.reserveVar("Envelope", new LichPrimitive(newEnvelope, 2));
+	LichVM.reserveVar("Env", new LichPrimitive(newEnvelope, 2));
 
-	function newBloodStream(argArray)
+	function newStream(argArray)
 	{
-		var bloodStream = new LichBloodStream(argArray[0], argArray[1]);
-		LichVM.push(bloodStream);
+		var Stream = new LichStream(argArray[0], argArray[1]);
+		LichVM.push(Stream);
 	}
 
-	LichVM.reserveVar("BloodStream", new LichPrimitive(newBloodStream, 2));
+	LichVM.reserveVar("Stream", new LichPrimitive(newStream, 2));
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////
-	// NEED TO ADD SUPPORT FOR OTHER TYPES NOT JUST BLOOD STREAM. Perhaps by casting them to a blood stream
-	function playBloodStream(argArray)
+	function playStream(argArray)
 	{
 		argArray[0].play();
 	}
 
-	LichVM.reserveVar("play", new LichPrimitive(playBloodStream, 1));
+	LichVM.reserveVar("play", new LichPrimitive(playStream, 1));
 
-	function stopBloodStream(argArray)
+	function stopStream(argArray)
 	{
 		argArray[0].stop();
 	}
 
-	LichVM.reserveVar("stop", new LichPrimitive(stopBloodStream, 1));
+	LichVM.reserveVar("stop", new LichPrimitive(stopStream, 1));
 	
 	function atObject(argArray) // 2 arguments: [0] object [1] index
 	{
@@ -5660,9 +5671,36 @@ function compileLich()
 		{
 			Soliton.playGarbage(argArray[0].value());
 		}
+
+		else
+		{
+			Soliton.playGarbage(argArray[0].to('Float').value());
+		}
 	}
 
 	LichVM.reserveVar("garbage", new LichPrimitive(garbage, 1));
+
+	function setTempo(argArray) // argArray[0] size
+	{
+		if(argArray[0].type() == 'Float' || argArray[0].type() == 'Variable')
+		{
+			Soliton.Clock.default.setTempoAtTime(argArray[0].value(), 0);
+		}
+
+		else
+		{
+			Soliton.Clock.default.setTempoAtTime(argArray[0].to('Float').value(), 0);
+		}
+	}
+
+	LichVM.reserveVar("setTempo", new LichPrimitive(setTempo, 1));
+
+	function freeStack(argArray)
+	{
+		LichVM.freeStack();
+	}
+
+	LichVM.reserveVar("__FREE_STACK__", new LichPrimitive(freeStack, 0));
 	
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Constants

@@ -29,7 +29,7 @@ All rights reserved.
 }
 
 body {
-	/*background : black;*/
+	background : #001122;
 	/*color: white;*/
     margin-left: auto;
     margin-right: auto;
@@ -38,7 +38,7 @@ body {
 
 #terminal, #post {
 	background-color: transparent;
-	color: black;
+	color: white;
 	overflow: auto;
 	resize: none;
 	border: none;
@@ -98,5 +98,5 @@ body {
 	float: right;*/
 	padding-top: 0em;
 	padding-left: 0.2em;
-	color: #335533;
+	color: #99ff99;
 }
