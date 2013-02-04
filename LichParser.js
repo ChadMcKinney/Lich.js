@@ -175,10 +175,10 @@ function post(text)
 	obj.scrollTop = obj.scrollHeight;
 }
 
-function currentLine()
+function currentLine(name)
 {
 	var cursor, terminal, lineLength, lineNum, start, end, textArea;
-	terminal = document.getElementById("terminal");
+	terminal = document.getElementById(name);
 	lineLength = 62;
 	cursor = getInputSelection(terminal).end;
 	textArea = terminal.value;
@@ -502,12 +502,9 @@ function tokenize(string) // Break up a string into an array of tokens
 	return tokens;
 }
 
-function parseCurrentLine()
-{	
-	// Tokenize current line
-	var tokens, objects, line;
-	line = currentLine();
-	tokens = tokenize(line.line);
+function compileInput(line)
+{
+	tokens = tokenize(line);
 	objects = new Array();
 	
 	for(var i = 0; i < tokens.length; ++i) // populate the objects array
@@ -526,7 +523,22 @@ function parseCurrentLine()
 		LichVM.interpretStack();
 		LichVM.printState();
 	}
+}
 
+function parseChangeFromNetwork()
+{
+	var line = document.getElementById("codeToCompile").value;
+	post("NetworkCompile: " + line);
+	compileInput(line);
+}
+
+function parseCurrentLine()
+{	
+	// Tokenize current line
+	var tokens, objects, line;
+	line = currentLine("terminal");
+	document.getElementById("codeToCompile").value = line.line;
+	compileInput(line.line);
 	setCaretPosition(line.end + 1); // Move the cursor to the next line
 }
 
