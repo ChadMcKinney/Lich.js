@@ -28,10 +28,10 @@ var loginName = 'default'; // Login name for user
 
 
 var previousCompileTimes = {
-	'Chad' : 0,
-	'Curtis' : 0,
-	'Ben' : 0,
-	'Cole' : 0
+	'Chad' : -1,
+	'Curtis' : -1,
+	'Ben' : -1,
+	'Cole' : -1
 };
 
 function colorize(str)
@@ -537,35 +537,68 @@ function compileInput(line)
 function login()
 {
 	loginName = document.getElementById("userName").value;
-	post("Logging in user: "+loginName);
+	post("Logging in as user: "+loginName);
 }
 
 function parseChangeFromNetwork(name)
 {
-	// post("parseChangeFromNetwork!");
+	var line = document.getElementById(name).value;
+	post(name + ": " + line);
+	
+	try 
+	{
+		compileInput(line);
+	}
+
+	catch(err)
+	{
+		post(err);
+	}
+
+	/*
 	if(name == 'default')
 	{
 		// post("DEFAULT!");
 		var line = document.getElementById(name).value;
-		post("NetworkCompile: " + line);
-		compileInput(line);
+		post(name + ": " + line);
+		
+		try 
+		{
+			compileInput(line);
+		}
+
+		catch(err)
+		{
+			post(err);
+		}
 	}
 
 	else
 	{
-		post("NOT DEFAULT!");
 		for(var i = 3; i >= 0; --i)
 		{
 			var time = parseInt(document.getElementById(name+"Time"+i).value);
+			post(name + " compile time " + i + ": " + time);
 
 			if(time > previousCompileTimes[name])
 			{
 				var line = document.getElementById(name+i).value;
 				post(name+": " + line);
-				compileInput(line);
+
+				try 
+				{
+					compileInput(line);
+				}
+
+				catch(err)
+				{
+					post(err);
+				}
 			}
 		}
-	}
+
+		previousCompileTimes[name] = parseInt(document.getElementById(name+"Time0").value);
+	}*/
 }
 
 function rotateCompiledTextAreas(name)
@@ -583,7 +616,9 @@ function parseCurrentLine()
 	// Tokenize current line
 	var tokens, objects, line;
 	line = currentLine("terminal");
+	document.getElementById(loginName).value = line.line;
 
+	/*
 	if(loginName == 'default')
 	{
 		document.getElementById(loginName).value = line.line;
@@ -592,9 +627,9 @@ function parseCurrentLine()
 	else
 	{
 		rotateCompiledTextAreas(loginName);
-		document.getElementById(loginName+0).value = line.line;
 		document.getElementById(loginName+"Time0").value = new Date().getTime();
-	}
+		document.getElementById(loginName+0).value = line.line;
+	}*/
 
 	compileInput(line.line);
 	setCaretPosition(line.end + 1); // Move the cursor to the next line

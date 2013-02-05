@@ -127,15 +127,17 @@ stop stream7
 		onChange="javascript:return parseChangeFromNetwork('default');"> </textarea>
 
 	<!-- Hardcoded For now, will be dynamic in the future -->
-	<textarea id="Chad0" rows="1" spellcheck="false" readonly="true" style="display:none;"
+	<textarea id="Chad" rows="1" spellcheck="false" readonly="true" style="display:none;"
 		onChange="javascript:return parseChangeFromNetwork('Chad');"> </textarea>
-	<textarea id="Chad1" rows="1" spellcheck="false" readonly="true" style="display:none;"> </textarea>
-	<textarea id="Chad2" rows="1" spellcheck="false" readonly="true" style="display:none;"> </textarea>
-	<textarea id="Chad3" rows="1" spellcheck="false" readonly="true" style="display:none;"> </textarea>
-	<textarea id="ChadTime0" rows="1" spellcheck="false" readonly="true" style="display:none;">0</textarea>
-	<textarea id="ChadTime1" rows="1" spellcheck="false" readonly="true" style="display:none;">0</textarea>
-	<textarea id="ChadTime2" rows="1" spellcheck="false" readonly="true" style="display:none;">0</textarea>
-	<textarea id="ChadTime3" rows="1" spellcheck="false" readonly="true" style="display:none;">0</textarea>
+
+	<textarea id="Cole" rows="1" spellcheck="false" readonly="true" style="display:none;"
+		onChange="javascript:return parseChangeFromNetwork('Cole');"> </textarea>
+
+	<textarea id="Curtis" rows="1" spellcheck="false" readonly="true" style="display:none;"
+		onChange="javascript:return parseChangeFromNetwork('Curtis');"> </textarea>
+
+	<textarea id="Ben" rows="1" spellcheck="false" readonly="true" style="display:none;"
+		onChange="javascript:return parseChangeFromNetwork('Ben');"> </textarea>
 
 	<script LANGUAGE="JavaScript" type="text/javascript">
 		compileLich();
@@ -146,10 +148,17 @@ stop stream7
 	  mobwrite.syncGateway = 'http://mobwrite3.appspot.com/scripts/q.py';
 	</SCRIPT>
 	<BODY ONLOAD="
-		mobwrite.share('terminal', 'default'); 
-		mobwrite.minSyncInterval = 5;
-		mobwrite.maxSyncInterval = 30;
-		mobwrite.syncInterval = 10;
+		mobwrite.share(
+			'terminal', 
+			'default',
+			'Chad',
+			'Cole', 
+			'Curtis',
+			'Ben'
+		); 
+		mobwrite.minSyncInterval = 30;
+		mobwrite.maxSyncInterval = 1000;
+		mobwrite.syncInterval = 500;
 	">
 	
 </body>
