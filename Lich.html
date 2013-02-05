@@ -121,8 +121,21 @@ stop stream7
 	</textarea>
 	
 	<textarea id="post" rows="6" spellcheck="false" readonly="true">Lich.js&#10;</textarea>
-	<textarea id="codeToCompile" rows="1" spellcheck="false" readonly="true" style="display:none;"
-		onChange="javascript:return parseChangeFromNetwork();"> </textarea>
+	<textarea id="userName" spellcheck="false" contenteditable="true"
+		onChange="javascript:return login()">default</textarea>
+	<textarea id="default" rows="1" spellcheck="false" readonly="true" style="display:none;"
+		onChange="javascript:return parseChangeFromNetwork('default');"> </textarea>
+
+	<!-- Hardcoded For now, will be dynamic in the future -->
+	<textarea id="Chad0" rows="1" spellcheck="false" readonly="true" style="display:none;"
+		onChange="javascript:return parseChangeFromNetwork('Chad');"> </textarea>
+	<textarea id="Chad1" rows="1" spellcheck="false" readonly="true" style="display:none;"> </textarea>
+	<textarea id="Chad2" rows="1" spellcheck="false" readonly="true" style="display:none;"> </textarea>
+	<textarea id="Chad3" rows="1" spellcheck="false" readonly="true" style="display:none;"> </textarea>
+	<textarea id="ChadTime0" rows="1" spellcheck="false" readonly="true" style="display:none;">0</textarea>
+	<textarea id="ChadTime1" rows="1" spellcheck="false" readonly="true" style="display:none;">0</textarea>
+	<textarea id="ChadTime2" rows="1" spellcheck="false" readonly="true" style="display:none;">0</textarea>
+	<textarea id="ChadTime3" rows="1" spellcheck="false" readonly="true" style="display:none;">0</textarea>
 
 	<script LANGUAGE="JavaScript" type="text/javascript">
 		compileLich();
@@ -133,10 +146,10 @@ stop stream7
 	  mobwrite.syncGateway = 'http://mobwrite3.appspot.com/scripts/q.py';
 	</SCRIPT>
 	<BODY ONLOAD="
-		mobwrite.share('terminal', 'codeToCompile'); 
-		mobwrite.minSyncInterval = 25;
-		mobwrite.maxSyncInterval = 1000;
-		mobwrite.syncInterval = 500;
+		mobwrite.share('terminal', 'default'); 
+		mobwrite.minSyncInterval = 5;
+		mobwrite.maxSyncInterval = 30;
+		mobwrite.syncInterval = 10;
 	">
 	
 </body>

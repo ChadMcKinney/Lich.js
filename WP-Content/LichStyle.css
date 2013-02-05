@@ -100,3 +100,21 @@ body {
 	padding-left: 0.2em;
 	color: #99ff99;
 }
+
+#userName {
+	background-color: transparent;
+	position: relative;
+	float: right;
+	width: 100px;
+	height: 14px;
+	padding-top: 0em;
+	padding-left: 0.2em;
+	color: #99dd99;
+	border: none;
+	z-index: 20;
+	resize: none;
+	font-size: 1.0em;
+	font-family: Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Consolas,Monaco,Lucida Console,Courier New, monospace;
+	font-smooth: true;
+	overflow: hidden;
+}
