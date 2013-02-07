@@ -2,7 +2,7 @@
     Lich.js - JavaScript audio/visual live coding language
     Copyright (C) 2012 Chad McKinney
 
-	http://chadmckinneyaudio.com/
+	"http://chadmckinneyaudio.com/
 	seppukuzombie@gmail.com
 
 	All rights reserved.
@@ -131,7 +131,8 @@ function lichVirtualMachine() {
 	{
 		if(this.state == undefined)
 		{
-			post("undefined");
+			// Taken out because it's annoying!
+			// post("undefined");
 		}
 
 		else
@@ -3631,7 +3632,9 @@ function LichFunction(_argNames, _functionObjects) {
 
 	this.stop = function()
 	{
-		return this.call().stop();
+		var result = this.call();
+		if(result)
+			return result.stop();
 	}
 
 	this.serialize = function() // Serialize the object into a JSON representation
@@ -3924,17 +3927,20 @@ function LichVariable(_objectName) {
 
 	this.to = function(lichType)
 	{
-		return this.object.to(lichType);
+		if(this.object != undefined && this.object != null)
+			return this.object.to(lichType);
 	}
 
 	this.play = function()
 	{
-		return this.object.play();
+		if(this.object != undefined && this.object != null)
+			return this.object.play();
 	}
 
 	this.stop = function()
 	{
-		return this.object.stop();
+		if(this.object != undefined && this.object != null)
+			return this.object.stop();
 	}
 
 	this.serialize = function() // Serialize the object into a JSON representation
@@ -5658,15 +5664,22 @@ function compileLich()
 
 	LichVM.reserveVar("sleep", new LichPrimitive(sleep, 1));
 
-	function summon(argArray) // argArray[0] input, url, file, etc...
+	function summon(argArray) // argArray[0] url, offset, durtation
 	{
 		if(argArray[0].type() == 'String')
 		{
-			Soliton.playURL(argArray[0].value());
+			var name = argArray[0].value();
+			Soliton.playURL(
+				"http://chadmckinneyaudio.com/ChadWP-Content/resources/music/ConvertedSamples/"+name+".ogg",
+				name,
+				Soliton.context.destination,
+				argArray[1].to('Float').value(),
+				argArray[2].to('Float').value()
+			);
 		}
 	}
 
-	LichVM.reserveVar("summon", new LichPrimitive(summon, 1));
+	LichVM.reserveVar("summon", new LichPrimitive(summon, 3));
 
 	function garbage(argArray) // argArray[0] size
 	{
@@ -5704,7 +5717,21 @@ function compileLich()
 	}
 
 	LichVM.reserveVar("__FREE_STACK__", new LichPrimitive(freeStack, 0));
+
+	function printSamples(argArray)
+	{
+		post(sampleArray);
+	}
 	
+	LichVM.reserveVar("printSamples", new LichPrimitive(printSamples, 0));
+
+	function setMasterGain(argArray)
+	{
+		Soliton.masterGain.gain.value = argArray[0].to('Float').value();
+	}
+
+	LichVM.reserveVar("setMasterGain", new LichPrimitive(setMasterGain, 1));
+
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Constants
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -5720,6 +5747,96 @@ function compileLich()
 	Soliton.print = post; // Set Soliton.print to our post function
 	Soliton.printError = post; // Set Soliton.print to our post function
 	LichVM.scheduler = Soliton.Clock.default.scheduler;
+
+	sampleArray = new Array(
+		 "Airport",
+		 "Atmospheres",
+		 "Banya1",
+		 "Banya2",
+		 "BanyaSlap",
+		 "BassNogoro",
+		 "Bonang",
+		 "BurntUmberLogic",
+		 "Caxixi",
+		 "China",
+		 "Clap",
+		 "cluster",
+		 "Cosmic Peel",
+		 "Crawling Chaos",
+		 "Curtis mix",
+		 "DanceCadaverous",
+		 "DarkGuitar",
+		 "eight energon cubes SLASH a stone among stones and the dead among the dead",
+		 "FeldmanSQ2",
+		 "Feral Christmas Rooster - Merry Christmas From the Dragon's Lair - 01 Santa Claus is Comin to Town",
+		 "Feral Christmas Rooster - Merry Christmas From the Dragon's Lair - 02 Rudolph the Red-nosed Reindeer",
+		 "Feral Christmas Rooster - Merry Christmas From the Dragon's Lair - 03 Twas The Night Before Christmas",
+		 "Feral Christmas Rooster - Merry Christmas From the Dragon's Lair - 04 Jingle Bell Rock",
+		 "Feral Christmas Rooster - Merry Christmas From the Dragon's Lair - 05 White Christmas",
+		 "Feral Christmas Rooster - Merry Christmas From the Dragon's Lair - 06 Silent Night",
+		 "Feral Christmas Rooster - Merry Christmas From the Dragon's Lair - 07 Don't Even Look At It",
+		 "Flam",
+		 "Foetid Tunnels ambient",
+		 "GreaterThanThree",
+		 "hallway",
+		 "HarpSoundBox",
+		 "Hip trop",
+		 "Hydrogen Atom Living with Necromancer",
+		 "Insects and Plant Monsters demo 1",
+		 "Ionisation",
+		 "It Came From The Deep(With Good Chorus)",
+		 "Ketuk",
+		 "Killing Music (second mix)",
+		 "Lanquidity",
+		 "Lost To Time",
+		 "Massacre at High Noon DEMO",
+		 "Merzcord",
+		 "Micron Atlantis Aurochs Ceil Chrysolite Birdseed",
+		 "Military_dungeon_base",
+		 "MomentTrio",
+		 "monkdrone",
+		 "Monster",
+		 "myla_audio",
+		 "MyoBat",
+		 "Name Randomly Generated Grad Portfolio Final",
+		 "Nano Mi_dungeon_01",
+		 "Newspaper",
+		 "Nyogtha - Summoning and Arrival",
+		 "Octopodae Vulgaris (Third Mixdown)",
+		 "Organism2",
+		 "Pranzo",
+		 "R'lyeh Grad Portfolio Final",
+		 "Safezone 4",
+		 "SilverBat",
+		 "Sleep Music_02",
+		 "SlendroLow5",
+		 "Sonnerie",
+		 "ss4",
+		 "Stochastic",
+		 "The Sea (second Mixdown) mp3",
+		 "ThitherAndYon",
+		 "Track No08",
+		 "Turangalila",
+		 "Turtle Shells and Cloud Hopping Beta 1",
+		 "Underground",
+		 "Ushi Oni vs. Karee Koumori- the Demon Attacks normalized",
+		 "Vampire of the Sun_section2(faster)",
+		 "YigSerpent",
+		 "Yog-Sothoth, The Key and The Gate (mp3)",
+		 "01_Dracula II the Seal of the Curse",
+		 "02_ia ia",
+		 "03_Oh Dae Su",
+		 "04_Unicron, Swirling, Inifinite Torrent Of Nothingness  At The End Of All Things, Divided To Create Primus,  Progenitor Of The Transformers",
+		 "05_Eternal Hyper Ooze of the Aeons",
+		 "06_Elk Clone",
+		 "Zither"
+	);
+
+	/*
+	for(var i = 0; i < preloadArray.length; ++i)
+	{
+
+	}*/
 
 	/*
 	var white = new Soliton.Pwhite(0, 666).asStream();

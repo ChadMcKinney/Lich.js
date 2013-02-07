@@ -24,6 +24,7 @@
 
 var Soliton = {}; // Soliton namespace
 Soliton.context = 0;
+Soliton.masterGain = 0;
 Soliton.buffers = {}; // Soliton.buffers namespace
 
 window.addEventListener('load', init, false);
@@ -33,6 +34,9 @@ function init()
 	try
 	{
 		Soliton.context = new webkitAudioContext(); // create the webkit audio context!
+		Soliton.masterGain = Soliton.context.createGainNode();
+		Soliton.masterGain.connect(Soliton.context.destination);
+		Soliton.masterGain.gain.value = 0.25;
 	}
 
 	catch(e)
@@ -83,22 +87,23 @@ Soliton.roundUp = function(inval, quant)
 }
 
 // Play a buffer into the destination
-Soliton.playBuffer = function(buffer, destination)
+Soliton.playBuffer = function(buffer, destination, offset, duration)
 {
 	var source = Soliton.context.createBufferSource();
 	source.buffer = buffer;
+	source.buffer.duration = 1.0;
 
 	if(destination == undefined)
-		destination = Soliton.context.destination;
+		destination = Soliton.masterGain;
 
-	source.connect(destination);
-	source.noteOn(0);
+	source.connect(Soliton.masterGain);
+	source.start(0, offset, duration);
 	return source;
 }
 
 // Buffer a url with an optional name for storage, callback on finish, 
 // and optional destination (for callback function)
-Soliton.bufferURL = function(url, name, callback, callbackDestination)
+Soliton.bufferURL = function(url, name, callback, callbackDestination, offset, duration)
 {
 	if(!Soliton.buffers.hasOwnProperty(name))
 	{
@@ -116,7 +121,7 @@ Soliton.bufferURL = function(url, name, callback, callbackDestination)
 				function(buffer)
 				{
 					if(name != undefined)
-						Soliton.buffers[name] = buffer;
+					 	Soliton.buffers[name] = buffer;
 
 					if(callback != undefined)
 						callback(buffer, callbackDestination);
@@ -134,11 +139,11 @@ Soliton.bufferURL = function(url, name, callback, callbackDestination)
 		request.send();
 	}
 
-	else
+	else if(Soliton.buffers[name])
 	{
-		Soliton.print("Already Downloaded!");
+		// Soliton.print("Already Downloaded!");
 		if(callback != undefined)
-			callback(Soliton.buffers[name], callbackDestination);
+			callback(Soliton.buffers[name], callbackDestination, offset, duration);
 	}
 }
 
@@ -193,15 +198,18 @@ Soliton.bufferGarbage = function(size, name, callback, callbackDestination)
 }
 
 // Play a url with an optional name for the buffer that will be created to store the audio and optional destination
-Soliton.playURL = function(url, name, destination)
+Soliton.playURL = function(url, name, destination, offset, duration)
 {
 	if(name == undefined)
 		name = url;
 
 	if(destination == undefined)
-		destination = Soliton.context.destination;
+		destination = Soliton.masterGain;
 
-	Soliton.bufferURL(url, name, Soliton.playBuffer, destination);
+	Soliton.bufferURL(url, name, Soliton.playBuffer, destination, offset, duration);
+	
+	if(!Soliton.buffers[name])
+		Soliton.buffers[name] = 0;
 }
 
 // Play a buffer fille with garbage with an optional name for the buffer that will be created to store the audio 
@@ -212,7 +220,7 @@ Soliton.playGarbage = function(size, name, destination)
 		name = size;
 
 	if(destination == undefined)
-		destination = Soliton.context.destination;
+		destination = Soliton.masterGain;
 
 	Soliton.bufferGarbage(size, name, Soliton.playBuffer, destination);
 }

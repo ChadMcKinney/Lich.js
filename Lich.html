@@ -95,10 +95,17 @@ void main()                    // The entry point for our fragment shader.
 	>
 // Lich.js
 
-=> stream0 Stream [ 0.5 0.25 0.1 ] [ { garbage 0.5 } { garbage 0.125 } ]
-=> stream1 Stream 1.0 { garbage 0.1 }
-=> stream2 Stream 0.75 { garbage 0.1 }
-=> stream3 Stream [ 0.125 0.25 0.5 0.75 1.0 ] { garbage 0.1 }
+printSamples
+
+// Preload a sample
+summon "ThitherAndYon" 0 2.0
+
+=> stream0 Stream [ 0.5 0.25 1.0 ] [ { summon "ThitherAndYon" 30 1.0 } ]
+=> stream1 Stream [ 0.125 0.25 0.5 0.75 1.0 ] { summon "ThitherAndYon" 1 1 }
+=> stream2 Stream 2.0 { summon "ThitherAndYon" 11 2.0 }
+=> stream4 Stream [ 1 2 1 ] [ 1 2 3 4 5 6 7 8 9 ]
+=> stream3 Stream 0.75 { summon "ThitherAndYon" stream4 0.75 }
+
 stop stream0
 stop stream1
 stop stream2
@@ -106,6 +113,7 @@ stop stream3
 stop stream3
 play stream3
 stop stream3
+stop stream4
 
 => stream4 Stream 0.5 { garbage 0.1 }
 => stream5 Stream 0.4 { garbage 0.1 }

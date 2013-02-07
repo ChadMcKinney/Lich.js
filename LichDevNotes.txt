@@ -1,5 +1,8 @@
 // Lich Dev Notes
 
+// 02/05/13
+Hard coding things like the Sample URL and player names, these will need to be dynamic in the future.
+
 // 02/04/13
 Working more on network compiling. Developing a login system so that each user as a history of 4 commands that is synchronized to attempt to minimize issues from missing compiled lines over the network.
 
