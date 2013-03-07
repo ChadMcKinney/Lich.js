@@ -92,10 +92,10 @@ void main()                    // The entry point for our fragment shader.
 		spellcheck="false" 
 		onkeydown="javascript:return keyDown(event);" 
 		onkeyup="javascript:return keyUp(event);"
-	>
 // Lich.js
 
 printSamples
+setMasterGain 1.0
 
 // Preload a sample
 summon "ThitherAndYon" 0 2.0
@@ -110,7 +110,6 @@ stop stream0
 stop stream1
 stop stream2
 stop stream3
-stop stream3
 play stream3
 stop stream3
 stop stream4
@@ -121,10 +120,14 @@ stop stream4
 stop stream5
 
 // Streams can be passed to eachother!
-=> stream6 Stream [ 0.5 1.0 0.25 ] [ 0.5 0.125 ]
-=> stream7 Stream [ 0.25 0.5 ] { garbage stream6 }
+=> stream6 Stream [ 0.5 1.0 0.25 ] [ 0.5 0.125 1.0 ]
+=> stream7 Stream [ 0.25 0.5 ] { summon "Airport" stream6 0.5 }
+=> stream8 Stream stream6 { summon "Airport" + * stream6 4 5 0.5 }
+=> stream9 Stream / 0.125 stream6 { summon "Airport" + * stream6 20 5 0.25 }
 stop stream6
 stop stream7
+stop stream8
+stop stream9	
 
 	</textarea>
 	
