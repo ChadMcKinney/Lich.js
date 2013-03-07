@@ -104,7 +104,7 @@ summon "ThitherAndYon" 0 2.0
 => stream1 Stream [ 0.125 0.25 0.5 0.75 1.0 ] { summon "ThitherAndYon" 1 1 }
 => stream2 Stream 2.0 { summon "ThitherAndYon" 11 2.0 }
 => stream4 Stream [ 1 2 1 ] [ 1 2 3 4 5 6 7 8 9 ]
-=> stream3 Stream 0.75 { summon "ThitherAndYon" stream4 0.75 }
+=> stream3 Stream 0.75 { summon "ThitherAndYon" stream4 1.0 }
 
 stop stream0
 stop stream1
@@ -121,13 +121,13 @@ stop stream5
 
 // Streams can be passed to eachother!
 => stream6 Stream [ 0.5 1.0 0.25 ] [ 0.5 0.125 1.0 ]
-=> stream7 Stream [ 0.25 0.5 ] { summon "Airport" stream6 0.5 }
-=> stream8 Stream stream6 { summon "Airport" + * stream6 4 5 0.5 }
-=> stream9 Stream / 0.125 stream6 { summon "Airport" + * stream6 20 5 0.25 }
-stop stream6
+=> stream7 Stream [ 0.25 0.5 ] { summon "Airport" stream6 1.0 }
+=> stream8 Stream stream6 { summon "Airport" + * stream6 4 5 1.0 }
+=> stream9 Stream / 0.125 stream6 { summon "Airport" + * stream6 20 5 0.5 }
 stop stream7
 stop stream8
 stop stream9	
+stop stream6
 
 	</textarea>
 	

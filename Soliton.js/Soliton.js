@@ -92,12 +92,17 @@ Soliton.playBuffer = function(buffer, destination, offset, duration)
 	var source = Soliton.context.createBufferSource();
 	source.buffer = buffer;
 	source.buffer.duration = 1.0;
+	var fadeGain = Soliton.context.createGainNode();
 
 	if(destination == undefined)
 		destination = Soliton.masterGain;
 
-	source.connect(Soliton.masterGain);
+	source.connect(fadeGain);
+	fadeGain.connect(destination);
+	fadeGain.gain.value = 0.0;
 	source.start(0, offset, duration);
+	fadeGain.gain.linearRampToValueAtTime(1.0, Soliton.context.currentTime + 0.1);
+	fadeGain.gain.linearRampToValueAtTime(0.0, Soliton.context.currentTime + duration);
 	return source;
 }
 
