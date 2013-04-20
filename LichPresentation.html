@@ -1,0 +1,1073 @@
+<!-- 
+    Lich.js - JavaScript audio/visual live coding language
+    Copyright (C) 2012 Chad McKinney
+	
+	http://chadmckinneyaudio.com/
+	seppukuzombie@gmail.com
+	
+	All rights reserved.
+
+	This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
+-->
+
+<!DOCTYPE html>
+
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Lich.js</title>
+	<meta name="keywords" content="Experimental, Computer Music, Multimedia, Live Coding" />
+	<meta name="description" contexnt="Lich.js is a very simple live coding audio and visual language implemented in javascript." />
+	<link rel="stylesheet" type="text/css" href="WP-Content/LichStyle.css" media="all" />
+	<script type="text/javascript" src="third-party/glMatrix-0.9.5.min.js"></script>
+	<script type="text/javascript" src="third-party/webgl-utils.js"></script>
+	<script type="text/javascript" src="third-party/three.js/three.min.js"></script>
+	<script src="third-party/three.js/shaders/CopyShader.js"></script>
+	<script src="third-party/three.js/shaders/DotScreenShader.js"></script>
+	<script src="third-party/three.js/shaders/RGBShiftShader.js"></script>
+	<script src="third-party/three.js/postprocessing/EffectComposer.js"></script>
+	<script src="third-party/three.js/postprocessing/RenderPass.js"></script>
+	<script src="third-party/three.js/postprocessing/MaskPass.js"></script>
+	<script src="third-party/three.js/postprocessing/ShaderPass.js"></script>
+	<script type="text/javascript" src="Soliton.js/Soliton.js"></script>
+	<script type="text/javascript" src="CloudChamber.js/CloudChamber.js"></script>
+	<script type="text/javascript" src="Lich.js"></script>
+	<script type="text/javascript" src="LichParser.js"></script>
+</head>
+
+<body>
+
+	<canvas id="canvas">
+
+	</canvas>
+	
+	<textarea 
+		id="terminal"
+		contenteditable="true"
+		rows="28" 
+		spellcheck="false" 
+		onkeydown="javascript:return keyDown(event);" 
+		onkeyup="javascript:return keyUp(event);">
+//////////////////////////////////////////////////////////////////////////////////
+// Lich.js - A Networked Audio / Visual Live Coding Language
+//////////////////////////////////////////////////////////////////////////////////
+
+// Background
+background [ 0 25 45 ]
+
+print "Network Music"
+
+// Glitch Lich
+print "www.glitchlich.com"
+
+// Live Coding
+=> i 1
+do 5 { print + i " am a pro at live coding." sleep 0.5 }
+
+////////////
+// Lich.js
+////////////
+
+Lich is a small language implemented in javascript Because of this extra layer, it is pretty sludgey, though we do get some nice things in return. 
+
+The goal of the language is to have a light weight language that can be used for audio / visual collaborations that has very small depencies (you just have to use Google Chrome). 
+
+It runs on Windows, OS X and Linux
+
+// Technologies used:
+Google Chrome
+Web Audio: http://www.w3.org/TR/webaudio/
+WebGL: http://www.khronos.org/webgl/
+Three.js: http://threejs.org/
+Mobwrite: http://code.google.com/p/google-mobwrite/
+
+Lich.js is open source and licensed under the GPL version 2.0 license
+If you're interested in the source you can find it on github:
+
+print "https://github.com/ChadMcKinney/Lich.js"
+
+You can find the page for Lich.js here:
+http://www.chadmckinneyaudio.com/Lich.js/Lich.html
+
+
+do 50 { print "Feel free to open it up and play with it during the talk!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" }
+// pro tip: use shift-enter to execute code
+
+// Some other examples of Live Coding in the browser 
+https://github.com/jonbro/jsaxus
+http://mrdoob.com/139/GLSL_Sandbox
+http://www.sketchpatch.net/livecodelab/index.html
+http://webglplayground.net/
+http://toplap.org/toplapapp-in-the-browser/
+http://www.charlie-roberts.com/gibber/
+
+// Why make a langue for the browser?
+Easy deployment
+Easy to update and distribute those updates
+Easy to begin development
+Easy to begin using
+Crashes much less than my other programs!
+
+// There are plenty of disadvantges as well
+Sometimes the networking eats your code....
+The scheduling isn't always solid.
+The networking isn't very good right now.
+	The document updating could be better
+	Semantic synchronization can very easily get off
+You *have* to have an internet connection to use some features (like sample playback)
+Performance is slow.
+Debugging JavaScript (especially in somthing this complex) can be a time sink
+The project relies on technologies made by entities that aren't concerned with music / live coding / etc.
+
+
+///////////////////////
+// Language Specifics
+///////////////////////
+
+
+You don't use semicolons or commas! Just use spaces to seperate code chunks, including entries in an array
+The errors are insulting.
+
+// Types
+In Lich we have 8 types. 
+
+// Floats
+Lich has no ints; all numbers are floats. Just type a number and it's a float object. ex: 666 or 7.7709
+
+// Strings
+Normal text string. Strings can be created with ' ' or " ". Useful for sample names or for creating dictionary type structures.
+
+// Arrays
+Holds any other types including other Arrays. Declared using [].
+
+// Envelopes
+Continuous float containers similar to SC envelopes, although they are created with [time level] pairs and can have new points added at any time as well as indexed at any point in 'time'. You can use $ or Envelope to create a new Envelope. More on this later. 
+
+You can't really do much that's interesting with Envelopes at the moment
+
+// Variables
+Can be assigned to anything else except for Primitives. You have to assign a variable using the assign operator => otherwise you'll get an undefined error.
+
+// Functions
+Functions Functions are first class citizens, as in SC and can be called directly or passed as arguments and assigned to variables. Functions are defined using
+: someArg someOtherArg thisCanGoOnForever { do someArg }
+More on this later.
+
+// Primitives
+Primitives are functions written in Javascript. They can't be assigned to variables and they are always resolved on call. These include operators such as +, -, /, *, as well as some other important functions. You can't create a primitive directly in Lich (however you could write your own javascript), however they are called constantly.
+
+// Streams
+Streams are sequences of values that can be passed between eachother. This is Lich.js's main way of creating patterned structures.
+
+The goal of the language is to keep the list short in the hopes that they can be used in any combination (although this isn't quite the case yet).
+
+Here's the catch. Everything is written with prefix notation. What the means is there is no operator precedence and everything is executed from the left. This takes some getting used to with most of the common operators like math, but actually makes alot of sense from a functional perspective and It also allows us to forgo any parentheses. It was also much easier for me to make and given this is my first language I didn't want to make it harder than it already was.
+
+/////////////////////////
+// HOW TO EVALUATE CODE
+/////////////////////////
+
+To execute a line of code put your cursor on the line then use any combination of either ctrl, alt, command (OS X), or shift then enter (or return).
+
+You will see the result printed to the post pane on the right. Also, spaces are the only important syntax marker. You don't have to use commas in arrays for instance.
+
++ 1 1 // The plus goes on the left. Weird?
+add 1 1 // All operators have a text equivalent!
+- 1 1
+subtract 1 1
+* 2 1
+/ 1 2
+% 5 3
+
++ 1 [2 2] // Any two types can be added. Arrays expand other types. No commas!
++ 1 [2, 2] // Of course if that freaks you out, you can always use them anyways.
++ [2 2]  [3 3 3] // Like in SC, arrays wrap when combined.
+- [0 1 2] [3 3 3 3] // Effectively 0 - 3, 1 - 3, 2 - 3, 0 - 3
+
+=> two + 1 1 // Assign variables using =>
++ [two 3 3] [two two] // Variables can be added too!
++ 1 [0 1 2] 
+
+[[0 1 2] [1 2 3] [2 3 4]] // Arrays can be multidimensional
++ [1 2 3] [[1 2 3] [1 1 1]] // Multidimensional arrays can be added!
+
+// Notice the String in the array below. What happens when these add?
++ [1 2 3 4 5 '!'] [[[0 1 2] [1 2 3]] [[3 4 5] [6 7 8] [9 0 9]]]
+
+// Networking uses Google Mobwrite
+http://code.google.com/p/google-mobwrite/
+
+// Function definition and variable assignment.
+// Functions use : to signify argument declarations and {} for the body
+// This function simply adds the given arguments together.
+=> myAdd : arg1 arg2 { + arg1 arg2 } 
+::myAdd 1 1 // Call the function using ::
+call myAdd 1 1 // All operators have a text equivalents!!
+::myAdd ::myAdd 1 1 1 // Functions can be chained. Anything can be chained.
+
+// Function definition that calls another function.
+=> myFuncCall : arg2 operator arg3 { ::operator arg2 arg3 }
+::myFuncCall [0.5 0.5] myAdd 2 // Pass our earlier function as an argument (no ::)
+
+// You can declare a function without arguments by just using { }
+=> onePlusOne { + 1 1 }
+::onePlusOne
++ ::onePlusOne ::onePlusOne
+=> otherTwo { + 1 1 }
+=> alsoTwo { + ::otherTwo 0 }
++ ::alsoTwo 3
+
+== 1 1 // Booleans are just floats: 1 is true, 0 is false.
+equivalent 1 1 // All operators have text equivalents!!!
+== 1 0
+== [2 2] [2 2]
+== [2 2] [3 3]
+!= 1 1
+!= 1 0
+!= [2 2] [2 2]
+!= [2 2] [3 3]
+
+
+// If statements are primitives. if float { trueFunction } { falseFunction }
+if == 1 1 { print true } { print false } // true and false are predefined constants
+if != 1 1 { print true } { print false }
+
+// You can print anything. This is important later when using loops or other things
+// which just post a final result.
+print 1.655123 
+=> myPrint : arg1 { print arg1 } 
+::myPrint true
+=> myString "YO!"
+print myString
+=> myString2 'yo yo yo'
+print myString2
+
+// if statements can use if bool trueFunc falseFunc 
+// OR if bool trueFunc else falseFunc syntax
+if == 1 1 { print 'TRUE!' } else { print 'false.' }
+if != 1 1 { print "TRUE!" } else { print "false." }
+if > 1 1 { print 'true' } { print 'false' }
+if >= 1 1 { print 'true' } { print 'false' }
+if < 1 1 { print 'true' } else { print 'false' }
+if >= 1 1 { print 'true' } else { print 'false' }
+if ! true { print 'true' } { print 'false' }
+if ! false { print 'true' } { print 'false' }
+if && == 1 1 != 1 0 { print 'true' } { print 'false' }
+if && == 1 1 != 1 1 { print 'true' } { print 'false' }
+if || == 1 1 != 1 1 { print 'true' } { print 'false' }
+
+// You can use if statements inside of function definitions.
+=> ifInFunc : arg { if arg { print 'true' } { print 'false' } }
+::ifInFunc 1
+::ifInFunc 0
+
+// Functions defined inside of arrays or other functions are not called.
+=> myArray ['Yo!' 2 { print 'This should not print!'}]
+print myArray
+
+// To redefine a variable, simply use => on it again
+=> redefine 1
+redefine
+=> redefine 2
+redefine
+
+// Do loops don't have a built in i argument. 
+// You'll need to make it yourself if you want to use it.
+=> i 0 
+do 5 { print ++ i } // The ++ operator redefines a variable to itself plus one.
+
+// Note that 1 - 5 was posted, if you want the tradition 0 - 4 you'll need to
+// declare i as -1 so that the first increment brings it to 0.
+=> i -1 
+do 5 { print ++ i } // The ++ operator redefines a variable to itself plus one.
+
+
+// Index anything (ANYTHING!) with the @ operator
+=> anArray [90 91 92 93 94 95]
+@ anArray 4 // @ variable index
++ @ anArray 2 1 // You can chain anything. Example 92 + 1
+=> doomString "This is about doom god damnit!"
+@ doomString 5 // Index a string
+at doomString 5 // All operators have text equivalents!!!!
+=> i -1
+do 30 { print @ doomString ++ i } // Do print and incrementing!
+
+// Envelopes are defined using Env or Envelope. 
+// The first argument is an array of [time, value] pairs and an interpolation type
+=> myEnvelope Envelope [[0 0.0001] [0.1 1] [1 0.0001]] 'linear'
+=> i -1
+do 30 { print @ myEnvelope / ++ i 30 } // Envelopes can be indexed at any point in time.
+=> myEnvelope2 + myEnvelope 1 // define myEnvelope2 as myEnvelope + 1.
+
+=> myEnvelope3 Env [[0.5 5] [0.8 2] [3 0.1] [5 0]] 'linear'
++ myEnvelope myEnvelope3 // You can add Envelopes (actually anything) together.
+
+// Insert a value using the -> operator
+=> myArray [0 1 2 3 4 5]
+-> myArray 1 111
+insert myArray 2 222 // All operators have text equivalents!!!!!
+-> myArray 3 333
+-> myArray 999 999 // Anything after the final index just pushes.
+
+// You can insert in a Envelope too! It takes time and value as seperate args.
+-> myEnvelope 3 0.6666
+-> myEnvelope 0.25 7.7
+-> myEnvelope 10 999
+
+// You can insert in strings too!
+=> myString "Doom"
+-> myString 0 'Hey'
+-> myString 5 '!!!?!?!?!'
+-> myString 999 '999'
+
+// Every object has it's own internal namespace.
+// This allows any object to store information of any type.
+// This way you can easily create maps.
+// You can also create class like objects using maps of functions.
+
+=> myString 'MetaDoom' 
+-> myString 0 '666' // inserting string into another string by index
+-> myString 'doom' 'internal doom' // inserting using a string
+@ myString 'doom' // access by string
+@ myString 0 // access by index
+=> myInt 1
+-> myInt 'something' 'internal' // insert by string
+@ myInt 'something' // access by string
+=> myArray [0 1 2 3]
+-> myArray 0 666 // insert by index
+@ myArray 0 // access by index
+-> myArray 'key' 'value' // insert by string
+@ myArray 'key' // access by string
+=> sig $ [[0.1 1] [0.5 0]] 'linear'
+-> sig 0.7 5
+@ sig 0.6
+-> sig 'key' 'value'
+@ sig 'key'
+
+// Threading works by using the spawn primitive and supplying a function. Unforunately you can't spawn threads inside threads.
+spawn { print 'threading is easy!' }
+=> i 0
+spawn { do 50 { sleep 1 print ++ i } }
+
+garbage 2 // 2 seconds of a really simple oscillator
+
+// Play with some trash
+=> i 0.025
+do 5000 { garbage i sleep * i 1.1 }
+=> i2 0.075
+do 5000 { garbage i2 sleep * i2 1.1 }
+=> i3 0.03
+do 5000 { garbage i3 sleep * i3 1.1 }
+=> i4 0.01
+do 5000 { garbage i4 sleep * i4 1.1 }
+
+
+// Sample Playback
+print samples
+
+// Play back an audio file on the server
+summon "http://chadmckinneyaudio.com/ChadWP-Content/resources/music/Inventions(excerpt).mp3"
+
+// you can also just index the samples array to find a specific sample
+@ samples 0
+@ samples 50
+
+summon @ samples 50 1 3
+
+setMasterGain 1.0
+
+// Preload a sample
+summon "ThitherAndYon" 0 2.0
+
+=> stream0 Stream [ 0.5 0.25 1.0 ] [ { summon "ThitherAndYon" 30 1.0 } ]
+=> stream1 Stream [ 0.125 0.25 0.5 0.75 1.0 ] { summon "ThitherAndYon" 1 1 }
+=> stream2 Stream 2.0 { summon "ThitherAndYon" 11 2.0 }
+=> stream4 Stream [ 1 2 1 ] [ 1 2 3 4 5 6 7 8 9 ]
+=> stream3 Stream 0.75 { summon "ThitherAndYon" stream4 1.0 }
+
+stop stream0
+stop stream1
+stop stream2
+stop stream3
+play stream3
+stop stream3
+stop stream4
+
+=> stream4 Stream 0.5 { garbage 0.1 }
+=> stream5 Stream 0.4 { garbage 0.1 }
+stop stream4
+stop stream5
+
+// Streams can be passed to eachother!
+=> stream6 Stream [ 0.5 1.0 0.25 ] [ 0.5 0.125 1.0 ]
+=> stream7 Stream [ 0.25 0.5 ] { summon "Airport" stream6 1.0 }
+=> stream8 Stream stream6 { summon "Airport" + * stream6 4 5 1.0 }
+=> stream9 Stream / 0.125 stream6 { summon "Airport" + * stream6 20 5 0.5 }
+
+stop stream7
+stop stream8
+stop stream9	
+stop stream6
+
+=> sampleNum Stream 0.5 [ 0 1 2 3 ]
+=> sampleSwitching Stream 0.5 { summon @ samples sampleNum }
+stop sampleNum
+stop sampleSwitching
+
+///////////
+// Visuals
+///////////
+
+background [ 255 100 20 ]
+
+do 500 { background * random [ 0 120 240 ] sleep 0.01 } background [ 0 25 45 ]
+
+// Graphics has been introduced, although still rather primitive
+=> time Stream [ 0.5 0.125 ] [ 0.125 0.25 0.5 0.75 1.0 ]
+=> colorStream Stream * time 0.25 { background * time [ 155 0 55 ] }
+
+stop time
+play time
+stop time
+stop colorStream background [ 45 0 25 ]
+
+// Create and delete a sphere
+=> sphere1 sphere [ 0 0 0 ] 50 [ 255 0 0 ]
+wireframe sphere1 true
+wireframe sphere1 false
+move sphere1 [ -50 50 -10 ]
+move sphere1 [ 75 -20 30 ]
+delete sphere1
+
+// Create several spheres and delete all of them at the same time
+do 5 { => pointer sphere * random [ 10 100 100 ] 50 [ 255 0 0 ] }
+wireframeAll true
+wireframeAll false
+moveAll [ -50 50 -10 ]
+moveAll [ 75 -20 30 ]
+deleteAll
+
+
+// If you're curious you can see how all the types can be combined together.
+// Below is a type by type procession through several operators.
+
+// DECLARE VARIABLES FOR TESTING. YOU MUST DO THIS FIRST
+
+=> myTestFunc { + 1 1 }
+=> someVar 'other string'
+
+// STRINGS
+
++ 'Yo!' 'Yo2!' 
++ 'Yo!' 1
++ 'Yo!' ::myTestFunc
++ 'Yo!' + 1 1
++ 'Yo!' [1 2 3] // Multichannel expansion
++ 'Yo!' someVar
++ 'Yo!' Env [[0 0] [0.1 1] [1 0]] 'linear'
+
+- 'Yo!' 'Yo!2' 
+- 'Yo!' 1
+- 'Yo!' ::myTestFunc
+- 'Yo!' + 1 1
+- 'Yo!' [1 2 3]
+- 'Yo!' someVar
+- 'Yo!' Env [[0 0] [0.1 1] [1 0]] 'linear'
+
+* 'Yo!' 'Yo2!' 
+* 'Yo!' 1
+* 'Yo!' ::myTestFunc
+* 'Yo!' + 1 1
+* 'Yo!' [1 2 3]
+* 'Yo!' someVar
+* 'Yo!' Env [[0 0] [0.1 1] [1 0]] 'linear'
+
+/ 'Yo!' 'Yo2!' 
+/ 'Yo!' 1
+/ 'Yo!' ::myTestFunc
+/ 'Yo!' + 1 1
+/ 'Yo!' [1 2 3]
+/ 'Yo!' someVar
+/ 'Yo!' Env [[0 0] [0.1 1] [1 0]] 'linear'
+
+% 'Yo!' 'Yo2!' 
+% 'Yo!' 1
+% 'Yo!' ::myTestFunc
+% 'Yo!' + 1 1
+% 'Yo!' [1 2 3]
+% 'Yo!' someVar
+% 'Yo!' Env [[0 0] [0.1 1] [1 0]] 'linear'
+
+== 'Yo!' 'Yo2!' 
+== 'Yo!' 1
+== 'Yo!' ::myTestFunc
+== 'Yo!' + 1 1
+== 'Yo!' [1 2 3]
+== 'Yo!' someVar
+== 'Yo!' Env [[0 0] [0.1 1] [1 0]] 'linear'
+
+!= 'Yo!' 'Yo2!' 
+!= 'Yo!' 1
+!= 'Yo!' ::myTestFunc
+!= 'Yo!' + 1 1
+!= 'Yo!' [1 2 3]
+!= 'Yo!' someVar
+!= 'Yo!' Env [[0 0] [0.1 1] [1 0]] 'linear'
+
+> 'Yo!' 'Yo2!' 
+> 'Yo!' 1
+> 'Yo!' ::myTestFunc
+> 'Yo!' + 1 1
+> 'Yo!' [1 2 3]
+> 'Yo!' someVar
+> 'Yo!' Env [[0 0] [0.1 1] [1 0]] 'linear'
+
+< 'Yo!' 'Yo2!' 
+< 'Yo!' 1
+< 'Yo!' ::myTestFunc
+< 'Yo!' + 1 1
+< 'Yo!' [1 2 3]
+< 'Yo!' someVar
+< 'Yo!' Env [[0 0] [0.1 1] [1 0]] 'linear'
+
+>= 'Yo!' 'Yo2!' 
+>= 'Yo!' 1
+>= 'Yo!' ::myTestFunc
+>= 'Yo!' + 1 1
+>= 'Yo!' [1 2 3]
+>= 'Yo!' someVar
+>= 'Yo!' Env [[0 0] [0.1 1] [1 0]] 'linear'
+
+<= 'Yo!' 'Yo2!' 
+<= 'Yo!' 1
+<= 'Yo!' ::myTestFunc
+<= 'Yo!' + 1 1
+<= 'Yo!' [1 2 3]
+<= 'Yo!' someVar
+<= 'Yo!' Env [[0 0] [0.1 1] [1 0]] 'linear'
+
+// FLOATS
+
++ 1 'Yo!' 
++ 1 1
++ 1 ::myTestFunc
++ 1 + 1 1
++ 1 [1 2 3]
++ 1 someVar
++ 1 Env [[0 0] [0.1 1] [1 0]] 'linear'
+
+- 1 'Yo!' 
+- 1 1
+- 1 ::myTestFunc
+- 1 + 1 1
+- 1 [1 2 3]
+- 1 someVar
+- 1 Env [[0 0] [0.1 1] [1 0]] 'linear'
+
+* 1 'Yo!' 
+* 1 1
+* 1 ::myTestFunc
+* 1 + 1 1
+* 1 [1 2 3]
+* 1 someVar
+* 1 Env [[0 0] [0.1 1] [1 0]] 'linear'
+
+/ 1 'Yo!' 
+/ 1 1
+/ 1 ::myTestFunc
+/ 1 + 1 1
+/ 1 [1 2 3]
+/ 1 someVar
+/ 1 Env [[0 0] [0.1 1] [1 0]] 'linear'
+
+% 1 'Yo!' 
+% 1 1
+% 1 ::myTestFunc
+% 1 + 1 1
+% 1 [1 2 3]
+% 1 someVar
+% 1 Env [[0 0] [0.1 1] [1 0]] 'linear'
+
+== 1 'Yo!' 
+== 1 1
+== 1 ::myTestFunc
+== 1 + 1 1
+== 1 [1 2 3]
+== 1 someVar
+== 1 Env [[0 0] [0.1 1] [1 0]] 'linear'
+
+!= 1 'Yo!' 
+!= 1 1
+!= 1 ::myTestFunc
+!= 1 + 1 1
+!= 1 [1 2 3]
+!= 1 someVar
+!= 1 Env [[0 0] [0.1 1] [1 0]] 'linear'
+
+> 1 'Yo!' 
+> 1 1
+> 1 ::myTestFunc
+> 1 + 1 1
+> 1 [1 2 3]
+> 1 someVar
+> 1 Env [[0 0] [0.1 1] [1 0]] 'linear'
+
+< 1 'Yo!' 
+< 1 1
+< 1 ::myTestFunc
+< 1 + 1 1
+< 1 [1 2 3]
+< 1 someVar
+< 1 Env [[0 0] [0.1 1] [1 0]] 'linear'
+
+>= 1 'Yo!' 
+>= 1 1
+>= 1 ::myTestFunc
+>= 1 + 1 1
+>= 1 [1 2 3]
+>= 1 someVar
+>= 1 Env [[0 0] [0.1 1] [1 0]] 'linear'
+
+<= 1 'Yo!' 
+<= 1 1
+<= 1 ::myTestFunc
+<= 1 + 1 1
+<= 1 [1 2 3]
+<= 1 someVar
+<= 1 Env [[0 0] [0.1 1] [1 0]] 'linear'
+
+// Function
+
++ ::myTestFunc 'Yo2!' 
++ ::myTestFunc 1
++ ::myTestFunc ::myTestFunc
++ ::myTestFunc + 1 1
++ ::myTestFunc [1 2 3]
++ ::myTestFunc someVar
++ ::myTestFunc Env [[0 0] [0.1 1] [1 0]] 'linear'
+
+- ::myTestFunc 'Yo!2' 
+- ::myTestFunc 1
+- ::myTestFunc ::myTestFunc
+- ::myTestFunc + 1 1
+- ::myTestFunc [1 2 3]
+- ::myTestFunc someVar
+- ::myTestFunc Env [[0 0] [0.1 1] [1 0]] 'linear'
+
+* ::myTestFunc 'Yo2!' 
+* ::myTestFunc 1
+* ::myTestFunc ::myTestFunc
+* ::myTestFunc + 1 1
+* ::myTestFunc [1 2 3]
+* ::myTestFunc someVar
+* ::myTestFunc Env [[0 0] [0.1 1] [1 0]] 'linear'
+
+/ ::myTestFunc 'Yo2!' 
+/ ::myTestFunc 1
+/ ::myTestFunc ::myTestFunc
+/ ::myTestFunc + 1 1
+/ ::myTestFunc [1 2 3]
+/ ::myTestFunc someVar
+/ ::myTestFunc Env [[0 0] [0.1 1] [1 0]] 'linear'
+
+% ::myTestFunc 'Yo2!' 
+% ::myTestFunc 1
+% ::myTestFunc ::myTestFunc
+% ::myTestFunc + 1 1
+% ::myTestFunc [1 2 3]
+% ::myTestFunc someVar
+% ::myTestFunc Env [[0 0] [0.1 1] [1 0]] 'linear'
+
+== ::myTestFunc 'Yo2!' 
+== ::myTestFunc 1
+== ::myTestFunc ::myTestFunc
+== ::myTestFunc + 1 1
+== ::myTestFunc [1 2 3]
+== ::myTestFunc someVar
+== ::myTestFunc Env [[0 0] [0.1 1] [1 0]] 'linear'
+
+!= ::myTestFunc 'Yo2!' 
+!= ::myTestFunc 1
+!= ::myTestFunc ::myTestFunc
+!= ::myTestFunc + 1 1
+!= ::myTestFunc [1 2 3]
+!= ::myTestFunc someVar
+!= ::myTestFunc Env [[0 0] [0.1 1] [1 0]] 'linear'
+
+> ::myTestFunc 'Yo2!' 
+> ::myTestFunc 1
+> ::myTestFunc ::myTestFunc
+> ::myTestFunc + 1 1
+> ::myTestFunc [1 2 3]
+> ::myTestFunc someVar
+> ::myTestFunc Env [[0 0] [0.1 1] [1 0]] 'linear'
+
+< ::myTestFunc 'Yo2!' 
+< ::myTestFunc 1
+< ::myTestFunc ::myTestFunc
+< ::myTestFunc + 1 1
+< ::myTestFunc [1 2 3]
+< ::myTestFunc someVar
+< ::myTestFunc Env [[0 0] [0.1 1] [1 0]] 'linear'
+
+>= ::myTestFunc 'Yo2!' 
+>= ::myTestFunc 1
+>= ::myTestFunc ::myTestFunc
+>= ::myTestFunc + 1 1
+>= ::myTestFunc [1 2 3]
+>= ::myTestFunc someVar
+>= ::myTestFunc Env [[0 0] [0.1 1] [1 0]] 'linear'
+
+<= ::myTestFunc 'Yo2!' 
+<= ::myTestFunc 1
+<= ::myTestFunc ::myTestFunc
+<= ::myTestFunc + 1 1
+<= ::myTestFunc [1 2 3]
+<= ::myTestFunc someVar
+<= ::myTestFunc Env [[0 0] [0.1 1] [1 0]] 'linear'
+
+// Arrays
+
++ [1 2 3] 'Yo2!' 
++ [1 2 3] 1
++ [1 2 3] ::myTestFunc
++ [1 2 3] + 1 1
++ [1 2 3] [1 2 3]
++ [1 2 3] someVar
++ [1 2 3] Env [[0 0] [0.1 1] [1 0]] 'linear'
+
+- [1 2 3] 'Yo!2' 
+- [1 2 3] 1
+- [1 2 3] ::myTestFunc
+- [1 2 3] + 1 1
+- [1 2 3] [1 2 3]
+- [1 2 3] someVar
+- [1 2 3] Env [[0 0] [0.1 1] [1 0]] 'linear'
+
+* [1 2 3] 'Yo2!' 
+* [1 2 3] 1
+* [1 2 3] ::myTestFunc
+* [1 2 3] + 1 1
+* [1 2 3] [1 2 3]
+* [1 2 3] someVar
+* [1 2 3] Env [[0 0] [0.1 1] [1 0]] 'linear'
+
+/ [1 2 3] 'Yo2!' 
+/ [1 2 3] 1
+/ [1 2 3] ::myTestFunc
+/ [1 2 3] + 1 1
+/ [1 2 3] [1 2 3]
+/ [1 2 3] someVar
+/ [1 2 3] Env [[0 0] [0.1 1] [1 0]] 'linear'
+
+% [1 2 3] 'Yo2!' 
+% [1 2 3] 1
+% [1 2 3] ::myTestFunc
+% [1 2 3] + 1 1
+% [1 2 3] [1 2 3]
+% [1 2 3] someVar
+% [1 2 3] Env [[0 0] [0.1 1] [1 0]] 'linear'
+
+== [1 2 3] 'Yo2!' 
+== [1 2 3] 1
+== [1 2 3] ::myTestFunc
+== [1 2 3] + 1 1
+== [1 2 3] [1 2 3]
+== [1 2 3] someVar
+== [1 2 3] Env [[0 0] [0.1 1] [1 0]] 'linear'
+
+!= [1 2 3] 'Yo2!' 
+!= [1 2 3] 1
+!= [1 2 3] ::myTestFunc
+!= [1 2 3] + 1 1
+!= [1 2 3] [1 2 3]
+
+!= [1 2 3] someVar
+!= [1 2 3] Env [[0 0] [0.1 1] [1 0]] 'linear'
+
+> [1 2 3] 'Yo2!' 
+> [1 2 3] 1
+> [1 2 3] ::myTestFunc
+> [1 2 3] + 1 1
+> [1 2 3] [1 2 3]
+> [1 2 3] someVar
+> [1 2 3] Env [[0 0] [0.1 1] [1 0]] 'linear'
+
+< [1 2 3] 'Yo2!' 
+< [1 2 3] 1
+< [1 2 3] ::myTestFunc
+< [1 2 3] + 1 1
+< [1 2 3] [1 2 3]
+< [1 2 3] someVar
+< [1 2 3] Env [[0 0] [0.1 1] [1 0]] 'linear'
+
+>= [1 2 3] 'Yo2!' 
+>= [1 2 3] 1
+>= [1 2 3] ::myTestFunc
+>= [1 2 3] + 1 1
+>= [1 2 3] [1 2 3]
+>= [1 2 3] someVar
+>= [1 2 3] Env [[0 0] [0.1 1] [1 0]] 'linear'
+
+<= [1 2 3] 'Yo2!' 
+<= [1 2 3] 1
+<= [1 2 3] ::myTestFunc
+<= [1 2 3] + 1 1
+<= [1 2 3] [1 2 3]
+<= [1 2 3] someVar
+<= [1 2 3] Env [[0 0] [0.1 1] [1 0]] 'linear'
+
+// Variable
+
++ someVar 'Yo2!' 
++ someVar 1
++ someVar ::myTestFunc
++ someVar + 1 1
++ someVar [1 2 3]
++ someVar someVar
++ someVar Env [[0 0] [0.1 1] [1 0]] 'linear'
+
+- someVar 'Yo!2' 
+- someVar 1
+- someVar ::myTestFunc
+- someVar + 1 1
+- someVar [1 2 3]
+- someVar someVar
+- someVar Env [[0 0] [0.1 1] [1 0]] 'linear'
+
+* someVar 'Yo2!' 
+* someVar 1
+* someVar ::myTestFunc
+* someVar + 1 1
+* someVar [1 2 3]
+* someVar someVar
+* someVar Env [[0 0] [0.1 1] [1 0]] 'linear'
+
+/ someVar 'Yo2!' 
+/ someVar 1
+/ someVar ::myTestFunc
+/ someVar + 1 1
+/ someVar [1 2 3]
+/ someVar someVar
+/ someVar Env [[0 0] [0.1 1] [1 0]] 'linear'
+
+% someVar 'Yo2!' 
+% someVar 1
+% someVar ::myTestFunc
+% someVar + 1 1
+% someVar [1 2 3]
+% someVar someVar
+% someVar Env [[0 0] [0.1 1] [1 0]] 'linear'
+
+== someVar 'Yo2!' 
+== someVar 1
+== someVar ::myTestFunc
+== someVar + 1 1
+== someVar [1 2 3]
+== someVar someVar
+== someVar Env [[0 0] [0.1 1] [1 0]] 'linear'
+
+!= someVar 'Yo2!' 
+!= someVar 1
+!= someVar ::myTestFunc
+!= someVar + 1 1
+!= someVar [1 2 3]
+!= someVar someVar
+!= someVar Env [[0 0] [0.1 1] [1 0]] 'linear'
+
+> someVar 'Yo2!' 
+> someVar 1
+> someVar ::myTestFunc
+> someVar + 1 1
+> someVar [1 2 3]
+> someVar someVar
+> someVar Env [[0 0] [0.1 1] [1 0]] 'linear'
+
+< someVar 'Yo2!' 
+< someVar 1
+< someVar ::myTestFunc
+< someVar + 1 1
+< someVar [1 2 3]
+< someVar someVar
+< someVar Env [[0 0] [0.1 1] [1 0]] 'linear'
+
+>= someVar 'Yo2!' 
+>= someVar 1
+>= someVar ::myTestFunc
+>= someVar + 1 1
+>= someVar [1 2 3]
+>= someVar someVar
+>= someVar Env [[0 0] [0.1 1] [1 0]] 'linear'
+
+<= someVar 'Yo2!' 
+<= someVar 1
+<= someVar ::myTestFunc
+<= someVar + 1 1
+<= someVar [1 2 3]
+<= someVar someVar
+<= someVar Env [[0 0] [0.1 1] [1 0]] 'linear'
+
+// Envs
+
++ Env [[0 0] [0.1 1] [1 0]] 'linear' 'Yo2!' 
++ Env [[0 0] [0.1 1] [1 0]] 'linear' 1
++ Env [[0 0] [0.1 1] [1 0]] 'linear' ::myTestFunc
++ Env [[0 0] [0.1 1] [1 0]] 'linear' + 1 1
++ Env [[0 0] [0.1 1] [1 0]] 'linear' [1 2 3]
++ Env [[0 0] [0.1 1] [1 0]] 'linear' someVar
++ Env [[0 0] [0.1 1] [1 0]] 'linear' Env [[0 0] [0.1 1] [1 0]] 'linear'
+
+- Env [[0 0] [0.1 1] [1 0]] 'linear' 'Yo!2' 
+- Env [[0 0] [0.1 1] [1 0]] 'linear' 1
+- Env [[0 0] [0.1 1] [1 0]] 'linear' ::myTestFunc
+- Env [[0 0] [0.1 1] [1 0]] 'linear' + 1 1
+- Env [[0 0] [0.1 1] [1 0]] 'linear' [1 2 3]
+- Env [[0 0] [0.1 1] [1 0]] 'linear' someVar
+- Env [[0 0] [0.1 1] [1 0]] 'linear' Env [[0 0] [0.1 1] [1 0]] 'linear'
+
+* Env [[0 0] [0.1 1] [1 0]] 'linear' 'Yo2!' 
+* Env [[0 0] [0.1 1] [1 0]] 'linear' 1
+* Env [[0 0] [0.1 1] [1 0]] 'linear' ::myTestFunc
+* Env [[0 0] [0.1 1] [1 0]] 'linear' + 1 1
+* Env [[0 0] [0.1 1] [1 0]] 'linear' [1 2 3]
+* Env [[0 0] [0.1 1] [1 0]] 'linear' someVar
+* Env [[0 0] [0.1 1] [1 0]] 'linear' Env [[0 0] [0.1 1] [1 0]] 'linear'
+
+/ Env [[0 0] [0.1 1] [1 0]] 'linear' 'Yo2!' 
+/ Env [[0 0] [0.1 1] [1 0]] 'linear' 1
+/ Env [[0 0] [0.1 1] [1 0]] 'linear' ::myTestFunc
+/ Env [[0 0] [0.1 1] [1 0]] 'linear' + 1 1
+/ Env [[0 0] [0.1 1] [1 0]] 'linear' [1 2 3]
+/ Env [[0 0] [0.1 1] [1 0]] 'linear' someVar
+/ Env [[0 0] [0.1 1] [1 0]] 'linear' Env [[0 0] [0.1 1] [1 0]] 'linear'
+
+% Env [[0 0] [0.1 1] [1 0]] 'linear' 'Yo2!' 
+% Env [[0 0] [0.1 1] [1 0]] 'linear' 1
+% Env [[0 0] [0.1 1] [1 0]] 'linear' ::myTestFunc
+% Env [[0 0] [0.1 1] [1 0]] 'linear' + 1 1
+% Env [[0 0] [0.1 1] [1 0]] 'linear' [1 2 3]
+% Env [[0 0] [0.1 1] [1 0]] 'linear' someVar
+% Env [[0 0] [0.1 1] [1 0]] 'linear' Env [[0 0] [0.1 1] [1 0]] 'linear'
+
+== Env [[0 0] [0.1 1] [1 0]] 'linear' 'Yo2!' 
+== Env [[0 0] [0.1 1] [1 0]] 'linear' 1
+== Env [[0 0] [0.1 1] [1 0]] 'linear' ::myTestFunc
+== Env [[0 0] [0.1 1] [1 0]] 'linear' + 1 1
+== Env [[0 0] [0.1 1] [1 0]] 'linear' [1 2 3]
+== Env [[0 0] [0.1 1] [1 0]] 'linear' someVar
+== Env [[0 0] [0.1 1] [1 0]] 'linear' Env [[0 0] [0.1 1] [1 0]] 'linear'
+
+!= Env [[0 0] [0.1 1] [1 0]] 'linear' 'Yo2!' 
+!= Env [[0 0] [0.1 1] [1 0]] 'linear' 1
+!= Env [[0 0] [0.1 1] [1 0]] 'linear' ::myTestFunc
+!= Env [[0 0] [0.1 1] [1 0]] 'linear' + 1 1
+!= Env [[0 0] [0.1 1] [1 0]] 'linear' [1 2 3]
+!= Env [[0 0] [0.1 1] [1 0]] 'linear' someVar
+!= Env [[0 0] [0.1 1] [1 0]] 'linear' Env [[0 0] [0.1 1] [1 0]] 'linear'
+
+> Env [[0 0] [0.1 1] [1 0]] 'linear' 'Yo2!' 
+> Env [[0 0] [0.1 1] [1 0]] 'linear' 1
+> Env [[0 0] [0.1 1] [1 0]] 'linear' ::myTestFunc
+> Env [[0 0] [0.1 1] [1 0]] 'linear' + 1 1
+> Env [[0 0] [0.1 1] [1 0]] 'linear' [1 2 3]
+> Env [[0 0] [0.1 1] [1 0]] 'linear' someVar
+> Env [[0 0] [0.1 1] [1 0]] 'linear' Env [[0 0] [0.1 1] [1 0]] 'linear'
+
+< Env [[0 0] [0.1 1] [1 0]] 'linear' 'Yo2!' 
+< Env [[0 0] [0.1 1] [1 0]] 'linear' 1
+< Env [[0 0] [0.1 1] [1 0]] 'linear' ::myTestFunc
+< Env [[0 0] [0.1 1] [1 0]] 'linear' + 1 1
+< Env [[0 0] [0.1 1] [1 0]] 'linear' [1 2 3]
+< Env [[0 0] [0.1 1] [1 0]] 'linear' someVar
+< Env [[0 0] [0.1 1] [1 0]] 'linear' Env [[0 0] [0.1 1] [1 0]] 'linear'
+
+>= Env [[0 0] [0.1 1] [1 0]] 'linear' 'Yo2!' 
+>= Env [[0 0] [0.1 1] [1 0]] 'linear' 1
+>= Env [[0 0] [0.1 1] [1 0]] 'linear' ::myTestFunc
+>= Env [[0 0] [0.1 1] [1 0]] 'linear' + 1 1
+>= Env [[0 0] [0.1 1] [1 0]] 'linear' [1 2 3]
+>= Env [[0 0] [0.1 1] [1 0]] 'linear' someVar
+>= Env [[0 0] [0.1 1] [1 0]] 'linear' Env [[0 0] [0.1 1] [1 0]] 'linear'
+
+<= Env [[0 0] [0.1 1] [1 0]] 'linear' 'Yo2!' 
+<= Env [[0 0] [0.1 1] [1 0]] 'linear' 1
+<= Env [[0 0] [0.1 1] [1 0]] 'linear' ::myTestFunc
+<= Env [[0 0] [0.1 1] [1 0]] 'linear' + 1 1
+<= Env [[0 0] [0.1 1] [1 0]] 'linear' [1 2 3]
+<= Env [[0 0] [0.1 1] [1 0]] 'linear' someVar
+<= Env [[0 0] [0.1 1] [1 0]] 'linear' Env [[0 0] [0.1 1] [1 0]] 'linear'
+
+
+// Developments that should (could) happen
+More interesting ways to use samples: Filtering, Distortion, Convolution, etc...
+More interesting things to draw including arbitrary meshes as well as shader generation
+More high level abstractions that simplify commons task
+Better networking, especially for code execution, drop mobwrite?
+A seperated chat area that can be printed to for easier communication between users
+Some low level auto complete to clue the user about the number of arguments.
+Perhaps some code black shading so that the user can easily more quickly grok code structures
+Highlighting of code blocks on compile
+Debugging!
+Documentation!
+
+
+	</textarea>
+	
+	<textarea id="post" rows="6" spellcheck="false" readonly="true">Lich.js&#10;</textarea>
+	<textarea id="userName" spellcheck="false" contenteditable="true"
+		onChange="javascript:return login()">default</textarea>
+	<textarea id="default" rows="1" spellcheck="false" readonly="true" style="display:none;"
+		onChange="javascript:return parseChangeFromNetwork('default');"> </textarea>
+
+	<!-- Hardcoded For now, will be dynamic in the future -->
+	<textarea id="Chad" rows="1" spellcheck="false" readonly="true" style="display:none;"
+		onChange="javascript:return parseChangeFromNetwork('Chad');"> </textarea>
+
+	<textarea id="Cole" rows="1" spellcheck="false" readonly="true" style="display:none;"
+		onChange="javascript:return parseChangeFromNetwork('Cole');"> </textarea>
+
+	<textarea id="Curtis" rows="1" spellcheck="false" readonly="true" style="display:none;"
+		onChange="javascript:return parseChangeFromNetwork('Curtis');"> </textarea>
+
+	<textarea id="Ben" rows="1" spellcheck="false" readonly="true" style="display:none;"
+		onChange="javascript:return parseChangeFromNetwork('Ben');"> </textarea>
+
+	<script LANGUAGE="JavaScript" type="text/javascript">
+		compileLich();
+	</script>
+
+	<!-- NETWORK SYNCHRONIZATION. CURRENTLY OFF. UNCOMMENT TO RESTORE.
+
+	<SCRIPT SRC="http://mobwrite3.appspot.com/static/compressed_form.js"></SCRIPT>`
+	<SCRIPT>
+	  mobwrite.syncGateway = 'http://mobwrite3.appspot.com/scripts/q.py';
+	</SCRIPT>
+	
+	<BODY ONLOAD="
+		mobwrite.share(
+			'terminal', 
+			'default',
+			'Chad',
+			'Cole', 
+			'Curtis',
+			'Ben'
+		); 
+		mobwrite.minSyncInterval = 500;
+		mobwrite.maxSyncInterval = 1000;
+		mobwrite.syncInterval = 500;
+	">
+	-->
+</body>
+
+</html>

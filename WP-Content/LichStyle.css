@@ -29,8 +29,9 @@ All rights reserved.
 }
 
 body {
-	background : #001122;
+	/* background : #001122; */
 	/*color: white;*/
+	background-color: transparent;
     margin-left: auto;
     margin-right: auto;
     overflow: hidden;
@@ -53,7 +54,7 @@ body {
 }
 
 #canvas {
-	/*background-color: transparent;*/
+	background-color: transparent;
 	position: absolute;
 	top: 0px;
 	left: 0px;
@@ -64,17 +65,17 @@ body {
 
 ::selection {
 	color: #FF0000;
-	background: ##335533;
+	background-color: ##335533;
 }
 
 ::-moz-selection {
 	color: #FF0000;
-	background: ##335533; 
+	background-color: ##335533; 
 }
 
 ::-webkit-selection {
 	color: #FF0000;
-	background: ##335533;
+	background-color: ##335533;
 }
 
 #terminal {

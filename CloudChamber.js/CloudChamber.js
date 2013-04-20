@@ -32,6 +32,7 @@ CloudChamber.ONE_SECOND_IN_MILLIS = 1000;
 CloudChamber.PI = 3.141592654;
 CloudChamber.POSITION_DATA_SIZE = 3;
 CloudChamber.COLOR_DATA_SIZE = 4;
+CloudChamber.pointers = new Array();
 
 ////////////////////////////////////////
 // Helper functions for loading files
@@ -86,13 +87,13 @@ CloudChamber.loadFiles = function(urls, callback, errorCallback)
 
     for (var i = 0; i < numUrls; i++) 
     {
-        loadFile(urls[i], i, partialCallback, errorCallback);
+        CloudChamber.loadFile(urls[i], i, partialCallback, errorCallback);
     }
 }
 
 CloudChamber.loadShaders = function(vertName, fragName)
 {
-	loadFiles([vertName, fragName], CloudChamber.setShaders, 
+	CloudChamber.loadFiles([vertName, fragName], CloudChamber.setShaders, 
 		function(url)
 		{
 			alert('CLOUD CHAMBER: Failed to download "' + url + '"');
@@ -103,7 +104,7 @@ CloudChamber.loadShaders = function(vertName, fragName)
 CloudChamber.setShaders = function(shaders) // An array of shader programs as a string array [0] vert [1] frag
 {
 	var vertexShader = CloudChamber.gl.createShader(CloudChamber.gl.VERTEX_SHADER);
-	CloudChamber.gl.shaderSource(vertexShader, document.getElementById("vertex_shader").text);
+	CloudChamber.gl.shaderSource(vertexShader, shaders[0]);
 	CloudChamber.gl.compileShader(vertexShader);
 	
 	var compiled = CloudChamber.gl.getShaderParameter(vertexShader, CloudChamber.gl.COMPILE_STATUS);
@@ -111,7 +112,7 @@ CloudChamber.setShaders = function(shaders) // An array of shader programs as a 
 		CloudChamber.print("ERROR COMPILING VERTEX  SHADER");
 
 	var fragmentShader = CloudChamber.gl.createShader(CloudChamber.gl.FRAGMENT_SHADER);
-	CloudChamber.gl.shaderSource(fragmentShader, document.getElementById("fragment_shader").text);
+	CloudChamber.gl.shaderSource(fragmentShader, shaders[1]);
 	CloudChamber.gl.compileShader(fragmentShader);
 
 	compiled = CloudChamber.gl.getShaderParameter(fragmentShader, CloudChamber.gl.COMPILE_STATUS);
@@ -155,10 +156,16 @@ CloudChamber.print = function(text)
 // Start animating
 CloudChamber.start = function()
 {
+	var drawFunc = function() 
+	{
+		window.requestAnimFrame(CloudChamber.draw, CloudChamber.canvas);
+	}
+
 	if(CloudChamber.framerate <= 0 || CloudChamber.framerate == undefined)
 		CloudChamber.print("CLOUD CHAMBER: FRAMERATE IS <= 0 OR UNDEFINED. NOT STARTING.");
 	else
-		CloudChamber.timer = setTimeout(CloudChamber.draw, CloudChamber.ONE_SECOND_IN_MILLIS / CloudChamber.framerate);
+		CloudChamber.timer = setInterval(drawFunc, CloudChamber.ONE_SECOND_IN_MILLIS / CloudChamber.framerate);
+		//CloudChamber.timer = setInterval(CloudChamber.draw, CloudChamber.ONE_SECOND_IN_MILLIS / CloudChamber.framerate);
 }
 
 // Stop animating
@@ -180,13 +187,35 @@ CloudChamber.checkGLError = function()
 
 
 CloudChamber.draw = function(time)
-{
+{		
+		CloudChamber.composer.render(CloudChamber.scene, CloudChamber.camera);
+		
+		/*
+		var move = Math.sin(time * 0.0013);
+		CloudChamber.camera.position.x = Math.sin(time * 0.0025) * 40;
+		CloudChamber.camera.position.y = Math.sin(time * 0.002) * 30;
+		CloudChamber.camera.position.z = 200 + (Math.sin(time * 0.0015) * 99);
+
+		CloudChamber.testLight.position.x = move * 100;
+		CloudChamber.testLight.position.y = move * 100;
+		CloudChamber.testLight.position.y = move * -100;*/
+
+		/*
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+		gluPerspective(50.0, 1.0, 3.0, 7.0);
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+
+		CloudChamber.mvpMatrix = mat4.lookAt(CloudChamber.eye, CloudChamber.look, CloudChamber.up);
+
 		CloudChamber.gl.bindFramebuffer(CloudChamber.gl.FRAMEBUFFER, null);		
     	CloudChamber.gl.viewport(0, 0, CloudChamber.gl.viewportWidth, CloudChamber.gl.viewportHeight);
+    	CloudChamber.gl.clearColor(Math.random(), Math.random(), Math.random(), 1);
     	CloudChamber.gl.clear(CloudChamber.gl.COLOR_BUFFER_BIT);
 		
-		mat4.identity(CloudChamber.modelMatrix);
-		
+    	//mat4.identity(CloudChamber.modelMatrix);
+
 		CloudChamber.gl.enableVertexAttribArray(CloudChamber.positionHandle);
 		CloudChamber.gl.bindBuffer(CloudChamber.gl.ARRAY_BUFFER, trianglePositionBufferObject);
 		
@@ -211,13 +240,23 @@ CloudChamber.draw = function(time)
 			0
 		);
 
-		mat4.multiply(CloudChamber.viewMatrix, CloudChamber.modelMatrix, CloudChamber.mvpMatrix);
+		// mat4.multiply(CloudChamber.viewMatrix, CloudChamber.modelMatrix, CloudChamber.mvpMatrix);
 		mat4.multiply(CloudChamber.projectionMatrix, CloudChamber.mvpMatrix, CloudChamber.mvpMatrix);
-		CloudChamber.gl.uniformMatrix4fv(CloudChamber.mvpMatrixHandle, false, CloudChamber.mvpMatrix);
+		
+		CloudChamber.gl.uniformMatrix4fv(
+			CloudChamber.mvpMatrixHandle, 
+			false, 
+			CloudChamber.mvpMatrix
+		);
+		
 		CloudChamber.gl.drawArrays(CloudChamber.gl.TRIANGLES, 0, 3);
 
 		CloudChamber.gl.flush();
-		window.requestAnimFrame(CloudChamber.draw, CloudChamber.canvas);
+		*/
+
+
+		// CloudChamber.print("CloudChamber drawn: " + time);
+		// window.requestAnimFrame(CloudChamber.draw, CloudChamber.canvas);
 
 		//if(CloudChamber.drawCallback != undefined)
 		//	CloudChamber.drawCallback(this);
@@ -233,6 +272,7 @@ CloudChamber.draw = function(time)
 CloudChamber.setup = function(canvasElementName, framerate, drawCallback, printCallback)
 {
 	CloudChamber.canvas = document.getElementById(canvasElementName);
+	/*
 	CloudChamber.gl = WebGLUtils.setupWebGL(CloudChamber.canvas);
 	CloudChamber.gl.viewport(0, 0, CloudChamber.canvas.clientWidth, CloudChamber.canvas.clientHeight);
 	CloudChamber.projectionMatrix = mat4.create();
@@ -241,14 +281,14 @@ CloudChamber.setup = function(canvasElementName, framerate, drawCallback, printC
 	CloudChamber.mvpMatrix = mat4.create();
 	CloudChamber.mvpMatrixHandle = 0;
 	CloudChamber.positionHandle = 0;
-	CloudChamber.colorHandle = 0;
+	CloudChamber.colorHandle = 0;*/
 	
 	CloudChamber.framerate = framerate;
 	CloudChamber.drawCallback = drawCallback;
 	CloudChamber.printCallback = printCallback
 	CloudChamber.timer = 0;
-	CloudChamber.vert = "uniform mat4 mvpMatrix; attribute vec4 position; attribute vec4 color; varying vec4 vColor; void main() { vColor = color; gl_Position = position * mvpMatrix; }";
-	CloudChamber.frag = "varying vec4 vColor; void main() { gl_FragColor = vColor; }";
+	// CloudChamber.vert = "uniform mat4 mvpMatrix; attribute vec4 position; attribute vec4 color; varying vec4 vColor; void main() { vColor = color; gl_Position = position * mvpMatrix; }";
+	// CloudChamber.frag = "varying vec4 vColor; void main() { gl_FragColor = vColor; }";
 	CloudChamber.currentProgram = 0;
 
 	// Setup view frustum and projection matrix
@@ -260,25 +300,30 @@ CloudChamber.setup = function(canvasElementName, framerate, drawCallback, printC
 	var near = 1.0;
 	var far = 10.0;
 	mat4.frustum(left, right, bottom, top, near, far, CloudChamber.projectionMatrix);
-	CloudChamber.gl.clearColor(0.9, 0.9, 0.9, 1);
+	// CloudChamber.gl.clearColor(0, 0, 0, 1);
 
-	var eye = vec3.create();
-	eye[0] = 0;
-	eye[1] = 0;
-	eye[2] = 1.5;
+	CloudChamber.eye = vec3.create();
+	CloudChamber.eye[0] = 25;
+	CloudChamber.eye[1] = 25;
+	CloudChamber.eye[2] = 25;
 
-	var look = vec3.create();
-	look[0] = 0;
-	look[1] = 0;
-	look[2] = -5;
+	CloudChamber.look = vec3.create();
+	CloudChamber.look[0] = 0;
+	CloudChamber.look[1] = 0;
+	CloudChamber.look[2] = 0;
 
-	var up = vec3.create();
-	up[0] = 0;
-	up[1] = 1;
-	up[2] = 0;
+	CloudChamber.up = vec3.create();
+	CloudChamber.up[0] = 0;
+	CloudChamber.up[1] = 1;
+	CloudChamber.up[2] = 0;
 
-	mat4.lookAt(eye, look, up, CloudChamber.viewMatrix);
-	CloudChamber.setShaders([CloudChamber.vert, CloudChamber.frag]);
+	/*
+	CloudChamber.mvpMatrix = mat4.lookAt(CloudChamber.eye, CloudChamber.look, CloudChamber.up);
+
+	CloudChamber.loadShaders(
+		"http://chadmckinneyaudio.com/Lich.js/CloudChamber.js/Cloud.vert",
+		"http://chadmckinneyaudio.com/Lich.js/CloudChamber.js/Cloud.frag"
+	);
 
 	// Define points for equilateral triangles.
 	trianglePositions = new Float32Array([
@@ -306,20 +351,211 @@ CloudChamber.setup = function(canvasElementName, framerate, drawCallback, printC
 	CloudChamber.gl.bindBuffer(CloudChamber.gl.ARRAY_BUFFER, triangleColorBufferObject);
 	CloudChamber.checkGLError();
 	CloudChamber.gl.bufferData(CloudChamber.gl.ARRAY_BUFFER, triangleColors, CloudChamber.gl.STATIC_DRAW);
-	CloudChamber.checkGLError();
+	CloudChamber.checkGLError();*/
 
-	window.requestAnimFrame(CloudChamber.draw, CloudChamber.canvas);
+	//window.requestAnimFrame(CloudChamber.draw, CloudChamber.canvas);
+
+	var cameraViewAngle = 45, near = 0.1, far = 10000;
+	
+	CloudChamber.renderer = new THREE.WebGLRenderer({antialias: true});
+
+
+	CloudChamber.camera = new THREE.PerspectiveCamera(
+		cameraViewAngle,
+		ratio,
+		near,
+		far
+	);
+
+	CloudChamber.scene = new THREE.Scene();
+	CloudChamber.scene.add(CloudChamber.camera);
+	CloudChamber.camera.position.z = 300;
+	CloudChamber.renderer.setSize(CloudChamber.canvas.clientWidth, CloudChamber.canvas.clientHeight);
+	CloudChamber.canvas.parentNode.replaceChild(CloudChamber.renderer.domElement, CloudChamber.canvas);
 	CloudChamber.print("CloudChamber created.");
+
+	/*
+	var sphereMaterial = new THREE.MeshLambertMaterial(
+		{
+			color: 0xCC0000
+		}
+	);
+
+	CloudChamber.testSphere = new THREE.Mesh(
+		new THREE.SphereGeometry(
+			50,
+			64,
+			64
+		),
+		sphereMaterial
+	);
+
+	CloudChamber.scene.add(CloudChamber.testSphere);*/
+
+	CloudChamber.testLight = new THREE.PointLight(0xFFFFFF);
+
+	CloudChamber.testLight.position.x = 10;
+	CloudChamber.testLight.position.y = 50;
+	CloudChamber.testLight.position.z = 130;	
+
+	CloudChamber.scene.add(CloudChamber.testLight);
+	CloudChamber.renderer.setClearColorHex(0x000000, 1);
+
+	// postprocessing
+	CloudChamber.composer = new THREE.EffectComposer(CloudChamber.renderer);
+	CloudChamber.composer.addPass( new THREE.RenderPass(CloudChamber.scene, CloudChamber.camera));
+
+/*
+	var dotScreenEffect = new THREE.ShaderPass(THREE.DotScreenShader);
+	dotScreenEffect.uniforms['scale'].value = 4;
+	CloudChamber.composer.addPass(dotScreenEffect);*/
+
+	var rgbEffect = new THREE.ShaderPass(THREE.RGBShiftShader);
+	rgbEffect.uniforms['amount'].value = 0.0015;
+	rgbEffect.renderToScreen = true;
+	CloudChamber.composer.addPass(rgbEffect);
+
+	// shim layer with setTimeout fallback
+	window.requestAnimFrame = (function(){
+	  return  window.requestAnimationFrame       ||
+	          window.webkitRequestAnimationFrame ||
+	          window.mozRequestAnimationFrame    ||
+	          function( callback ){
+	            window.setTimeout(callback, 33);
+	          };
+	})();
+
+
+	// usage:
+	// instead of setInterval(render, 16) ....
+
+	(function animloop(time){
+	  requestAnimFrame(animloop);
+	  CloudChamber.draw(time);
+	})();
+	// place the rAF *before* the render() to assure as close to
+	// 60fps with the setTimeout fallback.
 }
 
-/******************************************************************************************************************
-*	VboMesh - GL style mesh with support for drawing and materials
-*
-******************************************************************************************************************/
-
-CloudChamber.VboMesh = function(numVertices, numIndices, glPrimitiveType)
+CloudChamber.addPointer = function(object)
 {
-	CloudChamber.numVertices = numVertices;
-	CloudChamber.numIndices = numIndices;
-	CloudChamber.glPrimitiveType = glPrimitiveType;
+	CloudChamber.pointers.push(object);
+	return CloudChamber.pointers.length - 1;
+}
+
+CloudChamber.removePointer = function(pointer)
+{
+	CloudChamber.pointers[pointer] = null;
+}
+
+CloudChamber.sphere = function(sPosition, sRadius, sColor)
+{
+	var sphereMaterial = new THREE.MeshLambertMaterial(
+		{
+			color: sColor
+		}
+	);
+
+	var sphere = new THREE.Mesh(
+		new THREE.SphereGeometry(
+			sRadius, 64, 64
+		),
+		sphereMaterial
+	);
+
+	sphere.position = sPosition;
+	CloudChamber.scene.add(sphere);
+	CloudChamber.print("Sphere: " + sRadius);
+	return CloudChamber.addPointer(sphere);
+}
+
+CloudChamber.mesh = function()
+{
+	var sphereMaterial = new THREE.MeshLambertMaterial(
+		{
+			color: 0xCC0000
+		}
+	);
+
+	CloudChamber.testSphere = new THREE.Mesh(
+		new THREE.SphereGeometry(
+			50,
+			64,
+			64
+		),
+		sphereMaterial
+	);
+
+	CloudChamber.scene.add(CloudChamber.testSphere);
+}
+
+CloudChamber.all = function(func)
+{
+	for(var i = 0; i < CloudChamber.pointers.length; ++i)
+	{
+		if(CloudChamber.pointers[i] != null)
+		{
+			func(i);
+		}
+	}	
+}
+
+CloudChamber.allArg = function(func, arg)
+{
+	for(var i = 0; i < CloudChamber.pointers.length; ++i)
+	{
+		if(CloudChamber.pointers[i] != null)
+		{
+			func(i, arg);
+		}
+	}	
+}
+
+CloudChamber.delete = function(pointer)
+{
+	if(pointer < CloudChamber.pointers.length)
+	{
+		CloudChamber.scene.remove(CloudChamber.pointers[pointer]);
+		CloudChamber.removePointer(pointer);
+	}
+}
+
+CloudChamber.deleteAll = function()
+{
+	CloudChamber.all(CloudChamber.delete);
+}
+
+CloudChamber.wireframe = function(pointer, active)
+{
+	CloudChamber.pointers[pointer].material.wireframe = active;
+}
+
+CloudChamber.wireframeAll = function(active)
+{
+	CloudChamber.allArg(CloudChamber.wireframe, active);
+}
+
+CloudChamber.move = function(pointer, relPosition)
+{
+	var object = CloudChamber.pointers[pointer];
+	var position = object.position;
+	position.x += relPosition.x;
+	position.y += relPosition.y;
+	position.z += relPosition.z;
+	CloudChamber.pointers[pointer].position = position;
+}
+
+CloudChamber.moveAll = function(relPosition)
+{
+	CloudChamber.allArg(CloudChamber.move, relPosition);
+}
+
+CloudChamber.colorize = function(pointer, color)
+{
+	CloudChamber.pointers[pointer].material.color = color;
+}
+
+CloudChamber.colorizeAll = function(color)
+{
+	CloudChamber.allArg(CloudChamber.colorize, color);
 }

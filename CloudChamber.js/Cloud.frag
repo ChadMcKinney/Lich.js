@@ -22,7 +22,13 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 */
 
-void main()
+#ifdef GL_ES
+precision highp float;
+#endif
+							   // precision in the fragment shader.
+varying vec4 vColor;          // This is the color from the vertex shader interpolated across the
+		  					   // triangle per fragment.
+void main()                    // The entry point for our fragment shader.
 {
-	gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+    gl_FragColor = vColor;    // Pass the color directly through the pipeline.
 }

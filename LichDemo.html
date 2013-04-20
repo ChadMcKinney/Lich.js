@@ -32,6 +32,14 @@
 	<link rel="stylesheet" type="text/css" href="WP-Content/LichStyle.css" media="all" />
 	<script type="text/javascript" src="third-party/glMatrix-0.9.5.min.js"></script>
 	<script type="text/javascript" src="third-party/webgl-utils.js"></script>
+	<script type="text/javascript" src="third-party/three.js/three.min.js"></script>
+	<script src="third-party/three.js/shaders/CopyShader.js"></script>
+	<script src="third-party/three.js/shaders/DotScreenShader.js"></script>
+	<script src="third-party/three.js/shaders/RGBShiftShader.js"></script>
+	<script src="third-party/three.js/postprocessing/EffectComposer.js"></script>
+	<script src="third-party/three.js/postprocessing/RenderPass.js"></script>
+	<script src="third-party/three.js/postprocessing/MaskPass.js"></script>
+	<script src="third-party/three.js/postprocessing/ShaderPass.js"></script>
 	<script type="text/javascript" src="Soliton.js/Soliton.js"></script>
 	<script type="text/javascript" src="CloudChamber.js/CloudChamber.js"></script>
 	<script type="text/javascript" src="Lich.js"></script>
@@ -39,47 +47,6 @@
 </head>
 
 <body>
-
-<script id="vertex_shader" type="x-shader/x-vertex">
-
-#ifdef GL_ES
-precision highp float;
-#endif
-
-uniform mat4 mvpMatrix;   // A constant representing the combined model/view/projection matrix.
-
-attribute vec4 position;  // Per-vertex position information we will pass in.
-attribute vec4 color;     // Per-vertex color information we will pass in.
-
-varying vec4 vColor;       // This will be passed into the fragment shader.
-
-void main()                 // The entry point for our vertex shader.
-{
-    vColor = color;      // Pass the color through to the fragment shader.
-		  					// It will be interpolated across the triangle.
-
-	// gl_Position is a special variable used to store the final position.
-	// Multiply the vertex by the matrix to get the final point in normalized screen coordinates.
-	gl_Position = mvpMatrix * position;
-}
-
-</script>
-
-<script id="fragment_shader" type="x-shader/x-fragment">
-
-#ifdef GL_ES
-precision highp float;
-#endif
-							   // precision in the fragment shader.
-varying vec4 vColor;          // This is the color from the vertex shader interpolated across the
-		  					   // triangle per fragment.
-void main()                    // The entry point for our fragment shader.
-{
-    gl_FragColor = vColor;    // Pass the color directly through the pipeline.
-}
-
-</script>
-
 
 	<canvas id="canvas">
 
@@ -91,27 +58,33 @@ void main()                    // The entry point for our fragment shader.
 		rows="28" 
 		spellcheck="false" 
 		onkeydown="javascript:return keyDown(event);" 
-		onkeyup="javascript:return keyUp(event);"
-	>
+		onkeyup="javascript:return keyUp(event);">
 // Lich.js
 
-// New update!
+print samples
 
-// Streams allow for sequencing and modularity.
-// Anything can be passed to them including strings and functions
-// Currently there's a few bugs and performance isn't great, but there will be improvements coming soon.
+// you can also just index the samples array to find a specific sample
+@ samples 0
+@ samples 50
 
-=> stream0 Stream [ 0.5 0.25 0.1 ] [ { garbage 0.5 } { garbage 0.125 } ]
-=> stream1 Stream 1.0 { garbage 0.1 }
-=> stream2 Stream 0.75 { garbage 0.1 }
-=> stream3 Stream [ 0.125 0.25 0.5 0.75 1.0 ] { garbage 0.1 }
+setMasterGain 1.0
+
+// Preload a sample
+summon "ThitherAndYon" 0 2.0
+
+=> stream0 Stream [ 0.5 0.25 1.0 ] [ { summon "ThitherAndYon" 30 1.0 } ]
+=> stream1 Stream [ 0.125 0.25 0.5 0.75 1.0 ] { summon "ThitherAndYon" 1 1 }
+=> stream2 Stream 2.0 { summon "ThitherAndYon" 11 2.0 }
+=> stream4 Stream [ 1 2 1 ] [ 1 2 3 4 5 6 7 8 9 ]
+=> stream3 Stream 0.75 { summon "ThitherAndYon" stream4 1.0 }
+
 stop stream0
 stop stream1
 stop stream2
 stop stream3
-stop stream3
 play stream3
 stop stream3
+stop stream4
 
 => stream4 Stream 0.5 { garbage 0.1 }
 => stream5 Stream 0.4 { garbage 0.1 }
@@ -119,10 +92,21 @@ stop stream4
 stop stream5
 
 // Streams can be passed to eachother!
-=> stream6 Stream [ 0.5 1.0 0.25 ] [ 0.5 0.125 ]
-=> stream7 Stream [ 0.25 0.5 ] { garbage stream6 }
-stop stream6
+=> stream6 Stream [ 0.5 1.0 0.25 ] [ 0.5 0.125 1.0 ]
+=> stream7 Stream [ 0.25 0.5 ] { summon "Airport" stream6 1.0 }
+=> stream8 Stream stream6 { summon "Airport" + * stream6 4 5 1.0 }
+=> stream9 Stream / 0.125 stream6 { summon "Airport" + * stream6 20 5 0.5 }
 stop stream7
+stop stream8
+stop stream9	
+stop stream6
+
+// Graphics has been introduced, although still rather primitive
+=> colorStream Stream * stream6 0.25 { background * stream6 [ 155 0 55 ] }
+
+stop colorStream
+stop stream6
+
 
 If you're interested in the source you can find it on github:
 https://github.com/ChadMcKinney/Lich.js
@@ -134,7 +118,7 @@ Play with the language and let me know what you think!
 A brief intro:
 Lich is a functional language implemented in javascript Because of this extra layer, it is pretty sludgey, though we do get some nice things in return.
 
-In Lich we have 7 types. 
+In Lich we have 8 types. 
 
 Floats
 Lich has no ints; all numbers are floats. Just type a number and it's a float object. ex: 666 or 7.7709
@@ -157,6 +141,9 @@ More on this later.
 
 Primitives
 Primitives are functions written in Javascript. They can't be assigned to variables and they are always resolved on call. These include operators such as +, -, /, *, as well as some other important functions. You can't create a primitive, however they are called constantly.
+
+Streams
+Streams are sequences of values that can be passed between eachother. This is Lich.js's main way of creating patterned structures.
 
 The goal of the language is to keep the list short in the hopes that they can be used in any combination (although this isn't quite the case yet).
 
@@ -911,25 +898,53 @@ do 5000 { garbage i4 sleep * i4 1.1 }
 <= Env [[0 0] [0.1 1] [1 0]] 'linear' [1 2 3]
 <= Env [[0 0] [0.1 1] [1 0]] 'linear' someVar
 <= Env [[0 0] [0.1 1] [1 0]] 'linear' Env [[0 0] [0.1 1] [1 0]] 'linear'
+
 	</textarea>
 	
 	<textarea id="post" rows="6" spellcheck="false" readonly="true">Lich.js&#10;</textarea>
+	<textarea id="userName" spellcheck="false" contenteditable="true"
+		onChange="javascript:return login()">default</textarea>
+	<textarea id="default" rows="1" spellcheck="false" readonly="true" style="display:none;"
+		onChange="javascript:return parseChangeFromNetwork('default');"> </textarea>
+
+	<!-- Hardcoded For now, will be dynamic in the future -->
+	<textarea id="Chad" rows="1" spellcheck="false" readonly="true" style="display:none;"
+		onChange="javascript:return parseChangeFromNetwork('Chad');"> </textarea>
+
+	<textarea id="Cole" rows="1" spellcheck="false" readonly="true" style="display:none;"
+		onChange="javascript:return parseChangeFromNetwork('Cole');"> </textarea>
+
+	<textarea id="Curtis" rows="1" spellcheck="false" readonly="true" style="display:none;"
+		onChange="javascript:return parseChangeFromNetwork('Curtis');"> </textarea>
+
+	<textarea id="Ben" rows="1" spellcheck="false" readonly="true" style="display:none;"
+		onChange="javascript:return parseChangeFromNetwork('Ben');"> </textarea>
 
 	<script LANGUAGE="JavaScript" type="text/javascript">
 		compileLich();
 	</script>
 
+	<!-- NETWORK SYNCHRONIZATION. CURRENTLY OFF. UNCOMMENT TO RESTORE.
+
 	<SCRIPT SRC="http://mobwrite3.appspot.com/static/compressed_form.js"></SCRIPT>`
 	<SCRIPT>
 	  mobwrite.syncGateway = 'http://mobwrite3.appspot.com/scripts/q.py';
 	</SCRIPT>
+	
 	<BODY ONLOAD="
-		mobwrite.share('terminal'); 
-		mobwrite.minSyncInterval = 25;
+		mobwrite.share(
+			'terminal', 
+			'default',
+			'Chad',
+			'Cole', 
+			'Curtis',
+			'Ben'
+		); 
+		mobwrite.minSyncInterval = 500;
 		mobwrite.maxSyncInterval = 1000;
 		mobwrite.syncInterval = 500;
 	">
-	
+	-->
 </body>
 
 </html>

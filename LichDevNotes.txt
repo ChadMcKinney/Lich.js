@@ -1,5 +1,21 @@
 // Lich Dev Notes
 
+// 04/10/13
+Adding graphics. Using Three.js. New Lich functions will include:
+
+sphere Done!
+box
+mesh
+shader
+light
+move (this can move lights or meshes or camera) Done!
+rotate
+background Done!
+delete Done!
+color
+
+These will return index pointers to the objects themselves.
+
 // 02/05/13
 Hard coding things like the Sample URL and player names, these will need to be dynamic in the future.
 
@@ -327,8 +343,8 @@ Change Signal to Break Points??
 
 // 10/02/12
 
-
-// DONE
+DONE
+// 
 Changed the document layout
 Removed duplicates from signal arrays DONE!
 Inserting by index non-strings into strings breaks DONE!

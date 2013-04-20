@@ -1450,7 +1450,7 @@ function LichFloat(_floatVar) {
 		{
 		case 'String':
 			var newString = String(this.floatVar).concat(object.value());
-			//LichVM.push(new LichString(newString));
+			LichVM.push(new LichString(newString));
 			return newString;
 			break;
 			
@@ -5732,6 +5732,126 @@ function compileLich()
 
 	LichVM.reserveVar("setMasterGain", new LichPrimitive(setMasterGain, 1));
 
+	function randomFloat(argArray)
+	{
+		var value = new LichFloat(Math.random());
+		LichVM.push(value);
+		return value;
+	}
+
+	LichVM.reserveVar("random", new LichPrimitive(randomFloat, 0));
+
+	function decimalToHexString(number)
+	{
+	    if (number < 0)
+	    {
+	    	number = 0xFFFFFFFF + number + 1;
+	    }
+
+	    return number.toString(16).toUpperCase();
+	}
+
+	function packRGB(r, g, b)
+	{
+		return ((1 << 24) + (r << 16) + (g << 8) + b);
+	}
+
+	function rgbToHex(r, g, b) {
+	    return "0x" + packRGB(r, g, b).toString(16).slice(1);
+	}
+
+	function arrayToVector(array)
+	{
+		return {
+			x: array.arrayVar[0].value(),
+			y: array.arrayVar[1].value(),
+			z: array.arrayVar[2].value()	
+		}
+	}
+
+	function arrayToColor(array)
+	{
+		return packRGB(array.arrayVar[0].value(), array.arrayVar[1].value(), array.arrayVar[2].value());
+	}
+
+	function background(argArray)
+	{
+		CloudChamber.renderer.setClearColorHex(arrayToColor(argArray[0]), 1);
+	}
+
+	LichVM.reserveVar("background", new LichPrimitive(background, 1));
+
+	function sphere(argArray)
+	{
+		LichVM.push(
+			new LichFloat(
+				CloudChamber.sphere(
+					arrayToVector(argArray[0]),
+					argArray[1].value(), 
+					arrayToColor(argArray[2])
+				)
+			)
+		);
+	}
+
+	LichVM.reserveVar("sphere", new LichPrimitive(sphere, 3));
+
+	function deleteVisualObject(argArray)
+	{
+		CloudChamber.delete(argArray[0].value());
+	}
+
+	LichVM.reserveVar("delete", new LichPrimitive(deleteVisualObject, 1));
+
+	function deleteAllVisualObjects(argArray)
+	{
+		CloudChamber.deleteAll();
+	}
+
+	LichVM.reserveVar("deleteAll", new LichPrimitive(deleteAllVisualObjects, 0));
+
+	function wireframe(argArray)
+	{
+		CloudChamber.wireframe(argArray[0].value(), argArray[1].value());
+	}
+
+	LichVM.reserveVar("wireframe", new LichPrimitive(wireframe, 2));
+
+	function wireframeAll(argArray)
+	{
+		CloudChamber.wireframeAll(argArray[0].value());
+	}
+
+	LichVM.reserveVar("wireframeAll", new LichPrimitive(wireframeAll, 1));
+
+	function moveVisualObject(argArray)
+	{
+		CloudChamber.move(argArray[0].value(), arrayToVector(argArray[1]));
+	}
+
+	LichVM.reserveVar("move", new LichPrimitive(moveVisualObject, 2));
+
+	function moveAllVisualObjects(argArray)
+	{
+		CloudChamber.moveAll(arrayToVector(argArray[0]));
+	}
+
+	LichVM.reserveVar("moveAll", new LichPrimitive(moveAllVisualObjects, 1));
+
+	function colorVisualObject(argArray)
+	{
+		CloudChamber.colorize(argArray[0].value(), arrayToColor(argArray[1]));
+	}
+
+	LichVM.reserveVar("color", new LichPrimitive(colorVisualObject, 2));
+
+	function colorAllVisualObjects(argArray)
+	{
+		CloudChamber.colorizeAll(arrayToColor(argArray[0]));
+	}
+
+	LichVM.reserveVar("colorAll", new LichPrimitive(colorAllVisualObjects, 1));
+
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Constants
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -5832,6 +5952,15 @@ function compileLich()
 		 "Zither"
 	);
 
+	var lichSampleArray = new Array();
+
+	for(var i = 0; i < sampleArray.length; ++i)
+	{
+		lichSampleArray.push(new LichString(sampleArray[i]));
+	}
+
+	LichVM.reserveVar("samples", new LichArray(lichSampleArray));
+
 	/*
 	for(var i = 0; i < preloadArray.length; ++i)
 	{
@@ -5862,5 +5991,6 @@ function compileLich()
 
 	bind.play();*/
 	
-	// CloudChamber.setup("canvas", 0, undefined, post); // Create the CloudChamber instance
+	CloudChamber.setup("canvas", 24, undefined, post); // Create the CloudChamber instance
+	CloudChamber.start();
 }
