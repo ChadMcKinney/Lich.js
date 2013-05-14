@@ -5781,20 +5781,37 @@ function compileLich()
 
 	LichVM.reserveVar("background", new LichPrimitive(background, 1));
 
+	function addVisualObject(pointer)
+	{
+		LichVM.push(new LichFloat(pointer));
+	}
+
 	function sphere(argArray)
 	{
-		LichVM.push(
-			new LichFloat(
-				CloudChamber.sphere(
-					arrayToVector(argArray[0]),
-					argArray[1].value(), 
-					arrayToColor(argArray[2])
-				)
+		addVisualObject(
+			CloudChamber.sphere(
+				arrayToVector(argArray[0]), // position
+				argArray[1].value(), // radius
+				arrayToColor(argArray[2]) // color
 			)
 		);
 	}
 
 	LichVM.reserveVar("sphere", new LichPrimitive(sphere, 3));
+
+	function cube(argArray)
+	{
+		addVisualObject(
+			CloudChamber.cube(
+				arrayToVector(argArray[0]), // position
+				arrayToVector(argArray[1]), // size
+				arrayToVector(argArray[2]), // rotation
+				arrayToColor(argArray[3]) // color
+			)
+		);
+	}
+
+	LichVM.reserveVar("cube", new LichPrimitive(cube, 4));
 
 	function deleteVisualObject(argArray)
 	{
@@ -5851,6 +5868,20 @@ function compileLich()
 	}
 
 	LichVM.reserveVar("colorAll", new LichPrimitive(colorAllVisualObjects, 1));
+
+	function rotateVisualObject(argArray)
+	{
+		CloudChamber.rotate(argArray[0].value(), arrayToVector(argArray[1]));
+	}
+
+	LichVM.reserveVar("rotate", new LichPrimitive(rotateVisualObject, 2));
+
+	function rotateAllVisualObjects(argArray)
+	{
+		CloudChamber.rotateAll(arrayToVector(argArray[0]));
+	}
+
+	LichVM.reserveVar("rotateAll", new LichPrimitive(rotateAllVisualObjects, 1));
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Constants

@@ -465,13 +465,37 @@ CloudChamber.sphere = function(sPosition, sRadius, sColor)
 
 	sphere.position = sPosition;
 	CloudChamber.scene.add(sphere);
-	CloudChamber.print("Sphere: " + sRadius);
+	CloudChamber.print("Sphere: " + sPosition);
 	return CloudChamber.addPointer(sphere);
 }
 
-CloudChamber.mesh = function()
+CloudChamber.cube = function(cPosition, cSize, cRotation, cColor)
 {
-	var sphereMaterial = new THREE.MeshLambertMaterial(
+	var cubeMaterial = new THREE.MeshLambertMaterial(
+		{
+			color: cColor
+		}
+	);
+
+	var cube = new THREE.Mesh(
+		new THREE.CubeGeometry(
+			cSize.x,
+			cSize.y,
+			cSize.z
+		),
+		cubeMaterial
+	);
+
+	cube.position = cPosition;
+	cube.rotation = cRotation;
+	CloudChamber.scene.add(cube);
+	CloudChamber.print("Cube: " + cPosition);
+	return CloudChamber.addPointer(cube);
+}
+
+CloudChamber.mesh = function(positions, color)
+{
+	var mesh = new THREE.MeshLambertMaterial(
 		{
 			color: 0xCC0000
 		}
@@ -558,4 +582,19 @@ CloudChamber.colorize = function(pointer, color)
 CloudChamber.colorizeAll = function(color)
 {
 	CloudChamber.allArg(CloudChamber.colorize, color);
+}
+
+CloudChamber.rotate = function(pointer, relRotation)
+{
+	var object = CloudChamber.pointers[pointer];
+	var rotation = object.rotation;
+	rotation.x += relRotation.x;
+	rotation.y += relRotation.y;
+	rotation.z += relRotation.z;
+	CloudChamber.pointers[pointer].rotation = rotation;	
+}
+
+CloudChamber.rotateAll = function(relRotation)
+{
+	CloudChamber.allArg(CloudChamber.rotate, relRotation);
 }

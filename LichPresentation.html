@@ -86,7 +86,7 @@ The goal of the language is to have a light weight language that can be used for
 It runs on Windows, OS X and Linux
 
 // Technologies used:
-Google Chrome
+WebGL and Web Audio supporting browser such as Google Chrome
 Web Audio: http://www.w3.org/TR/webaudio/
 WebGL: http://www.khronos.org/webgl/
 Three.js: http://threejs.org/
@@ -174,6 +174,10 @@ The goal of the language is to keep the list short in the hopes that they can be
 
 Here's the catch. Everything is written with prefix notation. What the means is there is no operator precedence and everything is executed from the left. This takes some getting used to with most of the common operators like math, but actually makes alot of sense from a functional perspective and It also allows us to forgo any parentheses. It was also much easier for me to make and given this is my first language I didn't want to make it harder than it already was.
 
+// Errors
+The errors are insulting. If something goes wrong, I at least want it to be entertaining.
+
+
 /////////////////////////
 // HOW TO EVALUATE CODE
 /////////////////////////
@@ -207,6 +211,8 @@ subtract 1 1
 
 // Networking uses Google Mobwrite
 http://code.google.com/p/google-mobwrite/
+
+The networking isn't always awesome.
 
 // Function definition and variable assignment.
 // Functions use : to signify argument declarations and {} for the body
@@ -1018,6 +1024,7 @@ A seperated chat area that can be printed to for easier communication between us
 Some low level auto complete to clue the user about the number of arguments.
 Perhaps some code black shading so that the user can easily more quickly grok code structures
 Highlighting of code blocks on compile
+Scheduling of code compilation over the network
 Debugging!
 Documentation!
 
