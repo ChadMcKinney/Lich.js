@@ -5743,13 +5743,15 @@ function compileLich()
 		if(argArray[0].type() == 'String')
 		{
 			var name = argArray[0].value();
-			Soliton.playURL(
+			var nodeID = Soliton.playURL(
 				"http://chadmckinneyaudio.com/ChadWP-Content/resources/music/ConvertedSamples/"+name+".ogg",
 				name,
 				Soliton.context.destination,
 				argArray[1].to('Float').value(),
 				argArray[2].to('Float').value()
 			);
+
+			LichVM.push(new LichFloat(nodeID));
 		}
 	}
 
@@ -5776,6 +5778,50 @@ function compileLich()
 	}
 
 	LichVM.reserveVar("setMasterGain", new LichPrimitive(setMasterGain, 1));
+
+	function filterAudio(argArray) // [0] source nodeID, [1] freq, [2] filter type
+	{
+		var type;
+
+		if(argArray[2].type() == "String")
+		{
+			switch(argArray[2].stringVar)
+			{
+				case "low":
+				case "Low":
+					type = 0;
+					break;
+
+				case "high":
+				case "High":
+					type = 1;
+					break;
+
+				case "band":
+				case "Band":
+					type = 2;
+					break;
+			}
+		}
+
+		else
+		{
+			type = argArray[2].to("Float").floatVar;
+		}
+
+		var nodeID = Soliton.filter(argArray[0].value(), argArray[1].value(), type);
+		LichVM.push(new LichFloat(nodeID));
+	}
+
+	LichVM.reserveVar("filter", new LichPrimitive(filterAudio, 3));
+
+	function delayAudio(argArray) // [0] source, [1] delayTime, [2] feedback level
+	{
+		var nodeID = Soliton.delay(argArray[0].value(), argArray[1].value(), argArray[2].value());
+		LichVM.push(new LichFloat(nodeID));
+	}
+
+	LichVM.reserveVar("delay", new LichPrimitive(delayAudio, 3));
 
 	///////////////////////
 	// Graphics Primitives

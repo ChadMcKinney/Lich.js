@@ -26,6 +26,7 @@ var Soliton = {}; // Soliton namespace
 Soliton.context = 0;
 Soliton.masterGain = 0;
 Soliton.buffers = {}; // Soliton.buffers namespace
+Soliton.nodes = new Array();
 
 window.addEventListener('load', init, false);
 
@@ -48,6 +49,28 @@ function init()
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Soliton Functions
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+Soliton.addNode = function(node)
+{
+	var nodeID = Soliton.nodes.indexOf(null);
+
+	if(nodeID >= 0)
+	{
+		Soliton.nodes[nodeID] = node;
+		return nodeID;
+	}
+
+	else
+	{
+		Soliton.nodes.push(node);
+		return Soliton.nodes.length - 1;
+	}
+}
+
+Soliton.removeNode = function(nodeID)
+{
+	Soliton.nodes[nodeID] = null;
+}
 
 // Adding inheritance
 Function.prototype.inheritsFrom = function(parentClassOrObject)
@@ -103,7 +126,7 @@ Soliton.playBuffer = function(buffer, destination, offset, duration)
 	source.start(0, offset, duration);
 	fadeGain.gain.linearRampToValueAtTime(1.0, Soliton.context.currentTime + 0.1);
 	fadeGain.gain.linearRampToValueAtTime(0.0, Soliton.context.currentTime + duration);
-	return source;
+	return fadeGain;
 }
 
 // Buffer a url with an optional name for storage, callback on finish, 
@@ -142,13 +165,17 @@ Soliton.bufferURL = function(url, name, callback, callbackDestination, offset, d
 		}
 
 		request.send();
+
+		return null;
 	}
 
 	else if(Soliton.buffers[name])
 	{
 		// Soliton.print("Already Downloaded!");
 		if(callback != undefined)
-			callback(Soliton.buffers[name], callbackDestination, offset, duration);
+			return Soliton.addNode(callback(Soliton.buffers[name], callbackDestination, offset, duration));
+		else
+			return null;
 	}
 }
 
@@ -211,10 +238,12 @@ Soliton.playURL = function(url, name, destination, offset, duration)
 	if(destination == undefined)
 		destination = Soliton.masterGain;
 
-	Soliton.bufferURL(url, name, Soliton.playBuffer, destination, offset, duration);
+	var context = Soliton.bufferURL(url, name, Soliton.playBuffer, destination, offset, duration);
 	
 	if(!Soliton.buffers[name])
 		Soliton.buffers[name] = 0;
+
+	return context;
 }
 
 // Play a buffer fille with garbage with an optional name for the buffer that will be created to store the audio 
@@ -228,6 +257,50 @@ Soliton.playGarbage = function(size, name, destination)
 		destination = Soliton.masterGain;
 
 	Soliton.bufferGarbage(size, name, Soliton.playBuffer, destination);
+}
+
+Soliton.filter = function(nodeID, freq, type)
+{
+	var source = Soliton.nodes[nodeID];
+
+	if(source != null)
+	{
+		source.disconnect(0);
+		// Create the filter
+		var filter = Soliton.context.createBiquadFilter();
+		source.connect(filter);
+		filter.connect(Soliton.masterGain);		
+		// Create and specify parameters for the low-pass filter.
+		filter.type = type; // Low-pass filter. See BiquadFilterNode docs
+		filter.frequency.value = freq; // Set cutoff to 440 HZ
+		return Soliton.addNode(filter);
+	}
+
+	return null;
+}
+
+Soliton.delay = function(nodeID, delayTime, feedLevel)
+{
+	var source = Soliton.nodes[nodeID];
+
+	if(source != null)
+	{
+		source.disconnect(0);
+		var mix = Soliton.context.createGainNode();
+		var feedBack = Soliton.context.createGainNode();
+		feedBack.gain.value = feedLevel;
+		var delay = Soliton.context.createDelay();
+		delay.delayTime.value = delayTime;
+		source.connect(delay);
+		source.connect(mix);
+		delay.connect(mix);
+		delay.connect(feedBack);
+		feedBack.connect(delay);
+		mix.connect(Soliton.masterGain);
+		return Soliton.addNode(mix);
+	}
+
+	return null;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////

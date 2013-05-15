@@ -6,7 +6,7 @@ New development goals:
 momentum for graphics properties such as rotation and position. DONE
 Absolute position and rotation calls. DONE (for position at least)
 scale object DONE
-Arbitrary meshes.
+Arbitrary meshes. Needs work. Height maps are behaving oddly.
 Shader setting
 Shader generation
 Audio effects
