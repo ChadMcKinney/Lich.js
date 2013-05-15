@@ -1,5 +1,19 @@
 // Lich Dev Notes
 
+// 05/14/13
+
+New development goals:
+momentum for graphics properties such as rotation and position. DONE
+Absolute position and rotation calls. DONE (for position at least)
+scale object DONE
+Arbitrary meshes.
+Shader setting
+Shader generation
+Audio effects
+User cursor positions
+Redo networking!!!!!
+
+
 // 04/10/13
 Adding graphics. Using Three.js. New Lich functions will include:
 

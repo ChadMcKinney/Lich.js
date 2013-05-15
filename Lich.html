@@ -64,22 +64,69 @@
 // Lich.js - A Networked Audio / Visual Live Coding Language
 //////////////////////////////////////////////////////////////////////////////////
 
-=> cube1 cube [ 0 0 0 ] [ 90 90 90 ] [ 1 0.2 0.3 ] [ 0 145 200 ]
-=> stream1 Stream [ 0.001 ] { move cube1 - * random [ 1 1 1 ] 0.5 }
-=> stream2 Stream [ 0.001 ] { rotate cube1 * - * random [ 1 1 1 ] 0.5 0.1 }
-stop stream1
-stop stream2
-delete cube1
-
-=> cube2 cube [ -20 0 0 ] [ 90 90 90 ] [ 1 0.2 0.3 ] [ 0 200 145 ]
-=> stream3 Stream [ 0.001 ] { move cube2 - * random [ 1 1 1 ] 0.5 }
-=> stream4 Stream [ 0.001 ] { rotate cube2 * - * random [ 1 1 1 ] 0.5 0.1 }
-stop stream3
-stop stream4
-delete cube2
-
 // Background
 background [ 0 25 45 ]
+
+random [ 1 1 1 ] 
+
+// Make a cube with the arguments position size rotation and color
+=> cube1 cube [ 0 0 0 ] [ 90 90 90 ] [ 1 0.2 0.3 ] [ 0 145 200 ]
+
+move cube1 [ 30 30 30 ] // Relative positioning
+move cube1 [ -60 -60 -60 ] // Relative
+position cube1 [ 0 0 0 ] // absolute
+position cube1 random [ 10 10 10 ]
+positionAll [ 0 0 0 ]
+
+// You can use streams to move and rotate objects
+=> stream1 Stream [ 0.001 ] { move cube1 - random [  ] 0.5 }
+=> stream2 Stream [ 0.001 ] { rotate cube1 * - random [ 1 1 1 ] 0.5 0.1 }
+stop stream1
+stop stream2
+
+// You can also use the angular and linear functions to give them momentum
+angular cube1 [ 0.01 0.02 -0.01 ]
+linear cube1 [ 0 1 -1 ]
+linear cube1 [ 0 -1 1 ]
+angular cube1 [ 0 0 0 ]
+linear cube1 [ 0 0 0 ]
+
+
+// You can mix streams and momentum for smooth movements
+=> stream1 Stream [ 0.5 ] [ { linear cube1 [ -1 -1 1 ] } { linear cube1 [ 1 1 -1 ] } ]
+=> stream2 Stream [ 0.666 ] { angular cube1 random [ 0.1 0.1 0.1 ] }
+
+// You can even change cube1
+scale cube1 random 2
+=> stream3 Stream 0.5 { scale cube1 random 2 }
+stop stream3
+stop stream2
+stop stream1
+delete cube1
+
+
+=> mesh1 mesh "Cloud" 1000 [ 0 50 100 ]
+scale mesh1 0.5
+wireframe mesh1 true
+wireframe mesh1 false
+angular mesh1 [ 0.01 0 0.013 ]
+=> meshStream Stream 0.5 { angular mesh1 - random [ 0.05 0.05 0.05 ] 0.025 }
+=> meshStream2 Stream 0.75 { scale mesh1 + random 0.75 0.25 }
+=> meshStream3 Stream 0.25 { linear mesh1 - random [ 1 1 1 ] 0.5 ] }
+
+// try a guassian cloud
+=> mesh1 mesh "Gaussian" 1000 [ 0 50 100 ]
+scale mesh1 0.25
+
+=> mesh1 mesh "sine" 1000 [ 0 50 100 ]
+scale mesh1 0.5
+
+=> mesh1 mesh "SineMap" 2 [ 0 50 100 ]
+scale mesh1 20
+wireframe mesh1 true
+rotate mesh1 [ 0.5 0.5 0 ]
+angular mesh1 [ 0.013 0.012 0.1 ]
+wireframe mesh1 false
 
 print "Network Music"
 
@@ -444,7 +491,7 @@ stop sampleSwitching
 
 background [ 255 100 20 ]
 
-do 500 { background * random [ 0 120 240 ] sleep 0.01 } background [ 0 25 45 ]
+do 500 { background random [ 0 120 240 ] sleep 0.01 } background [ 0 25 45 ]
 
 // Graphics has been introduced, although still rather primitive
 => time Stream [ 0.5 0.125 ] [ 0.125 0.25 0.5 0.75 1.0 ]
@@ -464,7 +511,7 @@ move sphere1 [ 75 -20 30 ]
 delete sphere1
 
 // Create several spheres and delete all of them at the same time
-do 5 { => pointer sphere * random [ 10 100 100 ] 50 [ 255 0 0 ] }
+do 5 { => pointer sphere random [ 10 100 100 ] 50 [ 255 0 0 ] }
 wireframeAll true
 wireframeAll false
 moveAll [ -50 50 -10 ]

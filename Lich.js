@@ -2174,6 +2174,7 @@ function LichFloat(_floatVar) {
 	// Member vars
 	this.floatVar = _floatVar;
 	this.namespace = {};
+	this.isVisualPointer = false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2201,6 +2202,21 @@ function LichArray(_arrayVar) {
 	this.length = function()
 	{
 		return this.arrayVar.length;
+	}
+
+	this.map = function(func) // used internally for mapping functions to each item in an array
+	{
+		var result = new Array();
+		var lichResult;
+			
+		for(var i = 0; i < this.arrayVar.length; ++i)
+		{
+			result.push(func(this.arrayVar[i]));
+		}
+			
+		lichResult = new LichArray(result);
+		LichVM.push(lichResult);
+		return lichResult.value();
 	}
 	
 	this.insert = function(index, value)
@@ -3906,7 +3922,20 @@ function LichVariable(_objectName) {
 	this.assign = function()
 	{
 		if(this.object)
+		{
+			switch(this.object.type())
+			{
+			case "Stream":
 				this.object.stop();
+				break;
+			case "Float":
+				if(this.object.isVisualPointer)
+				{
+					CloudChamber.delete(this.object.value());
+				}
+				break;
+			}
+		}
 
 		var object = LichVM.pop();
 		
@@ -5331,6 +5360,8 @@ function compileLich()
 	
 	function assign(argArray)
 	{
+
+
 		argArray[0].assign();
 		LichVM.push(argArray[0]);
 		return argArray[0].type();
@@ -5664,6 +5695,49 @@ function compileLich()
 
 	LichVM.reserveVar("sleep", new LichPrimitive(sleep, 1));
 
+	function setTempo(argArray) // argArray[0] size
+	{
+		if(argArray[0].type() == 'Float' || argArray[0].type() == 'Variable')
+		{
+			Soliton.Clock.default.setTempoAtTime(argArray[0].value(), 0);
+		}
+
+		else
+		{
+			Soliton.Clock.default.setTempoAtTime(argArray[0].to('Float').value(), 0);
+		}
+	}
+
+	LichVM.reserveVar("setTempo", new LichPrimitive(setTempo, 1));
+
+	function freeStack(argArray)
+	{
+		LichVM.freeStack();
+	}
+
+	LichVM.reserveVar("__FREE_STACK__", new LichPrimitive(freeStack, 0));
+
+	function printSamples(argArray)
+	{
+		post(sampleArray);
+	}
+	
+	LichVM.reserveVar("printSamples", new LichPrimitive(printSamples, 0));
+
+	function randomFloat(argArray)
+	{
+		var result;
+		LichVM.push(new LichFloat(Math.random()));
+		LichVM.push(argArray[0]);
+		return LichVM.get("multiply").call();
+	}
+
+	LichVM.reserveVar("random", new LichPrimitive(randomFloat, 1));
+
+	///////////////////////
+	// Audio Primitives
+	///////////////////////
+
 	function summon(argArray) // argArray[0] url, offset, durtation
 	{
 		if(argArray[0].type() == 'String')
@@ -5696,35 +5770,6 @@ function compileLich()
 
 	LichVM.reserveVar("garbage", new LichPrimitive(garbage, 1));
 
-	function setTempo(argArray) // argArray[0] size
-	{
-		if(argArray[0].type() == 'Float' || argArray[0].type() == 'Variable')
-		{
-			Soliton.Clock.default.setTempoAtTime(argArray[0].value(), 0);
-		}
-
-		else
-		{
-			Soliton.Clock.default.setTempoAtTime(argArray[0].to('Float').value(), 0);
-		}
-	}
-
-	LichVM.reserveVar("setTempo", new LichPrimitive(setTempo, 1));
-
-	function freeStack(argArray)
-	{
-		LichVM.freeStack();
-	}
-
-	LichVM.reserveVar("__FREE_STACK__", new LichPrimitive(freeStack, 0));
-
-	function printSamples(argArray)
-	{
-		post(sampleArray);
-	}
-	
-	LichVM.reserveVar("printSamples", new LichPrimitive(printSamples, 0));
-
 	function setMasterGain(argArray)
 	{
 		Soliton.masterGain.gain.value = argArray[0].to('Float').value();
@@ -5732,14 +5777,9 @@ function compileLich()
 
 	LichVM.reserveVar("setMasterGain", new LichPrimitive(setMasterGain, 1));
 
-	function randomFloat(argArray)
-	{
-		var value = new LichFloat(Math.random());
-		LichVM.push(value);
-		return value;
-	}
-
-	LichVM.reserveVar("random", new LichPrimitive(randomFloat, 0));
+	///////////////////////
+	// Graphics Primitives
+	///////////////////////
 
 	function decimalToHexString(number)
 	{
@@ -5783,7 +5823,9 @@ function compileLich()
 
 	function addVisualObject(pointer)
 	{
-		LichVM.push(new LichFloat(pointer));
+		var pointer = new LichFloat(pointer);
+		pointer.isVisualPointer = true;
+		LichVM.push(pointer);
 	}
 
 	function sphere(argArray)
@@ -5882,6 +5924,104 @@ function compileLich()
 	}
 
 	LichVM.reserveVar("rotateAll", new LichPrimitive(rotateAllVisualObjects, 1));
+
+	function linearVisualObject(argArray)
+	{
+		CloudChamber.linear(argArray[0].value(), arrayToVector(argArray[1]));
+	}
+
+	LichVM.reserveVar("linear", new LichPrimitive(linearVisualObject, 2));
+
+	function linearAllVisualObjects(argArray)
+	{
+		CloudChamber.linearAll(arrayToVector(argArray[0]));
+	}
+
+	LichVM.reserveVar("linearAll", new LichPrimitive(linearAllVisualObjects, 1));
+
+	function angularVisualObject(argArray)
+	{
+		CloudChamber.angular(argArray[0].value(), arrayToVector(argArray[1]));
+	}
+
+	LichVM.reserveVar("angular", new LichPrimitive(angularVisualObject, 2));
+
+	function angularAllVisualObjects(argArray)
+	{
+		CloudChamber.angularAll(arrayToVector(argArray[0]));
+	}
+
+	LichVM.reserveVar("angularAll", new LichPrimitive(angularAllVisualObjects, 1));
+
+	function positionVisualObject(argArray)
+	{
+		CloudChamber.position(argArray[0].value(), arrayToVector(argArray[1]));
+	}
+
+	LichVM.reserveVar("position", new LichPrimitive(positionVisualObject, 2));
+
+	function positionAllVisualObjects(argArray)
+	{
+		CloudChamber.positionAll(arrayToVector(argArray[0]));
+	}
+
+	LichVM.reserveVar("positionAll", new LichPrimitive(positionAllVisualObjects, 1));
+
+	function scaleVisualObject(argArray)
+	{
+		CloudChamber.scale(argArray[0].value(), argArray[1].value());
+	}
+
+	LichVM.reserveVar("scale", new LichPrimitive(scaleVisualObject, 2));
+
+	function scaleAllVisualObjects(argArray)
+	{
+		CloudChamber.scaleAll(argArray[0].value());
+	}
+
+	LichVM.reserveVar("scaleAll", new LichPrimitive(scaleAllVisualObjects, 1));
+
+	function mesh(argArray)
+	{
+		var geometry;
+
+		switch(argArray[0].stringVar) // Generation Function (given as a string)
+		{
+		case "cloud":
+		case "Cloud":
+			geometry = CloudChamber.pointCloud(argArray[1].value()); // numTriangles
+			break;
+
+		case "guassian":
+		case "Gaussian":
+			geometry = CloudChamber.gaussianCloud(argArray[1].value());
+			break;
+
+		case "sine":
+		case "Sine":
+			geometry = CloudChamber.sine(argArray[1].value());
+			break;
+
+		case "sineMap":
+		case "SineMap":
+			geometry = CloudChamber.heightMap(CloudChamber.sineMap, argArray[1].value(), argArray[1].value()); // width/depth of height map
+			break;
+
+		default:
+			post("Mesh generation function not defined.");
+			return;
+			break;
+		}
+
+		addVisualObject(
+			CloudChamber.mesh(
+				geometry, // mesh
+				arrayToColor(argArray[2]) // color
+			)
+		);
+	}
+
+	LichVM.reserveVar("mesh", new LichPrimitive(mesh, 3));
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Constants

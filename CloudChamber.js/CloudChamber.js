@@ -33,6 +33,7 @@ CloudChamber.PI = 3.141592654;
 CloudChamber.POSITION_DATA_SIZE = 3;
 CloudChamber.COLOR_DATA_SIZE = 4;
 CloudChamber.pointers = new Array();
+CloudChamber.update_queue = {};
 
 ////////////////////////////////////////
 // Helper functions for loading files
@@ -188,6 +189,25 @@ CloudChamber.checkGLError = function()
 
 CloudChamber.draw = function(time)
 {		
+		for(var i = 0; i < CloudChamber.pointers.length; ++i)
+		{
+			if(CloudChamber.pointers[i] != null)
+			{
+				if(CloudChamber.pointers[i].momentum_update)
+				{
+					var linear = CloudChamber.pointers[i].linear_momentum;
+					var angular = CloudChamber.pointers[i].angular_momentum;
+					CloudChamber.pointers[i].position.x += linear.x;
+					CloudChamber.pointers[i].position.y += linear.y;
+					CloudChamber.pointers[i].position.z += linear.z;
+					
+					CloudChamber.pointers[i].rotation.x += angular.x;
+					CloudChamber.pointers[i].rotation.y += angular.y;
+					CloudChamber.pointers[i].rotation.z += angular.z;
+				}
+			}
+		}	
+
 		CloudChamber.composer.render(CloudChamber.scene, CloudChamber.camera);
 		
 		/*
@@ -464,6 +484,9 @@ CloudChamber.sphere = function(sPosition, sRadius, sColor)
 	);
 
 	sphere.position = sPosition;
+	sphere.linear_momentum = { x:0, y:0, z:0 };
+	sphere.angular_momentum = { x:0, y:0, z:0 };
+	sphere.momentum_update = false;
 	CloudChamber.scene.add(sphere);
 	CloudChamber.print("Sphere: " + sPosition);
 	return CloudChamber.addPointer(sphere);
@@ -488,29 +511,12 @@ CloudChamber.cube = function(cPosition, cSize, cRotation, cColor)
 
 	cube.position = cPosition;
 	cube.rotation = cRotation;
+	cube.linear_momentum = { x:0, y:0, z:0 };
+	cube.angular_momentum = { x:0, y:0, z:0 };
+	cube.momentum_update = false;
 	CloudChamber.scene.add(cube);
 	CloudChamber.print("Cube: " + cPosition);
 	return CloudChamber.addPointer(cube);
-}
-
-CloudChamber.mesh = function(positions, color)
-{
-	var mesh = new THREE.MeshLambertMaterial(
-		{
-			color: 0xCC0000
-		}
-	);
-
-	CloudChamber.testSphere = new THREE.Mesh(
-		new THREE.SphereGeometry(
-			50,
-			64,
-			64
-		),
-		sphereMaterial
-	);
-
-	CloudChamber.scene.add(CloudChamber.testSphere);
 }
 
 CloudChamber.all = function(func)
@@ -597,4 +603,246 @@ CloudChamber.rotate = function(pointer, relRotation)
 CloudChamber.rotateAll = function(relRotation)
 {
 	CloudChamber.allArg(CloudChamber.rotate, relRotation);
+}
+
+CloudChamber.linear = function(pointer, linear_momentum)
+{
+	CloudChamber.pointers[pointer].linear_momentum = linear_momentum;
+	CloudChamber.pointers[pointer].momentum_update = true;
+}
+
+CloudChamber.linearAll = function(linear_momentum)
+{
+	CloudChamber.allArg(CloudChamber.linear, linear_momentum);
+}
+
+CloudChamber.angular = function(pointer, angular_momentum)
+{
+	CloudChamber.pointers[pointer].angular_momentum = angular_momentum;
+	CloudChamber.pointers[pointer].momentum_update = true;
+}
+
+CloudChamber.angularAll = function(angular_momentum)
+{
+	CloudChamber.allArg(CloudChamber.angular, angular_momentum);
+}
+
+CloudChamber.position = function(pointer, position)
+{
+	CloudChamber.pointers[pointer].position = position;
+}
+
+CloudChamber.positionAll = function(position)
+{
+	CloudChamber.allArg(CloudChamber.position, position);
+}
+
+CloudChamber.scale = function(pointer, scale)
+{
+	CloudChamber.pointers[pointer].scale = { x: scale, y: scale, z: scale };
+}
+
+CloudChamber.scaleAll = function(scale)
+{
+	CloudChamber.allArg(CloudChamber.scale, scale);
+}
+
+CloudChamber.pointCloud = function(numTriangles)
+{
+	var triangles = new Array();
+
+	for(var i = 0; i < numTriangles; ++i)
+	{
+		var triangle = new Array();
+		triangle.push(new THREE.Vector3(Math.random() * 200 - 100, Math.random() * 200 - 100, Math.random() * 200 - 100));
+		triangle.push(new THREE.Vector3(Math.random() * 200 - 100, Math.random() * 200 - 100, Math.random() * 200 - 100));
+		triangle.push(new THREE.Vector3(Math.random() * 200 - 100, Math.random() * 200 - 100, Math.random() * 200 - 100));
+		triangles.push(triangle);
+	}
+
+	return triangles;
+}
+
+CloudChamber.nrand = function() {
+	var x1, x2, rad, y1;
+	do {
+		x1 = 2 * Math.random() - 1;
+		x2 = 2 * Math.random() - 1;
+		rad = x1 * x1 + x2 * x2;
+	} while(rad >= 1 || rad == 0);
+	var c = Math.sqrt(-2 * Math.log(rad) / rad);
+	return x1 * c;
+}
+
+CloudChamber.gaussianCloud = function(numTriangles)
+{
+	var triangles = new Array();
+
+	for(var i = 0; i < numTriangles; ++i)
+	{
+		var triangle = new Array();
+		triangle.push(new THREE.Vector3(CloudChamber.nrand() * 50, CloudChamber.nrand() * 50, CloudChamber.nrand() * 50));
+		triangle.push(new THREE.Vector3(CloudChamber.nrand() * 50, CloudChamber.nrand() * 50, CloudChamber.nrand() * 50));
+		triangle.push(new THREE.Vector3(CloudChamber.nrand() * 50, CloudChamber.nrand() * 50, CloudChamber.nrand() * 50));
+		triangles.push(triangle);
+	}
+
+	return triangles;
+}
+
+CloudChamber.sine = function(numTriangles)
+{
+	var triangles = new Array();
+	var freq1 = CloudChamber.nrand() * 0.1;
+	var freq2 = CloudChamber.nrand() * 0.1;
+	var freq3 = CloudChamber.nrand() * 0.1;
+	var freq4 = Math.random() * 0.1;
+
+	for(var i = 0; i < numTriangles; ++i)
+	{
+		var triangle = new Array();
+		var sine = Math.sin(i * freq4) * 0.1 + 0.9;
+		triangle.push(new THREE.Vector3(Math.sin(i * freq1) * 100 * sine, Math.sin(i * freq2) * 100 * sine, Math.sin(i * freq3) * 100 * sine));
+		triangle.push(new THREE.Vector3(Math.sin(i * freq3) * 100 * sine, Math.sin(i * freq1) * 100 * sine, Math.sin(i * freq2) * 100 * sine));
+		triangle.push(new THREE.Vector3(Math.sin(i * freq2) * 100 * sine, Math.sin(i * freq3) * 100 * sine, Math.sin(i * freq1) * 100 * sine));
+		triangles.push(triangle);
+	}
+
+	return triangles;
+}
+
+CloudChamber.heightMap = function(mapFunction, width, depth)
+{
+	var map = mapFunction(width, depth);
+	var triangles = new Array();
+	var x = 0;
+	var y = 0;
+	var even = true;
+	var doneIterating = false;
+
+	// Iterate over the height map and create a triangle mesh using correct winding
+	while(!doneIterating)
+	{
+		var triangle = new Array();
+
+		if(even)
+		{	
+			x += 1;
+			triangle.push(new THREE.Vector3(x, 0, y));
+			x -= 1;
+			triangle.push(new THREE.Vector3(x, 0, y));
+			y += 1;
+			triangle.push(new THREE.Vector3(x, 0, y));
+			even = false;
+			triangles.push(triangle);
+		}
+
+		else
+		{
+			triangle.push(new THREE.Vector3(x, 0, y));
+			x += 1;
+			triangle.push(new THREE.Vector3(x, 0, y));
+			y -= 1;
+			triangle.push(new THREE.Vector3(x, 0, y));
+			triangles.push(triangle);
+			even = true;
+
+			// Check to see that we're done by testing x/y against width/depth
+			if((x == width - 1) && (y == depth - 1))
+			{
+				doneIterating = true;
+			}
+
+			else if(x == width - 1)
+			{
+				// New row
+				x = 0;
+				y += 1;
+			}
+		}
+	}
+
+	return triangles;
+}
+
+CloudChamber.sineMap = function(width, depth)
+{
+	var map = new Array();
+	for(var x = 0; x < width; ++x)
+	{
+		map.push(new Array());
+	}
+
+
+	for(var x = 0; x < width; ++x)
+	{
+		var freq = Math.random();
+		for(var y = 0; y < depth; ++y)
+		{
+			map[x][y] = Math.sin(y * freq);
+		}
+	}
+
+	return map;
+}
+
+CloudChamber.calculateNormal = function(p1, p2, p3)
+{
+	/*
+	Set Vector U to (Triangle.p2 minus Triangle.p1)
+    Set Vector V to (Triangle.p3 minus Triangle.p1)
+ 
+    Set Normal.x to (multiply U.y by V.z) minus (multiply U.z by V.y)
+    Set Normal.y to (multiply U.z by V.x) minus (multiply U.x by V.z)
+    Set Normal.z to (multiply U.x by V.y) minus (multiply U.y by V.x)
+ 
+    Returning Normal
+	*/
+
+	var u = p2.sub(p1);
+	var v = p3.sub(p1);
+	
+	return new THREE.Vector3(
+		(u.y * v.z) - (u.z * v.y),
+		(u.z * v.x) - (u.x * v.z),
+		(u.x * v.y) - (u.y * v.x)
+	);
+}
+
+CloudChamber.mesh = function(mGeometry, mColor)
+{
+	var material = new THREE.MeshLambertMaterial(
+		{
+			color: mColor
+		}
+	);
+
+	var geometry = new THREE.Geometry();
+
+	for(var i = 0; i < mGeometry.length; ++i)
+	{
+		var p1 = mGeometry[i][0];
+		var p2 = mGeometry[i][1];
+		var p3 = mGeometry[i][2];
+		geometry.vertices.push(p1);
+		geometry.vertices.push(p2);
+		geometry.vertices.push(p3);
+		geometry.faces.push(new THREE.Face3(i * 3, (i * 3) + 1, (i * 3) + 2, CloudChamber.calculateNormal(p1, p2, p3), mColor));
+	}
+
+	geometry.computeBoundingSphere();
+
+	var mesh = new THREE.Mesh(
+		geometry,
+		material
+	);
+
+	// mesh.position = mPosition;
+	// mesh.rotation = mRotation;
+	mesh.linear_momentum = { x:0, y:0, z:0 };
+	mesh.angular_momentum = { x:0, y:0, z:0 };
+	mesh.momentum_update = false;
+	CloudChamber.scene.add(mesh);
+	CloudChamber.print("Mesh");
+	return CloudChamber.addPointer(mesh);
 }
