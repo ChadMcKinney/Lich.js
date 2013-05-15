@@ -5823,6 +5823,139 @@ function compileLich()
 
 	LichVM.reserveVar("delay", new LichPrimitive(delayAudio, 3));
 
+	function genSin(i, lastValue)
+	{
+		return new LichFloat(Math.sin(i));
+	}
+
+	function genRand(i, lastValue)
+	{
+		return new LichFloat(Math.random());
+	}
+
+	function genGaussian(i, lastValue)
+	{
+		return new LichFloat(CloudChamber.nrand());
+	}
+
+	// generate an array filled by an algorithm
+	// algorithms are functions taking an "i" and "lastValue" parameters
+	function genArray(argArray) // [0] algorithm, [1] num indexes
+	{
+		var algorithm;
+		var array = new Array();
+		var lastValue = null;
+
+		switch(argArray[0].value())
+		{
+		case "Sine":
+		case "sine":
+			algorithm = genSin;
+			break;
+
+		case "Rand":
+		case "rand":
+			algorithm = genRand;
+			break;
+
+		case "Gaussian":
+		case "gaussian":
+			algorithm = genGaussian;
+			break;
+
+		default:
+			algorithm = genRand;
+			post("genArray algorithm not defined.");
+		}
+
+		for(var i = 0; i < argArray[1].value(); ++i)
+		{
+			lastValue = algorithm(i, lastValue);
+			array.push(lastValue);
+		}
+
+		LichVM.push(new LichArray(array));
+	}
+
+	LichVM.reserveVar("genArray", new LichPrimitive(genArray, 2));
+
+	// Convert Lich array to Float32Array
+	function arrayToFloatArray(array)
+	{
+		var floatArray = new Float32Array(array.arrayVar.length);
+		for(var i = 0; i < array.arrayVar.length; ++i)
+		{
+			floatArray[i] = array.arrayVar[i].to("Float").value();
+		}
+
+		return floatArray;
+	}
+
+	function shapeAudio(argArray)
+	{
+		var nodeID = Soliton.waveShape(argArray[0].value(), arrayToFloatArray(argArray[1].to("Array")));
+
+		LichVM.push(new LichFloat(nodeID));
+	}
+
+	LichVM.reserveVar("waveShape", new LichPrimitive(shapeAudio, 2));
+
+	function percEnv(argArray) // [0] duration
+	{
+		var nodeID = Soliton.createEnvelope("perc", argArray[0].value());
+		LichVM.push(new LichFloat(nodeID));
+	}
+
+	LichVM.reserveVar("perc", new LichPrimitive(percEnv, 1));
+
+	function swellEnv(argArray) // [0] duration
+	{
+		var nodeID = Soliton.createEnvelope("swell", argArray[0].value());
+		LichVM.push(new LichFloat(nodeID));
+	}
+
+	LichVM.reserveVar("swell", new LichPrimitive(swellEnv, 1));
+
+	function sinOsc(argArray) // [0] frequency, [1] env
+	{
+		var nodeID = Soliton.oscillator(argArray[0].value(), argArray[1].value(), "sine");
+		LichVM.push(new LichFloat(nodeID));
+	}
+
+	LichVM.reserveVar("sinOsc", new LichPrimitive(sinOsc, 2));
+
+	function squareOsc(argArray) // [0] frequency, [1] env
+	{
+		var nodeID = Soliton.oscillator(argArray[0].value(), argArray[1].value(), "square");
+		LichVM.push(new LichFloat(nodeID));
+	}
+
+	LichVM.reserveVar("square", new LichPrimitive(squareOsc, 2));
+
+	function sawOsc(argArray) // [0] frequency, [1] env
+	{
+		var nodeID = Soliton.oscillator(argArray[0].value(), argArray[1].value(), "sawtooth");
+		LichVM.push(new LichFloat(nodeID));
+	}
+
+	LichVM.reserveVar("saw", new LichPrimitive(sawOsc, 2));
+
+	function triOsc(argArray) // [0] frequency, [1] env
+	{
+		var nodeID = Soliton.oscillator(argArray[0].value(), argArray[1].value(), "triangle");
+		LichVM.push(new LichFloat(nodeID));
+	}
+
+	LichVM.reserveVar("tri", new LichPrimitive(triOsc, 2));
+
+	function osc(argArray) // [0] frequency, [1] wave table [2] env
+	{
+		var nodeID = Soliton.oscillator(argArray[0].value(), argArray[2].value(), "custom", arrayToFloatArray(argArray[1].to("Array")));
+		LichVM.push(new LichFloat(nodeID));
+	}
+
+	LichVM.reserveVar("osc", new LichPrimitive(osc, 3));
+
 	///////////////////////
 	// Graphics Primitives
 	///////////////////////

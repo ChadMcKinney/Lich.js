@@ -124,9 +124,33 @@ Soliton.playBuffer = function(buffer, destination, offset, duration)
 	fadeGain.connect(destination);
 	fadeGain.gain.value = 0.0;
 	source.start(0, offset, duration);
-	fadeGain.gain.linearRampToValueAtTime(1.0, Soliton.context.currentTime + 0.1);
+	fadeGain.gain.linearRampToValueAtTime(1.0, Soliton.context.currentTime + 0.01);
 	fadeGain.gain.linearRampToValueAtTime(0.0, Soliton.context.currentTime + duration);
 	return fadeGain;
+}
+
+Soliton.createEnvelope = function(type, duration)
+{
+	var env = Soliton.context.createGainNode();
+	env.gain.value = 0.0;
+
+	switch(type)
+	{
+	case "perc":
+	case "Perc":
+		env.gain.linearRampToValueAtTime(1.0, Soliton.context.currentTime + 0.1);
+		env.gain.linearRampToValueAtTime(0.0, Soliton.context.currentTime + duration);
+		break;
+
+	case "swell":
+	case "Swell":
+		env.gain.linearRampToValueAtTime(1.0, Soliton.context.currentTime + (duration / 2));
+		env.gain.linearRampToValueAtTime(1, Soliton.context.currentTime + duration);
+		break;
+	}
+
+	env.connect(Soliton.masterGain);
+	return Soliton.addNode(env);
 }
 
 // Buffer a url with an optional name for storage, callback on finish, 
@@ -301,6 +325,45 @@ Soliton.delay = function(nodeID, delayTime, feedLevel)
 	}
 
 	return null;
+}
+
+Soliton.waveShape = function(nodeID, curve)
+{
+	var source = Soliton.nodes[nodeID];
+
+	if(source != null)
+	{
+		source.disconnect(0);
+		// Create the filter
+		var shape = Soliton.context.createWaveShaper();
+		source.connect(shape);
+		shape.connect(Soliton.masterGain);		
+		// Create and specify parameters for the low-pass filter.
+		shape.curve = curve;
+		return Soliton.addNode(shape);
+	}
+
+	return null;
+}
+
+Soliton.oscillator = function(freq, env, type, table)
+{
+	var osc = Soliton.context.createOscillator();
+	osc.frequency.value = freq;
+
+	if(type == "custom")
+	{
+		osc.setWaveTable(Soliton.context.createWaveTable(table, table));
+	}
+
+	else
+	{
+		osc.type = type;
+	}
+
+	osc.connect(Soliton.nodes[env]);
+	osc.start(0);
+	return env;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
