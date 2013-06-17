@@ -1,5 +1,8 @@
 // Lich Dev Notes
 
+// 06/16/13
+Introduction of the sub-language Splice. Splice uses characters as macros for functions in a particular domain. For example, spliceShader takes a string of characters and maps them to GLSL function calls creating a new shader with dynamic and glitchy qualities. This allows for fast and easy edits on the fly. Plans for the future include splice implementations for Mesh generation, Stream generation, Oscillator generation, filter/audio effects generation, and anything else that seems fun. 
+
 // 05/14/13
 
 New development goals:

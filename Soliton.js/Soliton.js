@@ -25,6 +25,9 @@
 var Soliton = {}; // Soliton namespace
 Soliton.context = 0;
 Soliton.masterGain = 0;
+Soliton.blockSize = 4096; // Audio block size
+Soliton.spliceFuncBlockSize = 64; // block size for splice generated osc node functions
+Soliton.spliceFuncBlockRatio = Soliton.blockSize / Soliton.spliceFuncBlockSize; // Ratio use for sample generation in splice osc nodes
 Soliton.buffers = {}; // Soliton.buffers namespace
 Soliton.nodes = new Array();
 
@@ -2115,3 +2118,480 @@ Soliton.Quant.default = new Soliton.Quant(1, 0, 0);
 Soliton.Clock.default = new Soliton.Clock(1, 0, 0, 256, 1); // default
 Soliton.Clock.permanent = true;
 Soliton.Scheduler.default = Soliton.Clock.default.scheduler;
+
+///////////////////////////////////////////////////////////////////////////////////////
+// splice language
+///////////////////////////////////////////////////////////////////////////////////////
+
+/*
+Generate a shader using the sub-language splice
+splice is a deterministic, non-turing complete graph description using characters:
+
+The first half of the string is the vertext shader, the second half is the fragment
+
+examples: 
+
+spliceShader "<vVvVvvv<>>>>>>><<<>><^><^^^^^^<^<>>vvvvvvv<v<v>666<<..>>>£%3kqkdwKW:DK"
+spliceShader ")(R£)FPIEWF}{P}{poef{pwfowefpowefw3290£)(R()IfifpECV<V<>V<££^94@@{}{}"
+
+characters are translated to WebGL function calls via a simple switch
+
+*/
+
+
+
+Soliton.parseSpliceChar = function(character)
+{
+	switch(character)
+	{
+	/*
+	case '!': 
+		return function(bufferL, bufferR, i) { var sample = *};
+		break;
+
+	case '£': 
+		if(frag)
+			spliceFunc = "sqrt(gl_FragCoord + "+input+" * vec4(10, 10, 10, 10));";
+		else
+			spliceFunc = "sqrt("+input+" + "+assignVar+" * vec4(10, 10, 10, 10));";
+		break;
+
+	case '=': 
+		if(frag)
+			spliceFunc = "fract(gl_FragCoord + "+input+" * vec4(10, 10, 10, 10));";
+		else
+			spliceFunc = "fract("+input+" + "+assignVar+" * vec4(10, 10, 10, 10));";
+		break;
+
+	case '`': 
+		if(frag)
+			spliceFunc = "inversesqrt(gl_FragCoord + "+input+");";
+		else
+			spliceFunc = "inversesqrt("+input+" + "+assignVar+");";
+		break;
+
+	case '~': 
+		if(frag)
+			spliceFunc = "inversesqrt(gl_FragCoord - "+input+");";
+		else
+			spliceFunc = "inversesqrt("+input+" - "+assignVar+");";
+		break;
+
+	case '#': 
+		if(frag)
+			spliceFunc = "reflect(gl_FragCoord, "+input+");";
+		else
+			spliceFunc = "reflect("+input+", "+assignVar+");";
+		break;
+
+	case ':':
+		if(frag)
+			spliceFunc = "refract(gl_FragCoord, "+input+", dot("+input+", "+assignVar+"));";
+		else
+			spliceFunc = "refract("+input+", "+assignVar+", dot("+input+", "+assignVar+"));";
+		break;
+
+	case ';': 
+			spliceFunc = "reflect("+assignVar+", reflect("+assignVar+", "+input+"));";
+		break;
+
+	case '?': 
+		if(frag)
+			spliceFunc = "clamp(gl_FragCoord, "+input+", "+assignVar+");";
+		else
+			spliceFunc = "clamp("+assignVar+", "+input+", "+input+");";
+		break;
+
+	case '\\': 
+		if(frag)
+			spliceFunc = "vec4(cross(gl_FragCoord.xyz, "+input+".xyz), 1);";
+		else
+			spliceFunc = "vec4(cross("+assignVar+".xyz, "+input+".xyz), 1);";
+		break;	
+
+	case ' ':
+		if(frag)
+			spliceFunc = "mix(gl_FragCoord, "+input+", abs("+assignVar+"));";
+		else
+			spliceFunc = "mix("+assignVar+", "+input+", abs("+assignVar+"));";
+		break;
+
+	case '_': // length
+		spliceFunc = "vec4(length("+input+"), length("+input+"), length("+input+"), length("+input+"));";
+		break;
+	
+	case '[': // fold add, add all components of vector returning a vector of the result
+		spliceFunc = input+"; "+assignVar+" = "+assignVar+" * ("+input+".x + "+input+".y + "+input+".z + "+input+".w);";
+		break;
+
+	case ']': // fold subtract, sub all components of vector returning a vector of the result
+		spliceFunc = input+"; "+assignVar+" = "+assignVar+" * ("+input+".x - "+input+".y - "+input+".z - "+input+".w);";
+		break;
+	
+	case '{':
+		spliceFunc = "vec4("+input+".w, "+input+".z, "+input+".y, "+input+".x);";
+		break;
+	
+	case '}':
+		if(frag)
+			spliceFunc = "reflect(gl_FragCoord, "+input+");";
+		else
+			spliceFunc = "vec4("+input+".z, "+input+".w, "+input+".x, "+input+".w);";
+		break;
+	
+	case '.': // dot() function
+		if(frag)
+			spliceFunc = input+" * dot(gl_FragCoord, "+input+");";
+		else
+			spliceFunc = input+" * dot("+input+", "+assignVar+");";
+		break;
+	
+	case '+': // add with next number
+			spliceFunc = input + " + "+assignVar+";";
+		break;
+	
+	case '-': // subtract next number from this
+			spliceFunc = input + " + "+assignVar+";";
+		break;
+	
+	case '*': // multiply by next number
+			spliceFunc = input + " * "+assignVar+";";
+		break;
+	
+	case '/': // divide by next number
+		spliceFunc = input + " / "+assignVar+";";
+		break;
+	
+	case '&': // bit and with next number
+			spliceFunc = input + " + "+assignVar+";";
+		break;
+	
+	case '|': // bit or with next number
+			spliceFunc = input + " - "+assignVar+";";
+		break;
+	
+	case '%': // modulus with next number
+			spliceFunc = "mod("+input+", "+assignVar+");";
+		break;
+	
+	case '<': // decrement
+		spliceFunc = "--"+input+";";
+		break;
+
+	case '^': // exponent
+		spliceFunc = "exp("+input+");";
+		break;
+
+	case '>': // increment
+		spliceFunc = "++"+input+";";
+		break;
+
+	case '(': // sin
+		spliceFunc = "sin("+input+");";
+		break;
+	
+	case ')': // cosin
+		spliceFunc = "cos("+input+");";
+		break;
+
+	case '@': // ascos
+		spliceFunc = "acos("+input+");";
+		break;
+
+	case '$': // ascos
+		spliceFunc = "asin("+input+");";
+		break;*/
+
+	case 'a':
+		
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				output[j] = Math.sin(i + j); 
+			} 
+
+			return output;
+		};
+
+		break;
+		/*
+	case 'A': // absolute value
+		spliceFunc = "abs("+input+");";
+		break;
+
+	case 'b': // less than
+		spliceFunc = "sign("+assignVar+" * vec4(0.2, 0.2, 0.2, 0.2) - vec4(0.1, 0.1, 0.1, 0.1) + "+input+" - "+assignVar+");";
+		break;
+
+	case 'B': // less than equal
+		if(frag)
+			spliceFunc = "sign("+assignVar+" * "+input+" - gl_FragCoord);";
+		else	
+			spliceFunc = "sign("+assignVar+" * "+input+");";
+		break;
+
+	case 'c': // ceil
+		spliceFunc = "ceil("+input+");";
+		break;
+
+	case 'C': // ceil
+		spliceFunc = "ceil("+input+" * "+assignVar+");";
+		break;
+
+	case 'd': // distance
+		spliceFunc = "vec4(distance("+assignVar+".x, "+input+".x), distance("+assignVar+".y, "+input+".y), distance("+assignVar+".z, "+input+".z), distance("+assignVar+".w, "+input+".w)) * vec4(-0.01, -0.1, -0.01, -0.01) + "+input+";";
+		break;
+	
+	case 'D': // distance
+		spliceFunc = input+";\n    "+assignVar+" = vec4(distance("+assignVar+".x, "+input+".x), distance("+assignVar+".y, "+input+".y), distance("+assignVar+".z, "+input+".z), distance("+assignVar+".w, "+input+".w)) * vec4(0.1, 0.1, 0.1, 0.1);";
+		break;
+
+	case 'e': // equal
+		spliceFunc = "radians("+input+" * "+assignVar+");";
+		break;
+
+	case 'E': // equal
+		spliceFunc = "radians("+input+" * ceil("+input+"));";
+		break;
+
+	case 'f': // floor
+		spliceFunc = "floor(vec4(4, 4, 4, 4) * "+input+");";
+		break;
+	
+	case 'F': // fract
+		spliceFunc = "fract("+input+");";
+		break;
+
+	case 'g': // return input, assign "+assignVar+"
+		spliceFunc = input+";\n    "+assignVar+" = floor(vec4(4, 4, 4, 4) * "+input+");";
+		break;
+
+	case 'G': // return input, assign "+assignVar+"
+		spliceFunc = input+";\n    "+assignVar+" = fract("+input+");";
+		break;
+
+	case 'h': // return input, assign "+assignVar+"
+		spliceFunc = input+";\n    "+assignVar+" = sin("+input+");";
+		break;
+
+	case 'H': // return input, assign "+assignVar+"
+		spliceFunc = input+";\n    "+assignVar+" = cos("+input+");";
+		break;
+
+	case 'i': // inverse sqrt
+		spliceFunc = input+" / inversesqrt("+input+") - "+assignVar+";";
+		break;
+	
+	case 'I': // invsqrt(1 / exp2)
+		spliceFunc = input+" / inversesqrt(vec4(1, 1, 1, 1) / exp2("+input+")) - "+assignVar+";";
+		break;
+
+	case 'j': // return input, assign "+assignVar+"
+		spliceFunc = input+";\n    "+assignVar+" = vec4(cross("+input+".xyz, "+assignVar+".xyz), "+assignVar+".w);";
+		break;
+
+	case 'J': // return input, assign "+assignVar+"
+		spliceFunc = input+";\n    "+assignVar+" = "+assignVar+" * dot("+input+", "+assignVar+");";
+		break;
+
+	case 'k': // clamp
+		spliceFunc = "clamp("+input+", floor(vec4(4, 4, 4, 4) * "+assignVar+"), "+assignVar+");";
+		break;
+
+	case 'K': // clamp
+		spliceFunc = "clamp("+input+" * vec4(2, 2, 2, 2), "+assignVar+", ceil("+assignVar+"));";
+		break;
+
+	case 'l': // log2
+		spliceFunc = input+" + log2("+input+");";
+		break;
+	
+	case 'L': // log2(1 / log2)
+		spliceFunc = "log2(vec4(1, 1, 1, 1) + log2("+input+"));";
+		break;
+
+	case 'm': // min
+		spliceFunc = "min("+input+", "+assignVar+");";
+		break;
+	
+	case 'M': // max
+		spliceFunc = "max("+input+", "+assignVar+");";
+		break;
+
+	case 'n': // normalize
+		spliceFunc = "normalize("+input+" * vec4(6, 0.6, 6, 0.6));";
+		break;
+
+	case 'N': // normalize
+		spliceFunc = "normalize("+input+" / "+assignVar+");";
+		break;
+
+	case 'o': // min
+		if(frag)
+			spliceFunc = "min("+input+", vec4(1, 1, 1, 1) / gl_FragCoord);";
+		else
+			spliceFunc = "min("+input+", vec4(1, 1, 1, 1) / "+assignVar+");";
+		break;
+
+	case 'O': // max
+		if(frag)
+			spliceFunc = "max("+input+", vec4(1, 1, 1, 1) / gl_FragCoord);";
+		else
+			spliceFunc = "max("+input+", vec4(1, 1, 1, 1) / "+assignVar+");";
+		break;
+
+	case 'p': // pow
+		spliceFunc = "pow("+assignVar+", "+input+");";
+		break;
+
+	case 'P': // pow pow
+		spliceFunc = "pow("+assignVar+", pow("+assignVar+", "+input+"));";
+		break
+
+	case 'q': // sign value
+		spliceFunc = "sign("+input+");";
+		break;	
+
+	case 'Q': // sign value
+		spliceFunc = "sign("+input+" * "+assignVar+");";
+		break;
+
+	case 'r': // reflect
+		spliceFunc = "reflect("+assignVar+", "+input+");";
+		break;
+
+	case 'R': // Refract
+		spliceFunc = "refract("+assignVar+", "+input+", dot("+input+", "+assignVar+"));";
+		break;	
+
+	case 's': // step
+		spliceFunc = "abs("+assignVar+" - reflect("+input+", "+assignVar+")) / "+input+";";
+		break;
+	
+	case 'S': // smooth step
+		spliceFunc = "faceforward("+input+", "+assignVar+", "+input+") + "+input+";";
+		break;
+
+	case 't': // cross
+		spliceFunc = "vec4(cross("+input+".xyz, "+assignVar+".xyz), 1);";
+		break;
+	
+	case 'T': // tangent
+		spliceFunc = "tan("+input+");";
+		break;	
+	
+	case 'u': // 
+		spliceFunc = input+";\n    "+assignVar+" = tan("+input+");";
+		break;
+
+	case 'U': // 
+		spliceFunc = input+";\n    "+assignVar+" = normalize("+input+");";
+		break;
+
+	case 'v': // sqrt
+		spliceFunc = "sqrt("+input+");";
+		break;
+
+	case 'V': // var sqrt
+		spliceFunc = input+"; "+assignVar+" = sqrt("+input+");";
+		break;
+
+	case 'w': // FaceForward
+		spliceFunc = input+" - faceforward("+input+", "+assignVar+", "+input+");";
+		break;
+
+	case 'W': // FaceForward
+		spliceFunc = input+" - faceforward("+input+", "+assignVar+", "+assignVar+");";
+		break;
+
+	case 'x': // mix
+		spliceFunc = "mix("+input+", "+assignVar+", normalize("+assignVar+"));";
+		break;
+	
+	case 'X': // mix
+		spliceFunc = "mix("+input+", vec4(1, 1, 1, 1) / "+assignVar+", normalize("+assignVar+"));";
+		break;
+
+	case 'y': // mul
+		spliceFunc = input + " * 1.111;";
+		break;
+
+	case 'Y': // mul
+		spliceFunc = input + " * 0.666;";
+		break;
+
+	case 'z': // mul
+		spliceFunc = input + " * vec4(-1, -1, -1, -1);";
+		break;
+
+	case 'Z': // mul
+		spliceFunc = input+";\n    "+assignVar+" = "+input+" * vec4(-1, -1, -1, -1);";
+		break;*/
+
+	default:
+		var sample = (character.charCodeAt(0) / 256 * 2 - 1);
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				// output[j] = Math.random() * 2 - 1;
+				output[j] = sample;
+			} 
+
+			return output;
+		};
+		
+		break;
+	}
+}
+
+Soliton.parseSplice = function(lang)
+{
+	var audioFuncArray = new Array(lang.length);
+
+	for(var i = 0; i < lang.length; ++i)
+	{
+		audioFuncArray[i] = Soliton.parseSpliceChar(lang[i]);
+	}
+
+	return audioFuncArray;
+}
+
+Soliton.spliceOSC = function(lang)
+{
+	var oscNode = Soliton.context.createScriptProcessor(Soliton.blockSize, 0, 2);
+	oscNode.audioFuncArray = Soliton.parseSplice(lang);
+	oscNode.currentFunc = 0;
+
+	oscNode.onaudioprocess = function(event)
+	{
+		var outputArrayL = event.outputBuffer.getChannelData(0);
+		var outputArrayR = event.outputBuffer.getChannelData(1);
+		var output;
+
+		for(var i = 0; i < Soliton.blockSize; i += Soliton.spliceFuncBlockSize)
+		{
+			output = this.audioFuncArray[this.currentFunc](i);
+
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j)
+			{
+				outputArrayL[i + j] = outputArrayR[i + j] = output[j];
+			}
+
+			if(++this.currentFunc >= this.audioFuncArray.length)
+			 	this.currentFunc = 0;
+		}
+	}
+
+	oscNode.onaudioprocess.parentNode = oscNode;
+	var fadeGain = Soliton.context.createGainNode();
+	oscNode.connect(fadeGain);
+	fadeGain.connect(Soliton.masterGain);
+	fadeGain.gain.value = 0.0;
+	fadeGain.gain.linearRampToValueAtTime(1.0, Soliton.context.currentTime + 0.01);
+	fadeGain.gain.linearRampToValueAtTime(0.0, Soliton.context.currentTime + 1);
+	return Soliton.addNode(oscNode);
+}

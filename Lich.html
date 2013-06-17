@@ -40,8 +40,44 @@
 	<script src="third-party/three.js/postprocessing/RenderPass.js"></script>
 	<script src="third-party/three.js/postprocessing/MaskPass.js"></script>
 	<script src="third-party/three.js/postprocessing/ShaderPass.js"></script>
+
+	<!-- Yes, there's a better way to load these... -->
+	<script src="third-party/three.js/shaders/BasicShader.js"></script>
+	<script src="third-party/three.js/shaders/BleachBypassShader.js"></script>
+	<script src="third-party/three.js/shaders/BlendShader.js"></script>
+	<script src="third-party/three.js/shaders/BokehShader.js"></script>
+	<script src="third-party/three.js/shaders/BrightnessContrastShader.js"></script>
+	<script src="third-party/three.js/shaders/ColorCorrectionShader.js"></script>
+	<script src="third-party/three.js/shaders/ColorifyShader.js"></script>
+	<script src="third-party/three.js/shaders/ConvolutionShader.js"></script>
+	<script src="third-party/three.js/shaders/CopyShader.js"></script>
+	<script src="third-party/three.js/shaders/DOFMipMapShader.js"></script>
+	<script src="third-party/three.js/shaders/DotScreenShader.js"></script>
+	<script src="third-party/three.js/shaders/EdgeShader.js"></script>
+	<script src="third-party/three.js/shaders/EdgeShader2.js"></script>
+	<script src="third-party/three.js/shaders/FilmShader.js"></script>
+	<script src="third-party/three.js/shaders/FocusShader.js"></script>
+	<script src="third-party/three.js/shaders/FresnelShader.js"></script>
+	<script src="third-party/three.js/shaders/FXAAShader.js"></script>
+	<script src="third-party/three.js/shaders/HorizontalBlurShader.js"></script>
+	<script src="third-party/three.js/shaders/HorizontalTiltShiftShader.js"></script>
+	<script src="third-party/three.js/shaders/HueSaturationShader.js"></script>
+	<script src="third-party/three.js/shaders/KaleidoShader.js"></script>
+	<script src="third-party/three.js/shaders/LuminosityShader.js"></script>
+	<script src="third-party/three.js/shaders/MirrorShader.js"></script>
+	<script src="third-party/three.js/shaders/NormalMapShader.js"></script>
+	<script src="third-party/three.js/shaders/RGBShiftShader.js"></script>
+	<script src="third-party/three.js/shaders/SepiaShader.js"></script>
+	<script src="third-party/three.js/shaders/SSAOShader.js"></script>
+	<script src="third-party/three.js/shaders/TriangleBlurShader.js"></script>
+	<script src="third-party/three.js/shaders/UnpackDepthRGBAShader.js"></script>
+	<script src="third-party/three.js/shaders/VerticalBlurShader.js"></script>
+	<script src="third-party/three.js/shaders/VerticalTiltShiftShader.js"></script>
+	<script src="third-party/three.js/shaders/VignetteShader.js"></script>
+
 	<script type="text/javascript" src="Soliton.js/Soliton.js"></script>
 	<script type="text/javascript" src="CloudChamber.js/CloudChamber.js"></script>
+	<script type="text/javascript" src="CloudChamber.js/MarchingCubes.js"></script>
 	<script type="text/javascript" src="Lich.js"></script>
 	<script type="text/javascript" src="LichParser.js"></script>
 </head>
@@ -64,11 +100,88 @@
 // Lich.js - A Networked Audio / Visual Live Coding Language
 //////////////////////////////////////////////////////////////////////////////////
 
+spliceOsc "a"
+
+=> spliceStreamOsc Stream 0.5 { spliceOsc * randString 15 4 }
+
+=> map mesh "sawMap" 20 [ 0 50 100 ]
+angular map [ 0 0.01 0.01 ]
+=> mover Stream 0.25 { linear map - random [ 1 1 1 ] 0.5 }
+=> backgroundStream Stream 0.3 { background random [  50 100 255 ] }
+scale map 10
+
+=> map2 mesh "cloud" 100 [ 255 0 200 ]
+angular map2 [ 0.03 0.013 0.017 ]
+=> mover2 Stream 0.23 { linear map2 - random [ 1 1 1 ] 0.5 }
+
+// Type a random string to generate a shader
+spliceShader "aaNNnnNNnna*&!8(()a"
+// You can also just generate a random string
+spliceShader randString 4
+// How about some sequencing?
+=> spliceStream Stream 0.2 { spliceShader randString + random random 30 2 }
+
+// Compile test
+spliceShader "1234567890!£$%^&*()_-+=`{[}]:;@'~#<,>.?/|\qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM"
+
+// Doesn't work right now
+=> marchCubes march [ 0 50 100]
+
+// helper functions to make this easier
+=> mapper { => map mesh "sawMap" 20 [ 0 50 100 ]}
+=> angler { angular map - random [ 0.02 0.02 0.02 ] 0.01 }
+=> scaler { scale map 10 }
+=> warpMap { ::mapper ::angler ::scaler }
+
+// Execute multiple times
+::warpMap
+
+setShader @ shaders 24
+print shaders
+setShader [ "EdgeShader" "MirrorShader" ]
+
+// Execute multiple times
+::warpMap
+
+=> mapper { => map mesh "squareMap" 20 [ 0 50 100 ]}
+::warpMap
+
+wireframe map true
+wireframe map false
+
+
+setShader [ "KaleidoShader" "DotScreenShader" ]
+
+=> mapper { => map mesh "gaussianMap" 20 [ 0 50 100 ]}
+::warpMap
+
+=> mapper { => map mesh "sineMap" 20 [ 0 50 100 ]}
+::warpMap
+
+// Keep executing warp map whenever
+setShader [ "SepiaShader" "RGBShiftShader" "RGBShiftShader" "RGBShiftShader" "RGBShiftShader" "RGBShiftShader" ]
+setShader [ "DotScreenShader" "RGBShiftShader" "RGBShiftShader" "RGBShiftShader" "RGBShiftShader" "RGBShiftShader" ]
+setShader [ "DotScreenShader" "RGBShiftShader" "DotScreenShader" "RGBShiftShader" "DotScreenShader" "RGBShiftShader" ]
+setShader [ "MirrorShader" "KaleidoShader" "MirrorShader" ]
+setShader [ "VerticalBlurShader" "CopyShader" "FXAAShader" "CopyShader" ]
+setShader [ "EdgeShader" "VerticalTiltShiftShader" "DotScreenShader" "MirrorShader"  ]
+
+=> mapper { => map mesh "cloud" 100 [ 0 50 100 ]}
+::warpMap
+scale map 0.999
+=> mover Stream 0.5 { linear map - random [ 2 2 2 ] 1 }
+
+// Finish
+delete map
+stop mover
+
+
+
 // Background
 background [ 0 25 45 ]
 print "Hello, are you coding right now?"
 print "Yes"
-setMasterGain 0.01
+setMasterGain 0.25
 
 sinOsc 440 perc 1
 saw 440 perc 1
@@ -76,6 +189,27 @@ square 440 perc 1
 tri 440 perc 1
 osc 40 genArray "gaussian" 20 perc 1
 delay sinOsc 440 perc 1 0.25 0.9
+
+// Dark Squarezzzz
+=> squarez : freq { delay square freq perc 0.25 / 1 / freq 2 0.99 }
+=> squareStream Stream [ 2.333 1.333 ] [ { ::squarez 13 } { ::squarez 2.333 } { ::squarez 26 } ]
+=> squareStream2 Stream 1 [ { ::squarez 50 } { ::squarez 25 } { ::squarez 63 } ]
+stop squareStream
+stop squareStream2
+
+// sequencing isn't exactly perfect right now...
+=> noise : freq filterFreq { filter osc freq genArray "gaussian" 50 perc 0.25 filterFreq "low" }
+=> low { sinOsc 200 perc 0.25 }
+=> mid { filter square 400 perc 0.25 400 "band" }
+=> high { ::noise 1600 2000 }
+=> drumStream Stream 0.5 [ { ::low } { ::mid } { ::high } { ::mid } ]
+=> drumStream2 Stream 0.25 [ {  } { filter tri 800 perc 0.125 800 "band" } ]
+=> drumStream3 Stream / 3 4 { filter saw * / 3 4 1600 perc 0.125 1600 "low" }
+=> drumStream4 Stream [ 0.125 0.125 0.125 0.25 ] { filter square * / 4 3 1000 perc 0.125 1600 "low" }
+stop drumStream
+stop drumStream2
+stop drumStream3
+stop drumStream4
 
 // Heavy
 setMasterGain 0.1 // This will be load and DC offset, need to fix that in waveShape
@@ -1135,7 +1269,7 @@ deleteAll
 			'Cole', 
 			'Curtis',
 			'Ben'
-	-->
+	
 	<SCRIPT SRC="http://mobwrite3.appspot.com/static/compressed_form.js"></SCRIPT>`
 	<SCRIPT>
 	  mobwrite.syncGateway = 'http://mobwrite3.appspot.com/scripts/q.py';
@@ -1150,7 +1284,7 @@ deleteAll
 		mobwrite.maxSyncInterval = 1000;
 		mobwrite.syncInterval = 500;
 	">
-	
+	-->
 </body>
 
 </html>

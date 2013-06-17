@@ -5956,6 +5956,14 @@ function compileLich()
 
 	LichVM.reserveVar("osc", new LichPrimitive(osc, 3));
 
+
+	function spliceOSC(argArray)
+	{
+		Soliton.spliceOSC(argArray[0].value());
+	}
+
+	LichVM.reserveVar("spliceOsc", new LichPrimitive(spliceOSC, 1));
+
 	///////////////////////
 	// Graphics Primitives
 	///////////////////////
@@ -6186,6 +6194,36 @@ function compileLich()
 			geometry = CloudChamber.heightMap(CloudChamber.sineMap, argArray[1].value(), argArray[1].value()); // width/depth of height map
 			break;
 
+		case "noiseMap":
+		case "NoiseMap":
+			geometry = CloudChamber.heightMap(CloudChamber.noiseMap, argArray[1].value(), argArray[1].value()); // width/depth of height map
+			break;
+
+		case "gaussianMap":
+		case "GaussianMap":
+			geometry = CloudChamber.heightMap(CloudChamber.gaussianMap, argArray[1].value(), argArray[1].value()); // width/depth of height map
+			break;
+
+		case "squareMap":
+		case "SquareMap":
+			geometry = CloudChamber.heightMap(CloudChamber.squareMap, argArray[1].value(), argArray[1].value()); // width/depth of height map
+			break;
+
+		case "sawMap":
+		case "Sawap":
+			geometry = CloudChamber.heightMap(CloudChamber.sawMap, argArray[1].value(), argArray[1].value()); // width/depth of height map
+			break;
+
+		case "triMap":
+		case "TriMap":
+			geometry = CloudChamber.heightMap(CloudChamber.triMap, argArray[1].value(), argArray[1].value()); // width/depth of height map
+			break;
+
+		case "FlatMap":
+		case "flatMap":
+			geometry = CloudChamber.heightMap(CloudChamber.newMap, argArray[1].value(), argArray[1].value());
+			break;
+
 		default:
 			post("Mesh generation function not defined.");
 			return;
@@ -6200,7 +6238,30 @@ function compileLich()
 		);
 	}
 
-	LichVM.reserveVar("mesh", new LichPrimitive(mesh, 3));
+	function march(argArray)
+	{
+		addVisualObject(
+			CloudChamber.march(
+				arrayToColor(argArray[0]) // color
+			)
+		);
+	}
+
+	LichVM.reserveVar("march", new LichPrimitive(march, 1));
+
+	function randomString(argArray) // length
+	{
+		var randString = new Array("");
+
+		for(var i = 0; i < argArray[0].value(); ++i)
+		{
+			randString.push(String.fromCharCode(Math.random() * 127));
+		}
+
+		LichVM.push(new LichString(randString.join("")));
+	}
+
+	LichVM.reserveVar("randString", new LichPrimitive(randomString, 1));
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Constants
@@ -6342,5 +6403,45 @@ function compileLich()
 	bind.play();*/
 	
 	CloudChamber.setup("canvas", 24, undefined, post); // Create the CloudChamber instance
+
+	var lichShaderArray = new Array();
+	for(var i = 0; i < CloudChamber.shaderArray.length; ++i)
+	{
+		lichShaderArray.push(new LichString(CloudChamber.shaderArray[i]));
+	}
+
+	LichVM.reserveVar("shaders", new LichArray(lichShaderArray));
+
+	LichVM.reserveVar("mesh", new LichPrimitive(mesh, 3));
+
+	function setShader(argArray) // [0] shader name or array of names
+	{
+		if(argArray[0].type() == "String")
+		{
+			CloudChamber.setShader(argArray[0].value()/*, argArray[1].value()*/);
+		}
+
+		else if(argArray[0].type() == "Array")
+		{
+			var shaderNames = new Array();
+
+			for(var i = 0; i < argArray[0].arrayVar.length; ++i)
+			{
+				shaderNames.push(argArray[0].arrayVar[i].value());
+			}
+
+			CloudChamber.setShaders(shaderNames);
+		}
+	}
+
+	LichVM.reserveVar("setShader", new LichPrimitive(setShader, 1));
+
+	function spliceShader(argArray) // [0] splice string
+	{
+		CloudChamber.spliceShader(argArray[0].value());
+	}
+
+	LichVM.reserveVar("spliceShader", new LichPrimitive(spliceShader, 1));
+
 	CloudChamber.start();
 }

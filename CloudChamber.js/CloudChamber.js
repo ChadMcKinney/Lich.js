@@ -1,5 +1,5 @@
 /* 
-    CloudChamber.js - JavaScript WebGL framework
+    CloudChamber : THREE., - JavaScript WebGL framework
     Copyright (C) 2012 Chad McKinney
 
 	http://chadmckinneyaudio.com/
@@ -43,7 +43,7 @@ CloudChamber.loadFile = function(url, data, callback, errorCallback)
 {
     // Set up an asynchronous request
     var request = new XMLHttpRequest();
-    request.open('GET', url, true);
+    request.open("GET", url, true);
 
     // Hook the event that gets called as the request progresses
     request.onreadystatechange = function () 
@@ -97,7 +97,7 @@ CloudChamber.loadShaders = function(vertName, fragName)
 	CloudChamber.loadFiles([vertName, fragName], CloudChamber.setShaders, 
 		function(url)
 		{
-			alert('CLOUD CHAMBER: Failed to download "' + url + '"');
+			alert("CLOUD CHAMBER: Failed to download" + url);
 		}
 	);
 }
@@ -209,77 +209,6 @@ CloudChamber.draw = function(time)
 		}	
 
 		CloudChamber.composer.render(CloudChamber.scene, CloudChamber.camera);
-		
-		/*
-		var move = Math.sin(time * 0.0013);
-		CloudChamber.camera.position.x = Math.sin(time * 0.0025) * 40;
-		CloudChamber.camera.position.y = Math.sin(time * 0.002) * 30;
-		CloudChamber.camera.position.z = 200 + (Math.sin(time * 0.0015) * 99);
-
-		CloudChamber.testLight.position.x = move * 100;
-		CloudChamber.testLight.position.y = move * 100;
-		CloudChamber.testLight.position.y = move * -100;*/
-
-		/*
-		glMatrixMode(GL_PROJECTION);
-		glLoadIdentity();
-		gluPerspective(50.0, 1.0, 3.0, 7.0);
-		glMatrixMode(GL_MODELVIEW);
-		glLoadIdentity();
-
-		CloudChamber.mvpMatrix = mat4.lookAt(CloudChamber.eye, CloudChamber.look, CloudChamber.up);
-
-		CloudChamber.gl.bindFramebuffer(CloudChamber.gl.FRAMEBUFFER, null);		
-    	CloudChamber.gl.viewport(0, 0, CloudChamber.gl.viewportWidth, CloudChamber.gl.viewportHeight);
-    	CloudChamber.gl.clearColor(Math.random(), Math.random(), Math.random(), 1);
-    	CloudChamber.gl.clear(CloudChamber.gl.COLOR_BUFFER_BIT);
-		
-    	//mat4.identity(CloudChamber.modelMatrix);
-
-		CloudChamber.gl.enableVertexAttribArray(CloudChamber.positionHandle);
-		CloudChamber.gl.bindBuffer(CloudChamber.gl.ARRAY_BUFFER, trianglePositionBufferObject);
-		
-		CloudChamber.gl.vertexAttribPointer(
-			CloudChamber.positionHandle, 
-			CloudChamber.POSITION_DATA_SIZE, 
-			CloudChamber.gl.FLOAT, 
-			false, 
-			0, 
-			0
-		);
-
-		CloudChamber.gl.enableVertexAttribArray(CloudChamber.colorHandle);
-		CloudChamber.gl.bindBuffer(CloudChamber.gl.ARRAY_BUFFER, triangleColorBufferObject);
-		
-		CloudChamber.gl.vertexAttribPointer(
-			CloudChamber.colorHandle, 
-			CloudChamber.COLOR_DATA_SIZE, 
-			CloudChamber.gl.FLOAT, 
-			false, 
-			0, 
-			0
-		);
-
-		// mat4.multiply(CloudChamber.viewMatrix, CloudChamber.modelMatrix, CloudChamber.mvpMatrix);
-		mat4.multiply(CloudChamber.projectionMatrix, CloudChamber.mvpMatrix, CloudChamber.mvpMatrix);
-		
-		CloudChamber.gl.uniformMatrix4fv(
-			CloudChamber.mvpMatrixHandle, 
-			false, 
-			CloudChamber.mvpMatrix
-		);
-		
-		CloudChamber.gl.drawArrays(CloudChamber.gl.TRIANGLES, 0, 3);
-
-		CloudChamber.gl.flush();
-		*/
-
-
-		// CloudChamber.print("CloudChamber drawn: " + time);
-		// window.requestAnimFrame(CloudChamber.draw, CloudChamber.canvas);
-
-		//if(CloudChamber.drawCallback != undefined)
-		//	CloudChamber.drawCallback(this);
 }
 
 /******************************************************************************************************************
@@ -292,23 +221,10 @@ CloudChamber.draw = function(time)
 CloudChamber.setup = function(canvasElementName, framerate, drawCallback, printCallback)
 {
 	CloudChamber.canvas = document.getElementById(canvasElementName);
-	/*
-	CloudChamber.gl = WebGLUtils.setupWebGL(CloudChamber.canvas);
-	CloudChamber.gl.viewport(0, 0, CloudChamber.canvas.clientWidth, CloudChamber.canvas.clientHeight);
-	CloudChamber.projectionMatrix = mat4.create();
-	CloudChamber.viewMatrix = mat4.create();
-	CloudChamber.modelMatrix = mat4.create();
-	CloudChamber.mvpMatrix = mat4.create();
-	CloudChamber.mvpMatrixHandle = 0;
-	CloudChamber.positionHandle = 0;
-	CloudChamber.colorHandle = 0;*/
-	
 	CloudChamber.framerate = framerate;
 	CloudChamber.drawCallback = drawCallback;
 	CloudChamber.printCallback = printCallback
 	CloudChamber.timer = 0;
-	// CloudChamber.vert = "uniform mat4 mvpMatrix; attribute vec4 position; attribute vec4 color; varying vec4 vColor; void main() { vColor = color; gl_Position = position * mvpMatrix; }";
-	// CloudChamber.frag = "varying vec4 vColor; void main() { gl_FragColor = vColor; }";
 	CloudChamber.currentProgram = 0;
 
 	// Setup view frustum and projection matrix
@@ -320,7 +236,6 @@ CloudChamber.setup = function(canvasElementName, framerate, drawCallback, printC
 	var near = 1.0;
 	var far = 10.0;
 	mat4.frustum(left, right, bottom, top, near, far, CloudChamber.projectionMatrix);
-	// CloudChamber.gl.clearColor(0, 0, 0, 1);
 
 	CloudChamber.eye = vec3.create();
 	CloudChamber.eye[0] = 25;
@@ -336,44 +251,6 @@ CloudChamber.setup = function(canvasElementName, framerate, drawCallback, printC
 	CloudChamber.up[0] = 0;
 	CloudChamber.up[1] = 1;
 	CloudChamber.up[2] = 0;
-
-	/*
-	CloudChamber.mvpMatrix = mat4.lookAt(CloudChamber.eye, CloudChamber.look, CloudChamber.up);
-
-	CloudChamber.loadShaders(
-		"http://chadmckinneyaudio.com/Lich.js/CloudChamber.js/Cloud.vert",
-		"http://chadmckinneyaudio.com/Lich.js/CloudChamber.js/Cloud.frag"
-	);
-
-	// Define points for equilateral triangles.
-	trianglePositions = new Float32Array([
-	        // X, Y, Z,
-	        -0.5, -0.25, 0.0,
-	        0.5, -0.25, 0.0,
-	        0.0, 0.559016994, 0.0]);
-	 
-	// This triangle is red, green, and blue.
-	triangleColors = new Float32Array([
-	        // R, G, B, A
-	        1.0, 0.0, 0.0, 1.0,
-	        0.0, 0.0, 1.0, 1.0,
-	        0.0, 1.0, 0.0, 1.0]);
-
-	trianglePositionBufferObject = CloudChamber.gl.createBuffer();
-	CloudChamber.checkGLError();
-	CloudChamber.gl.bindBuffer(CloudChamber.gl.ARRAY_BUFFER, trianglePositionBufferObject);
-	CloudChamber.checkGLError();
-	CloudChamber.gl.bufferData(CloudChamber.gl.ARRAY_BUFFER, trianglePositions, CloudChamber.gl.STATIC_DRAW);
-	CloudChamber.checkGLError();
-
-	triangleColorBufferObject = CloudChamber.gl.createBuffer();
-	CloudChamber.checkGLError();
-	CloudChamber.gl.bindBuffer(CloudChamber.gl.ARRAY_BUFFER, triangleColorBufferObject);
-	CloudChamber.checkGLError();
-	CloudChamber.gl.bufferData(CloudChamber.gl.ARRAY_BUFFER, triangleColors, CloudChamber.gl.STATIC_DRAW);
-	CloudChamber.checkGLError();*/
-
-	//window.requestAnimFrame(CloudChamber.draw, CloudChamber.canvas);
 
 	var cameraViewAngle = 45, near = 0.1, far = 10000;
 	
@@ -394,24 +271,6 @@ CloudChamber.setup = function(canvasElementName, framerate, drawCallback, printC
 	CloudChamber.canvas.parentNode.replaceChild(CloudChamber.renderer.domElement, CloudChamber.canvas);
 	CloudChamber.print("CloudChamber created.");
 
-	/*
-	var sphereMaterial = new THREE.MeshLambertMaterial(
-		{
-			color: 0xCC0000
-		}
-	);
-
-	CloudChamber.testSphere = new THREE.Mesh(
-		new THREE.SphereGeometry(
-			50,
-			64,
-			64
-		),
-		sphereMaterial
-	);
-
-	CloudChamber.scene.add(CloudChamber.testSphere);*/
-
 	CloudChamber.testLight = new THREE.PointLight(0xFFFFFF);
 
 	CloudChamber.testLight.position.x = 10;
@@ -425,15 +284,89 @@ CloudChamber.setup = function(canvasElementName, framerate, drawCallback, printC
 	CloudChamber.composer = new THREE.EffectComposer(CloudChamber.renderer);
 	CloudChamber.composer.addPass( new THREE.RenderPass(CloudChamber.scene, CloudChamber.camera));
 
-/*
+	/*
+
 	var dotScreenEffect = new THREE.ShaderPass(THREE.DotScreenShader);
-	dotScreenEffect.uniforms['scale'].value = 4;
+	dotScreenEffect.uniforms["scale"].value = 4;
 	CloudChamber.composer.addPass(dotScreenEffect);*/
 
+	
 	var rgbEffect = new THREE.ShaderPass(THREE.RGBShiftShader);
-	rgbEffect.uniforms['amount'].value = 0.0015;
+	rgbEffect.uniforms["amount"].value = 0.0;
 	rgbEffect.renderToScreen = true;
 	CloudChamber.composer.addPass(rgbEffect);
+
+	CloudChamber.numShaders = 1;
+
+	CloudChamber.shadersMap = {
+		"BasicShader" : THREE.BasicShader,
+		"BleachBypassShader" : THREE.BleachBypassShader,
+		"BlendShader" : THREE.BlendShader,
+		"BokehShader" : THREE.BokehShader,
+		"BrightnessContrastShader" : THREE.BrightnessContrastShader,
+		"ColorCorrectionShader" : THREE.ColorCorrectionShader,
+		"ColorifyShader" : THREE.ColorifyShader,
+		"ConvolutionShader" : THREE.ConvolutionShader,
+		"CopyShader" : THREE.CopyShader,
+		"DOFMipMapShader" : THREE.DOFMipMapShader,
+		"DotScreenShader" : THREE.DotScreenShader,
+		"EdgeShader" : THREE.EdgeShader,
+		"EdgeShader2" : THREE.EdgeShader2,
+		"FilmShader" : THREE.FilmShader,
+		"FocusShader" : THREE.FocusShader,
+		"FresnelShader" : THREE.FresnelShader,
+		"FXAAShader" : THREE.FXAAShader,
+		"HorizontalBlurShader" : THREE.HorizontalBlurShader,
+		"HorizontalTiltShiftShader" : THREE.HorizontalTiltShiftShader,
+		"HueSaturationShader" : THREE.HueSaturationShader,
+		"KaleidoShader" : THREE.KaleidoShader,
+		"LuminosityShader" : THREE.LuminosityShader,
+		"MirrorShader" : THREE.MirrorShader,
+		"NormalMapShader" : THREE.NormalMapShader,
+		"RGBShiftShader" : THREE.RGBShiftShader,
+		"SepiaShader" : THREE.SepiaShader,
+		"SSAOShader" : THREE.SSAOShader,
+		"TriangleBlurShader" : THREE.TriangleBlurShader,
+		"UnpackDepthRGBAShader" : THREE.UnpackDepthRGBAShader,
+		"VerticalBlurShader" : THREE.VerticalBlurShader,
+		"VerticalTiltShiftShader" : THREE.VerticalTiltShiftShader,
+		"VignetteShader" : THREE.VignetteShader 
+	}
+
+	CloudChamber.shaderArray = new Array(
+		"BasicShader",
+		"BleachBypassShader",
+		"BlendShader",
+		"BokehShader",
+		"BrightnessContrastShader",
+		"ColorCorrectionShader",
+		"ColorifyShader",
+		"ConvolutionShader",
+		"CopyShader",
+		"DOFMipMapShader",
+		"DotScreenShader",
+		"EdgeShader",
+		"EdgeShader2",
+		"FilmShader",
+		"FocusShader",
+		"FresnelShader",
+		"FXAAShader",
+		"HorizontalBlurShader",
+		"HorizontalTiltShiftShader",
+		"HueSaturationShader",
+		"KaleidoShader",
+		"LuminosityShader",
+		"MirrorShader",
+		"NormalMapShader",
+		"RGBShiftShader",
+		"SepiaShader",
+		"SSAOShader",
+		"TriangleBlurShader",
+		"UnpackDepthRGBAShader",
+		"VerticalBlurShader",
+		"VerticalTiltShiftShader",
+		"VignetteShader"
+	);
 
 	// shim layer with setTimeout fallback
 	window.requestAnimFrame = (function(){
@@ -455,6 +388,54 @@ CloudChamber.setup = function(canvasElementName, framerate, drawCallback, printC
 	})();
 	// place the rAF *before* the render() to assure as close to
 	// 60fps with the setTimeout fallback.
+}
+
+CloudChamber.addShader = function(shader, amount)
+{
+	var pass = new THREE.ShaderPass(CloudChamber.shadersMap[shader]);
+	// pass.uniforms["amount"].value = amount;
+	pass.renderToScreen = true;
+	CloudChamber.composer.addPass(pass);
+	CloudChamber.numShaders += 1;
+}
+
+CloudChamber.setShader = function(shader, amount)
+{
+	var pass = new THREE.ShaderPass(CloudChamber.shadersMap[shader]);
+	// pass.uniforms["amount"].value = amount;
+	pass.renderToScreen = true;
+	
+	for(var i = 0; i < CloudChamber.numShaders; ++i)
+	{
+		CloudChamber.composer.passes.pop();
+	}
+
+	CloudChamber.numShaders = 1;
+	CloudChamber.composer.addPass(pass);
+}
+
+CloudChamber.setShaders = function(shaders)
+{
+	for(var i = 0; i < shaders.length; ++i)
+	{
+		if(i == 0)
+		{
+			for(var j = 0; j < CloudChamber.numShaders; ++j)
+			{
+				CloudChamber.composer.passes.pop();
+			}
+
+			CloudChamber.numShaders = 0;
+		}
+
+		var pass = new THREE.ShaderPass(CloudChamber.shadersMap[shaders[i]]);
+		
+		if(i == (shaders.length - 1))
+			pass.renderToScreen = true;
+
+		CloudChamber.composer.addPass(pass);
+		CloudChamber.numShaders += 1;
+	}
 }
 
 CloudChamber.addPointer = function(object)
@@ -719,6 +700,7 @@ CloudChamber.heightMap = function(mapFunction, width, depth)
 	var y = 0;
 	var even = true;
 	var doneIterating = false;
+	var offset = new THREE.Vector3((width / 2) * -1, 0, (depth / 2) * -1);
 
 	// Iterate over the height map and create a triangle mesh using correct winding
 	while(!doneIterating)
@@ -728,32 +710,32 @@ CloudChamber.heightMap = function(mapFunction, width, depth)
 		if(even)
 		{	
 			x += 1;
-			triangle.push(new THREE.Vector3(x, 0, y));
+			triangle.push(new THREE.Vector3(x, map[x + (y * width)], y).add(offset));
 			x -= 1;
-			triangle.push(new THREE.Vector3(x, 0, y));
+			triangle.push(new THREE.Vector3(x, map[x + (y * width)], y).add(offset));
 			y += 1;
-			triangle.push(new THREE.Vector3(x, 0, y));
+			triangle.push(new THREE.Vector3(x, map[x + (y * width)], y).add(offset));
 			even = false;
 			triangles.push(triangle);
 		}
 
 		else
 		{
-			triangle.push(new THREE.Vector3(x, 0, y));
+			triangle.push(new THREE.Vector3(x, map[x + (y * width)], y).add(offset));
 			x += 1;
-			triangle.push(new THREE.Vector3(x, 0, y));
+			triangle.push(new THREE.Vector3(x, map[x + (y * width)], y).add(offset));
 			y -= 1;
-			triangle.push(new THREE.Vector3(x, 0, y));
+			triangle.push(new THREE.Vector3(x, map[x + (y * width)], y).add(offset));
 			triangles.push(triangle);
 			even = true;
 
-			// Check to see that we're done by testing x/y against width/depth
-			if((x == width - 1) && (y == depth - 1))
+			// Check to see that we"re done by testing x/y against width/depth
+			if((x == width) && (y == depth - 1))
 			{
 				doneIterating = true;
 			}
 
-			else if(x == width - 1)
+			else if(x == width)
 			{
 				// New row
 				x = 0;
@@ -765,21 +747,118 @@ CloudChamber.heightMap = function(mapFunction, width, depth)
 	return triangles;
 }
 
-CloudChamber.sineMap = function(width, depth)
+CloudChamber.newMap = function(width, depth)
 {
 	var map = new Array();
-	for(var x = 0; x < width; ++x)
+
+	for(var i = 0; i < (width * depth); ++i)
 	{
-		map.push(new Array());
+		map.push(0)
 	}
 
+	return map;
+}
 
+CloudChamber.sineMap = function(width, depth)
+{
+	var map = CloudChamber.newMap(width, depth);
+	var freq = Math.random() * width;
+	var freq2 = Math.round(Math.random() * 20) / 10;
 	for(var x = 0; x < width; ++x)
 	{
-		var freq = Math.random();
 		for(var y = 0; y < depth; ++y)
 		{
-			map[x][y] = Math.sin(y * freq);
+			map[x + (y * width)] = Math.sin(x * freq) * Math.sin(y * freq2) * (width / 2);
+		}
+	}
+
+	return map;
+}
+
+CloudChamber.noiseMap = function(width, depth)
+{
+	var map = CloudChamber.newMap(width, depth);
+	var amp = Math.random() * width;
+	for(var i = 0; i < (width * depth); ++i)
+	{
+		map[i] = ((Math.random() * 2) - 1) * amp;
+	}
+
+	return map;	
+}
+
+CloudChamber.gaussianMap = function(width, depth)
+{
+	var map = CloudChamber.newMap(width, depth);
+	var amp = Math.random() * width;
+	for(var i = 0; i < (width * depth); ++i)
+	{
+		map[i] = CloudChamber.nrand() * amp;
+	}
+
+	return map; 
+}
+
+CloudChamber.square = function(i, freq)
+{
+	if((i % freq) < (freq / 2))
+		return -1;
+	else
+		return 1;
+}
+
+CloudChamber.squareMap = function(width, depth)
+{
+	var map = CloudChamber.newMap(width, depth);
+	var freq = Math.random();
+	var freq2 = Math.round(Math.random() * 20) / 10;
+	for(var x = 0; x < width; ++x)
+	{
+		for(var y = 0; y < depth; ++y)
+		{
+			map[x + (y * width)] = CloudChamber.square(x, freq) * CloudChamber.square(y, freq2)  * (width / 2);
+		}
+	}
+
+	return map;
+}
+
+CloudChamber.saw = function(i, freq)
+{
+	return ((i % freq) / freq) * 2 - 1;
+}
+
+CloudChamber.sawMap = function(width, depth)
+{
+	var map = CloudChamber.newMap(width, depth);
+	var freq = Math.random();
+	var freq2 = Math.round(Math.random() * 20) / 10;
+	for(var x = 0; x < width; ++x)
+	{
+		for(var y = 0; y < depth; ++y)
+		{
+			map[x + (y * width)] = CloudChamber.saw(x, freq) * CloudChamber.saw(y, freq2)  * (width / 2);
+		}
+	}
+
+	return map;
+}
+
+CloudChamber.tri = function(i, freq)
+{
+	return freq / 2 - Math.abs(i % (2*freq) - freq);
+}
+
+CloudChamber.triMap = function(width, depth)
+{
+	var map = CloudChamber.newMap(width, depth);
+	var freq = Math.random();
+	var freq2 = Math.round(Math.random() * 20) / 10;
+	for(var x = 0; x < width; ++x)
+	{
+		for(var y = 0; y < depth; ++y)
+		{
+			map[x + (y * width)] = CloudChamber.tri(x, freq) * CloudChamber.tri(y, freq2)  * width;
 		}
 	}
 
@@ -802,11 +881,13 @@ CloudChamber.calculateNormal = function(p1, p2, p3)
 	var u = p2.sub(p1);
 	var v = p3.sub(p1);
 	
-	return new THREE.Vector3(
+	var normal = new THREE.Vector3(
 		(u.y * v.z) - (u.z * v.y),
 		(u.z * v.x) - (u.x * v.z),
 		(u.x * v.y) - (u.y * v.x)
 	);
+
+	return normal.normalize();
 }
 
 CloudChamber.mesh = function(mGeometry, mColor)
@@ -827,9 +908,11 @@ CloudChamber.mesh = function(mGeometry, mColor)
 		geometry.vertices.push(p1);
 		geometry.vertices.push(p2);
 		geometry.vertices.push(p3);
-		geometry.faces.push(new THREE.Face3(i * 3, (i * 3) + 1, (i * 3) + 2, CloudChamber.calculateNormal(p1, p2, p3), mColor));
+		geometry.faces.push(new THREE.Face3(i * 3, (i * 3) + 1, (i * 3) + 2));
 	}
 
+	geometry.computeFaceNormals();
+	geometry.computeCentroids();
 	geometry.computeBoundingSphere();
 
 	var mesh = new THREE.Mesh(
@@ -839,6 +922,8 @@ CloudChamber.mesh = function(mGeometry, mColor)
 
 	// mesh.position = mPosition;
 	// mesh.rotation = mRotation;
+	mesh.doubleSided = true;
+	mesh.overdraw = true;
 	mesh.linear_momentum = { x:0, y:0, z:0 };
 	mesh.angular_momentum = { x:0, y:0, z:0 };
 	mesh.momentum_update = false;
@@ -846,3 +931,543 @@ CloudChamber.mesh = function(mGeometry, mColor)
 	CloudChamber.print("Mesh");
 	return CloudChamber.addPointer(mesh);
 }
+
+CloudChamber.march = function(mColor)
+{
+	var map = MarchingCubes.march();
+
+	var material = new THREE.MeshLambertMaterial(
+		{
+			color: mColor
+		}
+	);
+
+	var geometry = new THREE.Geometry();
+
+	for(var i = 0; i < map.length; ++i)
+	{
+		geometry.vertices.push(map[i]);
+		CloudChamber.print("(" + map[i].x + ", " + map[i].y + ", " + map[i].z + ")");
+
+		if(i % 3 == 2)
+			geometry.faces.push(new THREE.Face3(i - 2, i - 1, i));
+	}
+
+	CloudChamber.print("March faces: " + geometry.faces.length);
+
+	geometry.computeFaceNormals();
+	geometry.computeCentroids();
+	geometry.computeBoundingSphere();
+
+	var mesh = new THREE.Mesh(
+		geometry,
+		material
+	);
+
+	mesh.doubleSided = true;
+	mesh.overdraw = true;
+	mesh.linear_momentum = { x:0, y:0, z:0 };
+	mesh.angular_momentum = { x:0, y:0, z:0 };
+	mesh.momentum_update = false;
+	CloudChamber.scene.add(mesh);
+	CloudChamber.print("March");
+	return CloudChamber.addPointer(mesh);
+}
+
+///////////////////////////////////////////////////////////////////////////////////////
+// splice language
+///////////////////////////////////////////////////////////////////////////////////////
+
+/*
+Generate a shader using the sub-language splice
+splice is a deterministic, non-turing complete graph description using characters:
+
+The first half of the string is the vertext shader, the second half is the fragment
+
+examples: 
+
+spliceShader "<vVvVvvv<>>>>>>><<<>><^><^^^^^^<^<>>vvvvvvv<v<v>666<<..>>>£%3kqkdwKW:DK"
+spliceShader ")(R£)FPIEWF}{P}{poef{pwfowefpowefw3290£)(R()IfifpECV<V<>V<££^94@@{}{}"
+
+characters are translated to WebGL function calls via a simple switch
+
+*/
+
+CloudChamber.parseSpliceChar = function(character, input)
+{
+	var spliceFunc;
+	var frag = input == "fragColor";
+	var assignVar = "a_variable";
+
+	if(frag)
+		assignVar = "frag_variable";
+
+	switch(character)
+	{
+	case '!': 
+		if(frag)
+			spliceFunc = "pow(gl_FragCoord, "+input+" * vec4(2, 2, 2, 2));";
+		else
+			spliceFunc = "pow("+assignVar+", "+input+" * vec4(2, 2, 2, 2));";
+		break;
+
+	case '£': 
+		if(frag)
+			spliceFunc = "sqrt(gl_FragCoord + "+input+" * vec4(10, 10, 10, 10));";
+		else
+			spliceFunc = "sqrt("+input+" + "+assignVar+" * vec4(10, 10, 10, 10));";
+		break;
+
+	case '=': 
+		if(frag)
+			spliceFunc = "fract(gl_FragCoord + "+input+" * vec4(10, 10, 10, 10));";
+		else
+			spliceFunc = "fract("+input+" + "+assignVar+" * vec4(10, 10, 10, 10));";
+		break;
+
+	case '`': 
+		if(frag)
+			spliceFunc = "inversesqrt(gl_FragCoord + "+input+");";
+		else
+			spliceFunc = "inversesqrt("+input+" + "+assignVar+");";
+		break;
+
+	case '~': 
+		if(frag)
+			spliceFunc = "inversesqrt(gl_FragCoord - "+input+");";
+		else
+			spliceFunc = "inversesqrt("+input+" - "+assignVar+");";
+		break;
+
+	case '#': 
+		if(frag)
+			spliceFunc = "reflect(gl_FragCoord, "+input+");";
+		else
+			spliceFunc = "reflect("+input+", "+assignVar+");";
+		break;
+
+	case ':':
+		if(frag)
+			spliceFunc = "refract(gl_FragCoord, "+input+", dot("+input+", "+assignVar+"));";
+		else
+			spliceFunc = "refract("+input+", "+assignVar+", dot("+input+", "+assignVar+"));";
+		break;
+
+	case ';': 
+			spliceFunc = "reflect("+assignVar+", reflect("+assignVar+", "+input+"));";
+		break;
+
+	case '?': 
+		if(frag)
+			spliceFunc = "clamp(gl_FragCoord, "+input+", "+assignVar+");";
+		else
+			spliceFunc = "clamp("+assignVar+", "+input+", "+input+");";
+		break;
+
+	case '\\': 
+		if(frag)
+			spliceFunc = "vec4(cross(gl_FragCoord.xyz, "+input+".xyz), 1);";
+		else
+			spliceFunc = "vec4(cross("+assignVar+".xyz, "+input+".xyz), 1);";
+		break;	
+
+	case ' ':
+		if(frag)
+			spliceFunc = "mix(gl_FragCoord, "+input+", abs("+assignVar+"));";
+		else
+			spliceFunc = "mix("+assignVar+", "+input+", abs("+assignVar+"));";
+		break;
+
+	case '_': // length
+		spliceFunc = "vec4(length("+input+"), length("+input+"), length("+input+"), length("+input+"));";
+		break;
+	
+	case '[': // fold add, add all components of vector returning a vector of the result
+		spliceFunc = input+"; "+assignVar+" = "+assignVar+" * ("+input+".x + "+input+".y + "+input+".z + "+input+".w);";
+		break;
+
+	case ']': // fold subtract, sub all components of vector returning a vector of the result
+		spliceFunc = input+"; "+assignVar+" = "+assignVar+" * ("+input+".x - "+input+".y - "+input+".z - "+input+".w);";
+		break;
+	
+	case '{':
+		spliceFunc = "vec4("+input+".w, "+input+".z, "+input+".y, "+input+".x);";
+		break;
+	
+	case '}':
+		if(frag)
+			spliceFunc = "reflect(gl_FragCoord, "+input+");";
+		else
+			spliceFunc = "vec4("+input+".z, "+input+".w, "+input+".x, "+input+".w);";
+		break;
+	
+	case '.': // dot() function
+		if(frag)
+			spliceFunc = input+" * dot(gl_FragCoord, "+input+");";
+		else
+			spliceFunc = input+" * dot("+input+", "+assignVar+");";
+		break;
+	
+	case '+': // add with next number
+			spliceFunc = input + " + "+assignVar+";";
+		break;
+	
+	case '-': // subtract next number from this
+			spliceFunc = input + " + "+assignVar+";";
+		break;
+	
+	case '*': // multiply by next number
+			spliceFunc = input + " * "+assignVar+";";
+		break;
+	
+	case '/': // divide by next number
+		spliceFunc = input + " / "+assignVar+";";
+		break;
+	
+	case '&': // bit and with next number
+			spliceFunc = input + " + "+assignVar+";";
+		break;
+	
+	case '|': // bit or with next number
+			spliceFunc = input + " - "+assignVar+";";
+		break;
+	
+	case '%': // modulus with next number
+			spliceFunc = "mod("+input+", "+assignVar+");";
+		break;
+	
+	case '<': // decrement
+		spliceFunc = "--"+input+";";
+		break;
+
+	case '^': // exponent
+		spliceFunc = "exp("+input+");";
+		break;
+
+	case '>': // increment
+		spliceFunc = "++"+input+";";
+		break;
+
+	case '(': // sin
+		spliceFunc = "sin("+input+");";
+		break;
+	
+	case ')': // cosin
+		spliceFunc = "cos("+input+");";
+		break;
+
+	case '@': // ascos
+		spliceFunc = "acos("+input+");";
+		break;
+
+	case '$': // ascos
+		spliceFunc = "asin("+input+");";
+		break;
+
+	case 'a': // scamble
+		spliceFunc = "vec4("+input+".y, "+input+".z, "+input+".x, "+input+".w);";		
+		break;
+
+	case 'A': // absolute value
+		spliceFunc = "abs("+input+");";
+		break;
+
+	case 'b': // less than
+		spliceFunc = "sign("+assignVar+" * vec4(0.2, 0.2, 0.2, 0.2) - vec4(0.1, 0.1, 0.1, 0.1) + "+input+" - "+assignVar+");";
+		break;
+
+	case 'B': // less than equal
+		if(frag)
+			spliceFunc = "sign("+assignVar+" * "+input+" - gl_FragCoord);";
+		else	
+			spliceFunc = "sign("+assignVar+" * "+input+");";
+		break;
+
+	case 'c': // ceil
+		spliceFunc = "ceil("+input+");";
+		break;
+
+	case 'C': // ceil
+		spliceFunc = "ceil("+input+" * "+assignVar+");";
+		break;
+
+	case 'd': // distance
+		spliceFunc = "vec4(distance("+assignVar+".x, "+input+".x), distance("+assignVar+".y, "+input+".y), distance("+assignVar+".z, "+input+".z), distance("+assignVar+".w, "+input+".w)) * vec4(-0.01, -0.1, -0.01, -0.01) + "+input+";";
+		break;
+	
+	case 'D': // distance
+		spliceFunc = input+";\n    "+assignVar+" = vec4(distance("+assignVar+".x, "+input+".x), distance("+assignVar+".y, "+input+".y), distance("+assignVar+".z, "+input+".z), distance("+assignVar+".w, "+input+".w)) * vec4(0.1, 0.1, 0.1, 0.1);";
+		break;
+
+	case 'e': // equal
+		spliceFunc = "radians("+input+" * "+assignVar+");";
+		break;
+
+	case 'E': // equal
+		spliceFunc = "radians("+input+" * ceil("+input+"));";
+		break;
+
+	case 'f': // floor
+		spliceFunc = "floor(vec4(4, 4, 4, 4) * "+input+");";
+		break;
+	
+	case 'F': // fract
+		spliceFunc = "fract("+input+");";
+		break;
+
+	case 'g': // return input, assign "+assignVar+"
+		spliceFunc = input+";\n    "+assignVar+" = floor(vec4(4, 4, 4, 4) * "+input+");";
+		break;
+
+	case 'G': // return input, assign "+assignVar+"
+		spliceFunc = input+";\n    "+assignVar+" = fract("+input+");";
+		break;
+
+	case 'h': // return input, assign "+assignVar+"
+		spliceFunc = input+";\n    "+assignVar+" = sin("+input+");";
+		break;
+
+	case 'H': // return input, assign "+assignVar+"
+		spliceFunc = input+";\n    "+assignVar+" = cos("+input+");";
+		break;
+
+	case 'i': // inverse sqrt
+		spliceFunc = input+" / inversesqrt("+input+") - "+assignVar+";";
+		break;
+	
+	case 'I': // invsqrt(1 / exp2)
+		spliceFunc = input+" / inversesqrt(vec4(1, 1, 1, 1) / exp2("+input+")) - "+assignVar+";";
+		break;
+
+	case 'j': // return input, assign "+assignVar+"
+		spliceFunc = input+";\n    "+assignVar+" = vec4(cross("+input+".xyz, "+assignVar+".xyz), "+assignVar+".w);";
+		break;
+
+	case 'J': // return input, assign "+assignVar+"
+		spliceFunc = input+";\n    "+assignVar+" = "+assignVar+" * dot("+input+", "+assignVar+");";
+		break;
+
+	case 'k': // clamp
+		spliceFunc = "clamp("+input+", floor(vec4(4, 4, 4, 4) * "+assignVar+"), "+assignVar+");";
+		break;
+
+	case 'K': // clamp
+		spliceFunc = "clamp("+input+" * vec4(2, 2, 2, 2), "+assignVar+", ceil("+assignVar+"));";
+		break;
+
+	case 'l': // log2
+		spliceFunc = input+" + log2("+input+");";
+		break;
+	
+	case 'L': // log2(1 / log2)
+		spliceFunc = "log2(vec4(1, 1, 1, 1) + log2("+input+"));";
+		break;
+
+	case 'm': // min
+		spliceFunc = "min("+input+", "+assignVar+");";
+		break;
+	
+	case 'M': // max
+		spliceFunc = "max("+input+", "+assignVar+");";
+		break;
+
+	case 'n': // normalize
+		spliceFunc = "normalize("+input+" * vec4(6, 0.6, 6, 0.6));";
+		break;
+
+	case 'N': // normalize
+		spliceFunc = "normalize("+input+" / "+assignVar+");";
+		break;
+
+	case 'o': // min
+		if(frag)
+			spliceFunc = "min("+input+", vec4(1, 1, 1, 1) / gl_FragCoord);";
+		else
+			spliceFunc = "min("+input+", vec4(1, 1, 1, 1) / "+assignVar+");";
+		break;
+
+	case 'O': // max
+		if(frag)
+			spliceFunc = "max("+input+", vec4(1, 1, 1, 1) / gl_FragCoord);";
+		else
+			spliceFunc = "max("+input+", vec4(1, 1, 1, 1) / "+assignVar+");";
+		break;
+
+	case 'p': // pow
+		spliceFunc = "pow("+assignVar+", "+input+");";
+		break;
+
+	case 'P': // pow pow
+		spliceFunc = "pow("+assignVar+", pow("+assignVar+", "+input+"));";
+		break
+
+	case 'q': // sign value
+		spliceFunc = "sign("+input+");";
+		break;	
+
+	case 'Q': // sign value
+		spliceFunc = "sign("+input+" * "+assignVar+");";
+		break;
+
+	case 'r': // reflect
+		spliceFunc = "reflect("+assignVar+", "+input+");";
+		break;
+
+	case 'R': // Refract
+		spliceFunc = "refract("+assignVar+", "+input+", dot("+input+", "+assignVar+"));";
+		break;	
+
+	case 's': // step
+		spliceFunc = "abs("+assignVar+" - reflect("+input+", "+assignVar+")) / "+input+";";
+		break;
+	
+	case 'S': // smooth step
+		spliceFunc = "faceforward("+input+", "+assignVar+", "+input+") + "+input+";";
+		break;
+
+	case 't': // cross
+		spliceFunc = "vec4(cross("+input+".xyz, "+assignVar+".xyz), 1);";
+		break;
+	
+	case 'T': // tangent
+		spliceFunc = "tan("+input+");";
+		break;	
+	
+	case 'u': // 
+		spliceFunc = input+";\n    "+assignVar+" = tan("+input+");";
+		break;
+
+	case 'U': // 
+		spliceFunc = input+";\n    "+assignVar+" = normalize("+input+");";
+		break;
+
+	case 'v': // sqrt
+		spliceFunc = "sqrt("+input+");";
+		break;
+
+	case 'V': // var sqrt
+		spliceFunc = input+"; "+assignVar+" = sqrt("+input+");";
+		break;
+
+	case 'w': // FaceForward
+		spliceFunc = input+" - faceforward("+input+", "+assignVar+", "+input+");";
+		break;
+
+	case 'W': // FaceForward
+		spliceFunc = input+" - faceforward("+input+", "+assignVar+", "+assignVar+");";
+		break;
+
+	case 'x': // mix
+		spliceFunc = "mix("+input+", "+assignVar+", normalize("+assignVar+"));";
+		break;
+	
+	case 'X': // mix
+		spliceFunc = "mix("+input+", vec4(1, 1, 1, 1) / "+assignVar+", normalize("+assignVar+"));";
+		break;
+
+	case 'y': // mul
+		spliceFunc = input + " * 1.111;";
+		break;
+
+	case 'Y': // mul
+		spliceFunc = input + " * 0.666;";
+		break;
+
+	case 'z': // mul
+		spliceFunc = input + " * vec4(-1, -1, -1, -1);";
+		break;
+
+	case 'Z': // mul
+		spliceFunc = input+";\n    "+assignVar+" = "+input+" * vec4(-1, -1, -1, -1);";
+		break;
+
+	default:
+		// spliceFunc = "atan("+input+", "+(character.charCodeAt(0) / 127)+");";
+		spliceFunc = input+" + "+ (character.charCodeAt(0) / 127 * 0.2 - 0.1)+";";
+		break;
+	}
+
+	// return "    "+input+" = "+spliceFunc+"\n     "+input+" = mod("+input+", vec4(1, 1, 1, 1));";
+	return "    "+input+" = "+spliceFunc;
+}
+
+CloudChamber.shaderTemplate = function(vert, frag)
+{
+	return {
+		uniforms: { 
+			"tDiffuse": { type: "t", value: null },
+		},
+
+		vertexShader: [
+			"varying vec4 a_variable;",
+			"varying vec2 vUv;",
+			"vec4 newPosition;",
+			"void main()",
+			"{",
+			"    vUv = uv;",
+			"    a_variable = vec4(position, 1);",
+			"    newPosition = vec4(position, 1);",
+			// vert,
+			"    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1);",
+			"    // gl_PointSize = min(dot(newPosition.xyz, position), 1);",
+			"}"
+		].join("\n"),
+
+		fragmentShader: [
+			"uniform sampler2D tDiffuse;",
+			"varying vec2 vUv;",
+			"varying vec4 a_variable;",
+			"vec4 frag_variable;",
+			"vec4 fragColor;",
+			"void main()",
+			"{",
+			"    frag_variable = a_variable;",
+			"    fragColor = texture2D(tDiffuse, vUv);",
+			frag,
+			"    gl_FragColor = vec4(1, 1, 1, 1) - mod(fragColor + texture2DProj(tDiffuse, normalize(fragColor) - (vec4(vUv, vUv))) - (gl_FragColor), gl_FragColor);",
+			"    // gl_FragColor = max(gl_FragColor, gl_FragCoord * 0.0001);",
+			"}"
+		].join("\n")
+	};
+}
+
+CloudChamber.parsesplice = function(lang)
+{
+	var numFuncsPerShader = Math.floor(lang.length / 2);
+	var vertArray = new Array(numFuncsPerShader);
+	var fragArray = new Array(numFuncsPerShader);
+	var vertVariable = "newPosition";
+	var fragVariable = "fragColor";
+
+	for(var i = 0; i < numFuncsPerShader; ++i)
+	{
+		vertArray.push(CloudChamber.parseSpliceChar(lang[i], vertVariable));
+	}
+
+	for(var i = 0; i < numFuncsPerShader; ++i)
+	{
+		fragArray.push(CloudChamber.parseSpliceChar(lang[i + numFuncsPerShader], fragVariable));
+	}
+
+	return CloudChamber.shaderTemplate(vertArray.join("\n"), fragArray.join("\n"));
+}
+
+CloudChamber.spliceShader = function(lang)
+{
+	var shader = CloudChamber.parsesplice(lang);
+	// CloudChamber.print(shader.vertexShader);
+	// CloudChamber.print("\n\n\n"+shader.fragmentShader);
+
+	var pass = new THREE.ShaderPass(shader);
+	pass.renderToScreen = true;
+	
+	for(var i = 0; i < CloudChamber.numShaders; ++i)
+	{
+		CloudChamber.composer.passes.pop();
+	}
+
+	CloudChamber.numShaders = 1;
+	CloudChamber.composer.addPass(pass);
+}
+
+// NOTE: CACHE SHADERS UP TO 20 OF THEM, THEN START POPPING 
