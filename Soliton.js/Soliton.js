@@ -2139,168 +2139,737 @@ characters are translated to WebGL function calls via a simple switch
 */
 
 
+// READ/WRITE vars for splice synthesis
+Soliton.var_a = 1;
+Soliton.var_b = 1;
+Soliton.var_c = 1;
+Soliton.buffer_a = new Array(Soliton.blockSize);
+Soliton.buffer_b = new Array(Soliton.blockSize);
+Soliton.buffer_c = new Array(Soliton.blockSize);
 
-Soliton.parseSpliceChar = function(character)
+// Prime numbers through 4096
+Soliton.prime = [
+	2,      3,      5,      7,      11,     13,     17,     19,     23,     29, 
+	31,     37,     41,     43,     47,     53,     59,     61,     67,     71, 
+	73 ,    79,     83,     89,     97,     101,    103,    107,    109,    113, 
+	127,    131,    137,    139,    149,    151,    157,    163,    167,    173, 
+	179,    181,    191,    193,    197,    199,    211,    223,    227,    229, 
+	233,    239,    241,    251,    257,    263,    269,    271,    277,    281, 
+	283,    293,    307,    311,    313,    317,    331,    337,    347,    349, 
+	353,    359,    367,    373,    379,    383,    389,    397,    401,    409, 
+	419,    421,    431,    433,    439,    443,    449,    457,    461,    463, 
+	467,    479,    487,    491,    499,    503,    509,    521,    523,    541, 
+	547,    557,    563,    569,    571,    577,    587,    593,    599,    601, 
+	607,    613,    617,    619,    631,    641,    643,    647,    653,    659, 
+	661,    673,    677,    683,    691,    701,    709,    719,    727,    733, 
+	739,    743,    751,    757,    761,    769,    773,    787,    797,    809, 
+	811,    821,    823,    827,    829,    839,    853,    857,    859,    863, 
+	877,    881,    883,    887,    907,    911,    919,    929,    937,    941, 
+	947,    953,    967,    971,    977,    983,    991,    997,    1009,   1013,
+	1019,   1021,   1031,   1033,   1039,   1049,   1051,   1061,   1063,   1069, 
+	1087,   1091,   1093,   1097,   1103,   1109,   1117,   1123,   1129,   1151, 
+	1153,   1163,   1171,   1181,   1187,   1193,   1201,   1213,   1217,   1223, 
+	1229,   1231,   1237,   1249,   1259,   1277,   1279,   1283,   1289,   1291, 
+	1297,   1301,   1303,   1307,   1319,   1321,   1327,   1361,   1367,   1373, 
+	1381,   1399,   1409,   1423,   1427,   1429,   1433,   1439,   1447,   1451, 
+	1453,   1459,   1471,   1481,   1483,   1487,   1489,   1493,   1499,   1511, 
+	1523,   1531,   1543,   1549,   1553,   1559,   1567,   1571,   1579,   1583, 
+	1597,   1601,   1607,   1609,   1613,   1619,   1621,   1627,   1637,   1657, 
+	1663,   1667,   1669,   1693,   1697,   1699,   1709,   1721,   1723,   1733, 
+	1741,   1747,   1753,   1759,   1777,   1783,   1787,   1789,   1801,   1811, 
+	1823,   1831,   1847,   1861,   1867,   1871,   1873,   1877,   1879,   1889, 
+	1901,   1907,   1913,   1931,   1933,   1949,   1951,   1973,   1979,   1987, 
+	1993,   1997,   1999,   2003,   2011,   2017,   2027,   2029,   2039,   2053, 
+	2063,   2069,   2081,   2083,   2087,   2089,   2099,   2111,   2113,   2129, 
+	2131,   2137,   2141,   2143,   2153,   2161,   2179,   2203,   2207,   2213, 
+	2221,   2237,   2239,   2243,   2251,   2267,   2269,   2273,   2281,   2287, 
+	2293,   2297,   2309,   2311,   2333,   2339,   2341,   2347,   2351,   2357, 
+	2371,   2377,   2381,   2383,   2389,   2393,   2399,   2411,   2417,   2423, 
+	2437,   2441,   2447,   2459,   2467,   2473,   2477,   2503,   2521,   2531, 
+	2539,   2543,   2549,   2551,   2557,   2579,   2591,   2593,   2609,   2617, 
+	2621,   2633,   2647,   2657,   2659,   2663,   2671,   2677,   2683,   2687, 
+	2689,   2693,   2699,   2707,   2711,   2713,   2719,   2729,   2731,   2741, 
+	2749,   2753,   2767,   2777,   2789,   2791,   2797,   2801,   2803,   2819, 
+	2833,   2837,   2843,   2851,   2857,   2861,   2879,   2887,   2897,   2903, 
+	2909,   2917,   2927,   2939,   2953,   2957,   2963,   2969,   2971,   2999, 
+	3001,   3011,   3019,   3023,   3037,   3041,   3049,   3061,   3067,   3079, 
+	3083,   3089,   3109,   3119,   3121,   3137,   3163,   3167,   3169,   3181, 
+	3187,   3191,   3203,   3209,   3217,   3221,   3229,   3251,   3253,   3257, 
+	3259,   3271,   3299,   3301,   3307,   3313,   3319,   3323,   3329,   3331, 
+	3343,   3347,   3359,   3361,   3371,   3373,   3389,   3391,   3407,   3413, 
+	3433,   3449,   3457,   3461,   3463,   3467,   3469,   3491,   3499,   3511, 
+	3517,   3527,   3529,   3533,   3539,   3541,   3547,   3557,   3559,   3571, 
+	3581,   3583,   3593,   3607,   3613,   3617,   3623,   3631,   3637,   3643, 
+	3659,   3671,   3673,   3677,   3691,   3697,   3701,   3709,   3719,   3727, 
+	3733,   3739,   3761,   3767,   3769,   3779,   3793,   3797,   3803,   3821, 
+	3823,   3833,   3847,   3851,   3853,   3863,   3877,   3881,   3889,   3907, 
+	3911,   3917,   3919,   3923,   3929,   3931,   3943,   3947,   3967,   3989, 
+	4001,   4003,   4007,   4013,   4019,   4021,   4027,   4049,   4051,   4057, 
+	4073,   4079,   4091,   4093
+];
+
+for(var i = 0; i < Soliton.blockSize; ++i)
+{
+	Soliton.buffer_a[i] = 0;
+	Soliton.buffer_b[i] = 0;
+	Soliton.buffer_c[i] = 0;
+}
+
+
+Soliton.clip = function(value)
+{
+	if(value > 1)
+		return 1;
+	else if(value < -1)
+		return -1;
+	else
+		return value;
+}
+
+Soliton.wrap = function(value)
+{
+    if(value >= 1) 
+    {
+        value -= 2;
+        
+        if(value < 1) 
+        	return value;
+    } 
+
+    else if(value < -1) 
+    {
+        value += 2;
+        
+        if(value >= -1) 
+        	return value;
+    } 
+
+    else 
+    	return value;
+    
+    return value - 2 * Math.floor((value + 1) / 2);
+}
+
+//////////////////////
+// spliceOsc
+//////////////////////
+
+Soliton.parseSpliceOscChar = function(character)
 {
 	switch(character)
 	{
-	/*
+	
 	case '!': 
-		return function(bufferL, bufferR, i) { var sample = *};
+		
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				output[j] = Math.atan(i + j * Soliton.var_a); 
+			} 
+
+			return output;
+		};
+
 		break;
 
+	
 	case '£': 
-		if(frag)
-			spliceFunc = "sqrt(gl_FragCoord + "+input+" * vec4(10, 10, 10, 10));";
-		else
-			spliceFunc = "sqrt("+input+" + "+assignVar+" * vec4(10, 10, 10, 10));";
+		
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				output[j] = Soliton.wrap(Math.exp(1 / (Soliton.spliceFuncBlockSize / (i + j + 1)) * Soliton.var_b)); 
+			} 
+
+			return output;
+		};
+
 		break;
 
 	case '=': 
-		if(frag)
-			spliceFunc = "fract(gl_FragCoord + "+input+" * vec4(10, 10, 10, 10));";
-		else
-			spliceFunc = "fract("+input+" + "+assignVar+" * vec4(10, 10, 10, 10));";
+		
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				output[j] = Soliton.clip(1 / (Soliton.spliceFuncBlockSize / (i + j + 1)) * Soliton.var_c); 
+			} 
+
+			return output;
+		};
+
 		break;
 
+	
 	case '`': 
-		if(frag)
-			spliceFunc = "inversesqrt(gl_FragCoord + "+input+");";
-		else
-			spliceFunc = "inversesqrt("+input+" + "+assignVar+");";
+		
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				output[j] = Soliton.clip(Math.sqrt((Soliton.spliceFuncBlockSize / (i + j + 1))) * 2 - 1 * Soliton.var_a); 
+			} 
+
+			return output;
+		};
+
 		break;
 
 	case '~': 
-		if(frag)
-			spliceFunc = "inversesqrt(gl_FragCoord - "+input+");";
-		else
-			spliceFunc = "inversesqrt("+input+" - "+assignVar+");";
+		
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				output[j] = Soliton.clip(Math.tan(i + j * Soliton.var_b)); 
+			} 
+
+			return output;
+		};
+
 		break;
 
 	case '#': 
-		if(frag)
-			spliceFunc = "reflect(gl_FragCoord, "+input+");";
-		else
-			spliceFunc = "reflect("+input+", "+assignVar+");";
+		
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				output[j] = Soliton.wrap(((i + j) / Soliton.blockSize) * 2 - 1 * Soliton.var_b); 
+			} 
+
+			return output;
+		};
+
 		break;
 
+		
 	case ':':
-		if(frag)
-			spliceFunc = "refract(gl_FragCoord, "+input+", dot("+input+", "+assignVar+"));";
-		else
-			spliceFunc = "refract("+input+", "+assignVar+", dot("+input+", "+assignVar+"));";
+		
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				output[j] = Soliton.wrap(Math.cos((i + j) / Soliton.blockSize * Soliton.var_c)); 
+			} 
+
+			return output;
+		};
+
 		break;
 
+	
 	case ';': 
-			spliceFunc = "reflect("+assignVar+", reflect("+assignVar+", "+input+"));";
+
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				output[j] = Soliton.wrap(Math.pow(i / Soliton.blockSize, j * Soliton.var_a)); 
+			} 
+
+			return output;
+		};
+
 		break;
 
 	case '?': 
-		if(frag)
-			spliceFunc = "clamp(gl_FragCoord, "+input+", "+assignVar+");";
-		else
-			spliceFunc = "clamp("+assignVar+", "+input+", "+input+");";
+		
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				output[j] = Soliton.wrap(Math.atan2(i / Soliton.blockSize * (Math.PI * 2) * Soliton.var_b, j / (Math.PI * 2))); 
+			} 
+
+			return output;
+		};
+
 		break;
 
+	
 	case '\\': 
-		if(frag)
-			spliceFunc = "vec4(cross(gl_FragCoord.xyz, "+input+".xyz), 1);";
-		else
-			spliceFunc = "vec4(cross("+assignVar+".xyz, "+input+".xyz), 1);";
+		
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				output[j] = Soliton.clip((i / Soliton.blockSize * (Math.PI * 2) * Soliton.var_c, j / (Math.PI * 2)) * 2 - 1); 
+			} 
+
+			return output;
+		};
+
 		break;	
 
+	
 	case ' ':
-		if(frag)
-			spliceFunc = "mix(gl_FragCoord, "+input+", abs("+assignVar+"));";
-		else
-			spliceFunc = "mix("+assignVar+", "+input+", abs("+assignVar+"));";
+		
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				if((i + j) % (77) == 0)
+					Soliton.var_a = Soliton.var_a * - 1;
+				
+				output[j] = Soliton.var_a;
+			} 
+
+			return output;
+		};
+
 		break;
 
 	case '_': // length
-		spliceFunc = "vec4(length("+input+"), length("+input+"), length("+input+"), length("+input+"));";
-		break;
+
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				if((i + j) % (66) == 0)
+					Soliton.var_b *= Soliton.var_a * - 1;
+				
+				Soliton.var_b = Math.cos(Soliton.var_b);
+				output[j] = Soliton.var_b;
+			} 
+
+			return output;
+		};
 	
-	case '[': // fold add, add all components of vector returning a vector of the result
-		spliceFunc = input+"; "+assignVar+" = "+assignVar+" * ("+input+".x + "+input+".y + "+input+".z + "+input+".w);";
 		break;
 
+
+	case '[': // fold add, add all components of vector returning a vector of the result
+		
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				if((i + j) % (666) == 0)
+					Soliton.var_c *= Soliton.var_b * - 1;
+				
+				Soliton.var_b = Math.cos(Soliton.var_b);
+				output[j] = Soliton.var_c + Soliton.buffer_a[i + j];
+				Soliton.buffer_a[i + j] = Soliton.wrap(Soliton.buffer_a[i + j] + (Soliton.var_a * Soliton.var_b * Soliton.var_c));
+			} 
+
+			return output;
+		};
+		
+		break;
+
+	
 	case ']': // fold subtract, sub all components of vector returning a vector of the result
-		spliceFunc = input+"; "+assignVar+" = "+assignVar+" * ("+input+".x - "+input+".y - "+input+".z - "+input+".w);";
+		
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				if((i + j) % (55) == 0)
+					Soliton.var_c *= Soliton.var_b * - 1;
+				
+				output[j] = Soliton.var_c + Soliton.buffer_a[i + j];
+				Soliton.buffer_a[((i + j) * 2) % Soliton.blockSize] = Soliton.wrap(Soliton.var_c + (Soliton.buffer_a[i + j]));
+			} 
+
+			return output;
+		};
+		
 		break;
 	
+	
 	case '{':
-		spliceFunc = "vec4("+input+".w, "+input+".z, "+input+".y, "+input+".x);";
+		
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				if((i + j) % (9) == 0)
+					Soliton.var_a *= Soliton.var_c * - 1;
+				
+				output[j] = Soliton.var_a + Soliton.buffer_a[i + j];
+				Soliton.buffer_b[((i + j) * 2) % Soliton.blockSize] = Soliton.wrap(Soliton.var_a + (Soliton.buffer_a[i + j]));
+			} 
+
+			return output;
+		};
+
 		break;
 	
 	case '}':
-		if(frag)
-			spliceFunc = "reflect(gl_FragCoord, "+input+");";
-		else
-			spliceFunc = "vec4("+input+".z, "+input+".w, "+input+".x, "+input+".w);";
+		
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				if((i + j) % (13) == 0)
+					Soliton.var_a *= Math.round(Soliton.var_a * -Soliton.var_b);
+				
+				output[j] = Soliton.var_a + Soliton.buffer_c[i + j];
+				Soliton.buffer_c[((i + j) * 2) % Soliton.blockSize] = Soliton.wrap(Soliton.var_a + (Soliton.buffer_c[i + j]));
+			} 
+
+			return output;
+		};	
+
 		break;
+	
 	
 	case '.': // dot() function
-		if(frag)
-			spliceFunc = input+" * dot(gl_FragCoord, "+input+");";
-		else
-			spliceFunc = input+" * dot("+input+", "+assignVar+");";
+		
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{
+				output[j] = Soliton.var_a;
+				Soliton.var_a = Soliton.wrap(Math.round(Math.sin(Soliton.var_a) * 100) / 100);
+			} 
+
+			return output;
+		};	
+
 		break;
+	
 	
 	case '+': // add with next number
-			spliceFunc = input + " + "+assignVar+";";
+		
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{
+				output[j] = Soliton.var_b;
+				Soliton.var_b = Soliton.wrap(Math.round(Math.sin(Soliton.var_b)));
+			} 
+
+			return output;
+		};	
+
 		break;
+	
 	
 	case '-': // subtract next number from this
-			spliceFunc = input + " + "+assignVar+";";
+
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{
+				output[j] = Soliton.var_c;
+				Soliton.var_c = Soliton.clip(Math.round(Math.sin(Soliton.var_c)));
+			} 
+
+			return output;
+		};	
+
 		break;
+	
 	
 	case '*': // multiply by next number
-			spliceFunc = input + " * "+assignVar+";";
+		
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{
+				var sample = Soliton.buffer_a[i + j];
+
+				if(sample > -0.5 && sample < 0.5)
+					sample = 0;
+
+				sample = (sample * -1) + Soliton.buffer_a[i + j];
+
+				output[j] = sample;
+				Soliton.buffer_a[((i + j) * 2) % Soliton.blockSize] = sample;
+			} 
+
+			return output;
+		}
+
 		break;
+	
 	
 	case '/': // divide by next number
-		spliceFunc = input + " / "+assignVar+";";
+		
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{
+				var sample = Soliton.buffer_b[i + j];
+
+				if(sample > -0.5 && sample < 0.5)
+					sample = 0;
+
+				sample = sample + Soliton.buffer_b[i + j];
+
+				output[j] = sample;
+				Soliton.buffer_b[((i + j) * 2) % Soliton.blockSize] = sample;
+			} 
+
+			return output;
+		}
+
 		break;
+	
+
 	
 	case '&': // bit and with next number
-			spliceFunc = input + " + "+assignVar+";";
+	
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{
+				var sample = Soliton.buffer_c[i + j];
+
+				if(sample > -0.5 && sample < 0.5)
+					sample = 0;
+
+				sample = sample + Soliton.buffer_c[i + j];
+
+				output[j] = sample;
+				var rotatedSample = Soliton.buffer_a[i + j];
+				Soliton.buffer_a[i + j] = Soliton.buffer_b[i + j];
+				Soliton.buffer_b[i + j] = Soliton.buffer_c[i + j];
+				Soliton.buffer_c[i + j] = rotatedSample;
+			} 
+
+			return output;
+		}
+
 		break;
 	
+
 	case '|': // bit or with next number
-			spliceFunc = input + " - "+assignVar+";";
+		
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{
+				var sample = Soliton.buffer_c[i + j];
+
+				if(sample > -0.5 && sample < 0.5)
+					sample = 0;
+
+				sample = Soliton.clip(sample + Soliton.buffer_c[i + j]);
+
+				output[j] = sample;
+				var rotatedSample = Soliton.buffer_b[i + j];
+				Soliton.buffer_a[i + j] = Soliton.buffer_c[i + j];
+				Soliton.buffer_b[i + j] = Soliton.buffer_a[i + j];
+				Soliton.buffer_c[i + j] = rotatedSample;
+			} 
+
+			return output;
+		}
+
 		break;
+
 	
 	case '%': // modulus with next number
-			spliceFunc = "mod("+input+", "+assignVar+");";
+		
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{
+				var sample = Soliton.buffer_a[i + j];
+
+				if(sample > -0.5 && sample < 0.5)
+					sample = 0;
+
+				sample = Soliton.clip(sample + Soliton.buffer_a[i + j]);
+
+				output[j] = sample;
+				var rotatedSample = Soliton.buffer_a[i];
+				Soliton.buffer_a[i + j] = Soliton.buffer_b[i];
+				Soliton.buffer_b[i + j] = Soliton.buffer_c[i];
+				Soliton.buffer_c[i + j] = rotatedSample;
+			} 
+
+			return output;
+		}
+		
 		break;
+	
 	
 	case '<': // decrement
-		spliceFunc = "--"+input+";";
+		
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{
+				var sample = Soliton.buffer_a[Math.max(i + j - 1, 0)];
+
+				if(sample > -0.5 && sample < 0.5)
+					sample = 0;
+
+				sample = Soliton.clip(sample + Soliton.buffer_a[i + j]);
+
+				output[j] = sample;
+				Soliton.buffer_a[((i + j) * 2 + 1) % Soliton.blockSize] = sample;
+			} 
+
+			return output;
+		}
+
 		break;
 
+	
 	case '^': // exponent
-		spliceFunc = "exp("+input+");";
+		
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{
+				var sample = Soliton.buffer_c[Math.max(i + j - 66, 0)];
+
+				if(sample > -0.5 && sample < 0.5)
+					sample = sample * Soliton.var_a / 2;
+
+				sample = Soliton.clip(sample + Soliton.buffer_c[i + j]);
+
+				output[j] = sample;
+				Soliton.buffer_c[((i + j) * 2 + 66) % Soliton.blockSize] = sample;
+			} 
+
+			return output;
+		}
+
 		break;
 
+	
 	case '>': // increment
-		spliceFunc = "++"+input+";";
+		
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			var rand = Math.random() * 2 - 1;
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{
+				var sample = Soliton.buffer_a[Math.max(i + j - 666, 0)] + rand;
+
+				if(sample > -0.5 && sample < 0.5)
+					sample = sample * Soliton.var_b / 2;
+
+				sample = Soliton.clip(sample + Soliton.buffer_a[i + j]);
+
+				output[j] = sample;
+				Soliton.buffer_a[((i + j) * 2 + 666) % Soliton.blockSize] = sample;
+			} 
+
+			return output;
+		}
+
 		break;
 
+	
 	case '(': // sin
-		spliceFunc = "sin("+input+");";
+		
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{
+				var sample = Soliton.buffer_c[Math.max(i + j - 1, 0)] + Soliton.var_b;
+
+				if(sample < -0.9 || sample > 0.9)
+				{
+					sample = sample * Soliton.var_a / 2;
+					sample = Soliton.clip(sample - Soliton.buffer_a[i + j]);
+					output[j] = sample;
+					Soliton.buffer_c[i + j] = sample;
+				}
+
+				else
+					output[j] = 0;
+			} 
+
+			return output;
+		}
+		
 		break;
 	
+
 	case ')': // cosin
-		spliceFunc = "cos("+input+");";
+		
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{
+				var sample = Soliton.buffer_a[Math.max(i + j - 1, 0)] + Soliton.var_a;
+
+				if(sample < -0.9 || sample > 0.9)
+				{
+					sample = sample * Soliton.var_a / 2;
+					sample = Soliton.clip(sample - Soliton.buffer_b[i + j]);
+					output[j] = sample;
+					Soliton.buffer_b[i + j] = sample;
+				}
+
+				else
+					output[j] = 0;
+			} 
+
+			return output;
+		}
+		
 		break;
 
+
 	case '@': // ascos
-		spliceFunc = "acos("+input+");";
+		
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{
+				output[j] = Soliton.buffer_a[Soliton.blockSize - 1 - (i + j)];
+			} 
+
+			return output;
+		}
+
 		break;
 
 	case '$': // ascos
-		spliceFunc = "asin("+input+");";
-		break;*/
+		
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{
+				output[j] = Soliton.buffer_b[Soliton.blockSize - 1 - (i + j)];
+			} 
+
+			return output;
+		}
+
+		break;
 
 	case 'a':
 		
@@ -2316,219 +2885,1168 @@ Soliton.parseSpliceChar = function(character)
 		};
 
 		break;
-		/*
+		
 	case 'A': // absolute value
-		spliceFunc = "abs("+input+");";
+
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{
+				output[j] = Soliton.buffer_c[Soliton.blockSize - 1 - (i + j)];
+			} 
+
+			return output;
+		}
+
 		break;
 
+		
 	case 'b': // less than
-		spliceFunc = "sign("+assignVar+" * vec4(0.2, 0.2, 0.2, 0.2) - vec4(0.1, 0.1, 0.1, 0.1) + "+input+" - "+assignVar+");";
+		
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{
+				switch((i + j) % 6)
+				{
+				case 0:
+					output[j] = Soliton.var_a;
+					break;
+
+				case 1:
+					output[j] = Soliton.var_b;
+					break;
+
+				case 2:
+					output[j] = Soliton.var_c;
+					break;
+
+				case 3:
+					output[j] = Soliton.buffer_a[i + j];
+					break;
+
+				case 4:
+					output[j] = Soliton.buffer_b[i + j];
+					break;
+
+				case 5:
+					output[j] = Soliton.buffer_c[i + j];
+					break;	
+				}
+			} 
+
+			return output;
+		}
+
 		break;
 
+	
 	case 'B': // less than equal
-		if(frag)
-			spliceFunc = "sign("+assignVar+" * "+input+" - gl_FragCoord);";
-		else	
-			spliceFunc = "sign("+assignVar+" * "+input+");";
+		
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{
+				switch((i + j) % 6)
+				{
+				case 0:
+					output[j] = Soliton.var_a * - 1;
+					Soliton.buffer_c[i + j] = Soliton.var_a;
+					break;
+
+				case 1:
+					output[j] = Soliton.var_b * - 1;
+					Soliton.var_b = Soliton.var_a;
+					break;
+
+				case 2:
+					output[j] = Soliton.var_c * - 1;
+					Soliton.var_c = Soliton.var_b;
+					break;
+
+				case 3:
+					output[j] = Soliton.buffer_a[i + j] * - 1;
+					Soliton.buffer_a[i + j] = Soliton.var_c;
+					break;
+
+				case 4:
+					output[j] = Soliton.buffer_b[i + j] * - 1;
+					Soliton.buffer_b[i + j] = Soliton.buffer_a[i + j];
+					break;
+
+				case 5:
+					output[j] = Soliton.buffer_c[i + j] * - 1;
+					Soliton.buffer_c[i + j] = Soliton.buffer_b[i + j];
+					break;	
+				}
+			} 
+
+			return output;
+		}
+
 		break;
 
 	case 'c': // ceil
-		spliceFunc = "ceil("+input+");";
+		
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{
+				switch((i + j) % 666)
+				{
+				case 0:
+					output[j] = Soliton.var_a * - 1;
+					Soliton.buffer_c[i + j] = Soliton.var_a;
+					break;
+
+				case 1:
+					output[j] = Soliton.var_b * - 1;
+					Soliton.var_b = Soliton.var_a;
+					break;
+
+				case 2:
+					output[j] = Soliton.var_c * - 1;
+					Soliton.var_c = Soliton.var_b;
+					break;
+
+				case 3:
+					output[j] = Soliton.buffer_a[i + j] * - 1;
+					Soliton.buffer_a[i + j] = Soliton.var_c;
+					break;
+
+				case 4:
+					output[j] = Soliton.buffer_b[i + j] * - 1;
+					Soliton.buffer_b[i + j] = Soliton.buffer_a[i + j];
+					break;
+
+				case 5:
+					output[j] = Soliton.buffer_c[i + j] * - 1;
+					Soliton.buffer_c[i + j] = Soliton.buffer_b[i + j];
+					break;	
+
+				default:
+					output[j] = 0;
+				}
+			} 
+
+			return output;
+		}
+
 		break;
 
+	
 	case 'C': // ceil
-		spliceFunc = "ceil("+input+" * "+assignVar+");";
+
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{
+				switch((i + j) % 100)
+				{
+				case 0:
+				case 33:
+					output[j] = Soliton.var_a * - 1;
+					Soliton.buffer_c[i + j] = Soliton.var_a;
+					break;
+
+				case 10:
+				case 34:
+					output[j] = Soliton.var_b * - 1;
+					Soliton.var_b = Soliton.var_a;
+					break;
+
+				case 20:
+				case 35:
+					output[j] = Soliton.var_c * - 1;
+					Soliton.var_c = Soliton.var_b;
+					break;
+
+				case 30:
+				case 36:
+					output[j] = Soliton.buffer_a[i + j] * - 1;
+					Soliton.buffer_a[i + j] = Soliton.var_c;
+					break;
+
+				case 40:
+				case 37:
+					output[j] = Soliton.buffer_b[i + j] * - 1;
+					Soliton.buffer_b[i + j] = Soliton.buffer_a[i + j];
+					break;
+
+				case 50:
+				case 38:
+					output[j] = Soliton.buffer_c[i + j] * - 1;
+					Soliton.buffer_c[i + j] = Soliton.buffer_b[i + j];
+					break;	
+
+				default:
+					output[j] = 0;
+				}
+			} 
+
+			return output;
+		}
+
 		break;
 
+
+	
 	case 'd': // distance
-		spliceFunc = "vec4(distance("+assignVar+".x, "+input+".x), distance("+assignVar+".y, "+input+".y), distance("+assignVar+".z, "+input+".z), distance("+assignVar+".w, "+input+".w)) * vec4(-0.01, -0.1, -0.01, -0.01) + "+input+";";
+		
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j)
+			{
+				output[j] = 0;
+			}
+
+			if(i == 0)
+			{
+				output[i] = Soliton.var_a;
+				Soliton.var_a *= -1;
+			}
+
+			return output;
+		};
+
 		break;
 	
+	
 	case 'D': // distance
-		spliceFunc = input+";\n    "+assignVar+" = vec4(distance("+assignVar+".x, "+input+".x), distance("+assignVar+".y, "+input+".y), distance("+assignVar+".z, "+input+".z), distance("+assignVar+".w, "+input+".w)) * vec4(0.1, 0.1, 0.1, 0.1);";
+		
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j)
+			{
+				output[j] = Soliton.buffer_a[i];
+			}
+
+			if(i == 0)
+			{
+				var sample = Soliton.clip(Soliton.var_b + Soliton.buffer_a[i]); 
+				output[i] = sample;
+				Soliton.var_b = sample;
+				Soliton.buffer_a[i] = sample;
+			}
+
+			return output;
+		};
+
 		break;
 
+	
 	case 'e': // equal
-		spliceFunc = "radians("+input+" * "+assignVar+");";
+		
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j)
+			{
+				output[j] = Soliton.buffer_b[i];
+			}
+
+			if(i == 0)
+			{
+				var sample = Soliton.clip(Soliton.var_b + Soliton.buffer_b[i]); 
+				output[i] = sample;
+				Soliton.var_b = sample;
+				Soliton.buffer_b[i] = sample;
+			}
+
+			return output;
+		};
+
 		break;
 
 	case 'E': // equal
-		spliceFunc = "radians("+input+" * ceil("+input+"));";
+
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{
+				output[j] = Soliton.buffer_c[Soliton.blockSize - 1 - (i + j)] - Soliton.buffer_c[i + j];
+			} 
+
+			Soliton.var_c = output[0];
+
+			return output;
+		}
+
 		break;
 
+	
 	case 'f': // floor
-		spliceFunc = "floor(vec4(4, 4, 4, 4) * "+input+");";
+		
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{
+				if(Math.random() > 0.5)
+					output[j] = Soliton.buffer_c[Soliton.blockSize - 1 - (i + j)] - Soliton.buffer_c[i + j];
+				else
+					output[j] = Soliton.buffer_b[Soliton.blockSize - 1 - (i + j)];
+			} 
+
+			Soliton.var_c = output[0];
+
+			return output;
+		}
+
 		break;
 	
-	case 'F': // fract
-		spliceFunc = "fract("+input+");";
+	
+	case 'F': 
+
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{
+				if(Soliton.prime[i + j])
+				{
+					output[j] = Soliton.var_b;
+					Soliton.var_b *= -1;
+				}
+
+				else
+					output[j] = 0;
+			} 
+
+			return output;
+		}
+
 		break;
 
 	case 'g': // return input, assign "+assignVar+"
-		spliceFunc = input+";\n    "+assignVar+" = floor(vec4(4, 4, 4, 4) * "+input+");";
+		
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{
+				if(Soliton.prime[i + j])
+				{
+					Soliton.var_a *= 1 / (i + j + 1);
+					output[j] = Soliton.var_a;
+				}
+
+				else
+					output[j] = 0;
+			} 
+
+			return output;
+		}
+
 		break;
 
+	
 	case 'G': // return input, assign "+assignVar+"
-		spliceFunc = input+";\n    "+assignVar+" = fract("+input+");";
+		
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{
+				if(Soliton.prime[i + j])
+				{
+					Soliton.var_c *= 1 / (i + j + 1);
+					output[j] = Soliton.var_a;
+				}
+
+				else
+					output[j] = Soliton.buffer_a[i + j];
+			} 
+
+			return output;
+		}
+
 		break;
 
+	
 	case 'h': // return input, assign "+assignVar+"
-		spliceFunc = input+";\n    "+assignVar+" = sin("+input+");";
+		
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{
+				if(Soliton.prime[i + j])
+				{
+					output[j] = Math.sin(i + j);
+				}
+
+				else
+					output[j] = Soliton.buffer_b[i + j];
+			} 
+
+			return output;
+		}
+
 		break;
 
+	
 	case 'H': // return input, assign "+assignVar+"
-		spliceFunc = input+";\n    "+assignVar+" = cos("+input+");";
+		
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{
+				if(Soliton.prime[i + j])
+				{
+					var sample = Math.atan2(i + j, Soliton.buffer_c[i + j]); 
+					output[j] = sample;
+					Soliton.buffer_c[i + j] = sample;
+				}
+
+				else
+					output[j] = Soliton.buffer_c[i + j];
+			} 
+
+			return output;
+		}
+
 		break;
 
+	
 	case 'i': // inverse sqrt
-		spliceFunc = input+" / inversesqrt("+input+") - "+assignVar+";";
+
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				if((i + j) % (Soliton.var_a * 10) <= 0)
+					Soliton.var_a *= Soliton.var_c * - 1;
+				
+				output[j] = Soliton.var_a + Soliton.buffer_a[i + j];
+				Soliton.buffer_b[i + j] = Soliton.wrap(Soliton.var_a + (Soliton.buffer_a[i + j]));
+			} 
+
+			return output;
+		};
+
 		break;
 	
+	
 	case 'I': // invsqrt(1 / exp2)
-		spliceFunc = input+" / inversesqrt(vec4(1, 1, 1, 1) / exp2("+input+")) - "+assignVar+";";
+
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				if((i + j) % (Soliton.var_b * 10) <= 0)
+					Soliton.var_b *= Soliton.var_a * - 1;
+				
+				output[j] = Soliton.var_b + Soliton.buffer_b[i + j];
+				Soliton.buffer_c[i + j] = Soliton.wrap(Soliton.var_b + (Soliton.buffer_b[i + j]));
+			} 
+
+			return output;
+		};
+
 		break;
 
+	
 	case 'j': // return input, assign "+assignVar+"
-		spliceFunc = input+";\n    "+assignVar+" = vec4(cross("+input+".xyz, "+assignVar+".xyz), "+assignVar+".w);";
+
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				if((i + j) % (Soliton.var_c * 10) <= 0)
+					Soliton.var_c *= Soliton.var_b * - 1;
+				
+				output[j] = Soliton.var_c + Soliton.buffer_c[i + j];
+				Soliton.buffer_a[i + j] = Soliton.wrap(Soliton.var_c + (Soliton.buffer_c[i + j]));
+			} 
+
+			return output;
+		};
+
 		break;
 
+	
 	case 'J': // return input, assign "+assignVar+"
-		spliceFunc = input+";\n    "+assignVar+" = "+assignVar+" * dot("+input+", "+assignVar+");";
+
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{
+				var sample = Soliton.buffer_a[i + j];
+
+				if(sample > -0.5 && sample < 0.5)
+					sample = 0;
+
+				sample = sample + Soliton.buffer_a[i + j];
+
+				output[j] = sample;
+				Soliton.buffer_c[((i + j) * 2) % Soliton.blockSize] = sample;
+			} 
+
+			return output;
+		}
+
 		break;
 
 	case 'k': // clamp
-		spliceFunc = "clamp("+input+", floor(vec4(4, 4, 4, 4) * "+assignVar+"), "+assignVar+");";
+
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{
+				var sample = Soliton.buffer_c[i + j];
+
+				if(sample > -0.666 && sample < 0.666)
+					sample = 0;
+
+				sample = sample + Soliton.buffer_c[i + j];
+
+				output[j] = sample;
+				Soliton.buffer_b[((i + j) * 2) % Soliton.blockSize] = sample;
+			} 
+
+			return output;
+		}
+
 		break;
 
+		
 	case 'K': // clamp
-		spliceFunc = "clamp("+input+" * vec4(2, 2, 2, 2), "+assignVar+", ceil("+assignVar+"));";
+		
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				if(Soliton.prime[i + j])
+					Soliton.var_a *= Soliton.var_c * - 1;
+				
+				output[j] = Soliton.var_a + Soliton.buffer_b[i + j];
+				Soliton.buffer_c[((i + j) * 2) % Soliton.blockSize] = Soliton.wrap(Soliton.var_a + (Soliton.buffer_b[i + j]));
+			} 
+
+			return output;
+		};
+
 		break;
 
+	
 	case 'l': // log2
-		spliceFunc = input+" + log2("+input+");";
+
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				if(Soliton.prime[i + j])
+					Soliton.var_b = Soliton.clip(Soliton.var_b - (1 / (i + j + 1)));
+				
+				var sample = Soliton.clip((Soliton.var_b + Soliton.buffer_b[i + j]) * (1 / (i + j + 1)));
+				output[j] = sample;
+				Soliton.buffer_a[((i + j) + 1) % Soliton.blockSize] = sample;
+			} 
+
+			return output;
+		};
+
 		break;
+	
 	
 	case 'L': // log2(1 / log2)
-		spliceFunc = "log2(vec4(1, 1, 1, 1) + log2("+input+"));";
+
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				if(Soliton.prime[i + j])
+					Soliton.var_b = Soliton.clip(Soliton.var_b * (1 / (i + j + 1)));
+				
+				var sample = Soliton.clip((Soliton.var_b + Soliton.buffer_b[i + j]) * (1 / (i + j + 1)));
+				output[j] = sample;
+				Soliton.buffer_a[((i + j) + 1) % Soliton.blockSize] = sample;
+			} 
+
+			return output;
+		};
+
 		break;
 
+	
 	case 'm': // min
-		spliceFunc = "min("+input+", "+assignVar+");";
+
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				if(Soliton.prime[i + j])
+					Soliton.var_c = Soliton.wrap(Soliton.var_b * (1 / (i + j + 1)));
+				
+				var sample = Soliton.wrap((Soliton.var_c + Soliton.buffer_a[i + j]) * (1 / (i + j + 1)));
+				output[j] = sample;
+				Soliton.buffer_a[((i + j) + 1) % Soliton.blockSize] = sample;
+			} 
+
+			return output;
+		};
+
 		break;
 	
+	
 	case 'M': // max
-		spliceFunc = "max("+input+", "+assignVar+");";
+
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				if(Soliton.prime[i + j])
+					Soliton.var_a = Soliton.wrap(Soliton.var_a + (1 / (i + j + 1)));
+				
+				var sample = Soliton.wrap((Soliton.var_a + Soliton.buffer_a[i + j]) * (1 / (i + j + 1)));
+				output[j] = sample;
+				Soliton.buffer_c[((i + j) + 1) % Soliton.blockSize] = sample;
+			} 
+
+			return output;
+		};
+
+
 		break;
 
+		
 	case 'n': // normalize
-		spliceFunc = "normalize("+input+" * vec4(6, 0.6, 6, 0.6));";
+
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				if(Soliton.prime[i + j])
+					Soliton.var_c = Soliton.wrap(Soliton.var_c / (i + j + 1) * -1);
+				
+				var sample = Soliton.wrap((Soliton.var_c + Soliton.buffer_b[i + j]) * (1 / (i + j + 1)));
+				output[j] = sample;
+				Soliton.buffer_b[((i + j) + 1) % Soliton.blockSize] = sample;
+			} 
+
+			return output;
+		};
+
 		break;
 
+
+	
 	case 'N': // normalize
-		spliceFunc = "normalize("+input+" / "+assignVar+");";
+
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				if((i + j) % (154) == 0)
+					Soliton.var_b = Soliton.var_b * - 1;
+				
+				output[j] = Soliton.var_b;
+			} 
+
+			return output;
+		};
+
 		break;
 
+	
 	case 'o': // min
-		if(frag)
-			spliceFunc = "min("+input+", vec4(1, 1, 1, 1) / gl_FragCoord);";
-		else
-			spliceFunc = "min("+input+", vec4(1, 1, 1, 1) / "+assignVar+");";
+
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				if((i + j) % (333) == 0)
+					Soliton.var_c = Soliton.var_c * - 1;
+				
+				output[j] = Soliton.var_c;
+			} 
+
+			return output;
+		};
+
 		break;
 
 	case 'O': // max
-		if(frag)
-			spliceFunc = "max("+input+", vec4(1, 1, 1, 1) / gl_FragCoord);";
-		else
-			spliceFunc = "max("+input+", vec4(1, 1, 1, 1) / "+assignVar+");";
+
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				if(Soliton.prime[i + j])
+					Soliton.var_c *= Math.round(Soliton.var_c * -Soliton.var_b);
+				
+				output[j] = Soliton.var_c + Soliton.buffer_a[i + j];
+				Soliton.buffer_a[((i + j) * 2) % Soliton.blockSize] = Soliton.wrap(Soliton.var_c + (Soliton.buffer_a[i + j]));
+			} 
+
+			return output;
+		};	
+
 		break;
 
+	
 	case 'p': // pow
-		spliceFunc = "pow("+assignVar+", "+input+");";
+
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				if((i + j) == 999)
+					Soliton.var_a *= Math.sin(Soliton.buffer_a[((i + j) * 2) % Soliton.blockSize] - Soliton.var_b);
+				
+				output[j] = Soliton.var_a + Soliton.buffer_c[i + j];
+				Soliton.buffer_c[((i + j) * 2) % Soliton.blockSize] = Soliton.wrap(Soliton.var_a + (Soliton.buffer_c[i + j]));
+			} 
+
+			return output;
+		};	
+
 		break;
 
 	case 'P': // pow pow
-		spliceFunc = "pow("+assignVar+", pow("+assignVar+", "+input+"));";
+
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				if((i + j) == 999)
+					Soliton.var_b *= Math.sin(Soliton.buffer_b[((i + j) * 2) % Soliton.blockSize] - Soliton.var_b);
+				
+				output[j] = Soliton.var_b + Soliton.buffer_b[i + j];
+				Soliton.buffer_b[((i + j) * 2 + 1) % Soliton.blockSize] = Soliton.wrap(Soliton.var_b + (Soliton.buffer_b[i + j]));
+			} 
+
+			return output;
+		};
+
 		break
 
+	
 	case 'q': // sign value
-		spliceFunc = "sign("+input+");";
+
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				output[j] = Soliton.var_b + Soliton.buffer_b[i + j];
+				Soliton.buffer_b[Soliton.blockSize - (i + j + 1)] = Soliton.wrap(Soliton.var_b + (Soliton.buffer_b[i + j]));
+			} 
+
+			return output;
+		};
+
 		break;	
+
 
 	case 'Q': // sign value
-		spliceFunc = "sign("+input+" * "+assignVar+");";
+
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				output[j] = Soliton.var_a + Soliton.buffer_a[i + j];
+				var sample = Soliton.wrap(Soliton.var_a - (Soliton.buffer_c[i + j]));
+				Soliton.buffer_a[Soliton.blockSize - (i + j + 1)] = sample;
+				Soliton.var_a = sample;
+			} 
+
+			return output;
+		};
+
 		break;
+
+	
 
 	case 'r': // reflect
-		spliceFunc = "reflect("+assignVar+", "+input+");";
+		
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				output[j] = Soliton.buffer_a[i + j] * Soliton.buffer_b[i + j] * Soliton.buffer_c[i + j];
+			} 
+
+			return output;
+		};
+
 		break;
 
+	
 	case 'R': // Refract
-		spliceFunc = "refract("+assignVar+", "+input+", dot("+input+", "+assignVar+"));";
+
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				output[j] = Soliton.buffer_a[Soliton.blockSize - (i + j + 1)] * Soliton.buffer_b[Soliton.blockSize - (i + j + 1)] * Soliton.buffer_c[Soliton.blockSize - (i + j + 1)];
+			} 
+
+			return output;
+		};
+
 		break;	
 
+	
+	
 	case 's': // step
-		spliceFunc = "abs("+assignVar+" - reflect("+input+", "+assignVar+")) / "+input+";";
+
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				output[j] = Math.sin((Soliton.buffer_a[i + j] + Soliton.buffer_b[i + j] + Soliton.buffer_c[i + j]) * 666 + (i + j));
+			} 
+
+			return output;
+		};
+
 		break;
+	
+
 	
 	case 'S': // smooth step
-		spliceFunc = "faceforward("+input+", "+assignVar+", "+input+") + "+input+";";
+
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				output[j] = Math.sin((Soliton.buffer_a[i + j] + Soliton.buffer_b[i + j] + Soliton.buffer_c[i + j]) * 4096);
+
+				if((i + j) % 66 == 0)
+					Soliton.var_a *= -1;
+			} 
+
+			return output;
+		};
+
 		break;
 
-	case 't': // cross
-		spliceFunc = "vec4(cross("+input+".xyz, "+assignVar+".xyz), 1);";
-		break;
+
 	
+	case 't': // cross
+
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				output[j] = Soliton.clip(Math.sqrt((Soliton.spliceFuncBlockSize / (i + j + 1))) + Soliton.var_b); 
+			} 
+
+			Soliton.var_b = Soliton.wrap(Soliton.var_b - Soliton.buffer_a[i]);
+
+			return output;
+		};
+
+		break;
+
 	case 'T': // tangent
-		spliceFunc = "tan("+input+");";
+
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				output[j] = Soliton.clip(1 / (Math.sqrt((Soliton.spliceFuncBlockSize / (i + j + 1))) + Soliton.var_b)); 
+			} 
+
+			Soliton.var_b = Soliton.wrap(Soliton.var_b - Soliton.buffer_a[i]);
+
+			return output;
+		};
+
 		break;	
 	
+	
 	case 'u': // 
-		spliceFunc = input+";\n    "+assignVar+" = tan("+input+");";
+		
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				output[j] = Soliton.var_a;
+
+				if(Soliton.prime[i + j])
+					Soliton.var_a *= -Soliton.var_b;
+			} 
+
+			return output;
+		};
+
 		break;
 
+	
 	case 'U': // 
-		spliceFunc = input+";\n    "+assignVar+" = normalize("+input+");";
+		
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				output[j] = Soliton.var_b;
+
+				if(Soliton.prime[i + j])
+					Soliton.var_b *= -Soliton.var_c;
+			} 
+
+			return output;
+		};
+
 		break;
 
+
+	
 	case 'v': // sqrt
-		spliceFunc = "sqrt("+input+");";
+		
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				output[j] = Soliton.var_c;
+
+				if(Soliton.prime[i + j])
+					Soliton.var_c *= -Soliton.var_a;
+			} 
+
+			return output;
+		};
+
 		break;
 
+		
 	case 'V': // var sqrt
-		spliceFunc = input+"; "+assignVar+" = sqrt("+input+");";
+		
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			var index = 0;
+
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				output[j] = Soliton.buffer_a[index];
+
+				if(Soliton.prime[i + j])
+					index = i + j;
+			} 
+
+			return output;
+		};
+
 		break;
 
+	
 	case 'w': // FaceForward
-		spliceFunc = input+" - faceforward("+input+", "+assignVar+", "+input+");";
+		
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			var index = 0;
+
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				output[j] = Soliton.buffer_b[index];
+
+				if(Soliton.prime[i + j])
+					index = i + j;
+			} 
+
+			return output;
+		};
+
 		break;
+
 
 	case 'W': // FaceForward
-		spliceFunc = input+" - faceforward("+input+", "+assignVar+", "+assignVar+");";
+		
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			var index = 0;
+
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				output[j] = Soliton.buffer_c[index];
+
+				if(Soliton.prime[i + j])
+					index = i + j;
+			} 
+
+			return output;
+		};
+
 		break;
 
+	
 	case 'x': // mix
-		spliceFunc = "mix("+input+", "+assignVar+", normalize("+assignVar+"));";
+		
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			var index = 0;
+
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				output[j] = Soliton.buffer_a[index];
+
+				if(Soliton.prime[i + j])
+					index++;
+			} 
+
+			return output;
+		};
+
 		break;
 	
+
+	
 	case 'X': // mix
-		spliceFunc = "mix("+input+", vec4(1, 1, 1, 1) / "+assignVar+", normalize("+assignVar+"));";
+		
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			var index = 0;
+
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				output[j] = Soliton.buffer_b[index];
+
+				if(Soliton.prime[i + j])
+					index++;
+			} 
+
+			return output;
+		};
+
 		break;
 
 	case 'y': // mul
-		spliceFunc = input + " * 1.111;";
+		
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			var index = 0;
+
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				output[j] = Soliton.buffer_c[index];
+
+				if(Soliton.prime[i + j])
+					index++;
+			} 
+
+			return output;
+		};
+
 		break;
 
+	
 	case 'Y': // mul
-		spliceFunc = input + " * 0.666;";
+		
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			var index = 0;
+			var var_array = [Soliton.var_a, Soliton.var_b, Soliton.var_c];
+
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				output[j] = var_array[index];
+
+				if(Soliton.prime[i + j])
+				{
+					index = (index + 1) % 3;
+					var_array[index] *= -1;
+				}
+			} 
+
+			return output;
+		};
+
 		break;
 
+	
 	case 'z': // mul
-		spliceFunc = input + " * vec4(-1, -1, -1, -1);";
+
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			var index = 0;
+			var var_array = [Soliton.buffer_a, Soliton.buffer_b, Soliton.buffer_c];
+
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				output[j] = var_array[index][i + j];
+
+				if(Soliton.prime[i + j])
+				{
+					index = (index + 1) % 3;
+					var_array[index][i + j] *= -1;
+				}
+			} 
+
+			return output;
+		};
+
 		break;
 
+	
 	case 'Z': // mul
-		spliceFunc = input+";\n    "+assignVar+" = "+input+" * vec4(-1, -1, -1, -1);";
-		break;*/
+		
+		return function(i) 
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			var index = 0;
+			var var_array = [Soliton.buffer_a, Soliton.buffer_b, Soliton.buffer_c];
+
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				output[j] = var_array[index][Soliton.blockSize - (i + j + 1)];
+
+				if(Soliton.prime[i + j])
+				{
+					index = (index + 1) % 3;
+					var_array[index][Soliton.blockSize - (i + j + 1)] *= -1;
+				}
+			} 
+
+			return output;
+		};
+
+		break;
 
 	default:
 		var sample = (character.charCodeAt(0) / 256 * 2 - 1);
@@ -2548,23 +4066,24 @@ Soliton.parseSpliceChar = function(character)
 	}
 }
 
-Soliton.parseSplice = function(lang)
+Soliton.parseSpliceOsc = function(lang)
 {
 	var audioFuncArray = new Array(lang.length);
 
 	for(var i = 0; i < lang.length; ++i)
 	{
-		audioFuncArray[i] = Soliton.parseSpliceChar(lang[i]);
+		audioFuncArray[i] = Soliton.parseSpliceOscChar(lang[i]);
 	}
 
 	return audioFuncArray;
 }
 
-Soliton.spliceOSC = function(lang)
+Soliton.spliceOSC = function(lang, divider)
 {
 	var oscNode = Soliton.context.createScriptProcessor(Soliton.blockSize, 0, 2);
-	oscNode.audioFuncArray = Soliton.parseSplice(lang);
+	oscNode.audioFuncArray = Soliton.parseSpliceOsc(lang);
 	oscNode.currentFunc = 0;
+	oscNode.divider = divider;
 
 	oscNode.onaudioprocess = function(event)
 	{
@@ -2572,13 +4091,17 @@ Soliton.spliceOSC = function(lang)
 		var outputArrayR = event.outputBuffer.getChannelData(1);
 		var output;
 
-		for(var i = 0; i < Soliton.blockSize; i += Soliton.spliceFuncBlockSize)
+		for(var i = 0; i < Soliton.blockSize; i += (Soliton.spliceFuncBlockSize * this.divider))
 		{
 			output = this.audioFuncArray[this.currentFunc](i);
 
 			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j)
 			{
-				outputArrayL[i + j] = outputArrayR[i + j] = output[j];
+				
+				for(var k = 1; k <= this.divider; ++k)
+				{
+					outputArrayL[i + (j * k)] = outputArrayR[i + (j * k)] = output[j];	
+				}  
 			}
 
 			if(++this.currentFunc >= this.audioFuncArray.length)
@@ -2590,8 +4113,1912 @@ Soliton.spliceOSC = function(lang)
 	var fadeGain = Soliton.context.createGainNode();
 	oscNode.connect(fadeGain);
 	fadeGain.connect(Soliton.masterGain);
-	fadeGain.gain.value = 0.0;
-	fadeGain.gain.linearRampToValueAtTime(1.0, Soliton.context.currentTime + 0.01);
+	fadeGain.gain.value = 1.0;
+	fadeGain.gain.linearRampToValueAtTime(1.0, Soliton.context.currentTime + 0.1);
+	fadeGain.gain.linearRampToValueAtTime(0.0, Soliton.context.currentTime + 1);
+	return Soliton.addNode(oscNode);
+}
+
+//////////////////
+// spliceFX
+//////////////////
+
+Soliton.parseSpliceFXChar = function(character)
+{
+	switch(character)
+	{
+	/*
+	case '!': 
+		
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				output[j] = Math.atan(i + j * Soliton.var_a); 
+			} 
+
+			return output;
+		};
+
+		break;
+
+	
+	case '£': 
+		
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				output[j] = Soliton.wrap(Math.exp(1 / (Soliton.spliceFuncBlockSize / (i + j + 1)) * Soliton.var_b)); 
+			} 
+
+			return output;
+		};
+
+		break;
+
+	case '=': 
+		
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				output[j] = Soliton.clip(1 / (Soliton.spliceFuncBlockSize / (i + j + 1)) * Soliton.var_c); 
+			} 
+
+			return output;
+		};
+
+		break;
+
+	
+	case '`': 
+		
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				output[j] = Soliton.clip(Math.sqrt((Soliton.spliceFuncBlockSize / (i + j + 1))) * 2 - 1 * Soliton.var_a); 
+			} 
+
+			return output;
+		};
+
+		break;
+
+	case '~': 
+		
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				output[j] = Soliton.clip(Math.tan(i + j * Soliton.var_b)); 
+			} 
+
+			return output;
+		};
+
+		break;
+
+	case '#': 
+		
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				output[j] = Soliton.wrap(((i + j) / Soliton.blockSize) * 2 - 1 * Soliton.var_b); 
+			} 
+
+			return output;
+		};
+
+		break;
+
+		
+	case ':':
+		
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				output[j] = Soliton.wrap(Math.cos((i + j) / Soliton.blockSize * Soliton.var_c)); 
+			} 
+
+			return output;
+		};
+
+		break;
+
+	
+	case ';': 
+
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				output[j] = Soliton.wrap(Math.pow(i / Soliton.blockSize, j * Soliton.var_a)); 
+			} 
+
+			return output;
+		};
+
+		break;
+
+	case '?': 
+		
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				output[j] = Soliton.wrap(Math.atan2(i / Soliton.blockSize * (Math.PI * 2) * Soliton.var_b, j / (Math.PI * 2))); 
+			} 
+
+			return output;
+		};
+
+		break;
+
+	
+	case '\\': 
+		
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				output[j] = Soliton.clip((i / Soliton.blockSize * (Math.PI * 2) * Soliton.var_c, j / (Math.PI * 2)) * 2 - 1); 
+			} 
+
+			return output;
+		};
+
+		break;	
+
+	
+	case ' ':
+		
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				if((i + j) % (77) == 0)
+					Soliton.var_a = Soliton.var_a * - 1;
+				
+				output[j] = Soliton.var_a;
+			} 
+
+			return output;
+		};
+
+		break;
+
+	case '_': // length
+
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				if((i + j) % (66) == 0)
+					Soliton.var_b *= Soliton.var_a * - 1;
+				
+				Soliton.var_b = Math.cos(Soliton.var_b);
+				output[j] = Soliton.var_b;
+			} 
+
+			return output;
+		};
+	
+		break;
+
+
+	case '[': // fold add, add all components of vector returning a vector of the result
+		
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				if((i + j) % (666) == 0)
+					Soliton.var_c *= Soliton.var_b * - 1;
+				
+				Soliton.var_b = Math.cos(Soliton.var_b);
+				output[j] = Soliton.var_c + Soliton.buffer_a[i + j];
+				Soliton.buffer_a[i + j] = Soliton.wrap(Soliton.buffer_a[i + j] + (Soliton.var_a * Soliton.var_b * Soliton.var_c));
+			} 
+
+			return output;
+		};
+		
+		break;
+
+	
+	case ']': // fold subtract, sub all components of vector returning a vector of the result
+		
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				if((i + j) % (55) == 0)
+					Soliton.var_c *= Soliton.var_b * - 1;
+				
+				output[j] = Soliton.var_c + Soliton.buffer_a[i + j];
+				Soliton.buffer_a[((i + j) * 2) % Soliton.blockSize] = Soliton.wrap(Soliton.var_c + (Soliton.buffer_a[i + j]));
+			} 
+
+			return output;
+		};
+		
+		break;
+	
+	
+	case '{':
+		
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				if((i + j) % (9) == 0)
+					Soliton.var_a *= Soliton.var_c * - 1;
+				
+				output[j] = Soliton.var_a + Soliton.buffer_a[i + j];
+				Soliton.buffer_b[((i + j) * 2) % Soliton.blockSize] = Soliton.wrap(Soliton.var_a + (Soliton.buffer_a[i + j]));
+			} 
+
+			return output;
+		};
+
+		break;
+	
+	case '}':
+		
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				if((i + j) % (13) == 0)
+					Soliton.var_a *= Math.round(Soliton.var_a * -Soliton.var_b);
+				
+				output[j] = Soliton.var_a + Soliton.buffer_c[i + j];
+				Soliton.buffer_c[((i + j) * 2) % Soliton.blockSize] = Soliton.wrap(Soliton.var_a + (Soliton.buffer_c[i + j]));
+			} 
+
+			return output;
+		};	
+
+		break;
+	
+	
+	case '.': // dot() function
+		
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{
+				output[j] = Soliton.var_a;
+				Soliton.var_a = Soliton.wrap(Math.round(Math.sin(Soliton.var_a) * 100) / 100);
+			} 
+
+			return output;
+		};	
+
+		break;
+	
+	
+	case '+': // add with next number
+		
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{
+				output[j] = Soliton.var_b;
+				Soliton.var_b = Soliton.wrap(Math.round(Math.sin(Soliton.var_b)));
+			} 
+
+			return output;
+		};	
+
+		break;
+	
+	
+	case '-': // subtract next number from this
+
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{
+				output[j] = Soliton.var_c;
+				Soliton.var_c = Soliton.clip(Math.round(Math.sin(Soliton.var_c)));
+			} 
+
+			return output;
+		};	
+
+		break;
+	
+	
+	case '*': // multiply by next number
+		
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{
+				var sample = Soliton.buffer_a[i + j];
+
+				if(sample > -0.5 && sample < 0.5)
+					sample = 0;
+
+				sample = (sample * -1) + Soliton.buffer_a[i + j];
+
+				output[j] = sample;
+				Soliton.buffer_a[((i + j) * 2) % Soliton.blockSize] = sample;
+			} 
+
+			return output;
+		}
+
+		break;
+	
+	
+	case '/': // divide by next number
+		
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{
+				var sample = Soliton.buffer_b[i + j];
+
+				if(sample > -0.5 && sample < 0.5)
+					sample = 0;
+
+				sample = sample + Soliton.buffer_b[i + j];
+
+				output[j] = sample;
+				Soliton.buffer_b[((i + j) * 2) % Soliton.blockSize] = sample;
+			} 
+
+			return output;
+		}
+
+		break;
+	
+
+	
+	case '&': // bit and with next number
+	
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{
+				var sample = Soliton.buffer_c[i + j];
+
+				if(sample > -0.5 && sample < 0.5)
+					sample = 0;
+
+				sample = sample + Soliton.buffer_c[i + j];
+
+				output[j] = sample;
+				var rotatedSample = Soliton.buffer_a[i + j];
+				Soliton.buffer_a[i + j] = Soliton.buffer_b[i + j];
+				Soliton.buffer_b[i + j] = Soliton.buffer_c[i + j];
+				Soliton.buffer_c[i + j] = rotatedSample;
+			} 
+
+			return output;
+		}
+
+		break;
+	
+
+	case '|': // bit or with next number
+		
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{
+				var sample = Soliton.buffer_c[i + j];
+
+				if(sample > -0.5 && sample < 0.5)
+					sample = 0;
+
+				sample = Soliton.clip(sample + Soliton.buffer_c[i + j]);
+
+				output[j] = sample;
+				var rotatedSample = Soliton.buffer_b[i + j];
+				Soliton.buffer_a[i + j] = Soliton.buffer_c[i + j];
+				Soliton.buffer_b[i + j] = Soliton.buffer_a[i + j];
+				Soliton.buffer_c[i + j] = rotatedSample;
+			} 
+
+			return output;
+		}
+
+		break;
+
+	
+	case '%': // modulus with next number
+		
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{
+				var sample = Soliton.buffer_a[i + j];
+
+				if(sample > -0.5 && sample < 0.5)
+					sample = 0;
+
+				sample = Soliton.clip(sample + Soliton.buffer_a[i + j]);
+
+				output[j] = sample;
+				var rotatedSample = Soliton.buffer_a[i];
+				Soliton.buffer_a[i + j] = Soliton.buffer_b[i];
+				Soliton.buffer_b[i + j] = Soliton.buffer_c[i];
+				Soliton.buffer_c[i + j] = rotatedSample;
+			} 
+
+			return output;
+		}
+		
+		break;
+	
+	
+	case '<': // decrement
+		
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{
+				var sample = Soliton.buffer_a[Math.max(i + j - 1, 0)];
+
+				if(sample > -0.5 && sample < 0.5)
+					sample = 0;
+
+				sample = Soliton.clip(sample + Soliton.buffer_a[i + j]);
+
+				output[j] = sample;
+				Soliton.buffer_a[((i + j) * 2 + 1) % Soliton.blockSize] = sample;
+			} 
+
+			return output;
+		}
+
+		break;
+
+	
+	case '^': // exponent
+		
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{
+				var sample = Soliton.buffer_c[Math.max(i + j - 66, 0)];
+
+				if(sample > -0.5 && sample < 0.5)
+					sample = sample * Soliton.var_a / 2;
+
+				sample = Soliton.clip(sample + Soliton.buffer_c[i + j]);
+
+				output[j] = sample;
+				Soliton.buffer_c[((i + j) * 2 + 66) % Soliton.blockSize] = sample;
+			} 
+
+			return output;
+		}
+
+		break;
+
+	
+	case '>': // increment
+		
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			var rand = Math.random() * 2 - 1;
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{
+				var sample = Soliton.buffer_a[Math.max(i + j - 666, 0)] + rand;
+
+				if(sample > -0.5 && sample < 0.5)
+					sample = sample * Soliton.var_b / 2;
+
+				sample = Soliton.clip(sample + Soliton.buffer_a[i + j]);
+
+				output[j] = sample;
+				Soliton.buffer_a[((i + j) * 2 + 666) % Soliton.blockSize] = sample;
+			} 
+
+			return output;
+		}
+
+		break;
+
+	
+	case '(': // sin
+		
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{
+				var sample = Soliton.buffer_c[Math.max(i + j - 1, 0)] + Soliton.var_b;
+
+				if(sample < -0.9 || sample > 0.9)
+				{
+					sample = sample * Soliton.var_a / 2;
+					sample = Soliton.clip(sample - Soliton.buffer_a[i + j]);
+					output[j] = sample;
+					Soliton.buffer_c[i + j] = sample;
+				}
+
+				else
+					output[j] = 0;
+			} 
+
+			return output;
+		}
+		
+		break;
+	
+
+	case ')': // cosin
+		
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{
+				var sample = Soliton.buffer_a[Math.max(i + j - 1, 0)] + Soliton.var_a;
+
+				if(sample < -0.9 || sample > 0.9)
+				{
+					sample = sample * Soliton.var_a / 2;
+					sample = Soliton.clip(sample - Soliton.buffer_b[i + j]);
+					output[j] = sample;
+					Soliton.buffer_b[i + j] = sample;
+				}
+
+				else
+					output[j] = 0;
+			} 
+
+			return output;
+		}
+		
+		break;
+
+
+	case '@': // ascos
+		
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{
+				output[j] = Soliton.buffer_a[Soliton.blockSize - 1 - (i + j)];
+			} 
+
+			return output;
+		}
+
+		break;
+
+	case '$': // ascos
+		
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{
+				output[j] = Soliton.buffer_b[Soliton.blockSize - 1 - (i + j)];
+			} 
+
+			return output;
+		}
+
+		break;
+
+	case 'a':
+		
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				output[j] = Math.sin(i + j); 
+			} 
+
+			return output;
+		};
+
+		break;
+		
+	case 'A': // absolute value
+
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{
+				output[j] = Soliton.buffer_c[Soliton.blockSize - 1 - (i + j)];
+			} 
+
+			return output;
+		}
+
+		break;
+
+		
+	case 'b': // less than
+		
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{
+				switch((i + j) % 6)
+				{
+				case 0:
+					output[j] = Soliton.var_a;
+					break;
+
+				case 1:
+					output[j] = Soliton.var_b;
+					break;
+
+				case 2:
+					output[j] = Soliton.var_c;
+					break;
+
+				case 3:
+					output[j] = Soliton.buffer_a[i + j];
+					break;
+
+				case 4:
+					output[j] = Soliton.buffer_b[i + j];
+					break;
+
+				case 5:
+					output[j] = Soliton.buffer_c[i + j];
+					break;	
+				}
+			} 
+
+			return output;
+		}
+
+		break;
+
+	
+	case 'B': // less than equal
+		
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{
+				switch((i + j) % 6)
+				{
+				case 0:
+					output[j] = Soliton.var_a * - 1;
+					Soliton.buffer_c[i + j] = Soliton.var_a;
+					break;
+
+				case 1:
+					output[j] = Soliton.var_b * - 1;
+					Soliton.var_b = Soliton.var_a;
+					break;
+
+				case 2:
+					output[j] = Soliton.var_c * - 1;
+					Soliton.var_c = Soliton.var_b;
+					break;
+
+				case 3:
+					output[j] = Soliton.buffer_a[i + j] * - 1;
+					Soliton.buffer_a[i + j] = Soliton.var_c;
+					break;
+
+				case 4:
+					output[j] = Soliton.buffer_b[i + j] * - 1;
+					Soliton.buffer_b[i + j] = Soliton.buffer_a[i + j];
+					break;
+
+				case 5:
+					output[j] = Soliton.buffer_c[i + j] * - 1;
+					Soliton.buffer_c[i + j] = Soliton.buffer_b[i + j];
+					break;	
+				}
+			} 
+
+			return output;
+		}
+
+		break;
+
+	case 'c': // ceil
+		
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{
+				switch((i + j) % 666)
+				{
+				case 0:
+					output[j] = Soliton.var_a * - 1;
+					Soliton.buffer_c[i + j] = Soliton.var_a;
+					break;
+
+				case 1:
+					output[j] = Soliton.var_b * - 1;
+					Soliton.var_b = Soliton.var_a;
+					break;
+
+				case 2:
+					output[j] = Soliton.var_c * - 1;
+					Soliton.var_c = Soliton.var_b;
+					break;
+
+				case 3:
+					output[j] = Soliton.buffer_a[i + j] * - 1;
+					Soliton.buffer_a[i + j] = Soliton.var_c;
+					break;
+
+				case 4:
+					output[j] = Soliton.buffer_b[i + j] * - 1;
+					Soliton.buffer_b[i + j] = Soliton.buffer_a[i + j];
+					break;
+
+				case 5:
+					output[j] = Soliton.buffer_c[i + j] * - 1;
+					Soliton.buffer_c[i + j] = Soliton.buffer_b[i + j];
+					break;	
+
+				default:
+					output[j] = 0;
+				}
+			} 
+
+			return output;
+		}
+
+		break;
+
+	
+	case 'C': // ceil
+
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{
+				switch((i + j) % 100)
+				{
+				case 0:
+				case 33:
+					output[j] = Soliton.var_a * - 1;
+					Soliton.buffer_c[i + j] = Soliton.var_a;
+					break;
+
+				case 10:
+				case 34:
+					output[j] = Soliton.var_b * - 1;
+					Soliton.var_b = Soliton.var_a;
+					break;
+
+				case 20:
+				case 35:
+					output[j] = Soliton.var_c * - 1;
+					Soliton.var_c = Soliton.var_b;
+					break;
+
+				case 30:
+				case 36:
+					output[j] = Soliton.buffer_a[i + j] * - 1;
+					Soliton.buffer_a[i + j] = Soliton.var_c;
+					break;
+
+				case 40:
+				case 37:
+					output[j] = Soliton.buffer_b[i + j] * - 1;
+					Soliton.buffer_b[i + j] = Soliton.buffer_a[i + j];
+					break;
+
+				case 50:
+				case 38:
+					output[j] = Soliton.buffer_c[i + j] * - 1;
+					Soliton.buffer_c[i + j] = Soliton.buffer_b[i + j];
+					break;	
+
+				default:
+					output[j] = 0;
+				}
+			} 
+
+			return output;
+		}
+
+		break;
+
+
+	
+	case 'd': // distance
+		
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j)
+			{
+				output[j] = 0;
+			}
+
+			if(i == 0)
+			{
+				output[i] = Soliton.var_a;
+				Soliton.var_a *= -1;
+			}
+
+			return output;
+		};
+
+		break;
+	
+	
+	case 'D': // distance
+		
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j)
+			{
+				output[j] = Soliton.buffer_a[i];
+			}
+
+			if(i == 0)
+			{
+				var sample = Soliton.clip(Soliton.var_b + Soliton.buffer_a[i]); 
+				output[i] = sample;
+				Soliton.var_b = sample;
+				Soliton.buffer_a[i] = sample;
+			}
+
+			return output;
+		};
+
+		break;
+
+	
+	case 'e': // equal
+		
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j)
+			{
+				output[j] = Soliton.buffer_b[i];
+			}
+
+			if(i == 0)
+			{
+				var sample = Soliton.clip(Soliton.var_b + Soliton.buffer_b[i]); 
+				output[i] = sample;
+				Soliton.var_b = sample;
+				Soliton.buffer_b[i] = sample;
+			}
+
+			return output;
+		};
+
+		break;
+
+	case 'E': // equal
+
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{
+				output[j] = Soliton.buffer_c[Soliton.blockSize - 1 - (i + j)] - Soliton.buffer_c[i + j];
+			} 
+
+			Soliton.var_c = output[0];
+
+			return output;
+		}
+
+		break;
+
+	
+	case 'f': // floor
+		
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{
+				if(Math.random() > 0.5)
+					output[j] = Soliton.buffer_c[Soliton.blockSize - 1 - (i + j)] - Soliton.buffer_c[i + j];
+				else
+					output[j] = Soliton.buffer_b[Soliton.blockSize - 1 - (i + j)];
+			} 
+
+			Soliton.var_c = output[0];
+
+			return output;
+		}
+
+		break;
+	
+	
+	case 'F': 
+
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{
+				if(Soliton.prime[i + j])
+				{
+					output[j] = Soliton.var_b;
+					Soliton.var_b *= -1;
+				}
+
+				else
+					output[j] = 0;
+			} 
+
+			return output;
+		}
+
+		break;
+
+	case 'g': // return input, assign "+assignVar+"
+		
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{
+				if(Soliton.prime[i + j])
+				{
+					Soliton.var_a *= 1 / (i + j + 1);
+					output[j] = Soliton.var_a;
+				}
+
+				else
+					output[j] = 0;
+			} 
+
+			return output;
+		}
+
+		break;
+
+	
+	case 'G': // return input, assign "+assignVar+"
+		
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{
+				if(Soliton.prime[i + j])
+				{
+					Soliton.var_c *= 1 / (i + j + 1);
+					output[j] = Soliton.var_a;
+				}
+
+				else
+					output[j] = Soliton.buffer_a[i + j];
+			} 
+
+			return output;
+		}
+
+		break;
+
+	
+	case 'h': // return input, assign "+assignVar+"
+		
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{
+				if(Soliton.prime[i + j])
+				{
+					output[j] = Math.sin(i + j);
+				}
+
+				else
+					output[j] = Soliton.buffer_b[i + j];
+			} 
+
+			return output;
+		}
+
+		break;
+
+	
+	case 'H': // return input, assign "+assignVar+"
+		
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{
+				if(Soliton.prime[i + j])
+				{
+					var sample = Math.atan2(i + j, Soliton.buffer_c[i + j]); 
+					output[j] = sample;
+					Soliton.buffer_c[i + j] = sample;
+				}
+
+				else
+					output[j] = Soliton.buffer_c[i + j];
+			} 
+
+			return output;
+		}
+
+		break;
+
+	
+	case 'i': // inverse sqrt
+
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				if((i + j) % (Soliton.var_a * 10) <= 0)
+					Soliton.var_a *= Soliton.var_c * - 1;
+				
+				output[j] = Soliton.var_a + Soliton.buffer_a[i + j];
+				Soliton.buffer_b[i + j] = Soliton.wrap(Soliton.var_a + (Soliton.buffer_a[i + j]));
+			} 
+
+			return output;
+		};
+
+		break;
+	
+	
+	case 'I': // invsqrt(1 / exp2)
+
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				if((i + j) % (Soliton.var_b * 10) <= 0)
+					Soliton.var_b *= Soliton.var_a * - 1;
+				
+				output[j] = Soliton.var_b + Soliton.buffer_b[i + j];
+				Soliton.buffer_c[i + j] = Soliton.wrap(Soliton.var_b + (Soliton.buffer_b[i + j]));
+			} 
+
+			return output;
+		};
+
+		break;
+
+	
+	case 'j': // return input, assign "+assignVar+"
+
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				if((i + j) % (Soliton.var_c * 10) <= 0)
+					Soliton.var_c *= Soliton.var_b * - 1;
+				
+				output[j] = Soliton.var_c + Soliton.buffer_c[i + j];
+				Soliton.buffer_a[i + j] = Soliton.wrap(Soliton.var_c + (Soliton.buffer_c[i + j]));
+			} 
+
+			return output;
+		};
+
+		break;
+
+	
+	case 'J': // return input, assign "+assignVar+"
+
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{
+				var sample = Soliton.buffer_a[i + j];
+
+				if(sample > -0.5 && sample < 0.5)
+					sample = 0;
+
+				sample = sample + Soliton.buffer_a[i + j];
+
+				output[j] = sample;
+				Soliton.buffer_c[((i + j) * 2) % Soliton.blockSize] = sample;
+			} 
+
+			return output;
+		}
+
+		break;
+
+	case 'k': // clamp
+
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{
+				var sample = Soliton.buffer_c[i + j];
+
+				if(sample > -0.666 && sample < 0.666)
+					sample = 0;
+
+				sample = sample + Soliton.buffer_c[i + j];
+
+				output[j] = sample;
+				Soliton.buffer_b[((i + j) * 2) % Soliton.blockSize] = sample;
+			} 
+
+			return output;
+		}
+
+		break;
+
+		
+	case 'K': // clamp
+		
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				if(Soliton.prime[i + j])
+					Soliton.var_a *= Soliton.var_c * - 1;
+				
+				output[j] = Soliton.var_a + Soliton.buffer_b[i + j];
+				Soliton.buffer_c[((i + j) * 2) % Soliton.blockSize] = Soliton.wrap(Soliton.var_a + (Soliton.buffer_b[i + j]));
+			} 
+
+			return output;
+		};
+
+		break;
+
+	
+	case 'l': // log2
+
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				if(Soliton.prime[i + j])
+					Soliton.var_b = Soliton.clip(Soliton.var_b - (1 / (i + j + 1)));
+				
+				var sample = Soliton.clip((Soliton.var_b + Soliton.buffer_b[i + j]) * (1 / (i + j + 1)));
+				output[j] = sample;
+				Soliton.buffer_a[((i + j) + 1) % Soliton.blockSize] = sample;
+			} 
+
+			return output;
+		};
+
+		break;
+	
+	
+	case 'L': // log2(1 / log2)
+
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				if(Soliton.prime[i + j])
+					Soliton.var_b = Soliton.clip(Soliton.var_b * (1 / (i + j + 1)));
+				
+				var sample = Soliton.clip((Soliton.var_b + Soliton.buffer_b[i + j]) * (1 / (i + j + 1)));
+				output[j] = sample;
+				Soliton.buffer_a[((i + j) + 1) % Soliton.blockSize] = sample;
+			} 
+
+			return output;
+		};
+
+		break;
+
+	
+	case 'm': // min
+
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				if(Soliton.prime[i + j])
+					Soliton.var_c = Soliton.wrap(Soliton.var_b * (1 / (i + j + 1)));
+				
+				var sample = Soliton.wrap((Soliton.var_c + Soliton.buffer_a[i + j]) * (1 / (i + j + 1)));
+				output[j] = sample;
+				Soliton.buffer_a[((i + j) + 1) % Soliton.blockSize] = sample;
+			} 
+
+			return output;
+		};
+
+		break;
+	
+	
+	case 'M': // max
+
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				if(Soliton.prime[i + j])
+					Soliton.var_a = Soliton.wrap(Soliton.var_a + (1 / (i + j + 1)));
+				
+				var sample = Soliton.wrap((Soliton.var_a + Soliton.buffer_a[i + j]) * (1 / (i + j + 1)));
+				output[j] = sample;
+				Soliton.buffer_c[((i + j) + 1) % Soliton.blockSize] = sample;
+			} 
+
+			return output;
+		};
+
+
+		break;
+
+		
+	case 'n': // normalize
+
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				if(Soliton.prime[i + j])
+					Soliton.var_c = Soliton.wrap(Soliton.var_c / (i + j + 1) * -1);
+				
+				var sample = Soliton.wrap((Soliton.var_c + Soliton.buffer_b[i + j]) * (1 / (i + j + 1)));
+				output[j] = sample;
+				Soliton.buffer_b[((i + j) + 1) % Soliton.blockSize] = sample;
+			} 
+
+			return output;
+		};
+
+		break;
+
+
+	
+	case 'N': // normalize
+
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				if((i + j) % (154) == 0)
+					Soliton.var_b = Soliton.var_b * - 1;
+				
+				output[j] = Soliton.var_b;
+			} 
+
+			return output;
+		};
+
+		break;
+
+	
+	case 'o': // min
+
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				if((i + j) % (333) == 0)
+					Soliton.var_c = Soliton.var_c * - 1;
+				
+				output[j] = Soliton.var_c;
+			} 
+
+			return output;
+		};
+
+		break;
+
+	case 'O': // max
+
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				if(Soliton.prime[i + j])
+					Soliton.var_c *= Math.round(Soliton.var_c * -Soliton.var_b);
+				
+				output[j] = Soliton.var_c + Soliton.buffer_a[i + j];
+				Soliton.buffer_a[((i + j) * 2) % Soliton.blockSize] = Soliton.wrap(Soliton.var_c + (Soliton.buffer_a[i + j]));
+			} 
+
+			return output;
+		};	
+
+		break;
+
+	
+	case 'p': // pow
+
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				if((i + j) == 999)
+					Soliton.var_a *= Math.sin(Soliton.buffer_a[((i + j) * 2) % Soliton.blockSize] - Soliton.var_b);
+				
+				output[j] = Soliton.var_a + Soliton.buffer_c[i + j];
+				Soliton.buffer_c[((i + j) * 2) % Soliton.blockSize] = Soliton.wrap(Soliton.var_a + (Soliton.buffer_c[i + j]));
+			} 
+
+			return output;
+		};	
+
+		break;
+
+	case 'P': // pow pow
+
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				if((i + j) == 999)
+					Soliton.var_b *= Math.sin(Soliton.buffer_b[((i + j) * 2) % Soliton.blockSize] - Soliton.var_b);
+				
+				output[j] = Soliton.var_b + Soliton.buffer_b[i + j];
+				Soliton.buffer_b[((i + j) * 2 + 1) % Soliton.blockSize] = Soliton.wrap(Soliton.var_b + (Soliton.buffer_b[i + j]));
+			} 
+
+			return output;
+		};
+
+		break
+
+	
+	case 'q': // sign value
+
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				output[j] = Soliton.var_b + Soliton.buffer_b[i + j];
+				Soliton.buffer_b[Soliton.blockSize - (i + j + 1)] = Soliton.wrap(Soliton.var_b + (Soliton.buffer_b[i + j]));
+			} 
+
+			return output;
+		};
+
+		break;	
+
+
+	case 'Q': // sign value
+
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				output[j] = Soliton.var_a + Soliton.buffer_a[i + j];
+				var sample = Soliton.wrap(Soliton.var_a - (Soliton.buffer_c[i + j]));
+				Soliton.buffer_a[Soliton.blockSize - (i + j + 1)] = sample;
+				Soliton.var_a = sample;
+			} 
+
+			return output;
+		};
+
+		break;
+
+	
+
+	case 'r': // reflect
+		
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				output[j] = Soliton.buffer_a[i + j] * Soliton.buffer_b[i + j] * Soliton.buffer_c[i + j];
+			} 
+
+			return output;
+		};
+
+		break;
+
+	
+	case 'R': // Refract
+
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				output[j] = Soliton.buffer_a[Soliton.blockSize - (i + j + 1)] * Soliton.buffer_b[Soliton.blockSize - (i + j + 1)] * Soliton.buffer_c[Soliton.blockSize - (i + j + 1)];
+			} 
+
+			return output;
+		};
+
+		break;	
+
+	
+	
+	case 's': // step
+
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				output[j] = Math.sin((Soliton.buffer_a[i + j] + Soliton.buffer_b[i + j] + Soliton.buffer_c[i + j]) * 666 + (i + j));
+			} 
+
+			return output;
+		};
+
+		break;
+	
+
+	
+	case 'S': // smooth step
+
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				output[j] = Math.sin((Soliton.buffer_a[i + j] + Soliton.buffer_b[i + j] + Soliton.buffer_c[i + j]) * 4096);
+
+				if((i + j) % 66 == 0)
+					Soliton.var_a *= -1;
+			} 
+
+			return output;
+		};
+
+		break;
+
+
+	
+	case 't': // cross
+
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				output[j] = Soliton.clip(Math.sqrt((Soliton.spliceFuncBlockSize / (i + j + 1))) + Soliton.var_b); 
+			} 
+
+			Soliton.var_b = Soliton.wrap(Soliton.var_b - Soliton.buffer_a[i]);
+
+			return output;
+		};
+
+		break;
+
+	case 'T': // tangent
+
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				output[j] = Soliton.clip(1 / (Math.sqrt((Soliton.spliceFuncBlockSize / (i + j + 1))) + Soliton.var_b)); 
+			} 
+
+			Soliton.var_b = Soliton.wrap(Soliton.var_b - Soliton.buffer_a[i]);
+
+			return output;
+		};
+
+		break;	
+	
+	
+	case 'u': // 
+		
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				output[j] = Soliton.var_a;
+
+				if(Soliton.prime[i + j])
+					Soliton.var_a *= -Soliton.var_b;
+			} 
+
+			return output;
+		};
+
+		break;
+
+	
+	case 'U': // 
+		
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				output[j] = Soliton.var_b;
+
+				if(Soliton.prime[i + j])
+					Soliton.var_b *= -Soliton.var_c;
+			} 
+
+			return output;
+		};
+
+		break;
+
+
+	
+	case 'v': // sqrt
+		
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				output[j] = Soliton.var_c;
+
+				if(Soliton.prime[i + j])
+					Soliton.var_c *= -Soliton.var_a;
+			} 
+
+			return output;
+		};
+
+		break;
+
+		
+	case 'V': // var sqrt
+		
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			var index = 0;
+
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				output[j] = Soliton.buffer_a[index];
+
+				if(Soliton.prime[i + j])
+					index = i + j;
+			} 
+
+			return output;
+		};
+
+		break;
+
+	
+	case 'w': // FaceForward
+		
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			var index = 0;
+
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				output[j] = Soliton.buffer_b[index];
+
+				if(Soliton.prime[i + j])
+					index = i + j;
+			} 
+
+			return output;
+		};
+
+		break;
+
+
+	case 'W': // FaceForward
+		
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			var index = 0;
+
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				output[j] = Soliton.buffer_c[index];
+
+				if(Soliton.prime[i + j])
+					index = i + j;
+			} 
+
+			return output;
+		};
+
+		break;
+
+	
+	case 'x': // mix
+		
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			var index = 0;
+
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				output[j] = Soliton.buffer_a[index];
+
+				if(Soliton.prime[i + j])
+					index++;
+			} 
+
+			return output;
+		};
+
+		break;
+	
+
+	
+	case 'X': // mix
+		
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			var index = 0;
+
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				output[j] = Soliton.buffer_b[index];
+
+				if(Soliton.prime[i + j])
+					index++;
+			} 
+
+			return output;
+		};
+
+		break;
+
+	case 'y': // mul
+		
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			var index = 0;
+
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				output[j] = Soliton.buffer_c[index];
+
+				if(Soliton.prime[i + j])
+					index++;
+			} 
+
+			return output;
+		};
+
+		break;
+
+	
+	case 'Y': // mul
+		
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			var index = 0;
+			var var_array = [Soliton.var_a, Soliton.var_b, Soliton.var_c];
+
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				output[j] = var_array[index];
+
+				if(Soliton.prime[i + j])
+				{
+					index = (index + 1) % 3;
+					var_array[index] *= -1;
+				}
+			} 
+
+			return output;
+		};
+
+		break;
+
+	
+	case 'z': // mul
+
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			var index = 0;
+			var var_array = [Soliton.buffer_a, Soliton.buffer_b, Soliton.buffer_c];
+
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				output[j] = var_array[index][i + j];
+
+				if(Soliton.prime[i + j])
+				{
+					index = (index + 1) % 3;
+					var_array[index][i + j] *= -1;
+				}
+			} 
+
+			return output;
+		};
+
+		break;
+
+	
+	case 'Z': // mul
+		
+		return function(inputL, inputR, i)
+		{ 
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			var index = 0;
+			var var_array = [Soliton.buffer_a, Soliton.buffer_b, Soliton.buffer_c];
+
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				output[j] = var_array[index][Soliton.blockSize - (i + j + 1)];
+
+				if(Soliton.prime[i + j])
+				{
+					index = (index + 1) % 3;
+					var_array[index][Soliton.blockSize - (i + j + 1)] *= -1;
+				}
+			} 
+
+			return output;
+		};
+
+		break;
+
+*/
+
+	default:
+		var sample = (character.charCodeAt(0) / 256 * 2 - 1);
+		return function(inputL, inputR, i)
+		{ 
+			var outputL = new Array(Soliton.spliceFuncBlockSize);
+			var outputR = new Array(Soliton.spliceFuncBlockSize);
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
+			{ 
+				outputL[j] = Soliton.wrap(inputL[i +j] + sample);
+				outputR[j] = Soliton.wrap(inputR[i +j] + sample);
+			} 
+
+			return { l: outputL, r: outputR };
+		};
+		
+		break;
+	}
+}
+
+Soliton.parseSpliceFX = function(lang)
+{
+	var audioFuncArray = new Array(lang.length);
+
+	for(var i = 0; i < lang.length; ++i)
+	{
+		audioFuncArray[i] = Soliton.parseSpliceFXChar(lang[i]);
+	}
+
+	return audioFuncArray;
+}
+
+Soliton.spliceFX = function(lang, divider, nodeID)
+{
+	/*
+	var source = Soliton.nodes[nodeID];
+
+	if(source != null)
+	{
+		source.disconnect(0);
+		var mix = Soliton.context.createGainNode();
+		var feedBack = Soliton.context.createGainNode();
+		feedBack.gain.value = feedLevel;
+		var delay = Soliton.context.createDelay();
+		delay.delayTime.value = delayTime;
+		source.connect(delay);
+		source.connect(mix);
+		delay.connect(mix);
+		delay.connect(feedBack);
+		feedBack.connect(delay);
+		mix.connect(Soliton.masterGain);
+		return Soliton.addNode(mix);
+	}
+
+	return null;*/
+
+	var source = Soliton.nodes[nodeID];
+
+	if(source == null)
+		return null;
+
+	var oscNode = Soliton.context.createScriptProcessor(Soliton.blockSize, 2, 2);
+	oscNode.audioFuncArray = Soliton.parseSpliceFX(lang);
+	oscNode.currentFunc = 0;
+	oscNode.divider = divider;
+
+	oscNode.onaudioprocess = function(event)
+	{
+		var outputArrayL = event.outputBuffer.getChannelData(0);
+		var outputArrayR = event.outputBuffer.getChannelData(1);
+		var inputArrayL = event.inputBuffer.getChannelData(0);
+		var inputArrayR = event.inputBuffer.getChannelData(1);
+		var output;
+
+		for(var i = 0; i < Soliton.blockSize; i += (Soliton.spliceFuncBlockSize * this.divider))
+		{
+			output = this.audioFuncArray[this.currentFunc](inputArrayL, inputArrayR, i);
+
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j)
+			{
+				
+				for(var k = 1; k <= this.divider; ++k)
+				{
+					outputArrayL[i + (j * k)] = output.l[j];
+					outputArrayR[i + (j * k)] = output.r[j];	
+				}  
+			}
+
+			if(++this.currentFunc >= this.audioFuncArray.length)
+			 	this.currentFunc = 0;
+		}
+	}
+
+	oscNode.onaudioprocess.parentNode = oscNode;
+	var fadeGain = Soliton.context.createGainNode();
+	source.disconnect(0);
+	source.connect(oscNode);
+	oscNode.connect(fadeGain);
+	fadeGain.connect(Soliton.masterGain);
+	fadeGain.gain.value = 1.0;
+	fadeGain.gain.linearRampToValueAtTime(1.0, Soliton.context.currentTime + 0.1);
 	fadeGain.gain.linearRampToValueAtTime(0.0, Soliton.context.currentTime + 1);
 	return Soliton.addNode(oscNode);
 }

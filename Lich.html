@@ -100,9 +100,16 @@
 // Lich.js - A Networked Audio / Visual Live Coding Language
 //////////////////////////////////////////////////////////////////////////////////
 
-spliceOsc "a"
+sinOsc 440 perc 1
 
-=> spliceStreamOsc Stream 0.5 { spliceOsc * randString 15 4 }
+spliceFX "/2094912309381?%%$" 1 sinOsc 440 perc 1
+
+summon "ThitherAndYon" 0 2
+spliceFX "a" 1 summon "ThitherAndYon" 0 2
+
+spliceOsc "a" 1
+
+=> spliceStreamOsc Stream 0.5 { spliceOsc randString 2 + 1 random 10 }
 
 => map mesh "sawMap" 20 [ 0 50 100 ]
 angular map [ 0 0.01 0.01 ]
@@ -125,7 +132,7 @@ spliceShader randString 4
 spliceShader "1234567890!£$%^&*()_-+=`{[}]:;@'~#<,>.?/|\qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM"
 
 // Doesn't work right now
-=> marchCubes march [ 0 50 100]
+=> marchCubes march [ 0 50 100 ]
 
 // helper functions to make this easier
 => mapper { => map mesh "sawMap" 20 [ 0 50 100 ]}

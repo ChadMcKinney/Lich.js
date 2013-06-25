@@ -5958,11 +5958,18 @@ function compileLich()
 
 
 	function spliceOSC(argArray)
-	{
-		Soliton.spliceOSC(argArray[0].value());
+	{	
+		Soliton.spliceOSC(argArray[0].value(), argArray[1].value());
 	}
 
-	LichVM.reserveVar("spliceOsc", new LichPrimitive(spliceOSC, 1));
+	LichVM.reserveVar("spliceOsc", new LichPrimitive(spliceOSC, 2));
+
+	function spliceFX(argArray)
+	{
+		Soliton.spliceFX(argArray[0].value(), argArray[1].value(), argArray[2].value());
+	}
+
+	LichVM.reserveVar("spliceFX", new LichPrimitive(spliceFX, 3));
 
 	///////////////////////
 	// Graphics Primitives
