@@ -35,6 +35,7 @@ body {
     margin-left: auto;
     margin-right: auto;
     overflow: hidden;
+    font-family: Ubuntu Mono, DejaVu Sans Mono, Liberation Mono,Bitstream Vera Sans Mono,Consolas,Monaco,Lucida Console,Courier New, monospace;
 }
 
 #terminal, #post {
@@ -46,7 +47,7 @@ body {
 	outline: 0;
 	outline: none;
 	font-size: 1.0em;
-	font-family: Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Consolas,Monaco,Lucida Console,Courier New, monospace;
+	font-family: Ubuntu Mono, DejaVu Sans Mono, Liberation Mono,Bitstream Vera Sans Mono,Consolas,Monaco,Lucida Console,Courier New, monospace;
 	/* background : black;
 	color: white; */
 	font-smooth: true;
@@ -115,7 +116,7 @@ body {
 	z-index: 20;
 	resize: none;
 	font-size: 1.0em;
-	font-family: Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Consolas,Monaco,Lucida Console,Courier New, monospace;
+	font-family: Ubuntu Mono, DejaVu Sans Mono, Liberation Mono,Bitstream Vera Sans Mono,Consolas,Monaco,Lucida Console,Courier New, monospace;
 	font-smooth: true;
 	overflow: hidden;
 }

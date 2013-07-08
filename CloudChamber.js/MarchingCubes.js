@@ -200,7 +200,7 @@ MarchingCubes.marchCube1 = function(vector, scale)
 	// Make a local copy of the values at the cube's corner
 	for(vertex = 0; vertex < 8; ++vertex)
 	{
-		cubeValue[vertex] = Math.random() * MarchingCubes.targetValue * 4 - (MarchingCubes.targetValue);
+		cubeValue[vertex] = Math.random() * MarchingCubes.targetValue * 40 - (MarchingCubes.targetValue);
 		/*
 		cubeValue[vertex] = MarchingCubes.sample1(new THREE.Vector3(
 			vector.x + MarchingCubes.vertexOffset[vertex].x * scale,

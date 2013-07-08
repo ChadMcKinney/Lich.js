@@ -6408,10 +6408,22 @@ function compileLich()
 	);
 
 	bind.play();*/
+
+	////////////////
+	// CodeMirror
+	////////////////
+
+	initCodeMirror();
 	
-	CloudChamber.setup("canvas", 24, undefined, post); // Create the CloudChamber instance
+	///////////////////
+	// CloudChamber
+	///////////////////
+
+	/*
+	CloudChamber.setup(canvas, 24, undefined, post); // Create the CloudChamber instance
 
 	var lichShaderArray = new Array();
+	
 	for(var i = 0; i < CloudChamber.shaderArray.length; ++i)
 	{
 		lichShaderArray.push(new LichString(CloudChamber.shaderArray[i]));
@@ -6425,7 +6437,7 @@ function compileLich()
 	{
 		if(argArray[0].type() == "String")
 		{
-			CloudChamber.setShader(argArray[0].value()/*, argArray[1].value()*/);
+			CloudChamber.setShader(argArray[0].value()); // , argArray[1].value()
 		}
 
 		else if(argArray[0].type() == "Array")
@@ -6450,5 +6462,5 @@ function compileLich()
 
 	LichVM.reserveVar("spliceShader", new LichPrimitive(spliceShader, 1));
 
-	CloudChamber.start();
+	CloudChamber.start();*/
 }

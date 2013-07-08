@@ -49,10 +49,10 @@ CloudChamber.loadFile = function(url, data, callback, errorCallback)
     request.onreadystatechange = function () 
     {
         // If the request is "DONE" (completed or failed)
-        if (request.readyState == 4) 
+        if(request.readyState == 4) 
         {
             // If we got HTTP status 200 (OK)
-            if (request.status == 200) 
+            if(request.status == 200) 
             {
                 callback(request.responseText, data)
             } 
@@ -218,9 +218,10 @@ CloudChamber.draw = function(time)
 *	drawCallback
 *	printCallback
 ******************************************************************************************************************/
-CloudChamber.setup = function(canvasElementName, framerate, drawCallback, printCallback)
+CloudChamber.setup = function(canvas, framerate, drawCallback, printCallback)
 {
-	CloudChamber.canvas = document.getElementById(canvasElementName);
+	// CloudChamber.canvas = document.getElementById(canvasElementName);
+	CloudChamber.canvas = canvas;
 	CloudChamber.framerate = framerate;
 	CloudChamber.drawCallback = drawCallback;
 	CloudChamber.printCallback = printCallback

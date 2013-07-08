@@ -29,6 +29,7 @@
     <title>Lich.js</title>
 	<meta name="keywords" content="Experimental, Computer Music, Multimedia, Live Coding" />
 	<meta name="description" contexnt="Lich.js is a very simple live coding audio and visual language implemented in javascript." />
+	<link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
 	<link rel="stylesheet" type="text/css" href="WP-Content/LichStyle.css" media="all" />
 	<script type="text/javascript" src="third-party/glMatrix-0.9.5.min.js"></script>
 	<script type="text/javascript" src="third-party/webgl-utils.js"></script>
@@ -78,12 +79,13 @@
 	<script type="text/javascript" src="Soliton.js/Soliton.js"></script>
 	<script type="text/javascript" src="CloudChamber.js/CloudChamber.js"></script>
 	<script type="text/javascript" src="CloudChamber.js/MarchingCubes.js"></script>
+	<script type="text/javascript" src="third-party/CodeMirror.js"></script>
 	<script type="text/javascript" src="Lich.js"></script>
 	<script type="text/javascript" src="LichParser.js"></script>
 </head>
 
 <body>
-
+<!--
 	<canvas id="canvas">
 
 	</canvas>
@@ -1246,14 +1248,16 @@ deleteAll
 
 
 	</textarea>
-	
+	-->
 	<textarea id="post" rows="6" spellcheck="false" readonly="true">Lich.js&#10;</textarea>
+	
+	<!--
 	<textarea id="userName" spellcheck="false" contenteditable="true"
 		onChange="javascript:return login()">default</textarea>
 	<textarea id="default" rows="1" spellcheck="false" readonly="true" style="display:none;"
 		onChange="javascript:return parseChangeFromNetwork('default');"> </textarea>
 
-	<!-- Hardcoded For now, will be dynamic in the future -->
+	<!-- Hardcoded For now, will be dynamic in the future 
 	<textarea id="Chad" rows="1" spellcheck="false" readonly="true" style="display:none;"
 		onChange="javascript:return parseChangeFromNetwork('Chad');"> </textarea>
 
@@ -1266,12 +1270,13 @@ deleteAll
 	<textarea id="Ben" rows="1" spellcheck="false" readonly="true" style="display:none;"
 		onChange="javascript:return parseChangeFromNetwork('Ben');"> </textarea>
 
+	-->
+
 	<script LANGUAGE="JavaScript" type="text/javascript">
 		compileLich();
 	</script>
 
 	<!-- NETWORK SYNCHRONIZATION. CURRENTLY OFF. UNCOMMENT TO RESTORE.
-	,
 			'Chad',
 			'Cole', 
 			'Curtis',
