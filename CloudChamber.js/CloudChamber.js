@@ -1456,8 +1456,8 @@ CloudChamber.parsesplice = function(lang)
 CloudChamber.spliceShader = function(lang)
 {
 	var shader = CloudChamber.parsesplice(lang);
-	// CloudChamber.print(shader.vertexShader);
-	// CloudChamber.print("\n\n\n"+shader.fragmentShader);
+	CloudChamber.print(shader.vertexShader);
+	CloudChamber.print("\n\n\n"+shader.fragmentShader);
 
 	var pass = new THREE.ShaderPass(shader);
 	pass.renderToScreen = true;

@@ -85,7 +85,7 @@
 </head>
 
 <body>
-<!--
+
 	<canvas id="canvas">
 
 	</canvas>
@@ -101,6 +101,258 @@
 //////////////////////////////////////////////////////////////////////////////////
 // Lich.js - A Networked Audio / Visual Live Coding Language
 //////////////////////////////////////////////////////////////////////////////////
+
+// Background
+background [ 0 25 45 ]
+
+// Printing
+print "Hello, are you coding right now?"
+print "Yes"
+
+// Binary Operations
+* 2 1
+/ 1 2
+% 5 3
+
++ 1 [2 2] // Any two types can be added. Arrays expand other types. No commas!
++ 1 [2, 2] // Of course if that freaks you out, you can always use them anyways.
+
+// Booleansand control flow
+if == 1 1 { print 'TRUE!' } else { print 'false.' }
+if != 1 1 { print "TRUE!" } else { print "false." }
+
+// Streams can be passed to eachother!
+=> stream6 Stream [ 0.5 1.0 0.25 ] [ 0.5 0.125 1.0 ]
+=> stream7 Stream [ 0.25 0.5 ] { summon "Airport" stream6 1.0 }
+=> stream8 Stream stream6 { summon "Airport" + * stream6 4 5 1.0 }
+=> stream9 Stream / 0.125 stream6 { summon "Airport" + * stream6 20 5 0.5 }
+
+setMasterGain 0.25
+
+sinOsc 440 perc 1
+tri 440 perc 1
+saw 440 perc 1
+square 440 perc 1
+filter square 440 perc 1 880  "low"
+osc 40 genArray "gaussian" 20 perc 1
+delay sinOsc random 1000 perc 1 0.25 0.9
+
+// Dark Squarezzzz
+=> squarez : freq { delay square freq perc 0.25 / 1 / freq 2 0.99 }
+=> squareStream Stream [ 2.333 1.333 ] [ { ::squarez 13 } { ::squarez 2.333 } { ::squarez 26 } ]
+=> squareStream2 Stream 1 [ { ::squarez 50 } { ::squarez 25 } { ::squarez 63 } ]
+stop squareStream
+stop squareStream2
+
+// sequencing isn't exactly perfect right now...
+=> noise : freq filterFreq { filter osc freq genArray "gaussian" 50 perc 0.25 filterFreq "low" }
+=> low { sinOsc 200 perc 0.25 }
+=> mid { filter square 400 perc 0.25 400 "band" }
+=> high { ::noise 1600 2000 }
+=> drumStream Stream 0.5 [ { ::low } { ::mid } { ::high } { ::mid } ]
+=> drumStream2 Stream 0.25 [ {  } { filter tri 800 perc 0.125 800 "band" } ]
+=> drumStream3 Stream / 3 4 { filter saw * / 3 4 1600 perc 0.125 1600 "low" }
+=> drumStream4 Stream [ 0.125 0.125 0.125 0.25 ] { filter square * / 4 3 1000 perc 0.125 1600 "low" }
+stop drumStream
+stop drumStream2
+stop drumStream3
+stop drumStream4
+
+=> pluck : freq { delay filter summon "ThitherAndYon" random 30 2 random 2000 random 3 / 1 freq 0.999 }
+=> pluckFreq Stream 1 [ 40 880 440 660 ]
+=> pluckDur Stream 0.5 [ 1 3.5 1.25 2 2.125 4 ]
+=> plucker Stream pluckDur { ::pluck pluckFreq }
+
+=> pluck : freq { delay filter square + random 20 2 perc 1 random 2000 random 3 / 1 freq 0.999 }
+=> pluckFreq Stream 1 [ 40 880 440 660 ]
+=> pluckDur Stream 0.5 [ 1 3.5 1.25 2 2.125 4 ]
+=> plucker Stream pluckDur { ::pluck pluckFreq }
+
+spliceFX "/2094912309381?%%$" 1 sinOsc 440 perc 1
+spliceFX randString random 4 1 sinOsc 440 perc 1
+
+
+///////////////////////////////////////////
+// Graphics
+///////////////////////////////////////////
+
+////////////
+// shapes
+////////////
+
+=> sphere1 sphere [ 0 0 0 ] 50 [ 255 0 0 ]
+wireframe sphere1 true
+wireframe sphere1 false
+move sphere1 [ -50 50 -10 ]
+move sphere1 [ 75 -20 30 ]
+delete sphere1
+
+// Create several spheres and delete all of them at the same time
+do 5 { => pointer sphere random [ 10 100 100 ] 50 [ 255 0 0 ] }
+wireframeAll true
+wireframeAll false
+moveAll [ -50 50 -10 ]
+moveAll [ 75 -20 30 ]
+deleteAll
+
+// Make a cube with the arguments position size rotation and color
+=> cube1 cube [ 0 0 0 ] [ 90 90 90 ] [ 1 0.2 0.3 ] [ 0 145 200 ]
+
+move cube1 [ 30 30 30 ] // Relative positioning
+move cube1 [ -60 -60 -60 ] // Relative
+position cube1 [ 0 0 0 ] // absolute
+position cube1 random [ 10 10 10 ]
+positionAll [ 0 0 0 ]
+
+// You can use streams to move and rotate objects
+=> stream1 Stream [ 0.001 ] { move cube1 - random [ 1 1 1 ] 0.5 }
+=> stream2 Stream [ 0.001 ] { rotate cube1 * - random [ 1 1 1 ] 0.5 0.1 }
+stop stream1
+stop stream2
+
+// You can also use the angular and linear functions to give them momentum
+angular cube1 [ 0.01 0.02 -0.01 ]
+linear cube1 [ 0 1 -1 ]
+linear cube1 [ 0 -1 1 ]
+angular cube1 [ 0 0 0 ]
+linear cube1 [ 0 0 0 ]
+
+
+// You can mix streams and momentum for smooth movements
+=> stream1 Stream [ 0.5 ] [ { linear cube1 [ -1 -1 1 ] } { linear cube1 [ 1 1 -1 ] } ]
+=> stream2 Stream [ 0.666 ] { angular cube1 random [ 0.1 0.1 0.1 ] }
+
+// You can even change cube1
+scale cube1 random 2
+=> stream3 Stream 0.5 { scale cube1 random 2 }
+stop stream3
+stop stream2
+stop stream1
+delete cube1
+
+
+=> mesh1 mesh "Cloud" 1000 [ 0 50 100 ]
+scale mesh1 0.5
+wireframe mesh1 true
+wireframe mesh1 false
+angular mesh1 [ 0.01 0 0.013 ]
+=> meshStream Stream 0.5 { angular mesh1 - random [ 0.05 0.05 0.05 ] 0.025 }
+=> meshStream2 Stream 0.75 { scale mesh1 + random 0.75 0.25 }
+=> meshStream3 Stream 0.25 { linear mesh1 - random [ 1 1 1 ] 0.5 ] }
+
+// try a guassian cloud
+=> mesh1 mesh "Gaussian" 1000 [ 0 50 100 ]
+scale mesh1 0.25
+
+=> mesh1 mesh "sine" 1000 [ 0 50 100 ]
+scale mesh1 0.5
+
+=> mesh1 mesh "SineMap" 2 [ 0 50 100 ]
+scale mesh1 20
+wireframe mesh1 true
+rotate mesh1 [ 0.5 0.5 0 ]
+angular mesh1 [ 0.013 0.012 0.1 ]
+wireframe mesh1 false
+
+//////////////
+// Shaders
+//////////////
+
+=> map mesh "sawMap" 20
+
+// helper functions to make this easier
+=> mapper { => map mesh "sawMap" 20 [ 0 50 100 ]}
+=> angler { angular map - random [ 0.02 0.02 0.02 ] 0.01 }
+=> scaler { scale map 10 }
+=> warpMap { ::mapper ::angler ::scaler }
+
+// Execute multiple times
+::warpMap
+
+setShader @ shaders 24
+print shaders
+setShader [ "EdgeShader" "MirrorShader" ]
+
+// Execute multiple times
+::warpMap
+
+=> mapper { => map mesh "squareMap" 20 [ 0 50 100 ]}
+::warpMap
+
+wireframe map true
+wireframe map false
+
+
+setShader [ "KaleidoShader" "DotScreenShader" ]
+
+=> mapper { => map mesh "gaussianMap" 20 [ 0 50 100 ]}
+::warpMap
+
+=> mapper { => map mesh "sineMap" 20 [ 0 50 100 ]}
+::warpMap
+
+// Keep executing warp map whenever
+setShader [ "SepiaShader" "RGBShiftShader" "RGBShiftShader" "RGBShiftShader" "RGBShiftShader" "RGBShiftShader" ]
+setShader [ "DotScreenShader" "RGBShiftShader" "RGBShiftShader" "RGBShiftShader" "RGBShiftShader" "RGBShiftShader" ]
+setShader [ "DotScreenShader" "RGBShiftShader" "DotScreenShader" "RGBShiftShader" "DotScreenShader" "RGBShiftShader" ]
+setShader [ "MirrorShader" "KaleidoShader" "MirrorShader" ]
+setShader [ "VerticalBlurShader" "CopyShader" "FXAAShader" "CopyShader" ]
+setShader [ "EdgeShader" "VerticalTiltShiftShader" "DotScreenShader" "MirrorShader"  ]
+
+=> mapper { => map mesh "cloud" 100 [ 0 50 100 ]}
+::warpMap
+scale map 0.999
+=> mover Stream 0.5 { linear map - random [ 2 2 2 ] 1 }
+
+// Finish
+delete map
+stop mover
+
+/////////////////////
+// Splice Shaders
+/////////////////////
+
+=> map mesh "sawMap" 20 [ 0 50 100 ]
+angular map [ 0 0.01 0.01 ]
+=> mover Stream 0.25 { linear map - random [ 1 1 1 ] 0.5 }
+=> backgroundStream Stream 0.3 { background random [  50 100 255 ] }
+scale map 10
+
+=> map2 mesh "cloud" 100 [ 255 0 200 ]
+angular map2 [ 0.03 0.013 0.017 ]
+=> mover2 Stream 0.23 { linear map2 - random [ 1 1 1 ] 0.5 }
+
+// Type a random string to generate a shader
+spliceShader "aaNNnnNNnna*&!8(()a"
+// You can also just generate a random string
+spliceShader randString 4
+// How about some sequencing?
+=> spliceStream Stream 0.2 { spliceShader randString + random random 30 2 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 sinOsc 440 perc 1
 
@@ -1248,10 +1500,10 @@ deleteAll
 
 
 	</textarea>
-	-->
+	
 	<textarea id="post" rows="6" spellcheck="false" readonly="true">Lich.js&#10;</textarea>
 	
-	<!--
+	
 	<textarea id="userName" spellcheck="false" contenteditable="true"
 		onChange="javascript:return login()">default</textarea>
 	<textarea id="default" rows="1" spellcheck="false" readonly="true" style="display:none;"

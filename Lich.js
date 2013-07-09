@@ -6413,14 +6413,14 @@ function compileLich()
 	// CodeMirror
 	////////////////
 
-	initCodeMirror();
+	// initCodeMirror();
 	
 	///////////////////
 	// CloudChamber
 	///////////////////
 
-	/*
-	CloudChamber.setup(canvas, 24, undefined, post); // Create the CloudChamber instance
+	
+	CloudChamber.setup(document.getElementById("canvas"), 24, undefined, post); // Create the CloudChamber instance
 
 	var lichShaderArray = new Array();
 	
@@ -6462,5 +6462,5 @@ function compileLich()
 
 	LichVM.reserveVar("spliceShader", new LichPrimitive(spliceShader, 1));
 
-	CloudChamber.start();*/
+	CloudChamber.start();
 }
