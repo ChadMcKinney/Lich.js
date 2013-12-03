@@ -37,8 +37,8 @@ function init()
 {
 	try
 	{
-		Soliton.context = new webkitAudioContext(); // create the webkit audio context!
-		Soliton.masterGain = Soliton.context.createGainNode();
+		Soliton.context = new AudioContext(); // create the webkit audio context!
+		Soliton.masterGain = Soliton.context.createGain();
 		Soliton.masterGain.connect(Soliton.context.destination);
 		Soliton.masterGain.gain.value = 0.25;
 	}
@@ -118,7 +118,7 @@ Soliton.playBuffer = function(buffer, destination, offset, duration)
 	var source = Soliton.context.createBufferSource();
 	source.buffer = buffer;
 	source.buffer.duration = 1.0;
-	var fadeGain = Soliton.context.createGainNode();
+	var fadeGain = Soliton.context.createGain();
 
 	if(destination == undefined)
 		destination = Soliton.masterGain;
@@ -134,7 +134,7 @@ Soliton.playBuffer = function(buffer, destination, offset, duration)
 
 Soliton.createEnvelope = function(type, duration)
 {
-	var env = Soliton.context.createGainNode();
+	var env = Soliton.context.createGain();
 	env.gain.value = 0.0;
 
 	switch(type)
@@ -313,8 +313,8 @@ Soliton.delay = function(nodeID, delayTime, feedLevel)
 	if(source != null)
 	{
 		source.disconnect(0);
-		var mix = Soliton.context.createGainNode();
-		var feedBack = Soliton.context.createGainNode();
+		var mix = Soliton.context.createGain();
+		var feedBack = Soliton.context.createGain();
 		feedBack.gain.value = feedLevel;
 		var delay = Soliton.context.createDelay();
 		delay.delayTime.value = delayTime;
@@ -356,7 +356,7 @@ Soliton.oscillator = function(freq, env, type, table)
 
 	if(type == "custom")
 	{
-		osc.setWaveTable(Soliton.context.createWaveTable(table, table));
+		osc.setPeriodicWave(Soliton.context.createPeriodicWave(table, table));
 	}
 
 	else
@@ -4110,7 +4110,7 @@ Soliton.spliceOSC = function(lang, divider)
 	}
 
 	oscNode.onaudioprocess.parentNode = oscNode;
-	var fadeGain = Soliton.context.createGainNode();
+	var fadeGain = Soliton.context.createGain();
 	oscNode.connect(fadeGain);
 	fadeGain.connect(Soliton.masterGain);
 	fadeGain.gain.value = 1.0;
@@ -5958,8 +5958,8 @@ Soliton.spliceFX = function(lang, divider, nodeID)
 	if(source != null)
 	{
 		source.disconnect(0);
-		var mix = Soliton.context.createGainNode();
-		var feedBack = Soliton.context.createGainNode();
+		var mix = Soliton.context.createGain();
+		var feedBack = Soliton.context.createGain();
 		feedBack.gain.value = feedLevel;
 		var delay = Soliton.context.createDelay();
 		delay.delayTime.value = delayTime;
@@ -6012,7 +6012,7 @@ Soliton.spliceFX = function(lang, divider, nodeID)
 	}
 
 	oscNode.onaudioprocess.parentNode = oscNode;
-	var fadeGain = Soliton.context.createGainNode();
+	var fadeGain = Soliton.context.createGain();
 	source.disconnect(0);
 	source.connect(oscNode);
 	oscNode.connect(fadeGain);

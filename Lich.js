@@ -5789,17 +5789,17 @@ function compileLich()
 			{
 				case "low":
 				case "Low":
-					type = 0;
+					type = "lowpass";
 					break;
 
 				case "high":
 				case "High":
-					type = 1;
+					type = "highpass";
 					break;
 
 				case "band":
 				case "Band":
-					type = 2;
+					type = "bandpass";
 					break;
 			}
 		}
@@ -6368,6 +6368,91 @@ function compileLich()
 		 "05_Eternal Hyper Ooze of the Aeons",
 		 "06_Elk Clone",
 		 "Zither"
+		 "Aloke1",
+		"Aloke2",
+		"Aloke3",
+		"Aloke4",
+		"Aloke5",
+		"Aloke6",
+		"Aloke7",
+		"Aloke8",
+		"Aloke9",
+		"Bartok1",
+		"Bartok2",
+		"Bartok3",
+		"Bartok4",
+		"Berg1",
+		"Berg2",
+		"Berg3",
+		"Berg4",
+		"Berg5",
+		"Berg6",
+		"Berg7",
+		"Dillinger1",
+		"Dillinger2",
+		"Dillinger3",
+		"Dillinger4",
+		"Dillinger5",
+		"Dillinger6",
+		"Dillinger7",
+		"Dillinger8",
+		"Dillinger9",
+		"Dillinger10",
+		"Dillinger11",
+		"Dillinger12",
+		"Fantomas1",
+		"Fantomas2",
+		"Fantomas3",
+		"Fantomas4",
+		"Fantomas5",
+		"Fantomas6",
+		"Fantomas7",
+		"Fantomas8",
+		"Fantomas9",
+		"Fantomas10",
+		"Fantomas11",
+		"Fantomas12",
+		"Fantomas13",
+		"Fantomas14",
+		"Fantomas15",
+		"Fantomas16",
+		"Feldman1",
+		"Feldman2",
+		"Feldman3",
+		"Feldman4",
+		"Feldman5",
+		"Hella1",
+		"Hella2",
+		"Hella3",
+		"Ligoti1",
+		"Ligoti2",
+		"Ligoti3",
+		"Ligoti4",
+		"Ligoti5",
+		"Melvins1",
+		"Melvins2",
+		"Melvins3",
+		"Melvins4",
+		"Melvins5",
+		"Melvins6",
+		"MoonChild1",
+		"MoonChild2",
+		"MoonChild3",
+		"MoonChild4",
+		"MoonChild5",
+		"MoonChild6",
+		"MoonChild7",
+		"Peres1",
+		"Peres2",
+		"Peres3",
+		"Ra1",
+		"Ra2",
+		"Ra3",
+		"Varese1",
+		"Varese2",
+		"Varese3",
+		"Varese4",
+		"Varese5"
 	);
 
 	var lichSampleArray = new Array();
