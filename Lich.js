@@ -294,6 +294,7 @@ function keyUp(thisEvent)
 	}
 }
 
+/*
 function parseCurrentLine()
 {
 	//var parser = require("./LichParser").parser;
@@ -310,7 +311,7 @@ function parseCurrentLine()
 	{
 		post(e);
 	}
-}
+}*/
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Lich Virtual Machine
