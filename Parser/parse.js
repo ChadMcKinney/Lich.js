@@ -25,12 +25,7 @@ Lich.parse = function(input) {
                                   LichParser.yy.lexer.yylloc);
         } 
     }
-    var res = LichParser.parse(y);
-//    try {
-//    alert(Lich.showAST(res));
-//    } catch (err) {
-//        alert(Lich.showError(err))
-//    }
-    return res;
+    
+    return LichParser.parse(y);
 }
 

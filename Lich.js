@@ -26,6 +26,8 @@
 // Lich DOM and Parser Util Functions
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+var ctrlDown = false;
+
 function trim11 (str) // Trim white space from front and back of string
 {	
     
@@ -163,20 +165,11 @@ function tab()
 	return insertText("    ", 0);
 }
 
-function post(text)
-{
-	var obj = document.getElementById("post");
-	var appendedText = document.createTextNode(text + "\n");
-	obj.appendChild(appendedText);
-	obj.scrollTop = obj.scrollHeight;
-}
-
 function login()
 {
 	loginName = document.getElementById("userName").value;
 	post("Logging in as user: "+loginName);
 }
-
 
 function currentLine(name)
 {
@@ -302,13 +295,13 @@ function parseCurrentLine()
 
 	try
 	{
-		post(Lich.parse);
-		post(Lich.parse(str));
+		var res = Lich.parse(str);
+		Lich.post(Lich.showAST(res));
 	}
 	
 	catch(e)
 	{
-		post(e);
+		Lich.post(e);
 	}
 }
 

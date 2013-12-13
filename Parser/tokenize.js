@@ -1600,73 +1600,84 @@ Lich.Parser.tokenize = (function(){
                                           }
                                         }
                                         if (result0 === null) {
-                                          if (input.substr(pos, 6) === "module") {
-                                            result0 = "module";
-                                            pos += 6;
+                                          if (input.substr(pos, 3) === "def") {
+                                            result0 = "def";
+                                            pos += 3;
                                           } else {
                                             result0 = null;
                                             if (reportFailures === 0) {
-                                              matchFailed("\"module\"");
+                                              matchFailed("\"def\"");
                                             }
                                           }
                                           if (result0 === null) {
-                                            if (input.substr(pos, 7) === "newtype") {
-                                              result0 = "newtype";
-                                              pos += 7;
+                                            if (input.substr(pos, 6) === "module") {
+                                              result0 = "module";
+                                              pos += 6;
                                             } else {
                                               result0 = null;
                                               if (reportFailures === 0) {
-                                                matchFailed("\"newtype\"");
+                                                matchFailed("\"module\"");
                                               }
                                             }
                                             if (result0 === null) {
-                                              if (input.substr(pos, 2) === "of") {
-                                                result0 = "of";
-                                                pos += 2;
+                                              if (input.substr(pos, 7) === "newtype") {
+                                                result0 = "newtype";
+                                                pos += 7;
                                               } else {
                                                 result0 = null;
                                                 if (reportFailures === 0) {
-                                                  matchFailed("\"of\"");
+                                                  matchFailed("\"newtype\"");
                                                 }
                                               }
                                               if (result0 === null) {
-                                                if (input.substr(pos, 4) === "then") {
-                                                  result0 = "then";
-                                                  pos += 4;
+                                                if (input.substr(pos, 2) === "of") {
+                                                  result0 = "of";
+                                                  pos += 2;
                                                 } else {
                                                   result0 = null;
                                                   if (reportFailures === 0) {
-                                                    matchFailed("\"then\"");
+                                                    matchFailed("\"of\"");
                                                   }
                                                 }
                                                 if (result0 === null) {
-                                                  if (input.substr(pos, 4) === "type") {
-                                                    result0 = "type";
+                                                  if (input.substr(pos, 4) === "then") {
+                                                    result0 = "then";
                                                     pos += 4;
                                                   } else {
                                                     result0 = null;
                                                     if (reportFailures === 0) {
-                                                      matchFailed("\"type\"");
+                                                      matchFailed("\"then\"");
                                                     }
                                                   }
                                                   if (result0 === null) {
-                                                    if (input.substr(pos, 5) === "where") {
-                                                      result0 = "where";
-                                                      pos += 5;
+                                                    if (input.substr(pos, 4) === "type") {
+                                                      result0 = "type";
+                                                      pos += 4;
                                                     } else {
                                                       result0 = null;
                                                       if (reportFailures === 0) {
-                                                        matchFailed("\"where\"");
+                                                        matchFailed("\"type\"");
                                                       }
                                                     }
                                                     if (result0 === null) {
-                                                      if (input.charCodeAt(pos) === 95) {
-                                                        result0 = "_";
-                                                        pos++;
+                                                      if (input.substr(pos, 5) === "where") {
+                                                        result0 = "where";
+                                                        pos += 5;
                                                       } else {
                                                         result0 = null;
                                                         if (reportFailures === 0) {
-                                                          matchFailed("\"_\"");
+                                                          matchFailed("\"where\"");
+                                                        }
+                                                      }
+                                                      if (result0 === null) {
+                                                        if (input.charCodeAt(pos) === 95) {
+                                                          result0 = "_";
+                                                          pos++;
+                                                        } else {
+                                                          result0 = null;
+                                                          if (reportFailures === 0) {
+                                                            matchFailed("\"_\"");
+                                                          }
                                                         }
                                                       }
                                                     }

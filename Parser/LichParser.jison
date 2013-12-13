@@ -1,6 +1,7 @@
 /*  
     Grammar specification for Lich. This is essentially a modified version of the parser found in the JSHC project, reworked for Lich.
-    Thank you JSHC for all the hardwork!
+    Thank you JSHC for all the hardwork! You can find more about the project here:
+    https://github.com/evilcandybag/Lich
 
 
     Rules are sorted under their corresponding chapter
@@ -48,7 +49,8 @@
 %%
 
 start_
-    : module_ EOF    { return $1; }
+    : "{" exp "}" EOF    { return $2; }
+    // : module_ EOF          { return $1; }
     ;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -76,7 +78,7 @@ body // : object
             if ($2[i].name == "impdecl" && !atdecs) {
                 imps.push($2[i]);
             } else if ($2[i].name == "impdecl" && atdecs) {
-                throw new Lich.ParseError("import declaration in statement block at line " + $2[i].pos.first_line ,$2[i].pos,"import declaration in statement block");
+                throw new Error("Parse error: import declaration in statement block at line " + $2[i].pos.first_line);
             } else {
                 atdecs = true;
                 decs.push($2[i]);
@@ -86,9 +88,9 @@ body // : object
         // add Prelude as an import if not explicitly imported
         var prelude_imported = false;
         for(i=0 ; i<imps.length ; i++){
-	    if( imps[i].modid == "Prelude" ){
-	        prelude_imported = true;
-	        break;
+      if( imps[i].modid == "Prelude" ){
+          prelude_imported = true;
+          break;
             }
         }
         if( ! prelude_imported ){
@@ -284,6 +286,8 @@ lexp // : object
   | '\' apats "->" exp              {{$$ = {name:"lambda", args: $2, rhs: $4, pos: @$}; }}
   | "case" exp "of" "{" alts "}"    {{$$ = {name:"case", exp: $2, alts: $5, pos: @$}; }}
   | "let" decls "in" exp            {{$$ = {name:"let", decls: $2, exp: $4, pos: @$}; }}
+  | "def" var rhs                   {{$$ = {name:"decl-fun", ident: $1, args: [], rhs: $2, pos: @$};}}
+  | "def" var apats rhs             {{$$ = {name:"decl-fun", ident: $1, args: $2, rhs: $3, pos: @$};}}
   ;
 
 // list of 1 or more 'aexp' without separator
@@ -530,11 +534,13 @@ pat_list_1_comma // : [pat]
     ;
 
 ////////////////////////////////////////////////////////////////////////////////
-// ???
+// Literals
 
 literal  // : object
     : integer {{$$ = {name: "integer-lit", value: Number($1), pos: @$};}}
-    // TODO: incomplete
+    | string {{$$ = {name: "string-lit", value: yytext, pos: @$};}}
+    | char {{$$ = {name: "char-lit", value: yytext, pos: @$};}}
+    | float {{$$ = {name: "float-lit", value: Number(yytext), pos: @$};}}
     ;
 
 ////////////////////////////////////////////////////////////////////////////////
