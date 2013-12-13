@@ -4,7 +4,7 @@ Lich.js
 Lich.js - JavaScript audio/visual live coding language
 	
 http://chadmckinneyaudio.com/
-chad@chadmckinneyaudio.com11
+chad@chadmckinneyaudio.com
 
 Copyright © 2013 Chad McKinney. All Rights Reserved.
 All rights reserved.
