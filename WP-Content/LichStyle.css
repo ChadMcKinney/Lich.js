@@ -29,9 +29,9 @@ All rights reserved.
 }
 
 body {
-	/* background : #001122; */
+	background : #111111;
 	/*color: white;*/
-	background-color: transparent;
+	/*background-color: transparent;*/
     margin-left: auto;
     margin-right: auto;
     overflow: hidden;
@@ -46,7 +46,7 @@ body {
 	border: none;
 	outline: 0;
 	outline: none;
-	font-size: 1.0em;
+	font-size: 1.1em;
 	font-family: Ubuntu Mono, DejaVu Sans Mono, Liberation Mono,Bitstream Vera Sans Mono,Consolas,Monaco,Lucida Console,Courier New, monospace;
 	/* background : black;
 	color: white; */
@@ -65,18 +65,18 @@ body {
 }
 
 ::selection {
-	color: #FF0000;
-	background-color: ##335533;
+	color: #000000;
+	background-color: #00ccff;
 }
 
 ::-moz-selection {
-	color: #FF0000;
-	background-color: ##335533; 
+	color: #000000;
+	background-color: #00ccff; 
 }
 
 ::-webkit-selection {
-	color: #FF0000;
-	background-color: ##335533;
+	color: #000000;
+	background-color: #00ccff;
 }
 
 #terminal {

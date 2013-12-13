@@ -22,10 +22,584 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 */
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Lich DOM and Parser Util Functions
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+function trim11 (str) // Trim white space from front and back of string
+{	
+    
+	str = str.replace(/^\s+/, '');
+    
+	for (var i = str.length - 1; i >= 0; i--) 
+	{
+        if (/\S/.test(str.charAt(i))) 
+        {
+            str = str.substring(0, i + 1);
+            break;
+        }
+    }
+    
+	return str;
+}
+
+function getInputSelection(el) 
+{
+    var start = 0, end = 0, normalizedValue, range,
+        textInputRange, len, endRange;
+
+    if(typeof el.selectionStart == "number" && typeof el.selectionEnd == "number") 
+	{
+        start = el.selectionStart;
+        end = el.selectionEnd;
+    } 
+
+	else 
+	{
+        range = document.selection.createRange();
+
+        if(range && range.parentElement() == el) 
+		{
+            len = el.value.length;
+            normalizedValue = el.value.replace(/\r\n/g, "\n");
+
+            // Create a working TextRange that lives only in the input
+            textInputRange = el.createTextRange();
+            textInputRange.moveToBookmark(range.getBookmark());
+
+            // Check if the start and end of the selection are at the very end
+            // of the input, since moveStart/moveEnd doesn't return what we want
+            // in those cases
+            endRange = el.createTextRange();
+            endRange.collapse(false);
+
+            if(textInputRange.compareEndPoints("StartToEnd", endRange) > -1) 
+			{
+                start = end = len;
+            } 
+
+			else 
+			{
+                start = -textInputRange.moveStart("character", -len);
+                start += normalizedValue.slice(0, start).split("\n").length - 1;
+
+                if(textInputRange.compareEndPoints("EndToEnd", endRange) > -1) 
+				{
+                    end = len;
+                } 
+				
+				else 
+				{
+                    end = -textInputRange.moveEnd("character", -len);
+                    end += normalizedValue.slice(0, end).split("\n").length - 1;
+                }
+            }
+        }
+    }
+
+    return {
+        start: start,
+        end: end
+    };
+}
+
+function getCaretPosition () 
+{
+	var ctrl = document.getElementById("terminal");
+	var CaretPos = 0;	// IE Support
+	
+	if(document.selection) 
+	{
+		ctrl.focus();
+		var Sel = document.selection.createRange();
+		Sel.moveStart('character', -ctrl.value.length);
+		CaretPos = Sel.text.length;
+	}
+	
+	// Firefox support
+	else if(ctrl.selectionStart || ctrl.selectionStart == '0')
+		CaretPos = ctrl.selectionStart;
+	
+	return (CaretPos);
+}
+
+function setCaretPosition(pos)
+{
+	var ctrl = document.getElementById("terminal");
+	
+	if(ctrl.setSelectionRange)
+	{
+		ctrl.focus();
+		ctrl.setSelectionRange(pos,pos);
+	}
+	
+	else if(ctrl.createTextRange) 
+	{
+		var range = ctrl.createTextRange();
+		// range.collapse(true);
+		range.moveEnd('character', pos);
+		range.moveStart('character', pos);
+		range.select();
+	}
+}
+
+function insertText(text, caretOffset) // Text to insert, offset for caret after insertion
+{
+	var currentCaretPosition, newCaretPosition, textarea;
+	currentCaretPosition = getCaretPosition();
+	textarea = document.getElementById("terminal");
+    newCaretPosition = currentCaretPosition + text.length;
+    
+    textarea.value = textarea.value.substring(0, currentCaretPosition) + text 
+    	+ textarea.value.substring(currentCaretPosition, textarea.value.length);
+
+    setCaretPosition(newCaretPosition + caretOffset);
+    return false;
+}
+
+// http://css-tricks.com/snippets/javascript/support-tabs-in-textareas/
+function tab()
+{	
+	return insertText("    ", 0);
+}
+
+function post(text)
+{
+	var obj = document.getElementById("post");
+	var appendedText = document.createTextNode(text + "\n");
+	obj.appendChild(appendedText);
+	obj.scrollTop = obj.scrollHeight;
+}
+
+function login()
+{
+	loginName = document.getElementById("userName").value;
+	post("Logging in as user: "+loginName);
+}
+
+
+function currentLine(name)
+{
+	var cursor, terminal, lineLength, lineNum, start, end, textArea;
+	terminal = document.getElementById(name);
+	lineLength = 62;
+	cursor = getInputSelection(terminal).end;
+	textArea = terminal.value;
+	
+	if(terminal.selectionStart == terminal.selectionEnd)
+	{
+		// If the cursor is at the end of the line, push it back so we can find the entire line
+		if(textArea[cursor] == '\n' && textArea[cursor - 1] != '\n') 
+			cursor -= 1;
+			
+		for(start = cursor; start >= 0 && textArea[start] != '\n'; --start);
+		for(end = cursor; end < textArea.length && textArea[end] != '\n'; ++end);
+		
+		start += 1; // Remove the initial line break
+	}
+	
+	else
+	{
+		start = terminal.selectionStart;
+		end = terminal.selectionEnd;
+	}
+	
+	return  {
+		line: terminal.value.substring(start, end), // Return the subtring of the text area, which is the currently selected line
+		end: end
+	};
+}
+
+function keyDown(thisEvent)
+{	
+	switch(thisEvent.keyCode)
+	{
+	case 9: // Tab key
+		return tab();
+		break;
+
+	case 13: // Enter key
+	
+		if(ctrlDown)
+		{
+			parseCurrentLine();
+        	return false; // do nothing
+		}
+	
+		break;
+
+	case 16: // shift
+		ctrlDown = true;
+		shiftDown = true;
+		break;
+
+	case 57:
+
+		if(shiftDown) // ( begin parentheses
+		{
+			return insertText("()", -1);
+		}
+
+		break;
+
+	case 17: // Ctrl
+	case 18: // alt
+	case 91: // Webkit left command
+	case 93: // Webkit right command
+	case 224: // Firefox command
+		ctrlDown = true;
+		break;
+
+	case 219: // [ square bracket
+		if(!shiftDown) // ( begin parentheses
+		{
+			return insertText("[]", -1);
+		}
+
+		break;
+
+	case 222: // Quotation marks
+		
+		// Doesn't work with UK keyboards
+		//if(shiftDown) // " double 
+		//{
+		//	return insertText("\"\"", -1);
+		//}
+
+		// else // ' single
+		if(!shiftDown) {
+			return insertText("''", -1);
+		}
+		
+		break;
+	}
+}
+
+function keyUp(thisEvent)
+{
+	switch(thisEvent.keyCode)
+	{
+	case 16: // shift
+		ctrlDown = false;
+		shiftDown = false;
+		break;
+
+	case 17: // Ctrl
+	case 18: // alt
+	case 91: // Webkit left command
+	case 93: // Webkit right command
+	case 224: // Firefox command
+		ctrlDown = false;
+		break;
+	}
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Lich Virtual Machine
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// Lich machine commands
+var OP_NOP = 0;
+var OP_VOID = 1; 
+var OP_COMPEQ = 2;
+var OP_COMPNEQ = 3;
+var OP_COMPGT = 4;
+var OP_COMPLT = 5;
+var OP_COMPGTEQ = 6;
+var OP_COMPLTEQ = 7;
+var OP_PLUS = 8;
+var OP_MINUS = 9;
+var OP_MUL = 10;
+var OP_DIVIDE = 11;
+var OP_NEG = 12;
+var OP_POW = 13;
+var OP_MOD = 14
+var OP_IF = 15;
+var OP_ASSIGN = 16;
+var OP_FUNCASSIGN = 17;
+var OP_FUNCINVOKE = 18;
+
+// Parse Node types
+var NODE_OP = 19;
+var NODE_VAR = 20;
+var NODE_CONST = 21;
+var NODE_FUNC = 22;
+var NODE_LIST = 23;
+var NODE_ARGLIST = 24;
+var NODE_EXPRLIST = 25;
+
+// Object types
+var LICH_CLOSURE = 26;
+
+// Parse node, these are used to combine AST creation and code generation as this is just a simple script language.
+function node()
+{
+	var type;
+	var value;
+	var children;
+}
+
+function createNode(type, value, children)
+{
+	var n = new node();
+	n.type = type;
+	n.value = value;
+	n.children = new Array();
+
+	for(var i = 2; i < arguments.length; ++i)
+	{
+		n.children.push(arguments[i]);
+	}
+
+	return n;
+}
+
+function LichClosure(parameterNames, expression, namespace, definedArguments)
+{
+	this.parameterNames = parameterNames ? parameterNames : new Array();
+	this.numArgs = this.parameterNames.size;
+	this.definedArguments = definedArguments ? definedArguments : 0;
+	this.namespace = namespace ? namespace : {};
+	this.type = LICH_CLOSURE;
+	this.expression = expression;
+
+	this.invoke = function(parameterValues)
+	{
+		for(var i = definedArguments; i < parameterValues.length; ++i)
+		{
+			this.namespace[this.parameterNames[i]] = parameterValues[i];
+			this.definedArguments += 1;
+		}
+
+		if(this.definedArguments < this.parameterNames.length) // This allows partial application
+		{
+			return new LichClosure(this.parameterNames, this.expression, this.namespace, this.definedArguments);
+		}
+
+		else
+		{
+			LichVM.pushScope(this.namespace);
+			var result = LichVM.interpretNode(this.expression);
+			LichVM.popScope();
+			return result;
+		}
+	}
+}
+
+function lichVirtualMachine()
+{
+	this.namespace = {};
+	this.scopeStack = new Array();
+
+	// pushScope and popScope allow for 
+	this.pushScope = function(scope)
+	{
+		this.scopeStack.push(scope);
+	}
+
+	this.popScope = function()
+	{
+		this.scopeStack.pop();
+	}
+	
+	this.getVar = function(varName) // Dynamically check scopes for a variable's value
+	{
+		var v = null;
+		
+		for(var i = this.scopeStack.length - 1; i >= 0; --i)
+		{
+			if(this.scopeStack[i][varName] != undefined)
+				return this.scopeStack[i][varName];
+		}
+
+		v = this.namespace[varName];
+
+		if(v == undefined)
+			v = null;
+
+		// post("LichVM.getVar("+varName+") = " + v);
+		return v;
+	}
+
+	this.setVar = function(varName, value)
+	{
+		// post("LichVM.setVar("+varName+") = " + value);
+
+		if(this.scopeStack.length > 0)
+		 	this.scopeStack[this.scopeStack.length - 1][varName] = value;
+		else
+			this.namespace[varName] = value;
+	}
+
+	this.executeOperation = function(node)
+	{
+		switch(node.value)
+		{
+			case OP_NOP:
+			case OP_VOID:
+				return null;
+				break;
+
+			case OP_COMPEQ:
+				return this.interpretNode(node.children[0]) == this.interpretNode(node.children[1]);
+				break;
+
+			case OP_COMPNEQ:
+				return this.interpretNode(node.children[0]) != this.interpretNode(node.children[1]);
+				break;
+
+			case OP_COMPGT:
+				return this.interpretNode(node.children[0]) > this.interpretNode(node.children[1]);
+				break;
+
+			case OP_COMPLT:
+				return this.interpretNode(node.children[0]) < this.interpretNode(node.children[1]);
+				break;
+
+			case OP_COMPGTEQ:
+				return this.interpretNode(node.children[0]) >= this.interpretNode(node.children[1]);
+				break;
+
+			case OP_COMPLTEQ:
+				return this.interpretNode(node.children[0]) <= this.interpretNode(node.children[1]);
+				break;
+
+			case OP_PLUS:
+				return this.interpretNode(node.children[0]) + this.interpretNode(node.children[1]);
+				break;
+
+			case OP_MINUS:
+				return this.interpretNode(node.children[0]) - this.interpretNode(node.children[1]);
+				break;
+
+			case OP_MUL:
+				return this.interpretNode(node.children[0]) * this.interpretNode(node.children[1]);
+				break;
+
+			case OP_DIVIDE:
+				return this.interpretNode(node.children[0]) / this.interpretNode(node.children[1]);
+				break;
+
+			case OP_NEG:
+				return -this.interpretNode(node.children[0]);
+				break;
+
+			case OP_POW:
+				return Math.pow(this.interpretNode(node.children[0]), this.interpretNode(node.children[1]));
+				break;
+
+			case OP_MOD:
+				return this.interpretNode(node.children[0]) % this.interpretNode(node.children[1]);
+				break;
+
+			case OP_IF:
+				if(this.interpretNode(node.children[0]))
+					return this.interpretNode(node.children[1]);
+				else
+					return this.interpretNode(node.children[2]);
+				break;
+
+			case OP_ASSIGN:
+				var value = this.interpretNode(node.children[1]);
+				this.setVar(node.children[0], value);
+				return value;
+				break;
+
+			case OP_FUNCASSIGN:
+				var argList = this.interpretNode(node.children[1]);
+				var func = new LichClosure(argList, node.children[2]); // parameterNames, expression, namespace, definedArguments
+				func = func.invoke(new Array());
+				this.setVar(node.children[0], func);
+				return func;
+				break;
+
+			case OP_FUNCINVOKE:
+				var closure = this.getVar(node.children[0]);
+				
+				if(closure.type == LICH_CLOSURE) // Check to see if the result has been collapsed or not
+				{
+					var parameterValues = this.interpretNode(node.children[1]);
+					return closure.invoke(parameterValues);
+				}
+
+				else // It's been collapsed, just return the result directly
+				{
+					return closure;
+				}
+
+				break;
+
+			default:
+				return node; // Raw values
+				break;
+		}
+	}
+
+	this.interpretNode = function(node)
+	{
+		if(node == null)
+			return null;
+
+		switch(node.type)
+		{
+			case NODE_OP:
+				return this.executeOperation(node);
+				break;
+
+			case NODE_VAR:
+				return LichVM.getVar(node.value);
+				break;
+
+			case NODE_FUNC:
+				return LichVM.getVar(node.value);
+				break;
+			
+			case NODE_CONST:
+				return node.value;
+				break;
+
+			case NODE_ARGLIST:
+				var args = new Array();
+				args.push(node.value);
+				
+				for(var i = 0; i < node.children.length; ++i)
+				{
+					var val = this.interpretNode(node.children[i]);
+					if(val != undefined)
+						args.push(val);
+				}
+				
+				return args;
+				break;
+
+			case NODE_EXPRLIST:
+				var exprs = new Array();
+				
+				for(var i = 0; i < node.children.length; ++i)
+				{
+					var val = this.interpretNode(node.children[i]);
+					if(val != undefined)
+						exprs.push(val);
+				}
+				
+				return exprs;
+				break;
+
+			default:
+				return node;
+				break;				
+		}
+	}
+
+	this.compileProgram = function(program)
+	{
+		this.state = this.interpretNode(program);
+		post(this.state);
+	}
+}
+
+/*
 
 function lichVirtualMachine() {
 	
@@ -178,9 +752,13 @@ function lichVirtualMachine() {
 	this.sleep = 0;
 };
 
+*/
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Helper Functions
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/*
 
 function stringToAscii(string)
 {
@@ -365,6 +943,8 @@ function arrayToPrintString(array) // Creates a printable string which represent
 	return printString;
 }
 
+*/
+
 function lerp(value1, value2, amount)
 {
 	return (value2 - value1) * amount + value1;
@@ -374,6 +954,8 @@ function exerp(value1, value2, amount)
 {
 	return Math.pow(value2 / value1, amount) * value1;
 }
+
+/*
 
 function deserializeLichObjectNamespace(serializedNamespace)
 {
@@ -458,6 +1040,8 @@ function deserializeLichObject(serializedObject)
 	return object;
 }
 
+*/
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Lich Classes 
@@ -470,6 +1054,8 @@ function deserializeLichObject(serializedObject)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // LichString
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/*
 
 function LichString(_stringVar) {
 	
@@ -3989,15 +4575,12 @@ function LichVariable(_objectName) {
 // LichEnvelope
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-/*
+// [0] _points: 2D Array of objects containing times and levels. [[0 0] [0.1 1] [1 0]]. Times are absolute!
+// [1] _shape: 'none', 'linear', 'exponential' supplied as a string
 
-[0] _points: 2D Array of objects containing times and levels. [[0 0] [0.1 1] [1 0]]. Times are absolute!
-[1] _shape: 'none', 'linear', 'exponential' supplied as a string
+// example:
+// Envelope [[0 0] [0.1 1] [1 0]] 'exponential'
 
-example:
-Envelope [[0 0] [0.1 1] [1 0]] 'exponential'
-
-*/
 
 function LichEnvelope(_points, _shape) {
 		
@@ -5018,18 +5601,14 @@ function LichEnvelope(_points, _shape) {
 // LichStream
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-/*
+// A stream of values at given intervals. Useful for sequencing, modulation, playback, etc...
+// Everything is quantized to beats and aligned.
 
-A stream of values at given intervals. Useful for sequencing, modulation, playback, etc...
-Everything is quantized to beats and aligned.
+// [0] _durations: An array (although it doesn't have to be, it can be anything!) of durations, can be other Streams or anything
+// [1] _values: An Array (although it doesn't have to be, it can be anything!) of values, can be other Streams or anything
 
-[0] _durations: An array (although it doesn't have to be, it can be anything!) of durations, can be other Streams or anything
-[1] _values: An Array (although it doesn't have to be, it can be anything!) of values, can be other Streams or anything
-
-example:
-Stream [ 0.1 0.2 1.0 ] [ { print '1' } { print '2' } { print '3' } { print '4' } ]
-
-*/
+// example:
+// Stream [ 0.1 0.2 1.0 ] [ { print '1' } { print '2' } { print '3' } { print '4' } ]
 
 function LichStream(_durations, _values) {
 		
@@ -6367,7 +6946,7 @@ function compileLich()
 		 "04_Unicron, Swirling, Inifinite Torrent Of Nothingness  At The End Of All Things, Divided To Create Primus,  Progenitor Of The Transformers",
 		 "05_Eternal Hyper Ooze of the Aeons",
 		 "06_Elk Clone",
-		 "Zither"
+		 "Zither",
 		 "Aloke1",
 		"Aloke2",
 		"Aloke3",
@@ -6464,35 +7043,35 @@ function compileLich()
 
 	LichVM.reserveVar("samples", new LichArray(lichSampleArray));
 
-	/*
-	for(var i = 0; i < preloadArray.length; ++i)
-	{
+	
+	// for(var i = 0; i < preloadArray.length; ++i)
+	// {
+	//
+	// }
 
-	}*/
+	
+	// var white = new Soliton.Pwhite(0, 666).asStream();
+	// white.next();
+	// white.next();
+	// white.next();
 
-	/*
-	var white = new Soliton.Pwhite(0, 666).asStream();
-	white.next();
-	white.next();
-	white.next();
-
-	// 'freq', new Soliton.Pwhite(0, 1), 
-	// 'dur', new Soliton.Pwhite(new Soliton.Pwhite(0, 0.001), new Soliton.Pwhite(0.1, 5.0))
+	// // 'freq', new Soliton.Pwhite(0, 1), 
+	// // 'dur', new Soliton.Pwhite(new Soliton.Pwhite(0, 0.001), new Soliton.Pwhite(0.1, 5.0))
 
 
-	var someFunc = function(inval)
-	{
-		var random = Math.random();
-		post("Pfunc: " + random);
-		return random;
-	}
+	// var someFunc = function(inval)
+	// {
+	// 	var random = Math.random();
+	// 	post("Pfunc: " + random);
+	// 	return random;
+	// }
 
-	var bind = new Soliton.Pbind(
-		// 'dur', new Soliton.Pseq([0.5, new Soliton.Pseq([new Soliton.Pwhite(0, 1), 0.5, new Soliton.Pwhite(0, 1)], Infinity)], Infinity)
-		'dur', new Soliton.Pfunc(someFunc)
-	);
+	// var bind = new Soliton.Pbind(
+	// 	// 'dur', new Soliton.Pseq([0.5, new Soliton.Pseq([new Soliton.Pwhite(0, 1), 0.5, new Soliton.Pwhite(0, 1)], Infinity)], Infinity)
+	// 	'dur', new Soliton.Pfunc(someFunc)
+	// );
 
-	bind.play();*/
+	// bind.play();
 
 	////////////////
 	// CodeMirror
@@ -6547,5 +7126,11 @@ function compileLich()
 
 	LichVM.reserveVar("spliceShader", new LichPrimitive(spliceShader, 1));
 
-	CloudChamber.start();
+	// CloudChamber.start();
+}
+*/
+
+function compileLich()
+{
+	LichVM = new lichVirtualMachine();
 }

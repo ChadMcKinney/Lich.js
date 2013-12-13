@@ -157,6 +157,7 @@ CloudChamber.print = function(text)
 // Start animating
 CloudChamber.start = function()
 {
+	/*
 	var drawFunc = function() 
 	{
 		window.requestAnimFrame(CloudChamber.draw, CloudChamber.canvas);
@@ -167,13 +168,14 @@ CloudChamber.start = function()
 	else
 		CloudChamber.timer = setInterval(drawFunc, CloudChamber.ONE_SECOND_IN_MILLIS / CloudChamber.framerate);
 		//CloudChamber.timer = setInterval(CloudChamber.draw, CloudChamber.ONE_SECOND_IN_MILLIS / CloudChamber.framerate);
+	*/
 }
 
 // Stop animating
 CloudChamber.stop = function()
 {
-	if(CloudChamber.timer)
-		clearTimeout(CloudChamber.timer);
+	// if(CloudChamber.timer)
+	//	clearTimeout(CloudChamber.timer);
 }
 
 CloudChamber.checkGLError = function()
@@ -223,6 +225,7 @@ CloudChamber.setup = function(canvas, framerate, drawCallback, printCallback)
 	// CloudChamber.canvas = document.getElementById(canvasElementName);
 	CloudChamber.canvas = canvas;
 	CloudChamber.framerate = framerate;
+	CloudChamber.frametime = 1000 / framerate;
 	CloudChamber.drawCallback = drawCallback;
 	CloudChamber.printCallback = printCallback
 	CloudChamber.timer = 0;
@@ -370,23 +373,34 @@ CloudChamber.setup = function(canvas, framerate, drawCallback, printCallback)
 	);
 
 	// shim layer with setTimeout fallback
-	window.requestAnimFrame = (function(){
-	  return  window.requestAnimationFrame       ||
-	          window.webkitRequestAnimationFrame ||
-	          window.mozRequestAnimationFrame    ||
-	          function( callback ){
-	            window.setTimeout(callback, 33);
-	          };
+	window.requestAnimFrame = (function()
+	{
+		return  window.requestAnimationFrame       || 
+        		window.webkitRequestAnimationFrame || 
+        		window.mozRequestAnimationFrame    || 
+        		window.oRequestAnimationFrame      || 
+        		window.msRequestAnimationFrame     || 
+        
+        function(/* function */ callback)
+        {
+            window.setTimeout(callback, 33);
+        }
 	})();
 
 
 	// usage:
 	// instead of setInterval(render, 16) ....
 
+	/* 
+	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	!! UNCOMMENT THIS TO GET GRAPHICS BACK!!!
+	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	(function animloop(time){
-	  requestAnimFrame(animloop);
-	  CloudChamber.draw(time);
+		requestAnimFrame(animloop);
+		CloudChamber.draw(time);
 	})();
+	*/
+
 	// place the rAF *before* the render() to assure as close to
 	// 60fps with the setTimeout fallback.
 }
