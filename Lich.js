@@ -294,6 +294,23 @@ function keyUp(thisEvent)
 	}
 }
 
+function parseCurrentLine()
+{
+	//var parser = require("./LichParser").parser;
+	var tokens, objects, line,str;
+	line = currentLine("terminal");
+	str = line.line;
+
+	try
+	{
+		post(LichParser.parse(str));
+	}
+	
+	catch(e)
+	{
+		post(e);
+	}
+}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Lich Virtual Machine
