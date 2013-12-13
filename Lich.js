@@ -302,6 +302,7 @@ function parseCurrentLine()
 
 	try
 	{
+		post(Lich.parse);
 		post(Lich.parse(str));
 	}
 	
