@@ -3,6 +3,10 @@ Lich.js
 
 Lich.js - JavaScript audio/visual live coding language
 	
+// ATTENTION!
+Lich.js is currently going under heavy revision. The syntax is being completely rebuilt to resemble a dynamically typed haskell. Additionally, more audio and graphics features will be added as well as numerous performance optimizations. Not safe for use for now as it will likely be consistently broken for the next couple of months until the official 1.0 release.
+
+
 http://chadmckinneyaudio.com/
 chad@chadmckinneyaudio.com
 
