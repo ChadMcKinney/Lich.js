@@ -53,7 +53,8 @@ reservedid = res:( "hiding" / "case" / "class" / "data" / "default" / "deriving"
 
 varsym = !(reservedop / dashes / escape / ":") s:(symbol)+ {return s.join("")}
 consym = !reservedop s:(":"symbol*) {return flatten(s).join("")}
-reservedop = op:( ".." / "::" / ":" / "=>" / "=" !"="  / "\\" !escapestuff / "|" !"|" / "<-" / "->" / "@" / "~" ) !(varsym / consym) {return {val: (op instanceof Array)? op.join(""): op, typ: (op instanceof Array)? op.join(""): op}}
+// Took out !escapestuff from the "\\" entry to allow for correct lamba parsing like (\acc x -> acc ++ [x])
+reservedop = op:( ".." / "::" / ":" / "=>" / "=" !"="  / "\\" / "|" !"|" / "<-" / "->" / "@" / "~" ) !(varsym / consym) {return {val: (op instanceof Array)? op.join(""): op, typ: (op instanceof Array)? op.join(""): op}}
 
 qvarid = qs:(conid ".")+ ref:((!"." varid) !".") {qs = flatten(qs).join(""); return {val: flatten([qs, ref[0]]).join(""), typ: "qvarid", qual: qs.substr(0,qs.length-1)}}
 qconid = qs:(conid ".")+ ref:((!"." conid) !".") {qs = flatten(qs).join(""); return {val: flatten([qs, ref[0]]).join(""), typ: "qconid", qual: qs.substr(0,qs.length-1)}}

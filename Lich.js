@@ -306,6 +306,8 @@ function parseCurrentLine()
 	line = currentLine("terminal");
 	str = line.line;
 
+	post("CODE: " + str);
+
 	try
 	{
 		var res = Lich.parse(str);

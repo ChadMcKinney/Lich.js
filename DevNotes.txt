@@ -37,38 +37,6 @@ map (+2) [1,2,3]
 //////////////////////////////
 
 
-Total known bugs: 3
-
-
-//////////////////////////////
-// Lambda parsing
-// Dec 13, 2013
-
-These don't parse
-foldl (\acc x -> acc ++ [x]) [] [1,2,3]
-foldl (\bcc x -> acc ++ [x]) [] [1,2,3]
-
-Yet this will parse 
-foldl (\ acc x -> acc ++ [x]) [] [1,2,3]
-
-And this will even parse
-foldl (\ccc x -> acc ++ [x]) [] [1,2,3]
-
-
-
-//////////////////////////////
-// String Whitespace
-// Dec 13, 2013
-
-Strings with whitespace don't parse. For example this parses:
-"Hello,world."
-
-but this does not
-"Hello, world."
-
-
-
-
 //////////////////////////////
 // end line comments broken
 // Dec 13, 2013
@@ -79,7 +47,12 @@ Comments at the end of lines aren't correctly ignored. Example:
 
 
 
+//////////////////////////////
+// Multiple let declarations
+// Dec 14, 2013
 
-
+Multi-line compiling with let declarations doesn't parse. For example compiling these two together:
+let one = 1
+let two = 2
 
 

@@ -436,11 +436,11 @@ case 160:this.$ = [$$[$0]];
 break;
 case 161:this.$ = {name: "integer-lit", value: Number($$[$0]), pos: this._$};
 break;
-case 162:this.$ = {name: "string-lit", value: yytext, pos: this._$};
+case 162:this.$ = {name: "string-lit", value: $$[$0], pos: this._$};
 break;
-case 163:this.$ = {name: "char-lit", value: yytext, pos: this._$};
+case 163:this.$ = {name: "char-lit", value: $$[$0], pos: this._$};
 break;
-case 164:this.$ = {name: "float-lit", value: Number(yytext), pos: this._$};
+case 164:this.$ = {name: "float-lit", value: Number($$[$0]), pos: this._$};
 break;
 }
 },

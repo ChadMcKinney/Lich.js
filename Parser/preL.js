@@ -7,6 +7,7 @@ Lich.Parser.preL = function(input) {
 	var line = 1;
 	var newBlock = false;
 	var newLine = false;
+	var inString = false;
 	var result = [];
 	
 	var mkToken = function (tok, lin, col) {
@@ -47,7 +48,8 @@ Lich.Parser.preL = function(input) {
 	}
     
 	for (var i = 1; i < input.length; i++) {
-		if (isWhite(input[i].val)) {
+
+		if (isWhite(input[i].val) && !this.inString) {
 		//input[i] is whitespace
 		    var rows = countvalues(input[i].val,"\n");
             line += rows; // increase line number by the number of newlines
@@ -95,6 +97,10 @@ Lich.Parser.preL = function(input) {
 //boolean check whether input::String is Whitespace.
 function isWhite(input) {
 	var res;
+
+	if(input.match(/\"/))
+		return false;
+
 	if (input instanceof Array) 
 		res = input.match(/\s/);
 	else
@@ -123,7 +129,7 @@ function howLongWS(ws, indent) {
 	    case '\r'://ignore carriage return
 	        break;
 		default:
-		    throw new Error("Whitespace contained something that is not a newline or tab! Erroneous character code: " + ws.charCodeAt(i) + "in string: " + ws);
+			throw new Error("Whitespace contained something that is not a newline or tab! Erroneous character code: " + ws.charCodeAt(i) + "in string: " + ws);
 		}
 	}
 	return sum;
@@ -131,11 +137,13 @@ function howLongWS(ws, indent) {
 
 //count the occurrences of que in arr
 function countvalues(arr,que) {
-var i = arr.length;
-var j = 0;
-while( i-- ) {
-	if (arr[i] === que)
+	var i = arr.length;
+	var j = 0;
+	
+	while( i-- ) {
+		if (arr[i] === que)
 		j++;
-}
-return j;
+	}
+	
+	return j;
 }
