@@ -49,7 +49,7 @@ hexit = ( digit / [A-F] / [a-f] )
  
 varid = ( !reservedid head:small tail:( small / large / digit / "'" )* ) {return head.concat(tail.join(""))}
 conid = ( head:large tail:( small / large / digit / "'" )* ) {return head.concat(tail.join(""))}
-reservedid = res:( "hiding" / "case" / "class" / "data" / "default" / "deriving" / "do" / "else" / "foreign" / "if" / "import" / "infixl" / "infixr" / "infix" / "instance" / "in" / "let" / "def" / "module" / "newtype" / "of" / "then" / "type" / "where" / "_" ) !(varid / reservedid) {return {val: res, typ: res}}
+reservedid = res:( "hiding" / "case" / "class" / "data" / "default" / "deriving" / "do" / "else" / "foreign" / "if" / "import" / "infixl" / "infixr" / "infix" / "instance" / "in" / "let" / "module" / "newtype" / "of" / "then" / "type" / "where" / "_" ) !(varid / reservedid) {return {val: res, typ: res}}
 
 varsym = !(reservedop / dashes / escape / ":") s:(symbol)+ {return s.join("")}
 consym = !reservedop s:(":"symbol*) {return flatten(s).join("")}

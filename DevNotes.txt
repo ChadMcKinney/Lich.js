@@ -1,0 +1,75 @@
+//////////////////////////////
+// Dev Notes
+//////////////////////////////
+
+Have two parsing modes. One for library code and one for interactive mode. Lib code is like .hs files, with modules and imports at the top and normal, but interactive mode requiring the use of 'let' for global scope variable declaration.
+
+
+//////////////////////////////
+// Known Bugs
+//////////////////////////////
+
+
+Total known bugs: 4
+
+
+//////////////////////////////
+// Lambda parsing
+// Dec 13, 2013
+//////////////////////////////
+
+These don't parse
+foldl (\acc x -> acc ++ [x]) [] [1,2,3]
+foldl (\bcc x -> acc ++ [x]) [] [1,2,3]
+
+Yet this will parse 
+foldl (\ acc x -> acc ++ [x]) [] [1,2,3]
+
+And this will even parse
+foldl (\ccc x -> acc ++ [x]) [] [1,2,3]
+
+
+
+//////////////////////////////
+// String Whitespace
+// Dec 13, 2013
+//////////////////////////////
+
+Strings with whitespace don't parse. For example this parses:
+"Hello,world."
+
+but this does not
+"Hello, world."
+
+
+
+
+//////////////////////////////
+// Guards don't parse
+// Dec 13, 2013
+//////////////////////////////
+
+Guards just don't parse at all, I need to write the CFG for them. For example:
+
+myGuard x
+	| x > 4 -> 99
+	| _ -> 100
+
+
+
+
+//////////////////////////////
+// end line comments broken
+// Dec 13, 2013
+//////////////////////////////
+
+Comments at the end of lines aren't correctly ignored. Example:
+
+1 + 2 -- Commenting is cool!
+
+
+
+
+
+
+

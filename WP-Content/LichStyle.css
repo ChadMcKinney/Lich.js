@@ -46,7 +46,7 @@ body {
 	border: none;
 	outline: 0;
 	outline: none;
-	font-size: 1.1em;
+	font-size: 1.125em;
 	font-family: Ubuntu Mono, DejaVu Sans Mono, Liberation Mono,Bitstream Vera Sans Mono,Consolas,Monaco,Lucida Console,Courier New, monospace;
 	/* background : black;
 	color: white; */
@@ -65,8 +65,7 @@ body {
 }
 
 ::selection {
-	color: #000000;
-	background-color: #00ccff;
+  background: #00ccff; /* -webkit browser*/
 }
 
 ::-moz-selection {
@@ -100,7 +99,7 @@ body {
 	float: right;*/
 	padding-top: 0em;
 	padding-left: 0.2em;
-	color: #99ff99;
+	color: rgb(48,144,144);
 }
 
 #userName {
@@ -111,11 +110,11 @@ body {
 	height: 18px;
 	padding-top: 0em;
 	padding-left: 0.2em;
-	color: #99dd99;
+	color: rgb(48,144,144);
 	border: none;
 	z-index: 20;
 	resize: none;
-	font-size: 1.0em;
+	font-size: 1.1em;
 	font-family: Ubuntu Mono, DejaVu Sans Mono, Liberation Mono,Bitstream Vera Sans Mono,Consolas,Monaco,Lucida Console,Courier New, monospace;
 	font-smooth: true;
 	overflow: hidden;

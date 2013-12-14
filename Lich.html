@@ -105,9 +105,111 @@
 		onkeydown="javascript:return keyDown(event);" 
 		onkeyup="javascript:return keyUp(event);">
 
-//////////////////////////////////////////////////////////////////////////////////
-// Lich.js - A Networked Audio / Visual Live Coding Language
-//////////////////////////////////////////////////////////////////////////////////
+----------------------------------------------------------------------------------
+--| Lich.js - A Networked Audio / Visual Live Coding Language
+----------------------------------------------------------------------------------
+
+let timesTen x = 20 + 10
+
+timesTen (timesTen 12) (\x y z -> x + y + z)
+
+let ten = 10
+let ten elven = ten + 11
+
+if true then false else true
+
+
+
+-- This is a comment, comments are cool!
+foldl (\ccc x -> acc ++ [x]) [] [1,2,3]
+foldl (\acc x -> acc ++ [x]) [] [1,2,3]
+
+let x y = x + y
+let eight = 8
+let ten z = 10 + 10
+    where 
+        x = 20
+        y = 21
+        z = z    
+
+{-
+    yay more comments!!!!!!!
+-}
+
+let w = let y = 11 in 12 + w
+
+1 + 2
+2 + 3
+
+let two = 2
+let one two = 1 + 2 + two
+
+one 3
+
+map (add 2) [1,2,3,4]
+
+timesTen . timesTen $ timesTen 10
+
+module BinTree where
+import BinTree
+
+data TreeSet a = Leaf | Node a (TreeSet a) (TreeSet a)
+--  deriving Show
+
+let empty = Leaf
+
+let insert x (Node y l r) = 
+  if x > y 
+    then Node y l (insert x r)
+    else if x < y 
+      then Node y (insert x l) r 
+      else Node y l r
+      
+{-
+contains x Leaf         = False
+contains x (Node y l r) = 
+  if x == y 
+    then True
+    else if x > y
+      then contains x r
+      else contains x l-}
+
+let one = "Hello,world."
+
+let ones = 1 : ones
+let twos = map (\ x -> x+1) ones
+let l = take 3 twos
+
+print "hello,world"
+
+let fac 0 = 1
+-- test
+let fac n = n * fac (n-1)
+
+let numbers = [2,4,1.1]
+let tree = foldr insert empty numbers
+
+
+
+1 + 2
+(\x -> x * 3)
+my my 1
+let my = "Yo~"
+let a b = b
+a 10
+(\x -> x * 10)
+let y = map (add 2) [1,0,7]
+let y z = \x -> x + y + z
+let x = yo * yo
+    where yo = 99
+let timesTen x = x * 10.001
+timesTen (timesTen 10)
+let timesTen x = "Hello,world!" + x
+let x = (1 + 2) * 23
+2 * 0.3
+
+------------------------------------------------------------------------------
+-- OLD CODE BELOW
 
 // Background
 background [ 0 25 45 ]

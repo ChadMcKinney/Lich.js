@@ -49,7 +49,7 @@
 %%
 
 start_
-    : "{" exp "}" EOF    { return $2; }
+    : "{" exps "}" EOF    { return $2; }
     // : module_ EOF          { return $1; }
     ;
 
@@ -255,6 +255,11 @@ import_a // : object
 ////////////////////////////////////////////////////////////////////////////////
 // 3 Expressions
 
+exps // : [exp]
+  : exps ";" exp        {{ ($1).push($3); $$ = $1; }}
+  | exp                              {{ $$ = [$1]; }}
+  ;
+
 exp // : object
   : infixexp "::" type          {{$$ = {name:"type-signature",exp:$1,sig:$3,pos:@$};}}
   | infixexp %prec NOSIGNATURE  {{$$ = $1;}}
@@ -286,8 +291,11 @@ lexp // : object
   | '\' apats "->" exp              {{$$ = {name:"lambda", args: $2, rhs: $4, pos: @$}; }}
   | "case" exp "of" "{" alts "}"    {{$$ = {name:"case", exp: $2, alts: $5, pos: @$}; }}
   | "let" decls "in" exp            {{$$ = {name:"let", decls: $2, exp: $4, pos: @$}; }}
-  | "def" var rhs                   {{$$ = {name:"decl-fun", ident: $1, args: [], rhs: $2, pos: @$};}}
-  | "def" var apats rhs             {{$$ = {name:"decl-fun", ident: $1, args: $2, rhs: $3, pos: @$};}}
+  | "let" var rhs                   {{$$ = {name:"decl-fun", ident: $1, args: [], rhs: $2, pos: @$};}}
+  | "let" var apats rhs             {{$$ = {name:"decl-fun", ident: $1, args: $2, rhs: $3, pos: @$};}}
+  | "let" pat varop pat rhs {{$$ = {name:"decl-fun", ident: $2, args: [$1,$3], rhs: $4, pos: @$, orig: "infix"};}}
+  | "let" '(' pat varop pat ')' apats rhs
+    {{$$ = {name:"decl-fun", ident: $3, args: [$2,$4].concat($6), rhs: $7, pos: @$, orig: "infix"};}}
   ;
 
 // list of 1 or more 'aexp' without separator
