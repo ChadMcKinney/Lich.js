@@ -2,21 +2,47 @@
 // Dev Notes
 //////////////////////////////
 
+/////////////////////////////////////////
+// Parsing modes: Module and Interactive
+
 Have two parsing modes. One for library code and one for interactive mode. Lib code is like .hs files, with modules and imports at the top and normal, but interactive mode requiring the use of 'let' for global scope variable declaration.
 
+/////////////////////////
+// List creation syntax
+// Dec 14, 2013
+
+Need to add the nice haskell list creation syntax. Examples:
+[1..7]
+[2,5..99]
+
+//////////////////
+// Guard Patterns
+// Dec 14, 2013
+
+Need to add syntax for guard patterns, for example:
+
+myGuard x
+	| x > 4 -> 99
+	| otherwise -> 100
+
+///////////////////////////////
+// Curried operator expression
+// Dec 14, 2013
+
+Partial operator expressions don't parser. For example:
+map (+2) [1,2,3]
 
 //////////////////////////////
 // Known Bugs
 //////////////////////////////
 
 
-Total known bugs: 4
+Total known bugs: 3
 
 
 //////////////////////////////
 // Lambda parsing
 // Dec 13, 2013
-//////////////////////////////
 
 These don't parse
 foldl (\acc x -> acc ++ [x]) [] [1,2,3]
@@ -33,7 +59,6 @@ foldl (\ccc x -> acc ++ [x]) [] [1,2,3]
 //////////////////////////////
 // String Whitespace
 // Dec 13, 2013
-//////////////////////////////
 
 Strings with whitespace don't parse. For example this parses:
 "Hello,world."
@@ -45,23 +70,8 @@ but this does not
 
 
 //////////////////////////////
-// Guards don't parse
-// Dec 13, 2013
-//////////////////////////////
-
-Guards just don't parse at all, I need to write the CFG for them. For example:
-
-myGuard x
-	| x > 4 -> 99
-	| _ -> 100
-
-
-
-
-//////////////////////////////
 // end line comments broken
 // Dec 13, 2013
-//////////////////////////////
 
 Comments at the end of lines aren't correctly ignored. Example:
 

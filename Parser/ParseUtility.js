@@ -422,6 +422,7 @@ Lich.showAST = (function(){
 	};
 
 	var showAST2 = function(sb,ast){
+        // post("AST TYPE: " + (typeof ast));
 	    if( typeof ast === "string" ){
 		sb.push("\"" + ast.toString() + "\"");
 	    } else if( typeof ast === "number" ){
@@ -463,7 +464,7 @@ Lich.showAST = (function(){
 
 	var showNode = function(sb,l){
 	    if ( l.length == 0 ) {
-		return;
+		    return;
 	    }
 	    //document.write(s +"<br>");
 	    showNodeNE(sb,l);
@@ -471,8 +472,8 @@ Lich.showAST = (function(){
 	
 	var showNodeNE = function(sb,l){
 	    for(var i=0 ; i<l.length-1 ; i=i+1){
-		showAST2(sb,l[i]);
-		sb.push(", ");
+	        showAST2(sb,l[i]);
+		    sb.push(", ");
 	    }
 	    //document.write(s +"<br>");
 	    showAST2(sb,l[l.length-1]);

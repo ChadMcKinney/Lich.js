@@ -291,11 +291,7 @@ lexp // : object
   | '\' apats "->" exp              {{$$ = {name:"lambda", args: $2, rhs: $4, pos: @$}; }}
   | "case" exp "of" "{" alts "}"    {{$$ = {name:"case", exp: $2, alts: $5, pos: @$}; }}
   | "let" decls "in" exp            {{$$ = {name:"let", decls: $2, exp: $4, pos: @$}; }}
-  | "let" var rhs                   {{$$ = {name:"decl-fun", ident: $1, args: [], rhs: $2, pos: @$};}}
-  | "let" var apats rhs             {{$$ = {name:"decl-fun", ident: $1, args: $2, rhs: $3, pos: @$};}}
-  | "let" pat varop pat rhs {{$$ = {name:"decl-fun", ident: $2, args: [$1,$3], rhs: $4, pos: @$, orig: "infix"};}}
-  | "let" '(' pat varop pat ')' apats rhs
-    {{$$ = {name:"decl-fun", ident: $3, args: [$2,$4].concat($6), rhs: $7, pos: @$, orig: "infix"};}}
+  | "let" decl                      {{$$ = {name:"let", decl: $2, pos: @$}; }}
   ;
 
 // list of 1 or more 'aexp' without separator
