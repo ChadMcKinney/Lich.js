@@ -102,6 +102,8 @@
 	<script type="text/javascript" src="Parser/parse.js"></script>
 	<script type="text/javascript" src="Parser/LichParser.js"></script>
 	<script type="text/javascript" src="Lich.js"></script>
+
+	<script type="text/javascript" src="Networking/LichClient.js"></script>
 </head>
 
 <body>
@@ -1625,6 +1627,10 @@ deleteAll
 
 	<script LANGUAGE="JavaScript" type="text/javascript">
 		compileLich();
+	</script>
+	<script src="/socket.io/socket.io.js"></script>
+	<script LANGUAGE="JavaScript" type="text/javascript">
+  		connectToWebSocketServer();
 	</script>
 
 </body>
