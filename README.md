@@ -1,7 +1,7 @@
 Lich.js
 =======
 
-Lich.js - JavaScript audio/visual live coding language
+Lich.js - A Networked Audio / Visual Live Coding Language. 
 	
 ATTENTION!
 ==========
