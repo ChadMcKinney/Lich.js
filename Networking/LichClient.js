@@ -4,7 +4,7 @@ var socket;
 
 function connectToWebSocketServer()
 {
-	socket = io.connect('http://localhost:80');
+	socket = io.connect('http://173.203.102.166:80');
 	
 	socket.on('BroadcastCodeClient', receivedLichCode);
 
