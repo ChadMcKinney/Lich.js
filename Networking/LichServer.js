@@ -12,7 +12,10 @@ function handler(request, response) {
   var 
         uri = url.parse(request.url).pathname, 
         filename = path.join(process.cwd(), uri);
-  
+
+    fs.exists = fs.exists || require('path').exists;
+    fs.existsSync = fs.existsSync || require('path').existsSync;
+
     fs.exists(filename, function(exists) 
     {
         if(!exists) 
@@ -52,4 +55,4 @@ io.sockets.on('connection', function (socket) {
 
 });
 
-console.log("Static file server running at  => http://localhost:" + port);
+console.log("Server running on port:" + port);
