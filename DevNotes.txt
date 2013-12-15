@@ -56,3 +56,10 @@ let one = 1
 let two = 2
 
 
+
+//////////////////////////////
+// Strings in where statement
+// Dec 15, 2013
+
+Strings in a where statement don't parse correctly. This is because of the formatting fix I made to allow for spaces in a string, such as "Hello, world."
+The solution needs to allow for both spaces in strings and string in where statements and likely any other kind of indented syntax.

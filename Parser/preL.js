@@ -37,7 +37,7 @@ Lich.Parser.preL = function(input) {
 	    }
 	    catch (err) {
 	        //err.message.concat
-	        post("In program: \n\n" + Lich.showAST(input));
+	        Lich.post("In program: \n\n" + Lich.showAST(input));
 	        throw err;
 	    }
 	} else {
@@ -63,7 +63,7 @@ Lich.Parser.preL = function(input) {
 			    column += howLongWS(input[i].val,column);
 			} catch (err) {
 			    //err.message.concat
-			    post("In program: \n\n" + Lich.showAST(input));
+			    Lich.post("In program: \n\n" + Lich.showAST(input));
 	            throw err;
 			}
 		} else {

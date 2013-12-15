@@ -181,7 +181,7 @@ function tab()
 function login()
 {
 	loginName = document.getElementById("userName").value;
-	post("Logging in as user: "+loginName);
+	Lich.post("Logging in as user: "+loginName);
 }
 
 function currentLine(name)
@@ -306,12 +306,11 @@ function parseCurrentLine()
 	line = currentLine("terminal");
 	str = line.line;
 
-	post("CODE: " + str);
-
 	try
 	{
 		var res = Lich.parse(str);
 		Lich.post(Lich.showAST(res));
+		Lich.compileAST(res);
 	}
 	
 	catch(e)
@@ -443,13 +442,13 @@ function lichVirtualMachine()
 		if(v == undefined)
 			v = null;
 
-		// post("LichVM.getVar("+varName+") = " + v);
+		// Lich.post("LichVM.getVar("+varName+") = " + v);
 		return v;
 	}
 
 	this.setVar = function(varName, value)
 	{
-		// post("LichVM.setVar("+varName+") = " + value);
+		// Lich.post("LichVM.setVar("+varName+") = " + value);
 
 		if(this.scopeStack.length > 0)
 		 	this.scopeStack[this.scopeStack.length - 1][varName] = value;
@@ -620,7 +619,7 @@ function lichVirtualMachine()
 	this.compileProgram = function(program)
 	{
 		this.state = this.interpretNode(program);
-		post(this.state);
+		Lich.post(this.state);
 	}
 }
 
@@ -657,7 +656,7 @@ function lichVirtualMachine() {
 		
 		else
 		{
-			post("VARIABLE " + objectName + " IS RESERVED. DON'T BE A FOOL.")
+			Lich.post("VARIABLE " + objectName + " IS RESERVED. DON'T BE A FOOL.")
 		}
 	}
 	
@@ -704,7 +703,7 @@ function lichVirtualMachine() {
 	
 	this.clearStack = function()
 	{
-		post("STACK CLEARED. APOCALYPSE.\n");
+		Lich.post("STACK CLEARED. APOCALYPSE.\n");
 		while(this.stack.length > 0)
 		{
 			this.stack.pop();
@@ -731,14 +730,14 @@ function lichVirtualMachine() {
 		if(this.state == undefined)
 		{
 			// Taken out because it's annoying!
-			// post("undefined");
+			// Lich.post("undefined");
 		}
 
 		else
 		{
 			if(this.state.constructor == Array) // Print Array
 			{
-				post(arrayToPrintString(this.state));
+				Lich.post(arrayToPrintString(this.state));
 			}
 			
 			else if(this.state == '__LICH_PRINT_VALUE__') // Ignore the print value, it prints on it's own
@@ -754,17 +753,17 @@ function lichVirtualMachine() {
 				{
 					var printString = arrayToPrintString(this.state.points.value());
 					printString = printString.concat(" ").concat(this.state.shape);
-					post(printString);
+					Lich.post(printString);
 				}
 				else
 				{
-					post(this.state.type());
+					Lich.post(this.state.type());
 				}
 			}
 			
 			else
 			{
-				post(this.state);
+				Lich.post(this.state);
 			}
 		}
 	}
@@ -1139,7 +1138,7 @@ function LichString(_stringVar) {
 			{
 				var error = "YOU CAN'T INSERT A ";
 				error = error.concat(value.type()).concat(" BY INDEX INTO A STRING. LAMENTABLY LAME.");
-				post(error);
+				Lich.post(error);
 				LichVM.push(this);
 				return this;
 			}
@@ -1903,7 +1902,7 @@ function LichString(_stringVar) {
 			break;
 			
 		case 'Primitive':
-			post("OBVIOUSLY you can't cast to a primtive, OBVIOUSLY.")
+			Lich.post("OBVIOUSLY you can't cast to a primtive, OBVIOUSLY.")
 			break;
 			
 		case 'Array':
@@ -1916,7 +1915,7 @@ function LichString(_stringVar) {
 			break;
 			
 		case 'Variable':
-			post("WTF. Casting to a Variable is like translating to vapid programmer speak.");
+			Lich.post("WTF. Casting to a Variable is like translating to vapid programmer speak.");
 			break;
 
 		case 'Envelope':
@@ -2727,7 +2726,7 @@ function LichFloat(_floatVar) {
 			break;
 			
 		case 'Primitive':
-			post("OBVIOUSLY you can't cast to a primtive, OBVIOUSLY.")
+			Lich.post("OBVIOUSLY you can't cast to a primtive, OBVIOUSLY.")
 			break;
 			
 		case 'Array':
@@ -2735,7 +2734,7 @@ function LichFloat(_floatVar) {
 			break;
 			
 		case 'Variable':
-			post("WTF. Casting to a Variable is like translating to vapid programmer speak.");
+			Lich.post("WTF. Casting to a Variable is like translating to vapid programmer speak.");
 			break;
 
 		case 'Envelope':
@@ -3621,7 +3620,7 @@ function LichArray(_arrayVar) {
 			break;
 			
 		case 'Primitive':
-			post("OBVIOUSLY you can't cast to a primtive, OBVIOUSLY.")
+			Lich.post("OBVIOUSLY you can't cast to a primtive, OBVIOUSLY.")
 			break;
 			
 		case 'Array':
@@ -3629,7 +3628,7 @@ function LichArray(_arrayVar) {
 			break;
 			
 		case 'Variable':
-			post("WTF. Casting to a Variable is like translating to vapid programmer speak.");
+			Lich.post("WTF. Casting to a Variable is like translating to vapid programmer speak.");
 			break;
 
 		case 'Envelope':
@@ -3942,18 +3941,18 @@ function LichPrimitive(_primitive, _numArgs) {
 
 	this.to = function(lichType)
 	{
-		post("YOU CAN'T CAST A PRIMITIVE. Your computer will explode in 3...2...1...");
+		Lich.post("YOU CAN'T CAST A PRIMITIVE. Your computer will explode in 3...2...1...");
 	}
 
 	this.play = function()
 	{
-		post("Penguins can't fly and you can't play a primitive.");
+		Lich.post("Penguins can't fly and you can't play a primitive.");
 		return this;
 	}
 
 	this.stop = function()
 	{
-		post("Stop trying to stop a primitive. It doesn't work. Get out of my face.");
+		Lich.post("Stop trying to stop a primitive. It doesn't work. Get out of my face.");
 		return this;
 	}
 
@@ -4303,7 +4302,7 @@ function LichVariable(_objectName) {
 	
 	this.undefinedError = function()
 	{
-		post("ERROR. UNDEFINED VARIABLE: " + this.objectName + ". YOUR WORLD IS A LIE.");
+		Lich.post("ERROR. UNDEFINED VARIABLE: " + this.objectName + ". YOUR WORLD IS A LIE.");
 		return LichVM.clearStack();
 	}
 	
@@ -4696,7 +4695,7 @@ function LichEnvelope(_points, _shape) {
 					{
 					case 'none':
 						interpolatedValue = pointOne.back().value();
-						post("InterpolatedValue!: " + interpolatedValue);
+						Lich.post("InterpolatedValue!: " + interpolatedValue);
 						break;
 
 					case 'linear':
@@ -5551,7 +5550,7 @@ function LichEnvelope(_points, _shape) {
 			break;
 			
 		case 'Primitive':
-			post("OBVIOUSLY you can't cast to a primtive, OBVIOUSLY.")
+			Lich.post("OBVIOUSLY you can't cast to a primtive, OBVIOUSLY.")
 			break;
 			
 		case 'Array':
@@ -5559,7 +5558,7 @@ function LichEnvelope(_points, _shape) {
 			break;
 			
 		case 'Variable':
-			post("WTF. Casting to a Variable is like translating to vapid programmer speak.");
+			Lich.post("WTF. Casting to a Variable is like translating to vapid programmer speak.");
 			break;
 
 		case 'Envelope':
@@ -5740,7 +5739,7 @@ function LichStream(_durations, _values) {
 			break;
 			
 		case 'Primitive':
-			post("OBVIOUSLY you can't cast to a primtive, OBVIOUSLY.")
+			Lich.post("OBVIOUSLY you can't cast to a primtive, OBVIOUSLY.")
 			break;
 			
 		case 'Array':
@@ -5748,7 +5747,7 @@ function LichStream(_durations, _values) {
 			break;
 			
 		case 'Variable':
-			post("WTF. Casting to a Variable is like translating to vapid programmer speak.");
+			Lich.post("WTF. Casting to a Variable is like translating to vapid programmer speak.");
 			break;
 
 		case 'Envelope':
@@ -5799,24 +5798,24 @@ function LichStream(_durations, _values) {
 
 	this.nextDuration = function(inval)
 	{
-		// post("Stream.nextDuration!!!");
+		// Lich.post("Stream.nextDuration!!!");
 		if(this.playing)
 		{
-			// post("Stream.nextDuration.playing == true");
+			// Lich.post("Stream.nextDuration.playing == true");
 			var duration;
 
 			if(this.durations.type() == 'Array')
 			{
 				duration = this.durations.arrayVar[this.durationArrayIndex % this.durations.length()];
-				// post("Stream.nextDuration this.durations.type() == Array");
+				// Lich.post("Stream.nextDuration this.durations.type() == Array");
 				this.durationArrayIndex = (this.durationArrayIndex + 1) % this.durations.length();
 			}
 
 			else
 			{
-				// post("Stream.nextDuration this.durations.type() != Array");
+				// Lich.post("Stream.nextDuration this.durations.type() != Array");
 				duration = this.durations;	
-				// post("Stream.nextDuration duration is assigned");
+				// Lich.post("Stream.nextDuration duration is assigned");
 			}
 
 			switch(duration.type())
@@ -5833,13 +5832,13 @@ function LichStream(_durations, _values) {
 				duration = duration.to('Float').value();
 			}
 
-			// post("Stream.nextDuration: " + duration);
+			// Lich.post("Stream.nextDuration: " + duration);
 			return duration;
 		}
 		
 		else
 		{
-			// post("Stream.nextDuration: null");
+			// Lich.post("Stream.nextDuration: null");
 			return null;	
 		}
 	}
@@ -5863,7 +5862,7 @@ function LichStream(_durations, _values) {
 		if(value.type() == 'Function')
 			value = value.call();
 
-		// post("Stream.nextValue: " + value);
+		// Lich.post("Stream.nextValue: " + value);
 
 		// LichVM.push(value);
 		this.currentValue = value;
@@ -6180,7 +6179,7 @@ function compileLich()
 			printString = printString.concat(argArray[0].value());
 		}
 		
-		post(printString);
+		Lich.post(printString);
 		LichVM.push(argArray[0]);
 		return '__LICH_PRINT_VALUE__';
 	}
@@ -6253,9 +6252,9 @@ function compileLich()
 			function(event)
 			{
 				if(event.data.message != undefined)
-					post(event.data.message);
+					Lich.post(event.data.message);
 				else if(event.data.print != undefined)
-					post(event.data.print);
+					Lich.post(event.data.print);
 			},
 			false
 		);
@@ -6264,7 +6263,7 @@ function compileLich()
 			"error",
 			function(event)
 			{
-				post(event.message);
+				Lich.post(event.message);
 			},
 			false
 		);
@@ -6323,7 +6322,7 @@ function compileLich()
 
 	function printSamples(argArray)
 	{
-		post(sampleArray);
+		Lich.post(sampleArray);
 	}
 	
 	LichVM.reserveVar("printSamples", new LichPrimitive(printSamples, 0));
@@ -6469,7 +6468,7 @@ function compileLich()
 
 		default:
 			algorithm = genRand;
-			post("genArray algorithm not defined.");
+			Lich.post("genArray algorithm not defined.");
 		}
 
 		for(var i = 0; i < argArray[1].value(); ++i)
@@ -6836,7 +6835,7 @@ function compileLich()
 			break;
 
 		default:
-			post("Mesh generation function not defined.");
+			Lich.post("Mesh generation function not defined.");
 			return;
 			break;
 		}
@@ -6886,8 +6885,8 @@ function compileLich()
 	// Soliton
 	/////////////////////////
 
-	Soliton.print = post; // Set Soliton.print to our post function
-	Soliton.printError = post; // Set Soliton.print to our post function
+	Soliton.print = Lich.post; // Set Soliton.print to our Lich.post function
+	Soliton.printError = Lich.post; // Set Soliton.print to our Lich.post function
 	LichVM.scheduler = Soliton.Clock.default.scheduler;
 
 	sampleArray = new Array(
@@ -7087,7 +7086,7 @@ function compileLich()
 	// var someFunc = function(inval)
 	// {
 	// 	var random = Math.random();
-	// 	post("Pfunc: " + random);
+	// 	Lich.post("Pfunc: " + random);
 	// 	return random;
 	// }
 
@@ -7109,7 +7108,7 @@ function compileLich()
 	///////////////////
 
 	
-	CloudChamber.setup(document.getElementById("canvas"), 24, undefined, post); // Create the CloudChamber instance
+	CloudChamber.setup(document.getElementById("canvas"), 24, undefined, Lich.post); // Create the CloudChamber instance
 
 	var lichShaderArray = new Array();
 	
