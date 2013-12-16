@@ -309,7 +309,7 @@ function parseCurrentLine()
 	try
 	{
 		var res = Lich.parse(str);
-		// Lich.post(Lich.showAST(res));
+		Lich.post(Lich.showAST(res));
 		Lich.VM.Print(Lich.compileAST(res));
 	}
 	

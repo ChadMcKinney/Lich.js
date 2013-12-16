@@ -11,45 +11,204 @@
     it appears. 
 */
 
-/* operator associations and precedence */
 
-//%left '+' '-'
-//%left '*' '/'
-//%left '^'
-//%right '!'
-//%right '%'
-//%left OP
-//%left LEFT
-//%left "::"
-//%left exp
-//%left infixexp
-//%left infixexp_inner
-//%left "in"
-//%left lexp
-//%left decls
-//%left decl
-//%left fexp
-//%left aexp
-%nonassoc  prec_infixexp
-%nonassoc  NOSIGNATURE     // lower than "::"
-%nonassoc  INFIXEXP        // lower than varsym, qconop, qvarsym, "`"
-//%nonassoc  VAR
+/*
 
-%nonassoc  varsym
-%nonassoc  qconop
-%nonassoc  qvarsym
-%nonassoc  "`"
-%nonassoc  "="
-%nonassoc  ","
-%nonassoc  "::"
+//function to flatten a nestled array
+{function flatten(array){
+    var flat = [];
+    for (var i = 0, l = array.length; i < l; i++){
+        var type = Object.prototype.toString.call(array[i]).split(' ').pop().split(']').shift().toLowerCase();
+        if (type) { flat = flat.concat(/^(array|collection|arguments|object)$/.test(type) ? flatten(array[i]) : array[i]); }
+    }
+    return flat;
+}}start = (whitespace / lexeme )+
 
-%start start_
-%error-verbose
-%debug
+lexeme = (varid_e / conid_e / varsym_e / consym_e / qvarid / qconid / qvarsym / qconsym / literal / special / reservedop / reservedid)
+literal = ( integer / float / char  / string )
+special = s:( "(" / ")" / "," / ";" / "[" / "]" / "`" / "{" / "}" ) {return {val: s, typ: s}}
+
+whitespace = w:( whitestuff )+ {return {val: w.join("")}}
+whitestuff = ( whitechar / comment / ncomment )
+whitechar = ( newline / vertab / space / tab ) 
+newline =  ( return linefeed / linefeed / formfeed )
+return = "\r"
+linefeed = "\n"
+vertab = "\v"
+formfeed = "\f"
+space = " "
+tab = "\t"
+
+comment = ds:dashes ((!symbol any) any*)? n:newline {return n}
+dashes = d:"-"ds:("-")+ {return d.concat(ds.join(""))}
+opencom = "{-"
+closecom = "-}" 
+ncomment = !symbol com:(opencom ANYseq (ncomment ANYseq)* closecom) {return flatten(com).join("").replace(/\S/g," ");}
+ANYseq = as:ANY* {return as.join("")} 
+ANY = !(opencom / closecom) a:( graphic / whitechar ) {return a}
+any = ( graphic / space / tab ) 
+graphic = g:( small / large / symbol / digit / special / "\"" / "'" ) {return (g instanceof Object? g.val:g)}
+
+small = ( ascSmall / "_" )
+ascSmall = [a-z]
+
+large = ascLarge
+ascLarge = [A-Z]
+
+symbol = s:ascSymbol {return s}
+ascSymbol = !(opencom / closecom) s:( "!" / "#" / "$" / "&" / "." / "<" / ">" / "=" / "?" / "@" / "\\" / "|" / "~" / ":" ) {return s}
+
+equivalent "=="
+notEquivalent = "/="
+greater = ">"
+lesser = "<"
+greaterEqual = ">="
+lesserEqual = "<="
+minus = "-"
+plus = "+"
+mod = "%"
+mul = "*"
+div = "/"
+pow = "^"
+
+digit = ascDigit
+ascDigit = [0-9]
+octit = [0-7]
+hexit = ( digit / [A-F] / [a-f] )
+ 
+varid = ( !reservedid head:small tail:( small / large / digit / "'" )* ) {return head.concat(tail.join(""))}
+conid = ( head:large tail:( small / large / digit / "'" )* ) {return head.concat(tail.join(""))}
+reservedid = res:( "hiding" / "case" / "class" / "data" / "default" / "deriving" / "do" / "else" / "foreign" / "if" / "import" / "infixl" / "infixr" / "infix" / "instance" / "in" / "let" / "module" / "newtype" / "of" / "then" / "type" / "where" / "_" ) !(varid / reservedid) {return {val: res, typ: res}}
+
+varsym = !(reservedop / dashes / escape / ":") s:(symbol)+ {return s.join("")}
+consym = !reservedop s:(":"symbol*) {return flatten(s).join("")}
+// Took out !escapestuff from the "\\" entry to allow for correct lamba parsing like (\acc x -> acc ++ [x])
+reservedop = op:( ".." / "::" / ":" / "=>" / "=" !"="  / "\\" / "|" !"|" / "<-" / "->" / "@" / "~" ) !(varsym / consym) {return {val: (op instanceof Array)? op.join(""): op, typ: (op instanceof Array)? op.join(""): op}}
+
+qvarid = qs:(conid ".")+ ref:((!"." varid) !".") {qs = flatten(qs).join(""); return {val: flatten([qs, ref[0]]).join(""), typ: "qvarid", qual: qs.substr(0,qs.length-1)}}
+qconid = qs:(conid ".")+ ref:((!"." conid) !".") {qs = flatten(qs).join(""); return {val: flatten([qs, ref[0]]).join(""), typ: "qconid", qual: qs.substr(0,qs.length-1)}}
+qvarsym = qs:(conid ".")+ ref:(varsym !".") {qs = flatten(qs).join(""); return {val: flatten([qs, ref[0]]).join(""), typ: "qvarsym", qual: qs.substr(0,qs.length-1)}}
+qconsym = qs:(conid ".")+ ref:((!"." consym) !".") {qs = flatten(qs).join(""); return {val: flatten([qs, ref[0]]).join(""), typ: "qconsym", qual: qs.substr(0,qs.length-1)}}
+
+varid_e = !"." v:varid !"." {return {val: v, typ: "varid"}}
+conid_e = !"." c:conid !"." {return {val: c, typ: "conid"}}
+varsym_e = v:varsym !"."    {return {val: v, typ: "varsym"}}
+consym_e = !"." c:consym !"." {return {val: c, typ: "consym"}}
+
+decimal = d:digit+ {return d.join("")}
+octal = o:octit+ {return o.join("")}
+hexadecimal = h:hexit+ {return h.join("")}
+
+integer = i:( notdecimal / decimal !("o" /"O" / "x" / "X")) !"." {return {val: i.join(""), typ: "integer"}}
+notdecimal = ( "0o" octal / "0O" octal / "0x" hexadecimal / "0X" hexadecimal )
+
+float = f:( (decimal "." decimal (exponent)?) / decimal exponent ) {return {val: f.join(""), typ: "float"}}
+exponent = e:(("e"/"E") ("+"/"-")? decimal) {return e.join("")}
+
+char = ("'"c:( !("'" / "\\") graphic / space / !"\\&" escape)"'" ) {return {val: ("'" + c.join("") + "'"), typ: "char"}}
+string = "\"" bod:stringchar* "\"" {return {val: ('"' + bod.join("") + '"'), typ: "string"}}
+stringchar =  !("\"") ch:(space / escape / graphic / gap)  {return ch}
+escape = esc:("\\" escapestuff) {return esc.join("")} 
+escapestuff = ( charesc / ascii / decimal / "o" octal / "x" hexadecimal)
+charesc = ( "a" / "b" / "f" / "n" / "r" / "t" / "v" / "\\" / "\"" / "'" / "&" )
+ascii = ( "^" cntrl "&#0" / "&#1" / "&#2" / "&#3" / "&#4" / "&#5" / "&#6" / "&#7" / "&#8" / "&#9" / "&#10" / "&#11" / "&#12" / "&#13" / "&#14" / "&#15" / "&#16" / "&#17" / "&#18" / "&#19" / "&#20" / "&#21" / "&#22" / "&#23" / "&#24" / "&#25" / "&#26" / "&#27" / "&#28" / "&#29" / "&#30" / "&#31" / "&#32" / "&#127" )
+cntrl = ( ascLarge / "@" / "[" / "\\" / "]" / "^" / "_" )
+gap = "\\" whitechar+ "\\"
+
+*/
+
+/* lexical grammar */
+%lex
 %%
 
+[\t\r\v\f" "]+|"--".*|"{-".*"-}"       {/* skip whitespace and comments */}
+\n                          return 'ENDL';
+[0-9]+("."[0-9]+)?          return 'NUMBER';
+"False"|"false"             return 'FALSE';
+"True"|"true"               return 'TRUE';
+"*"                         return '*';
+"/"                         return '/';
+"-"                         return '-';
+"+"                         return '+';
+"^"                         return '^';
+"=="                        return '==';
+"/="                        return '/=';
+">"                         return '>';
+">="                        return '>=';
+"<"                         return '<';
+"<="                        return '<=';
+"("                         return '(';
+")"                         return ')';
+"="                         return '=';
+"_"                         return '_';
+"!"                         return '!';
+"#"                         return '#';
+"$"                         return '$';
+"&"                         return '&';
+"."                         return '.';
+"@"                         return '@';
+"\\"                        return '\\';      
+"|"                         return '|';
+"~"                         return '~';
+":"                         return ':';
+"::"                        return '::';
+","                         return ',';
+<<EOF>>                     return 'EOF';
+"where"                     return 'WHERE';
+"if"                        return 'IF';
+"then"                      return 'THEN';
+"else"                      return 'ELSE';
+"let"                       return 'LET';
+"hiding"                    return 'HIDING';
+"case"                      return 'CASE';
+"class"                     return 'CLASS';
+"data"                      return 'DATA';
+"default"                   return 'DEFAULT';
+"deriving"                  return 'DERIVING';
+"do"                        return 'DO';
+"foreign"                   return 'FOREIGN';
+"import"                    return 'IMPORT';
+"infixl"                    return 'INFIXL';
+"instance"                  return 'INSTANCE';
+"in"                        return 'IN';
+"module"                    return 'MODULE';
+"newtype"                   return 'NEWTYPE';
+"of"                        return 'OF';
+"type"                      return 'TYPE';
+[a-z][A-Za-z0-9_]*          return 'varid';
+[A-Z][A-Za-z0-9_]*          return 'conid';
+\"([^\"])*\"                return 'string';
+["!""#""$""&"".""<"">""=""?""@""\\""|""~"]+     return 'varsym';
+":"["!""#""$""&"".""<"">""=""?""@""\\""|""~"]*  return 'consym';
+[[A-Z][A-Za-z0-9_]*"."]+[a-z][A-Za-z0-9_]*      return 'qvarid';
+[[A-Z][A-Za-z0-9_]*"."]+[A-Z][A-Za-z0-9_]*      return 'qconid';
+[[A-Z][A-Za-z0-9_]*"."]+["!""#""$""&"<"">""=""?""@""\\""|""~"]+ return 'qvarsym';
+[[A-Z][A-Za-z0-9_]*"."]+":"["!""#""$""&"<"">""=""?""@""\\""|""~"]+ return 'qconsym';
+
+/*
+qvarid = qs:(conid ".")+ ref:((!"." varid) !".") {qs = flatten(qs).join(""); return {val: flatten([qs, ref[0]]).join(""), typ: "qvarid", qual: qs.substr(0,qs.length-1)}}
+qconid = qs:(conid ".")+ ref:((!"." conid) !".") {qs = flatten(qs).join(""); return {val: flatten([qs, ref[0]]).join(""), typ: "qconid", qual: qs.substr(0,qs.length-1)}}
+qvarsym = qs:(conid ".")+ ref:(varsym !".") {qs = flatten(qs).join(""); return {val: flatten([qs, ref[0]]).join(""), typ: "qvarsym", qual: qs.substr(0,qs.length-1)}}
+qconsym = qs:(conid ".")+ ref:((!"." consym) !".") {qs = flatten(qs).join(""); return {val: flatten([qs, ref[0]]).join(""), typ: "qconsym", qual: qs.substr(0,qs.length-1)
+*/
+
+/lex
+
+/* operator associations and precedence */
+
+%left '+' '-' '%'
+%left '*' '/'
+%left '^'
+%left UMINUS
+
+%nonassoc '='
+
+
+%start start_
+%% /* language grammar */
+
 start_
-    : "{" exp "}" EOF    { return $2; }
+    : exp EOF    { return $1; }
     // : module_ EOF          { return $1; }
     ;
 
@@ -57,12 +216,12 @@ start_
 // 5.1 Module Structure
 
 module_ // : object
-  : "module" modid "where" body
-       {{$$ = {name: "module", modid: $2, body: $4, pos: @$}; }}
-  | "module" modid '(' exports ')' "where" body
-       {{$$ = {name: "module", modid: $2, exports: $4, body: $7, pos: @$}; }}
+  : MODULE modid WHERE body
+       {{$$ = {name: MODULE, modid: $2, body: $4, pos: @$}; }}
+  | MODULE modid '(' exports ')' WHERE body
+       {{$$ = {name: MODULE, modid: $2, exports: $4, body: $7, pos: @$}; }}
   | body
-      {{$$ = {name: "module", modid: new Lich.ModName("Main"), body: $1, pos:@$}; }}
+      {{$$ = {name: MODULE, modid: new Lich.ModName("Main"), body: $1, pos:@$}; }}
          // no modid since missing. defaults to 'Main'.
          // no exports since missing. everything exported.
   ;
@@ -115,21 +274,21 @@ topdecls_nonempty // : [topdecl]
 
 topdecl // : object
     : decl                          {{$$ = {name: "topdecl-decl", decl: $1, pos: @$};}}
-    | "data" simpletype             {{$$ = {name: "topdecl-data", typ: $2, constrs: [], pos: @$};}}
-    | "data" simpletype "=" constrs {{$$ = {name: "topdecl-data", typ: $2, constrs: $4, pos: @$};}}
+    | DATA simpletype             {{$$ = {name: "topdecl-data", typ: $2, constrs: [], pos: @$};}}
+    | DATA simpletype "=" constrs {{$$ = {name: "topdecl-data", typ: $2, constrs: $4, pos: @$};}}
     | impdecl                       {{$$ = $1;}}
     ;
 
 
 decls // : [decl]
-  : '{' '}'                           {{ $$ = []; }}
-  | '{' list_decl_comma_1 '}'         {{ $$ = $2; }}
-  | '{' error '}'                        {{ $$ = []; }}
-  | '{' list_decl_comma_1 error '}'      {{ $$ = $2; }}
+  //:                                      {{ $$ = []; }}
+  : list_decl_comma_1                    {{ $$ = $1; }}
+  // | error                                {{ $$ = []; }}
+  //| list_decl_comma_1 error              {{ $$ = $1; }}
   ;
 
 list_decl_comma_1 // : [decl]
-  : list_decl_comma_1 ";" decl        {{ ($1).push($3); $$ = $1; }}
+  : list_decl_comma_1 ENDL decl       {{ ($1).push($3); $$ = $1; }}
   | decl                              {{ $$ = [$1]; }}
   ;
 
@@ -139,14 +298,14 @@ list_decl_comma_1 // : [decl]
 //  | gendecl
 //  ;
 decl // : object
-  : decl_fixity           {{$$ = $1;}}
-  | var rhs           {{$$ = {name:"decl-fun", ident: $1, args: [], rhs: $2, pos: @$};}}
+  // : decl_fixity           {{$$ = $1;}}
+  : var rhs           {{$$ = {name:"decl-fun", ident: $1, args: [], rhs: $2, pos: @$};}}
   | var apats rhs     {{$$ = {name:"decl-fun", ident: $1, args: $2, rhs: $3, pos: @$};}}
   | pat varop pat rhs {{$$ = {name:"decl-fun", ident: $2, args: [$1,$3], rhs: $4, pos: @$, orig: "infix"};}}
   | '(' pat varop pat ')' apats rhs
     {{$$ = {name:"decl-fun", ident: $3, args: [$2,$4].concat($6), rhs: $7, pos: @$, orig: "infix"};}}
-  | var "::" type           {{$$ = {name:"type-signature",vars:[$1],sig:$3,pos:@$};}}
-  | var "," vars "::" type  {{$$ = {name:"type-signature",vars:[$1].concat($3),sig:$5,pos:@$};}}
+  // | var "::" type           {{$$ = {name:"type-signature",vars:[$1],sig:$3,pos:@$};}}
+  // | var "," vars "::" type  {{$$ = {name:"type-signature",vars:[$1].concat($3),sig:$5,pos:@$};}}
   ;
 
 //funlhs // : object
@@ -157,13 +316,16 @@ decl // : object
 
 rhs // : object
     : '=' exp                  {{$$ = $2;}}
-    | '=' exp "where" decls    {{$$ = {name: "fun-where", exp: $2, decls: $4, pos: @$}; }}
+    // | '=' exp WHERE decls    {{$$ = {name: "fun-where", exp: $2, decls: $4, pos: @$}; }}
+    // | '=' exp ENDL WHERE decls    {{$$ = {name: "fun-where", exp: $2, decls: $5, pos: @$}; }}
+    | '=' exp ENDL WHERE ENDL decls    {{$$ = {name: "fun-where", exp: $2, decls: $6, pos: @$}; }}
     ; //TODO
 
+/*
 decl_fixity // : type declaration | fixity
-    : "infixl" literal op_list_1_comma  {{ $$ = {name: "fixity", fix: "leftfix", num: $2, ops: $3, pos: @$}; }}
-    | "infixr" literal op_list_1_comma  {{ $$ = {name: "fixity", fix: "rightfix", num: $2, ops: $3, pos: @$}; }}
-    | "infix" literal op_list_1_comma   {{ $$ = {name: "fixity",  fix: "nonfix",num: $2, ops: $3, pos: @$}; }}
+    : INFIXL literal op_list_1_comma  {{ $$ = {name: "fixity", fix: "leftfix", num: $2, ops: $3, pos: @$}; }}
+    | INFIXR literal op_list_1_comma  {{ $$ = {name: "fixity", fix: "rightfix", num: $2, ops: $3, pos: @$}; }}
+    | INFIXR literal op_list_1_comma   {{ $$ = {name: "fixity",  fix: "nonfix",num: $2, ops: $3, pos: @$}; }}
     ;
 
 simpletype // : object
@@ -188,9 +350,11 @@ atypes // : [atype]
     | atype             {{$$ = [$1];}}
     ;
 
+*/
+
 ////////////////////////////////////////////////////////////////////////////////
 // 5.2 Export Lists
-
+/*
 exports // : [export]
     : exports_inner         {{$$ = $1;}}
     | exports_inner ','     {{$$ = $1;}}
@@ -204,7 +368,7 @@ exports_inner // : [export]
 export // : object
     : qvar
         {{$$ = {name: "export-qvar", exp: $1, pos: @$};}}
-    | "module" modid 
+    | MODULE modid 
         {{$$ = {name: "export-module", exp: $2, pos: @$};}}
     | qtycon
         {{$$ = {name: "export-type-unspec", exp: $1, pos: @$};}}
@@ -213,23 +377,23 @@ export // : object
     | qtycon '(' list_cname_0_comma ')'
         {{$$ = {name: "export-type-vars", exp: $1, vars: $3, pos: @$};}}
     ; //TODO: export types and classes
-
+*/
 ////////////////////////////////////////////////////////////////////////////////
 // 5.3 Import Declarations
 
 impdecl // : object
-    : "import" modid
+    : IMPORT modid
         {{$$ = {name: "impdecl", modid: $2, pos: @$};}}
-    | "import" modid '(' imports ')'
+    | IMPORT modid '(' imports ')'
         {{$$ = {name: "impdecl", modid: $2, hiding: false, imports: $4, pos: @$};}}
-    | "import" modid "hiding" '(' imports ')'
+    | IMPORT modid HIDING '(' imports ')'
         {{$$ = {name: "impdecl", modid: $2, hiding: true, imports: $5, pos: @$};}}
     ; //TODO: qualified and renamed imports
 /*
 impspec // : object
     : '(' imports ')'
         {{$$ = {name: "impspec", imports: $2, pos: @$};}}
-    | "hiding" '(' imports ')'
+    | HIDING '(' imports ')'
         {{$$ = {name: "impspec-hiding", imports: $3, pos: @$};}}
     ;
 */
@@ -254,17 +418,19 @@ import_a // : object
 
 ////////////////////////////////////////////////////////////////////////////////
 // 3 Expressions
-
+/*
 exps // : [exp]
   : exps ";" exp        {{ ($1).push($3); $$ = $1; }}
   | exp                              {{ $$ = [$1]; }}
   ;
-
+*/
 exp // : object
-  : infixexp "::" type          {{$$ = {name:"type-signature",exp:$1,sig:$3,pos:@$};}}
-  | infixexp %prec NOSIGNATURE  {{$$ = $1;}}
+  // : infixexp "::" type          {{$$ = {name:"type-signature",exp:$1,sig:$3,pos:@$};}}
+  // : infixexp %prec NOSIGNATURE  {{$$ = $1;}}
+  : lexp {{$$ = $1;}}
   ;
 
+/*
 infixexp // : [lexp | qop | '-']
   : infixexpLR lexp     %prec INFIXEXP          {{
           ($1).push($2);
@@ -276,22 +442,27 @@ infixexp // : [lexp | qop | '-']
       }}
   ;
 
+// : infixexpLR lexp qop           {{var t=($1).pop();($1).push($3,t,$2); $$ = $1;}} // Rewrite order for infix qop expression
 infixexpLR // : [lexp | qop | '-']. re-written to be left recursive.
-  : infixexpLR lexp qop           {{($1).push($2,$3); $$ = $1;}}
+  // : infixexpLR lexp qop           {{($1).push($2,$3); $$ = $1;}}
+  : infixexpLR lexp qop           {{var t=($1).pop();($1).push($3,t,$2); $$ = $1;}} // Rewrite order for infix qop expression
   | infixexpLR '-'                {{($1).push($2);    $$ = $2;}}
   |                               {{$$ = [];}}
   ;
+
+*/
+
 //  lexp OP infixexp            {{ ($3).unshift($1,$2); $$ = $3; }}
 //  '-' infixexp                {{ ($2).shift($1);      $$ = $2; }}
 //  lexp                        {{ $$ = [$1]; }}
 
 lexp // : object
-  : "if" exp "then" exp "else" exp  {{$$ = {name:"ite",e1:$2,e2:$4,e3:$6,pos:@$}; }}
+  : IF exp THEN exp ELSE exp        {{$$ = {name:"ite",e1:$2,e2:$4,e3:$6,pos:@$}; }}
   | fexp                            {{ $$ = ($1.length === 1) ? ($1[0]) : {name:"application", exps:$1,pos:@$}; }}
   | '\' apats "->" exp              {{$$ = {name:"lambda", args: $2, rhs: $4, pos: @$}; }}
-  | "case" exp "of" "{" alts "}"    {{$$ = {name:"case", exp: $2, alts: $5, pos: @$}; }}
-  | "let" decls "in" exp            {{$$ = {name:"let", decls: $2, exp: $4, pos: @$}; }}
-  | "let" decl                      {{$$ = {name:"let-one", decl: $2, pos: @$}; }}
+  | CASE exp OF alts                {{$$ = {name:"case", exp: $2, alts: $4, pos: @$}; }}
+  | LET decls IN exp                {{$$ = {name:"let", decls: $2, exp: $4, pos: @$}; }}
+  | LET decl                        {{$$ = {name:"let-one", decl: $2, pos: @$}; }}
   ;
 
 // list of 1 or more 'aexp' without separator
@@ -307,11 +478,28 @@ vars // : [var]
     ;
 
 ////////////////////////////////////////////////////////////////////////////////
+// Operators
+/*
+binop
+  : "*"                         {return $1;}
+  | "/"                         {return $1;}
+  | "-"                         {return $1;}
+  | "+"                         {return $1;}
+  | "^"                         {return $1;}
+  | "=="                        {return $1;}
+  | "/="                        {return $1;}
+  | ">"                         {return $1;}
+  | ">="                        {return $1;}
+  | "<"                         {return $1;}
+  | "<="                        {return $1;}
+  ;    
+*/
+////////////////////////////////////////////////////////////////////////////////
 // case expression alternatives
 
 // ';' separated list of 1 or more 'alt'
 alts // : [alt]
-    : alts ";" alt      {{$1.push($3); $$ = $1;}}
+    : alts alt          {{$1.push($2); $$ = $1;}}
     | alt               {{$$ = [$1];}}
     ;
 
@@ -542,9 +730,30 @@ pat_list_1_comma // : [pat]
 
 literal  // : object
     : integer {{$$ = {name: "integer-lit", value: Number($1), pos: @$};}}
-    | string {{$$ = {name: "string-lit", value: $1, pos: @$};}}
+    | string {{$$ = {name: "string-lit", value: yytext, pos: @$};}}
     | char {{$$ = {name: "char-lit", value: $1, pos: @$};}}
     | float {{$$ = {name: "float-lit", value: Number($1), pos: @$};}}
+    | NUMBER {{$$ = {name: "number", value: Number($1)}; }}
+    | FALSE {{$$ = {name: "boolean-lit", value: false}; }}
+    | TRUE {{$$ = {name: "boolean-lit", value: true}; }}
     ;
 
 ////////////////////////////////////////////////////////////////////////////////
+
+
+/*
+varsym = !(reservedop / dashes / escape / ":") s:(symbol)+ {return s.join("")}
+consym = !reservedop s:(":"symbol*) {return flatten(s).join("")}
+// Took out !escapestuff from the "\\" entry to allow for correct lamba parsing like (\acc x -> acc ++ [x])
+reservedop = op:( ".." / "::" / ":" / "=>" / "=" !"="  / "\\" / "|" !"|" / "<-" / "->" / "@" / "~" ) !(varsym / consym) {return {val: (op instanceof Array)? op.join(""): op, typ: (op instanceof Array)? op.join(""): op}}
+
+qvarid = qs:(conid ".")+ ref:((!"." varid) !".") {qs = flatten(qs).join(""); return {val: flatten([qs, ref[0]]).join(""), typ: "qvarid", qual: qs.substr(0,qs.length-1)}}
+qconid = qs:(conid ".")+ ref:((!"." conid) !".") {qs = flatten(qs).join(""); return {val: flatten([qs, ref[0]]).join(""), typ: "qconid", qual: qs.substr(0,qs.length-1)}}
+qvarsym = qs:(conid ".")+ ref:(varsym !".") {qs = flatten(qs).join(""); return {val: flatten([qs, ref[0]]).join(""), typ: "qvarsym", qual: qs.substr(0,qs.length-1)}}
+qconsym = qs:(conid ".")+ ref:((!"." consym) !".") {qs = flatten(qs).join(""); return {val: flatten([qs, ref[0]]).join(""), typ: "qconsym", qual: qs.substr(0,qs.length-1)}}
+
+varid_e = !"." v:varid !"." {return {val: v, typ: "varid"}}
+conid_e = !"." c:conid !"." {return {val: c, typ: "conid"}}
+varsym_e = v:varsym !"."    {return {val: v, typ: "varsym"}}
+consym_e = !"." c:consym !"." {return {val: c, typ: "consym"}}
+*/

@@ -38,16 +38,6 @@ map (+2) [1,2,3]
 
 
 //////////////////////////////
-// end line comments broken
-// Dec 13, 2013
-
-Comments at the end of lines aren't correctly ignored. Example:
-
-1 + 2 -- Commenting is cool!
-
-
-
-//////////////////////////////
 // Multiple let declarations
 // Dec 14, 2013
 

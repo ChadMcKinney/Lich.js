@@ -4,15 +4,6 @@
 	Most of this is taken from the JSHC project, modified for use with the Lich language. 
 */
 
-var Lich = new Object();
-Lich.post = function post(text)
-{
-    var obj = document.getElementById("post");
-    var appendedText = document.createTextNode(text + "\n");
-    obj.appendChild(appendedText);
-    obj.scrollTop = obj.scrollHeight;
-}
-
 Lich.Parser = new Object() // Global Lich object for lexing/parsing
 
 //////////////////////////////////////////////////////////////////////////////////////////

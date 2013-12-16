@@ -27,6 +27,6 @@ Lich.parse = function(input) {
         } 
     }
     
-    return LichParser.parse(y);
+    return LichParser.parse(input);
 }
 
