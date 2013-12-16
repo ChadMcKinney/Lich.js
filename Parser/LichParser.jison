@@ -542,9 +542,9 @@ pat_list_1_comma // : [pat]
 
 literal  // : object
     : integer {{$$ = {name: "integer-lit", value: Number($1), pos: @$};}}
-    | string {{$$ = {name: "string-lit", value: yytext, pos: @$};}}
-    | char {{$$ = {name: "char-lit", value: yytext, pos: @$};}}
-    | float {{$$ = {name: "float-lit", value: Number(yytext), pos: @$};}}
+    | string {{$$ = {name: "string-lit", value: $1, pos: @$};}}
+    | char {{$$ = {name: "char-lit", value: $1, pos: @$};}}
+    | float {{$$ = {name: "float-lit", value: Number($1), pos: @$};}}
     ;
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -1937,7 +1937,6 @@ Lich.Parser.tokenize = (function(){
                   pos = pos2;
                 }
                 if (result0 === null) {
-                  pos2 = pos;
                   if (input.charCodeAt(pos) === 92) {
                     result0 = "\\";
                     pos++;
@@ -1946,27 +1945,6 @@ Lich.Parser.tokenize = (function(){
                     if (reportFailures === 0) {
                       matchFailed("\"\\\\\"");
                     }
-                  }
-                  if (result0 !== null) {
-                    pos3 = pos;
-                    reportFailures++;
-                    result1 = parse_escapestuff();
-                    reportFailures--;
-                    if (result1 === null) {
-                      result1 = "";
-                    } else {
-                      result1 = null;
-                      pos = pos3;
-                    }
-                    if (result1 !== null) {
-                      result0 = [result0, result1];
-                    } else {
-                      result0 = null;
-                      pos = pos2;
-                    }
-                  } else {
-                    result0 = null;
-                    pos = pos2;
                   }
                   if (result0 === null) {
                     pos2 = pos;

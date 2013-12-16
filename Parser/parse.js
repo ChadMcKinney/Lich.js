@@ -18,10 +18,10 @@ Lich.parse = function(input) {
     LichParser.lexer = new iterL();
     LichParser.yy.parseError = function (str, hash) {
         if (LichParser.yy.lexer.debugArr !== undefined)
-            console.log("parse error happened, lexer has so far returned:<br>" + LichParser.yy.lexer.debugArr)
+            console.log("parse error happened, lexer has so far returned:  " + LichParser.yy.lexer.debugArr)
         if (!LichParser.yy.lexer.parseError()) {
             throw new Lich.ParseError(str + " expected: " + hash.expected +
-                                 "<br>Lexer returned: " + LichParser.yy.lexer.recent,
+                                 "  Lexer returned: " + LichParser.yy.lexer.recent,
                                   LichParser.yy.lexer.yylloc);
         } 
     }
