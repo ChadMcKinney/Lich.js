@@ -49,10 +49,21 @@ function handler(request, response) {
 //Setup websocket code
 io.sockets.on('connection', function (socket) {
 
+    socket.on('Typing', function (id, text) {
+        io.sockets.emit('TypingClient',id, text);
+    });
+
     socket.on('BroadcastCode', function (data) {
         io.sockets.emit('BroadcastCodeClient',data);
     });
 
+    socket.on('Login',function (name){
+        socket.emit('LoginClient');
+    })
+
+    socket.on('LoginInfo', function (name){
+        console.log("Login information received for: " + name);
+    })
 });
 
 console.log("Server running on port:" + port);

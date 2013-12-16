@@ -279,6 +279,8 @@ function keyDown(thisEvent)
 		
 		break;
 	}
+
+	broadcastTyping(document.getElementById("terminal").value);
 }
 
 function keyUp(thisEvent)

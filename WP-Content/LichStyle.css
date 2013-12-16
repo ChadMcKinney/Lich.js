@@ -38,7 +38,7 @@ body {
     font-family: Ubuntu Mono, DejaVu Sans Mono, Liberation Mono,Bitstream Vera Sans Mono,Consolas,Monaco,Lucida Console,Courier New, monospace;
 }
 
-#terminal, #post {
+#terminal,#terminal1,#terminal2,#terminal3, #post {
 	background-color: transparent;
 	color: white;
 	overflow: auto;
@@ -78,8 +78,8 @@ body {
 	background-color: #00ccff;
 }
 
-#terminal {
-	position: absolute;
+#terminal,#terminal1,#terminal2,#terminal3 {
+	position: relative;
 	height: 80%;
 	width: 100%;
 	left: 0px;
