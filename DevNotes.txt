@@ -46,27 +46,18 @@ let one = 1
 let two = 2
 
 
-/////////////////////////////////////
-// End of Line Comments Not Ignored
-// Dec 14, 2013
+//////////////////////////////
+// Let In Statements
+// Dec 17, 2013
 
-End of Line comments aren't correctly ignored. Example
-1 + 2 -- COMMENTS!
+Let In statements don't parse. Example:
+
+let x = 20 in x + y
 
 
 //////////////////////////////
 // Strings in where statement
-// Dec 15, 2013
+// Dec 17, 2013
 
 Strings in a where statement don't parse correctly. This is because of the formatting fix I made to allow for spaces in a string, such as "Hello, world."
 The solution needs to allow for both spaces in strings and string in where statements and likely any other kind of indented syntax.
-
-
-
-//////////////////////////////
-// Order of Operations
-// Dec 16, 2013
-
-Order of operations is currently unsupported in Lich. Need to add it to Pegjs which is convoluted.
-
-1 + 2 * 3 // Should be 7, but will compute to 9

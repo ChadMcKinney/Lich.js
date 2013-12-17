@@ -410,7 +410,7 @@ Lich.compileBooleanLit = function(ast)
 
 Lich.compileBinOpExp = function(ast)
 {
-	var op = Lich.VM.getVar(ast.op.id.id); // Lookup function for operator
+	var op = Lich.VM.getVar(ast.op); // Lookup function for operator
 
 	if(op == Lich.VM.Nothing)
 		throw new Error("Binary Operator not found: " + ast.op.id.id);

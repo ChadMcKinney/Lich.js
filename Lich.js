@@ -279,8 +279,6 @@ function keyDown(thisEvent)
 		
 		break;
 	}
-
-	broadcastTyping(document.getElementById("terminal").value);
 }
 
 function keyUp(thisEvent)
@@ -313,6 +311,7 @@ function parseCurrentLine()
 		var res = Lich.parse(str);
 		// Lich.post(Lich.showAST(res));
 		Lich.VM.Print(Lich.compileAST(res));
+		// broadcastTyping(document.getElementById("terminal").value);
 	}
 	
 	catch(e)
@@ -320,6 +319,9 @@ function parseCurrentLine()
 		Lich.post(e);
 	}
 }
+
+// THIS IS INCREDIBLY SLOW AS HELL RIGHT NOW.
+// setInterval(function(){broadcastTyping(document.getElementById("terminal").value)},5000);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Lich Virtual Machine

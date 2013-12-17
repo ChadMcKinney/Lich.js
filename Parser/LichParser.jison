@@ -11,47 +11,119 @@
     it appears. 
 */
 
-/* operator associations and precedence */
-
-//%left '+' '-'
-//%left '*' '/'
-//%left '^'
-//%right '!'
-//%right '%'
-//%left OP
-//%left LEFT
-//%left "::"
-//%left exp
-//%left infixexp
-//%left infixexp_inner
-//%left "in"
-//%left lexp
-//%left decls
-//%left decl
-//%left fexp
-//%left aexp
-%nonassoc  prec_infixexp
-%nonassoc  NOSIGNATURE     // lower than "::"
-%nonassoc  INFIXEXP        // lower than varsym, qconop, qvarsym, "`"
-//%nonassoc  VAR
-
-%nonassoc  varsym
-%nonassoc  qconop
-%nonassoc  qvarsym
-%nonassoc  "`"
-%nonassoc  "="
-%nonassoc  ","
-%nonassoc  "::"
-
-%start start_
-%error-verbose
-%debug
+/* lexical grammar */
+%lex
 %%
 
+/*
+whitespace = w:( whitestuff )+ {return {val: w.join("")}}
+whitestuff = ( whitechar / comment / ncomment )
+whitechar = ( newline / vertab / space / tab ) 
+newline =  ( return linefeed / linefeed / formfeed )
+return = "\r"
+linefeed = "\n"
+vertab = "\v"
+formfeed = "\f"
+space = " "
+tab = "\t"
+*/
+
+
+"--".*|"{-".*"-}"       {/* skip whitespace and comments */}
+\s+                         return {val:yytext};
+("-")?[0-9]+("."[0-9]+)?    return {val:yytext,typ:"float"};
+"False"|"false"             return {val:"false",typ:"False"};
+"True"|"true"               return {val:"true",typ:"True"};
+"=="                        return {val:"==",typ:"=="};
+"/="                        return {val:"/=",typ:"/="};
+">="                        return {val:">=",typ:">="};
+"<="                        return {val:"<=",typ:"<="};
+">"                         return {val:">",typ:">"};
+"<"                         return {val:"<",typ:"<"};
+"("                         return {val:"(",typ:"("};
+")"                         return {val:")",typ:")"};
+"*"                         return {val:"*",typ:"*"};
+"/"                         return {val:"/",typ:"/"};
+"-"                         return {val:"-",typ:"-"};
+"+"                         return {val:"+",typ:"+"};
+"^"                         return {val:"^",typ:"^"};
+"="                         return {val:"=",typ:"="};
+"_"                         return {val:"_",typ:"_"};
+"!"                         return {val:"!",typ:"!"};
+"#"                         return {val:"#",typ:"#"};
+"$"                         return {val:"$",typ:"$"};
+"&"                         return {val:"&",typ:"&"};
+"."                         return {val:".",typ:"."};
+"@"                         return {val:"@",typ:"@"};
+"\\"                        return {val:"\\",typ:"\\"};      
+"|"                         return {val:"|",typ:"|"};
+"~"                         return {val:"~",typ:"~"};
+":"                         return {val:":",typ:":"};
+"::"                        return {val:"::",typ:"::"};
+","                         return {val:",",typ:","};
+<<EOF>>                     return {val:"EOF",typ:"EOF"};
+"where"                     return {val:"where",typ:"where"};
+"if"                        return {val:"if",typ:"if"};
+"then"                      return {val:"then",typ:"then"};
+"else"                      return {val:"else",typ:"else"};
+"let"                       return {val:"let",typ:"let"};
+"hiding"                    return {val:"hiding",typ:"hiding"};
+"case"                      return {val:"case",typ:"case"};
+"class"                     return {val:"class",typ:"class"};
+"data"                      return {val:"dat",typ:"data"};
+"default"                   return {val:"default",typ:"default"};
+"deriving"                  return {val:"deriving",typ:"deriving"};
+"do"                        return {val:"do",typ:"do"};
+"foreign"                   return {val:"foreign",typ:"foreign"};
+"import"                    return {val:"import",typ:"import"};
+"infixl"                    return {val:"infixl",typ:"infixl"};
+"instance"                  return {val:"instance",typ:"instance"};
+"in"                        return {val:"in",typ:"in"};
+"module"                    return {val:"module",typ:"module"};
+"newtype"                   return {val:"newtype",typ:"newtype"};
+"of"                        return {val:"of",typ:"of"};
+"type"                      return {val:"type",typ:"type"};
+[a-z][A-Za-z0-9_]*          return {val:yytext,typ:"varid"};
+[A-Z][A-Za-z0-9_]*          return {val:yytext,typ:"conid"};
+\"([^\"])*\"                return {val:yytext,typ:"string"};
+\'(!\')?\'                  return {val:yytext,typ:"char"};
+["!""#""$""&"".""<"">""=""?""@""\\""|""~"]+     return {val:yytext,typ:"varsym"};
+":"["!""#""$""&"".""<"">""=""?""@""\\""|""~"]*  return {val:yytext,typ:"consym"};
+[[A-Z][A-Za-z0-9_]*"."]+[a-z][A-Za-z0-9_]*      return {val:yytext,typ:"qvarid"};
+[[A-Z][A-Za-z0-9_]*"."]+[A-Z][A-Za-z0-9_]*      return {val:yytext,typ:"qconid"};
+[[A-Z][A-Za-z0-9_]*"."]+["!""#""$""&"<"">""=""?""@""\\""|""~"]+ return {val:yytext,typ:"qvarsym"};
+[[A-Z][A-Za-z0-9_]*"."]+":"["!""#""$""&"<"">""=""?""@""\\""|""~"]+ return {val:yytext,typ:"qconsym"};
+
+/*
+qvarid = qs:(conid ".")+ ref:((!"." varid) !".") {qs = flatten(qs).join(""); return {val: flatten([qs, ref[0]]).join(""), typ: "qvarid", qual: qs.substr(0,qs.length-1)}}
+qconid = qs:(conid ".")+ ref:((!"." conid) !".") {qs = flatten(qs).join(""); return {val: flatten([qs, ref[0]]).join(""), typ: "qconid", qual: qs.substr(0,qs.length-1)}}
+qvarsym = qs:(conid ".")+ ref:(varsym !".") {qs = flatten(qs).join(""); return {val: flatten([qs, ref[0]]).join(""), typ: "qvarsym", qual: qs.substr(0,qs.length-1)}}
+qconsym = qs:(conid ".")+ ref:((!"." consym) !".") {qs = flatten(qs).join(""); return {val: flatten([qs, ref[0]]).join(""), typ: "qconsym", qual: qs.substr(0,qs.length-1)
+*/
+
+/lex
+
+/* operator associations and precedence */
+
+// %nonassoc '='
+%left '+' '-' '%'
+%left '*' '/'
+%left '^'
+//%left '==' '>' '<' 
+//%left '/=' '>=' '<='
+//%left UMINUS
+
+
+%start start_
+//%error-verbose
+//%debug
+%% /* language grammar */
+
 start_
-    : "{" exp "}" EOF    { return $2; }
+    : "{" exp "}" EOF         { return $2; }
     // : module_ EOF          { return $1; }
     ;
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // 5.1 Module Structure
@@ -231,12 +303,24 @@ import_a // : object
 
 exps // : [exp]
   : exps ";" exp        {{ ($1).push($3); $$ = $1; }}
-  | exp                              {{ $$ = [$1]; }}
+  | exp                 {{ $$ = [$1]; }}
   ;
 
 exp // : object
   // : infixexp %prec NOSIGNATURE  {{$$ = $1;}}
   : lexp          {{$$ = $1}}
+  | exp "+" exp         {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
+  | exp "-" exp         {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
+  | exp "*" exp         {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
+  | exp "/" exp         {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
+  | exp "^" exp         {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
+  | exp "%" exp         {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
+  | exp "==" exp         {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
+  | exp "/=" exp         {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
+  | exp ">" exp         {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
+  | exp "<" exp         {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
+  | exp ">=" exp         {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
+  | exp "<=" exp         {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
   ;
 
 /*
@@ -270,7 +354,7 @@ lexp // : object
   | "case" exp "of" "{" alts "}"    {{$$ = {astType:"case", exp: $2, alts: $5, pos: @$}; }}
   | "let" decls "in" exp            {{$$ = {astType:"let", decls: $2, exp: $4, pos: @$}; }}
   | "let" decl                      {{$$ = {astType:"let-one", decl: $2, pos: @$}; }}
-  | exp qop lexp                   {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
+  | exp qop lexp                    {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
   ;
 
 // list of 1 or more 'aexp' without separator
@@ -481,8 +565,8 @@ literal  // : object
     | string {{$$ = {astType: "string-lit", value: $1, pos: @$};}}
     | char {{$$ = {astType: "char-lit", value: $1, pos: @$};}}
     | float {{$$ = {astType: "float-lit", value: Number($1), pos: @$};}}
-    | trueBool {{$$ = {astType: "boolean-lit", value: $1, pos: @$};}}
-    | falseBool {{$$ = {astType: "boolean-lit", value: $1, pos: @$};}}
+    | True {{$$ = {astType: "boolean-lit", value: true, pos: @$};}}
+    | False {{$$ = {astType: "boolean-lit", value: false, pos: @$};}}
     ;
 
 ////////////////////////////////////////////////////////////////////////////////
