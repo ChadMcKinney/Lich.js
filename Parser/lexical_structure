@@ -9,7 +9,7 @@
 }}start = (whitespace / lexeme )+
 
 lexeme = (varid_e / conid_e / varsym_e / consym_e / qvarid / qconid / qvarsym / qconsym / literal / special / reservedop / reservedid)
-literal = ( integer / float / char  / string )
+literal = ( integer / float / char  / string / trueBool / falseBool )
 special = s:( "(" / ")" / "," / ";" / "[" / "]" / "`" / "{" / "}" ) {return {val: s, typ: s}}
 
 whitespace = w:( whitestuff )+ {return {val: w.join("")}}
@@ -85,4 +85,5 @@ charesc = ( "a" / "b" / "f" / "n" / "r" / "t" / "v" / "\\" / "\"" / "'" / "&" )
 ascii = ( "^" cntrl "&#0" / "&#1" / "&#2" / "&#3" / "&#4" / "&#5" / "&#6" / "&#7" / "&#8" / "&#9" / "&#10" / "&#11" / "&#12" / "&#13" / "&#14" / "&#15" / "&#16" / "&#17" / "&#18" / "&#19" / "&#20" / "&#21" / "&#22" / "&#23" / "&#24" / "&#25" / "&#26" / "&#27" / "&#28" / "&#29" / "&#30" / "&#31" / "&#32" / "&#127" )
 cntrl = ( ascLarge / "@" / "[" / "\\" / "]" / "^" / "_" )
 gap = "\\" whitechar+ "\\"
-
+trueBool = tr("true" / "True") {return {val: true, typ:"falseBool"}}
+falseBool = fl("false" / "False") {return {val: false, typ:"falseBool"}}

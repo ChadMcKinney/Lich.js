@@ -47,43 +47,67 @@ function LichNothing()
 	this.value = null;
 }
 
-function LichClosure(args, rhs, mutable)
+function LichClosure(argNames, rhs, mutable, namespace)
 {
-	var args = args;
-	var rhs = rhs;
-	var namespace = {};
-
+	this.argNames = argNames;
+	this.rhs = rhs;
+	this.namespace = typeof namespace !== "undefined" ? namespace : {};
 	this.type = "Closure";
-
 	this.mutable = typeof mutable !== "undefined" ? mutable : false;
 
 	this.hasVar = function(name)
 	{
-		Lich.post("LichClosure.hasVar(" + name + ") = " + namespace[name]);
-		return typeof namespace[name] !== "undefined";
+		return typeof this.namespace[name] !== "undefined";
 	}
 
 	this.getVar = function(name)
 	{
-		var res = namespace[name];
+		var res = this.namespace[name];
 		return typeof res !== "undefined" ? res : Lich.VM.Nothing;
 	}
 
 	this.setVar = function(name, value)
 	{
-		Lich.post("LichClosure.setVar(" + name + ") = " + value);
-
-		if(namespace.hasOwnProperty(name))
+		if(this.namespace.hasOwnProperty(name))
 		{
 			if(this.mutable)
-				namespace[name] = value;
+				this.namespace[name] = value;
 			else
 				throw new Error("Unable to change immutable variable: " + name);
 		}
 
 		else
 		{
-			namespace[name] = value;
+			this.namespace[name] = value;
 		}
 	}
+
+	this.invoke = function(args)
+	{
+		var i;
+		for(i = 0; i < args.length && i < argNames.length; ++i)
+		{
+			this.namespace[this.argNames[i]] = args[i];
+		}
+
+		if(i < this.argNames.length) // Partial application
+		{
+			Lich.post("Partial Application!!!");
+			return new LichClosure(this.argNames.slice(i, this.argNames.length), this.rhs, this.mutable, this.namespace);
+		}
+
+		else
+		{
+			Lich.VM.pushProcedure(this);
+			var res = Lich.compileAST(this.rhs);
+			Lich.VM.popProcedure();
+			return res;
+		}
+	}
+}
+
+function createPrimitive(name, argNames, primitiveFunc)
+{
+	primitiveFunc.astType = "primitive";
+	Lich.VM.setVar(name, new LichClosure(argNames, primitiveFunc));
 }

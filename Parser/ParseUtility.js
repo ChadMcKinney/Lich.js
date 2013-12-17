@@ -32,7 +32,7 @@ assert.AssertionError = function(obj){
        //document.write("key:"+k+",value:"+err[k]+"<br>");
     }
 
-    this.name = "AssertionError";
+    this.astType = "AssertionError";
 
     if( obj !== undefined ){
         this.message = obj.message;
@@ -120,7 +120,7 @@ Lich.Name.prototype.equal = function(other){
 
 // no location parameter as module names are never qualified and always global.
 Lich.ModName = function(id,pos){
-    this.name = "modname";
+    this.astType = "modname";
     this.id = id;
     if( pos !== undefined ){
         this.pos = pos;
@@ -159,7 +159,7 @@ Lich.ModName.prefixes = function(id){
 ////////////////////////////////////////////////////////////////////////////////
 
 Lich.TyCls = function(id,pos,loc){
-    this.name = "tycls";
+    this.astType = "tycls";
     if( loc !== undefined ){
         this.loc = loc;
         if( id.substr(0,loc.length) == loc ){
@@ -189,7 +189,7 @@ Lich.TyCls.prototype.toString = Lich.TyCls.prototype.toStringN;
 
 // no location parameter as they are never top-level names.
 Lich.TyVar = function(id,pos){
-    this.name = "tyvar";
+    this.astType = "tyvar";
     this.id = id;
     if( pos !== undefined ){
         this.pos = pos;
@@ -212,7 +212,7 @@ Lich.TyVar.prototype.toString = Lich.TyVar.prototype.toStringN;
 ////////////////////////////////////////////////////////////////////////////////
 
 Lich.TyCon = function(id,pos,loc){
-    this.name = "tycon";
+    this.astType = "tycon";
     if( loc !== undefined ){
         this.loc = loc;
         if( id.substr(0,loc.length) == loc ){
@@ -242,7 +242,7 @@ Lich.TyCon.prototype.toString = Lich.TyCon.prototype.toStringN;
 
 Lich.DaCon = function(id,pos,isSymbol,loc){
     assert.ok( typeof isSymbol === "boolean" );
-    this.name = "dacon";
+    this.astType = "dacon";
     if( loc !== undefined ){
         this.loc = loc;
         if( id.substr(0,loc.length) == loc ){
@@ -274,7 +274,7 @@ Lich.DaCon.prototype.toString = Lich.DaCon.prototype.toStringN;
 
 Lich.VarName = function(id,pos,isSymbol,loc){
     assert.ok( typeof isSymbol === "boolean" );
-    this.name = "varname";
+    this.astType = "varname";
     if( loc !== undefined ){
         this.loc = loc;
         if( id.substr(0,loc.length) == loc ){
@@ -368,7 +368,7 @@ Lich.TupleTyCon.prototype = new Lich.TyCon(null,{});
 ////////////////////////////////////////////////////////////////////////////////
 
 Lich.ConPat = function(con, pats, pos){
-    this.name = "conpat";
+    this.astType = "conpat";
     
     this.con = con;
     this.pats = pats;

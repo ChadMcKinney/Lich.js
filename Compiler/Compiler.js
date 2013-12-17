@@ -38,14 +38,11 @@
 // The Lich.js compiler traverse the abstract syntax tree returned by the parser and calls native JavaScript
 Lich.compileAST = function(ast)
 {
-	Lich.post("Lich.compileAST: " + ast);
-
 	if(ast instanceof Array)
 	{
 		var res = null;
 		for(n in ast)
 		{	
-			Lich.post("AST ARRAY!: " + ast[n]);
 			res = Lich.compileAST(ast[n]);
 		}
 
@@ -54,82 +51,32 @@ Lich.compileAST = function(ast)
 
 	else if(ast instanceof Object)
 	{
+		/*
 		if (typeof ast === "function")
 		{
 			Lich.post("AST FUNCTION?!: " + ast);
 			return; // Do nothing, this is a tail end function given by the parser we don't need.
-		}
+		}*/
 
-		Lich.post("AST name: " + ast.name);
-		Lich.post(ast);
+		// Lich.post("AST name: " + ast.astType);
+		// Lich.post(ast);
 
-		switch(ast.name)
+		switch(ast.astType)
 		{
+			case "primitive":
+				return ast();
+				break;
 			case "module":
 				return Lich.compileModule(ast);
 				break;
 			case "body":
 				return Lich.compileBody(ast);
 				break;
-			case "topdecl-decl":
-				return Lich.compileTopdeclDecl(ast);
-				break;
-			case "topdecl-data":
-				return Lich.compileTopdeclData(ast);
-				break;
 			case "decl-fun":
 				return Lich.compileDeclFun(ast);
 				break;
-			case "type-signature":
-				return Lich.compileTypeSignature(ast);
-				break;
 			case "fun-where":
 				return Lich.compileFunWhere(ast);
-				break;
-			case "fixity":
-				return Lich.compileFixity(ast);
-				break;
-			case "simpletype":
-				return Lich.compileSimpleType(ast);
-				break;
-			case "constr":
-				return Lich.compileConstr(ast);
-				break;
-			case "export-qvar":
-				return Lich.compileExportQvar(ast);
-				break;
-			case "export-module":
-				return Lich.compileExportModule(ast);
-				break;
-			case "export-type-unspec":
-				return Lich.compileExportTypeUnspec(ast);
-				break;
-			case "export-type-all":
-				return Lich.compileExportTypeAll(ast);
-				break;
-			case "export-type-vars":
-				return Lich.compileExportTypeVars(ast);
-				break;
-			case "impdecl":
-				return Lich.compileImpDecl(ast);
-				break;
-			case "impspec":
-				return Lich.compileImpSpec(ast);
-				break;
-			case "impspec-hiding":
-				return Lich.compileImpSpecHiding(ast);
-				break;
-			case "import-var":
-				return Lich.compileImportVar(ast);
-				break;
-			case "import-tycon":
-				return Lich.compileImportTycon(ast);
-				break;
-			case "type-signature":
-				return Lich.compileTypeSignature(ast);
-				break;
-			case "infixexp":
-				return Lich.compileInfixExp(ast);
 				break;
 			case "ite":
 				return Lich.compileIte(ast);
@@ -189,6 +136,11 @@ Lich.compileAST = function(ast)
 			case "boolean-lit":
 				return Lich.compileBooleanLit(ast);
 				break;
+			case "binop-exp":
+				return Lich.compileBinOpExp(ast);
+				break;
+			case "negate":
+				return Lich.compileNegate(ast);
 			default:
 				Lich.unsupportedSemantics(ast);
 				break;
@@ -197,13 +149,13 @@ Lich.compileAST = function(ast)
 
 	else
 	{
-		post("Unknown AST Type: " + (typeof ast));
+		Lich.post("Unknown AST Type: " + (typeof ast));
 	}
 }
 
 Lich.unsupportedSemantics = function(ast)
 {
-	throw new Error("Unsupported semantics for " + ast.name);
+	throw new Error("Unsupported semantics for " +ast+" with type "+ ast.astType);
 }
 
 Lich.compileModule = function(ast)
@@ -345,7 +297,23 @@ Lich.compileIte = function(ast)
 
 Lich.compileApplication = function(ast)
 {
-	Lich.unsupportedSemantics(ast);
+	Lich.post("Lich.compileApplication!");
+	var closure = Lich.compileAST(ast.exps[0]);
+	if(closure.type != "Closure")
+	{
+		throw new Error("Unable to use application on an object of type " + ast.astType);
+	}
+
+	else
+	{
+		var args = new Array();
+		for(var i = 1; i < ast.exps.length; ++i)
+		{
+			args.push(Lich.compileAST(ast.exps[i]));
+		}
+
+		closure.invoke(args);
+	}
 }
 
 Lich.compileLambda = function(ast)
@@ -405,12 +373,12 @@ Lich.compileIntegerLit = function(ast)
 
 Lich.compileStringLit = function(ast)
 {
-	return ast.value;
+	return ast.value.substring(1, ast.value.length - 1);
 }
 
 Lich.compileCharLit = function(ast)
 {
-	return ast.value;
+	return ast.value.substring(1, ast.value.length - 1);
 }
 
 Lich.compileFloatLit = function(ast)
@@ -432,10 +400,25 @@ Lich.compileDacon = function(ast)
 	else if(ast == "Nothing")
 		return Lich.VM.Nothing;
 	else
-		Lich.unsupportedSemantics({name:ast});
+		Lich.unsupportedSemantics({astType:ast});
 }
 
 Lich.compileBooleanLit = function(ast)
 {
 	return ast.value;
+}
+
+Lich.compileBinOpExp = function(ast)
+{
+	var op = Lich.VM.getVar(ast.op.id.id); // Lookup function for operator
+
+	if(op == Lich.VM.Nothing)
+		throw new Error("Binary Operator not found: " + ast.op.id.id);
+
+	return op.invoke([Lich.compileAST(ast.lhs), Lich.compileAST(ast.rhs)]);
+}
+
+Lich.compileNegate = function(ast)
+{ 
+	return Lich.VM.getVar("subtract").invoke([0, Lich.compileAST(ast.rhs)]);
 }

@@ -83,20 +83,14 @@ Lich.post = function post(text)
 
 Lich.VM.Print = function(object)
 {
-	switch(object.type)
-	{
-		case "Void":
-			break;
-		case "Nothing":
-			Lich.post("Nothing");
-			break;
-		default:
-			Lich.post(object);
-			break;
-	}
-
-	if(object == Lich.VM.Nothing)
+	if(typeof object == "boolean")
+		if(object)
+			Lich.post("True");
+		else
+			Lich.post("False");
+	else if(object == Lich.VM.Nothing)
 		Lich.post("Nothing");
 	else if(object != Lich.VM.Void)
 		Lich.post(object);
+
 }

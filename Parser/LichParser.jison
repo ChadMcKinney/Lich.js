@@ -58,11 +58,11 @@ start_
 
 module_ // : object
   : "module" modid "where" body
-       {{$$ = {name: "module", modid: $2, body: $4, pos: @$}; }}
+       {{$$ = {astType: "module", modid: $2, body: $4, pos: @$}; }}
   | "module" modid '(' exports ')' "where" body
-       {{$$ = {name: "module", modid: $2, exports: $4, body: $7, pos: @$}; }}
+       {{$$ = {astType: "module", modid: $2, exports: $4, body: $7, pos: @$}; }}
   | body
-      {{$$ = {name: "module", modid: new Lich.ModName("Main"), body: $1, pos:@$}; }}
+      {{$$ = {astType: "module", modid: new Lich.ModName("Main"), body: $1, pos:@$}; }}
          // no modid since missing. defaults to 'Main'.
          // no exports since missing. everything exported.
   ;
@@ -94,11 +94,11 @@ body // : object
             }
         }
         if( ! prelude_imported ){
-            imps.push({name: "impdecl", modid: new Lich.ModName("Prelude")});
+            imps.push({astType: "impdecl", modid: new Lich.ModName("Prelude")});
         }
 
-        $$ = {name: "body", impdecls: imps, topdecls: decs, pos:@$}; }}
-  |   {{$$ = {name: "body", impdecls: [], topdecls: [], pos:@$}; }}
+        $$ = {astType: "body", impdecls: imps, topdecls: decs, pos:@$}; }}
+  |   {{$$ = {astType: "body", impdecls: [], topdecls: [], pos:@$}; }}
   ;
   
 topdecls // : [topdecl]
@@ -114,9 +114,7 @@ topdecls_nonempty // : [topdecl]
 /* 4 Declarations and Bindings */
 
 topdecl // : object
-    : decl                          {{$$ = {name: "topdecl-decl", decl: $1, pos: @$};}}
-    | "data" simpletype             {{$$ = {name: "topdecl-data", typ: $2, constrs: [], pos: @$};}}
-    | "data" simpletype "=" constrs {{$$ = {name: "topdecl-data", typ: $2, constrs: $4, pos: @$};}}
+    : decl                          {{$$ = {astType: "topdecl-decl", decl: $1, pos: @$};}}
     | impdecl                       {{$$ = $1;}}
     ;
 
@@ -134,58 +132,34 @@ list_decl_comma_1 // : [decl]
   ;
 
 //decl // : object
-//  : funlhs rhs          {{$$ = {name: "decl-fun", lhs: $1, rhs: $2, pos:@$};}}
+//  : funlhs rhs          {{$$ = {astType: "decl-fun", lhs: $1, rhs: $2, pos:@$};}}
     //| pat rhs
 //  | gendecl
 //  ;
 decl // : object
   : decl_fixity           {{$$ = $1;}}
-  | var rhs           {{$$ = {name:"decl-fun", ident: $1, args: [], rhs: $2, pos: @$};}}
-  | var apats rhs     {{$$ = {name:"decl-fun", ident: $1, args: $2, rhs: $3, pos: @$};}}
-  | pat varop pat rhs {{$$ = {name:"decl-fun", ident: $2, args: [$1,$3], rhs: $4, pos: @$, orig: "infix"};}}
+  | var rhs           {{$$ = {astType:"decl-fun", ident: $1, args: [], rhs: $2, pos: @$};}}
+  | var apats rhs     {{$$ = {astType:"decl-fun", ident: $1, args: $2, rhs: $3, pos: @$};}}
+  | pat varop pat rhs {{$$ = {astType:"decl-fun", ident: $2, args: [$1,$3], rhs: $4, pos: @$, orig: "infix"};}}
   | '(' pat varop pat ')' apats rhs
-    {{$$ = {name:"decl-fun", ident: $3, args: [$2,$4].concat($6), rhs: $7, pos: @$, orig: "infix"};}}
-  | var "::" type           {{$$ = {name:"type-signature",vars:[$1],sig:$3,pos:@$};}}
-  | var "," vars "::" type  {{$$ = {name:"type-signature",vars:[$1].concat($3),sig:$5,pos:@$};}}
+    {{$$ = {astType:"decl-fun", ident: $3, args: [$2,$4].concat($6), rhs: $7, pos: @$, orig: "infix"};}}
   ;
 
 //funlhs // : object
-//    : var apats       {{$$ = {name: "fun-lhs", ident: $1, args: $2, pos: @$};}}
-//    | var             {{$$ = {name:"fun-lhs", ident: $1, args: [], pos: @$};}}
+//    : var apats       {{$$ = {astType: "fun-lhs", ident: $1, args: $2, pos: @$};}}
+//    | var             {{$$ = {astType:"fun-lhs", ident: $1, args: [], pos: @$};}}
 //  | pat varop pat
 //    ;
 
 rhs // : object
     : '=' exp                  {{$$ = $2;}}
-    | '=' exp "where" decls    {{$$ = {name: "fun-where", exp: $2, decls: $4, pos: @$}; }}
+    | '=' exp "where" decls    {{$$ = {astType: "fun-where", exp: $2, decls: $4, pos: @$}; }}
     ; //TODO
 
 decl_fixity // : type declaration | fixity
-    : "infixl" literal op_list_1_comma  {{ $$ = {name: "fixity", fix: "leftfix", num: $2, ops: $3, pos: @$}; }}
-    | "infixr" literal op_list_1_comma  {{ $$ = {name: "fixity", fix: "rightfix", num: $2, ops: $3, pos: @$}; }}
-    | "infix" literal op_list_1_comma   {{ $$ = {name: "fixity",  fix: "nonfix",num: $2, ops: $3, pos: @$}; }}
-    ;
-
-simpletype // : object
-    : tycon         {{$$ = {name: "simpletype", tycon: $1, vars: [], pos: @$};}}
-    | tycon tyvars  {{$$ = {name: "simpletype", tycon: $1, vars: $2, pos: @$};}}
-    ;
-
-constrs // : [constr]
-    : constrs "|" constr        {{$1.push($3); $$ = $1;}}
-    | constr                    {{$$ = [$1];}}
-    ;
-
-constr // : object
-    : con
-        {{$$ = {name: "constr", dacon: $1, types: [], pos: @$};}}
-    | con atypes
-        {{$$ = {name: "constr", dacon: $1, types: $2, pos: @$};}}
-    ;
-
-atypes // : [atype]
-    : atypes atype      {{$1.push($2); $$ = $1;}}
-    | atype             {{$$ = [$1];}}
+    : "infixl" literal op_list_1_comma  {{ $$ = {astType: "fixity", fix: "leftfix", num: $2, ops: $3, pos: @$}; }}
+    | "infixr" literal op_list_1_comma  {{ $$ = {astType: "fixity", fix: "rightfix", num: $2, ops: $3, pos: @$}; }}
+    | "infix" literal op_list_1_comma   {{ $$ = {astType: "fixity",  fix: "nonfix",num: $2, ops: $3, pos: @$}; }}
     ;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -203,15 +177,15 @@ exports_inner // : [export]
 
 export // : object
     : qvar
-        {{$$ = {name: "export-qvar", exp: $1, pos: @$};}}
+        {{$$ = {astType: "export-qvar", exp: $1, pos: @$};}}
     | "module" modid 
-        {{$$ = {name: "export-module", exp: $2, pos: @$};}}
+        {{$$ = {astType: "export-module", exp: $2, pos: @$};}}
     | qtycon
-        {{$$ = {name: "export-type-unspec", exp: $1, pos: @$};}}
+        {{$$ = {astType: "export-type-unspec", exp: $1, pos: @$};}}
     | qtycon '(' ".." ')'
-        {{$$ = {name: "export-type-all", exp: $1, pos: @$};}}
+        {{$$ = {astType: "export-type-all", exp: $1, pos: @$};}}
     | qtycon '(' list_cname_0_comma ')'
-        {{$$ = {name: "export-type-vars", exp: $1, vars: $3, pos: @$};}}
+        {{$$ = {astType: "export-type-vars", exp: $1, vars: $3, pos: @$};}}
     ; //TODO: export types and classes
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -219,18 +193,18 @@ export // : object
 
 impdecl // : object
     : "import" modid
-        {{$$ = {name: "impdecl", modid: $2, pos: @$};}}
+        {{$$ = {astType: "impdecl", modid: $2, pos: @$};}}
     | "import" modid '(' imports ')'
-        {{$$ = {name: "impdecl", modid: $2, hiding: false, imports: $4, pos: @$};}}
+        {{$$ = {astType: "impdecl", modid: $2, hiding: false, imports: $4, pos: @$};}}
     | "import" modid "hiding" '(' imports ')'
-        {{$$ = {name: "impdecl", modid: $2, hiding: true, imports: $5, pos: @$};}}
+        {{$$ = {astType: "impdecl", modid: $2, hiding: true, imports: $5, pos: @$};}}
     ; //TODO: qualified and renamed imports
 /*
 impspec // : object
     : '(' imports ')'
-        {{$$ = {name: "impspec", imports: $2, pos: @$};}}
+        {{$$ = {astType: "impspec", imports: $2, pos: @$};}}
     | "hiding" '(' imports ')'
-        {{$$ = {name: "impspec-hiding", imports: $3, pos: @$};}}
+        {{$$ = {astType: "impspec-hiding", imports: $3, pos: @$};}}
     ;
 */
 imports // : [import]
@@ -246,10 +220,10 @@ list_import_1_comma // : [import]
     ;
 
 import_a // : object
-    : var                              {{$$ = {name: "import-var", varname: $1, pos: @$};}}
-    | tycon                            {{$$ = {name: "import-tycon", tycon: $1, all: false, pos: @$};}}
-    | tycon '(' ".." ')'               {{$$ = {name: "import-tycon", tycon: $1, all: true, pos: @$};}}
-    | tycon '(' list_cname_0_comma ')' {{$$ = {name: "import-tycon", tycon: $1, all: false, list:$3, pos: @$};}}
+    : var                              {{$$ = {astType: "import-var", varastType: $1, pos: @$};}}
+    | tycon                            {{$$ = {astType: "import-tycon", tycon: $1, all: false, pos: @$};}}
+    | tycon '(' ".." ')'               {{$$ = {astType: "import-tycon", tycon: $1, all: true, pos: @$};}}
+    | tycon '(' list_cname_0_comma ')' {{$$ = {astType: "import-tycon", tycon: $1, all: false, list:$3, pos: @$};}}
     ; //TODO: classes
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -261,17 +235,18 @@ exps // : [exp]
   ;
 
 exp // : object
-  : infixexp "::" type          {{$$ = {name:"type-signature",exp:$1,sig:$3,pos:@$};}}
-  | infixexp %prec NOSIGNATURE  {{$$ = $1;}}
+  // : infixexp %prec NOSIGNATURE  {{$$ = $1;}}
+  : lexp          {{$$ = $1}}
   ;
 
+/*
 infixexp // : [lexp | qop | '-']
   : infixexpLR lexp     %prec INFIXEXP          {{
           ($1).push($2);
           if( ($1).length == 1 && ($1)[0].name=="infixexp" ){
                   $$ = ($1)[0];
           } else {
-              $$ = {name:"infixexp",exps:$1,pos:@$};
+              $$ = {astType:"infixexp",exps:$1,pos:@$};
           }
       }}
   ;
@@ -281,17 +256,21 @@ infixexpLR // : [lexp | qop | '-']. re-written to be left recursive.
   | infixexpLR '-'                {{($1).push($2);    $$ = $2;}}
   |                               {{$$ = [];}}
   ;
+*/
+
+
 //  lexp OP infixexp            {{ ($3).unshift($1,$2); $$ = $3; }}
 //  '-' infixexp                {{ ($2).shift($1);      $$ = $2; }}
 //  lexp                        {{ $$ = [$1]; }}
 
 lexp // : object
-  : "if" exp "then" exp "else" exp  {{$$ = {name:"ite",e1:$2,e2:$4,e3:$6,pos:@$}; }}
-  | fexp                            {{ $$ = ($1.length === 1) ? ($1[0]) : {name:"application", exps:$1,pos:@$}; }}
-  | '\' apats "->" exp              {{$$ = {name:"lambda", args: $2, rhs: $4, pos: @$}; }}
-  | "case" exp "of" "{" alts "}"    {{$$ = {name:"case", exp: $2, alts: $5, pos: @$}; }}
-  | "let" decls "in" exp            {{$$ = {name:"let", decls: $2, exp: $4, pos: @$}; }}
-  | "let" decl                      {{$$ = {name:"let-one", decl: $2, pos: @$}; }}
+  : "if" exp "then" exp "else" exp  {{$$ = {astType:"ite",e1:$2,e2:$4,e3:$6,pos:@$}; }}
+  | fexp                            {{ $$ = ($1.length === 1) ? ($1[0]) : {astType:"application", exps:$1,pos:@$}; }}
+  | '\' apats "->" exp              {{$$ = {astType:"lambda", args: $2, rhs: $4, pos: @$}; }}
+  | "case" exp "of" "{" alts "}"    {{$$ = {astType:"case", exp: $2, alts: $5, pos: @$}; }}
+  | "let" decls "in" exp            {{$$ = {astType:"let", decls: $2, exp: $4, pos: @$}; }}
+  | "let" decl                      {{$$ = {astType:"let-one", decl: $2, pos: @$}; }}
+  | exp qop lexp                   {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
   ;
 
 // list of 1 or more 'aexp' without separator
@@ -316,7 +295,7 @@ alts // : [alt]
     ;
 
 alt // : object
-    : pat "->" exp      {{$$ = {name:"alt", pat: $1, exp: $3};}}
+    : pat "->" exp      {{$$ = {astType:"alt", pat: $1, exp: $3};}}
     // TODO: incomplete
     ;
 
@@ -343,17 +322,18 @@ aexp // : object
   | gcon                {{$$ = $1;}}
   | literal             {{$$ = $1;}}
   | "(" exp ")"         {{$$ = $2;}}
+  | '(' '-' exp ')'                {{$$ = {astType:"negate",rhs:$3};}}
   | tuple               {{$$ = $1;}}
   | listexp             {{$$ = $1;}}
   // TODO: incomplete
   ;
 
 tuple // : object
-    : "(" exp "," list_exp_1_comma ")" {{$4.unshift($2); $$ = {name: "tuple", members: $4, pos: @$}; }}
+    : "(" exp "," list_exp_1_comma ")" {{$4.unshift($2); $$ = {astType: "tuple", members: $4, pos: @$}; }}
     ;
 
 listexp // : object
-    : "[" list_exp_1_comma "]" {{ $$ = {name: "listexp", members: $2, pos: @$}; }}
+    : "[" list_exp_1_comma "]" {{ $$ = {astType: "listexp", members: $2, pos: @$}; }}
     ;
 
 list_exp_1_comma
@@ -368,8 +348,8 @@ modid // : object # {conid .} conid
 
 // optionally qualified binary operators in infix expressions
 qop // : object
-    : qvarop              {{$$ = {name: "qop", id: $1, pos: @$};}}
-    | qconop              {{$$ = {name: "qop", id: $1, pos: @$};}}
+    : qvarop              {{$$ = {astType: "qop", id: $1, pos: @$};}}
+    | qconop              {{$$ = {astType: "qop", id: $1, pos: @$};}}
     ;
 
 op_list_1_comma // : [op]
@@ -409,22 +389,6 @@ varop // : object
 tyvars // : [TyVar]
     : tyvars tyvar          {{$1.push($2); $$ = $1;}}
     | tyvar                 {{$$ = [$1];}}
-    ;
-
-// type variable
-tyvar // : Lich.TyVar
-    : varid      {{$$ = new Lich.TyVar($1, @$);}}
-    ;
-
-// non-qualified type constructor id name
-tycon // : Lich.TyCon
-    : conid      {{$$ = new Lich.TyCon($1, @$);}}
-    ;
-
-// optionally qualified type constructor id name
-qtycon // : Lich.TyCon
-    : qconid     {{$$ = new Lich.TyCon($1, @$, yy.lexer.previous.qual);}}
-    | tycon      {{$$ = $1;}}
     ;
 
 // non-qualified data constructor id (or symbol in parentheses) name
@@ -472,34 +436,6 @@ gconsym // : object
     ;
 
 ////////////////////////////////////////////////////////////////////////////////
-// 4.1.2 Syntax of Types
-
-atype // : object
-    : gtycon                {{$$ = $1;}}
-    | tyvar                 {{$$ = $1;}}
-    | "(" type ")"          {{$$ = $2;}}
-    // TODO: incomplete
-    ;
-
-type // : object
-    : apptype               {{$$ = $1;}}
-    | apptype "->" type     {{$$ = new Lich.FunType([$1,$3],@$);}}
-    ;
-
-apptype // : object
-    : apptype atype     {{$$ = new Lich.AppType($1,$2,@$);}}
-                        //{{$1.push($2); $$ = $1;}}
-    | atype             {{$$ = $1;}}
-                        //{{$$ = [$1];}}
-    ;
-
-// optionally qualified type constructor, or a built-in type constructor
-gtycon // : object
-    : qtycon            {{$$ = $1;}}
-    // TODO: incomplete
-    ;
-
-////////////////////////////////////////////////////////////////////////////////
 // 3.17 Pattern Matching
 
 pat // : object
@@ -509,7 +445,7 @@ pat // : object
 
 lpat // : object
     : apat          {{$$ = $1;}}
-    | gcon apats    {{$$ = {name: "conpat", con: $1, pats: $2}; }}
+    | gcon apats    {{$$ = {astType: "conpat", con: $1, pats: $2}; }}
     // TODO: incomplete
     ;
 
@@ -523,13 +459,13 @@ apat // : object
     : var               {{$$ = $1; }}
     | gcon              {{$$ = $1; }}
     | literal           {{$$ = $1; }}
-    | '_'               {{$$ = {name:"wildcard", pos: @$}; }}
+    | '_'               {{$$ = {astType:"wildcard", pos: @$}; }}
     | tuple_pat         {{$$ = $1; }}
     | "(" pat ")"       {{$$ = $2; }}
     ;
 
 tuple_pat // object
-    :  "(" pat "," pat_list_1_comma ")" {{$4.unshift($2); $$ = {name: "tuple_pat", members: $4, pos: @$}; }}
+    :  "(" pat "," pat_list_1_comma ")" {{$4.unshift($2); $$ = {astType: "tuple_pat", members: $4, pos: @$}; }}
     ;
     
 pat_list_1_comma // : [pat]
@@ -541,10 +477,12 @@ pat_list_1_comma // : [pat]
 // Literals
 
 literal  // : object
-    : integer {{$$ = {name: "integer-lit", value: Number($1), pos: @$};}}
-    | string {{$$ = {name: "string-lit", value: $1, pos: @$};}}
-    | char {{$$ = {name: "char-lit", value: $1, pos: @$};}}
-    | float {{$$ = {name: "float-lit", value: Number($1), pos: @$};}}
+    : integer {{$$ = {astType: "integer-lit", value: Number($1), pos: @$};}}
+    | string {{$$ = {astType: "string-lit", value: $1, pos: @$};}}
+    | char {{$$ = {astType: "char-lit", value: $1, pos: @$};}}
+    | float {{$$ = {astType: "float-lit", value: Number($1), pos: @$};}}
+    | trueBool {{$$ = {astType: "boolean-lit", value: $1, pos: @$};}}
+    | falseBool {{$$ = {astType: "boolean-lit", value: $1, pos: @$};}}
     ;
 
 ////////////////////////////////////////////////////////////////////////////////
