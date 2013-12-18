@@ -280,7 +280,7 @@ function keyDown(thisEvent)
 		break;
 	}
 
-	broadcastTyping(document.getElementById("terminal").value);
+	broadcastTyping(document.getElementById("terminal"+clientName).value);
 }
 
 function keyUp(thisEvent)
@@ -300,6 +300,8 @@ function keyUp(thisEvent)
 		ctrlDown = false;
 		break;
 	}
+
+	broadcastTyping(document.getElementById("terminal"+clientName).value);
 }
 
 function parseCurrentLine()
