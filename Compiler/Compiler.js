@@ -189,8 +189,20 @@ Lich.compileDeclFun = function(ast)
 
 	else
 	{
-		Lich.VM.setVar(ast.ident, new LichClosure(ast.args, ast.rhs));
-		return Lich.VM.Void;
+		Lich.post("compileDeclFunc["+ast.ident+"]");
+
+		for(var i = 0; i < ast.args.length; ++i)
+		{
+			Lich.post("LichClosure.args["+i+"] = " + ast.args[i]);
+		}
+
+		var closure = lichClosure(ast.args, ast.rhs);
+		//closure = createPrimitive("_TEST_", [], function() {Lich.post("TEST PRIMITIVE!!!!!")});
+		Lich.post("Lich.compileDeclFunc.closure.lichType = " + closure.lichType);
+		Lich.VM.setVar(ast.ident, lichClosure(ast.args, ast.rhs));
+		Lich.post("Lich.VM.getVar(ast.ident).lichType = "+Lich.VM.getVar(ast.ident));
+		Lich.post("closure.invoke: " + closure.invoke(2));
+		return ast.ident;
 	}
 }
 
@@ -298,10 +310,17 @@ Lich.compileIte = function(ast)
 Lich.compileApplication = function(ast)
 {
 	Lich.post("Lich.compileApplication!");
+	Lich.post("Lich.compileApplication.ast.exps[0] = " + ast.exps[0].id);
 	var closure = Lich.compileAST(ast.exps[0]);
-	if(closure.type != "Closure")
+
+	for(var i = 0; i < ast.exps.length; ++i)
 	{
-		throw new Error("Unable to use application on an object of type " + ast.astType);
+		Lich.post(ast.exps[i].astType);
+	}
+
+	if(closure.lichType != CLOSURE)
+	{
+		throw new Error("Unable to use application on " + closure.astType);
 	}
 
 	else
@@ -312,13 +331,24 @@ Lich.compileApplication = function(ast)
 			args.push(Lich.compileAST(ast.exps[i]));
 		}
 
-		closure.invoke(args);
+		return closure.invoke(args);
 	}
 }
 
 Lich.compileLambda = function(ast)
 {
-	Lich.unsupportedSemantics(ast);
+	for(var i = 0; i < ast.args.length; ++i)
+	{
+		Lich.post("LichClosure.args["+i+"] = " + ast.args[i]);
+	}
+
+	var closure = lichClosure(ast.args, ast.rhs);
+	Lich.post("Lich.compileLambda closure.lichType = " + closure.lichType);
+	Lich.post("Lich.compileLambda ast.rhs.rhs.value = " + ast.rhs.rhs.value);
+	// Lich.VM.setVar(ast.ident, new LichClosure(ast.args, ast.rhs));
+	// Lich.post("Lich.VM.getVar(ast.ident).lichType = "+Lich.VM.getVar(ast.ident));
+	Lich.post("Lich.compileLambda.closure.invoke: " + closure.invoke([2]));
+	return closure;
 }
 
 Lich.compileLet = function(ast)
@@ -388,7 +418,7 @@ Lich.compileFloatLit = function(ast)
 
 Lich.compileVarName = function(ast)
 {
-	return Lich.VM.getVar(ast);
+	return Lich.VM.getVar(ast.id);
 }
 
 Lich.compileDacon = function(ast)

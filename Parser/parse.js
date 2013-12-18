@@ -40,21 +40,21 @@ Lich.parse = function(input) {
     {
       token = Lich.Lexer.lex();
       // Lich.post("Lich.Lexer.lex() = " + token.typ);
-      if(token != Lich.Lexer.EOF)
-        x.push(token);
-      else
+      if(token == Lich.Lexer.EOF)
         break;
+
+      x.push(token);
     }
 
     x.pop(); // Remove trailing EOF
 
-
+    /*
     for(var i = 0; i < x.length; ++i)
     {
       Lich.post("Jison lexer["+i+"] = { val: " + x[i].val + ", typ: " + x[i].typ + "}");
     }
     
-    /*
+
     for(var i = 0; i < z.length; ++i)
     {
       Lich.post("Peg lexer["+i+"] = { val: " + z[i].val + ", typ: " + z[i].typ + "}");

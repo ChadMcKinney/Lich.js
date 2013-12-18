@@ -12,6 +12,7 @@ Have two parsing modes. One for library code and one for interactive mode. Lib c
 // Dec 14, 2013
 
 Need to add the nice haskell list creation syntax. Examples:
+[1,2,3,4]
 [1..7]
 [2,5..99]
 

@@ -34,6 +34,7 @@ tab = "\t"
 ("-")?[0-9]+("."[0-9]+)?    return {val:yytext,typ:"float"};
 "False"|"false"             return {val:"false",typ:"False"};
 "True"|"true"               return {val:"true",typ:"True"};
+"->"                        return {val:"->",typ:"->"};
 "=="                        return {val:"==",typ:"=="};
 "/="                        return {val:"/=",typ:"/="};
 ">="                        return {val:">=",typ:">="};
@@ -406,7 +407,7 @@ aexp // : object
   | gcon                {{$$ = $1;}}
   | literal             {{$$ = $1;}}
   | "(" exp ")"         {{$$ = $2;}}
-  | '(' '-' exp ')'                {{$$ = {astType:"negate",rhs:$3};}}
+  | '(' '-' exp ')'     {{$$ = {astType:"negate",rhs:$3};}}
   | tuple               {{$$ = $1;}}
   | listexp             {{$$ = $1;}}
   // TODO: incomplete

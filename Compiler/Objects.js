@@ -35,73 +35,85 @@
 	either expressed or implied, of the FreeBSD Project.
 */
 
+
+var VOID = 0;
+var NOTHING = 1;
+var CLOSURE = 2;
+
 function LichVoid() // Non-return value for the VM. 
 {
-	this.type = "Void";
+	this.lichType = VOID;
 }
 
 // Haskell-like Nothing object
 function LichNothing()
 {
-	this.type = "Nothing";
+	this.lichType = NOTHING;
 	this.value = null;
 }
 
-function LichClosure(argNames, rhs, mutable, namespace)
+function lichClosure(argNames, rhs, mutable, namespace)
 {
-	this.argNames = argNames;
-	this.rhs = rhs;
-	this.namespace = typeof namespace !== "undefined" ? namespace : {};
-	this.type = "Closure";
-	this.mutable = typeof mutable !== "undefined" ? mutable : false;
+	var _argNames = argNames;
+	var _rhs = rhs;
+	var _namespace = typeof namespace !== "undefined" ? namespace : {};
+	var _mutable = typeof mutable !== "undefined" ? mutable : false;
 
-	this.hasVar = function(name)
-	{
-		return typeof this.namespace[name] !== "undefined";
-	}
+	return { // Resolves circular dependencies with Lich.compileAST
+		
+		lichType: CLOSURE,
 
-	this.getVar = function(name)
-	{
-		var res = this.namespace[name];
-		return typeof res !== "undefined" ? res : Lich.VM.Nothing;
-	}
-
-	this.setVar = function(name, value)
-	{
-		if(this.namespace.hasOwnProperty(name))
+		hasVar: function(name)
 		{
-			if(this.mutable)
-				this.namespace[name] = value;
+			return typeof _namespace[name] !== "undefined";
+		},
+
+		getVar: function(name)
+		{
+			var res = _namespace[name];
+			return typeof res !== "undefined" ? res : Lich.VM.Nothing;
+		},
+
+		setVar: function(name, value)
+		{
+			if(_namespace.hasOwnProperty(name))
+			{
+				if(_mutable)
+					_namespace[name] = value;
+				else
+					throw new Error("Unable to change immutable variable: " + name);
+			}
+
 			else
-				throw new Error("Unable to change immutable variable: " + name);
-		}
+			{
+				_namespace[name] = value;
+			}
+		},
 
-		else
+		invoke: function(args)
 		{
-			this.namespace[name] = value;
-		}
-	}
+			Lich.post("LichClosure.invoke(args) = " + args);
 
-	this.invoke = function(args)
-	{
-		var i;
-		for(i = 0; i < args.length && i < argNames.length; ++i)
-		{
-			this.namespace[this.argNames[i]] = args[i];
-		}
+			var i;
+			for(i = 0; i < args.length && i < argNames.length; ++i)
+			{
+				_namespace[_argNames[i]] = args[i];
+			}
 
-		if(i < this.argNames.length) // Partial application
-		{
-			Lich.post("Partial Application!!!");
-			return new LichClosure(this.argNames.slice(i, this.argNames.length), this.rhs, this.mutable, this.namespace);
-		}
+			if(i < _argNames.length) // Partial application
+			{
+				Lich.post("Partial Application!!!");
+				return new LichClosure(_argNames.slice(i, _argNames.length), _rhs, _mutable, _namespace);
+			}
 
-		else
-		{
-			Lich.VM.pushProcedure(this);
-			var res = Lich.compileAST(this.rhs);
-			Lich.VM.popProcedure();
-			return res;
+			else
+			{
+				Lich.post("LichClosure.invoke.rhs.astType = " + _rhs.astType);
+				Lich.VM.pushProcedure(this);
+				var res = Lich.compileAST(_rhs);
+				Lich.VM.popProcedure();
+				return res;
+			}
 		}
 	}
 }
@@ -109,5 +121,5 @@ function LichClosure(argNames, rhs, mutable, namespace)
 function createPrimitive(name, argNames, primitiveFunc)
 {
 	primitiveFunc.astType = "primitive";
-	Lich.VM.setVar(name, new LichClosure(argNames, primitiveFunc));
+	Lich.VM.setVar(name, lichClosure(argNames, primitiveFunc));
 }

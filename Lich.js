@@ -279,6 +279,8 @@ function keyDown(thisEvent)
 		
 		break;
 	}
+
+	broadcastTyping(document.getElementById("terminal").value);
 }
 
 function keyUp(thisEvent)
@@ -311,7 +313,6 @@ function parseCurrentLine()
 		var res = Lich.parse(str);
 		// Lich.post(Lich.showAST(res));
 		Lich.VM.Print(Lich.compileAST(res));
-		// broadcastTyping(document.getElementById("terminal").value);
 	}
 	
 	catch(e)

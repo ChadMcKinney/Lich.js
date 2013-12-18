@@ -39,7 +39,7 @@ var Lich = new Object();
 
 Lich.VM = new Object();
 Lich.VM.procedureStack = new Array();
-Lich.VM.main = new LichClosure([], null, true); // We allow mutability at the global scope in interactive mode.
+Lich.VM.main = lichClosure([], null, true); // We allow mutability at the global scope in interactive mode.
 Lich.VM.procedureStack.push(Lich.VM.main);
 Lich.VM.Nothing = new LichNothing(); // We only need one Nothing value because they're immutable and identical.
 Lich.VM.Void = new LichVoid(); // Same as Nothing, we only need one.
@@ -83,14 +83,8 @@ Lich.post = function post(text)
 
 Lich.VM.Print = function(object)
 {
-	if(typeof object == "boolean")
-		if(object)
-			Lich.post("True");
-		else
-			Lich.post("False");
-	else if(object == Lich.VM.Nothing)
+	if(object == Lich.VM.Nothing)
 		Lich.post("Nothing");
 	else if(object != Lich.VM.Void)
 		Lich.post(object);
-
 }
