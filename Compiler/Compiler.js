@@ -344,7 +344,14 @@ Lich.compileTuple = function(ast)
 
 Lich.compileListExp = function(ast)
 {
-	Lich.unsupportedSemantics(ast);
+	var res = new Array();
+
+	for(var i = 0; i < ast.members.length; ++i)
+	{
+		res.push(Lich.compileAST(ast.members[i]));
+	}
+
+	return res;
 }
 
 Lich.compileQop = function(ast)

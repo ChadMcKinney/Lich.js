@@ -129,3 +129,41 @@ function lesserEqual()
 }
 
 createPrimitive("<=", ["_L", "_R"], lesserEqual);
+
+function indexList()
+{
+	var list = Lich.VM.getVar("_L");
+
+	if(!(list instanceof Array))
+		throw new Error("indexing via !! can only be applied to lists.");
+
+	var res = list[Lich.VM.getVar("_R")];
+	return typeof res === "undefined" ? Lich.VM.Nothing : res;
+}
+
+createPrimitive("!!", ["_L", "_R"], indexList);
+
+
+function mapList()
+{
+	var func = Lich.VM.getVar("_L");
+	var list = Lich.VM.getVar("_R");
+
+	if(func.lichType != CLOSURE)
+		throw new Error("map can only be applied using: map function list");
+
+	if(!(list instanceof Array))
+		throw new Error("map can only be applied to lists.");
+
+	var res = new Array();
+
+	for(var i = 0; i < list.length; ++i)
+	{
+		res.push(func.invoke([list[i]]));
+	}
+
+	return res;
+}
+
+createPrimitive("map", ["_L", "_R"], mapList);
+
