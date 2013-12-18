@@ -22,7 +22,6 @@ All rights reserved.
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 */
 
-
 * {
 	margin : 0;
 	padding : 0;
@@ -38,7 +37,7 @@ body {
     font-family: Ubuntu Mono, DejaVu Sans Mono, Liberation Mono,Bitstream Vera Sans Mono,Consolas,Monaco,Lucida Console,Courier New, monospace;
 }
 
-#terminal,#terminal1,#terminal2,#terminal3, #post {
+.terminal, #post {
 	background-color: transparent;
 	color: white;
 	overflow: auto;
@@ -46,12 +45,13 @@ body {
 	border: none;
 	outline: 0;
 	outline: none;
-	font-size: 1.125em;
+	font-size: 100%;
 	font-family: Ubuntu Mono, DejaVu Sans Mono, Liberation Mono,Bitstream Vera Sans Mono,Consolas,Monaco,Lucida Console,Courier New, monospace;
 	/* background : black;
-	color: white; */
+	color: white; 
+	font-size: 1.125em;
+	*/
 	font-smooth: true;
-	z-index: 10;
 }
 
 #canvas {
@@ -78,15 +78,68 @@ body {
 	background-color: #00ccff;
 }
 
-#terminal,#terminal1,#terminal2,#terminal3 {
-	position: relative;
+#pageDiv,{
+	height: 100%;
+	width: 100%;
+	left: 0px;
+	top: 0px;
+}
+
+#textdiv,{
+	
 	height: 80%;
 	width: 100%;
 	left: 0px;
 	top: 0px;
-	/*width: 69.9%;
+	/*
+	position: relative;
+	width: 69.9%;
+	height: 100%;
+	border: 1px dotted red;
 	float: left;*/
 	padding-left: 0.2em;
+	-moz-box-sizing:border-box;
+    -webkit-box-sizing:border-box;
+    box-sizing:border-box;
+    resize:vertical;
+    
+}
+
+.terminal{
+	position: absolute;
+	width: 100%;
+	height: 0%;
+	top: 0px;
+	
+	padding: 0 0 0 0;
+	margin: 0 0 0 0;
+
+	z-index:10;
+
+	transition: height 2s;
+	-webkit-transition: height 2s,top 2s;
+	transition: height 2s,top 2s;
+	
+	-webkit-box-sizing:border-box;
+	   -moz-box-sizing:border-box;
+    		box-sizing:border-box;
+
+    -webkit-box-shadow: inset 1px 4px 9px -6px  rgba(200,200,255,0.25);;
+	   -moz-box-shadow: inset 1px 4px 9px -6px  rgba(200,200,255,0.25);;
+	        box-shadow: inset 1px 4px 9px -6px  rgba(200,200,255,0.25);;
+}
+
+.terminalName{
+	background-color: transparent;
+	color: white;
+	overflow: auto;
+	resize: none;
+	border: none;
+	outline: 0;
+	outline: none;
+	font-size: 100%;
+	font-family: Ubuntu Mono, DejaVu Sans Mono, Liberation Mono,Bitstream Vera Sans Mono,Consolas,Monaco,Lucida Console,Courier New, monospace;
+	font-smooth: true;
 }
 
 #post {
@@ -100,6 +153,7 @@ body {
 	padding-top: 0em;
 	padding-left: 0.2em;
 	color: rgb(48,144,144);
+	z-index:15;
 }
 
 #userName {

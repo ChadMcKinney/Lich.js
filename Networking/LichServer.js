@@ -9,8 +9,7 @@ var url = require("url"),
 app.listen(port);
 
 function handler(request, response) {
-  var 
-        uri = url.parse(request.url).pathname, 
+    var uri = url.parse(request.url).pathname, 
         filename = path.join(process.cwd(), uri);
 
     fs.exists = fs.exists || require('path').exists;
@@ -46,8 +45,18 @@ function handler(request, response) {
     });
 }
 
+var User = function(name, address)
+{
+    this.name = name;
+    this.address = address;
+}
+
+var users = [];
+
 //Setup websocket code
 io.sockets.on('connection', function (socket) {
+    var address = socket.handshake.address;
+    console.log("New connection from " + address.address + ":" + address.port);
 
     socket.on('Typing', function (id, text) {
         io.sockets.emit('TypingClient',id, text);
@@ -59,11 +68,91 @@ io.sockets.on('connection', function (socket) {
 
     socket.on('Login',function (name){
         socket.emit('LoginClient');
-    })
+    });
 
-    socket.on('LoginInfo', function (name){
-        console.log("Login information received for: " + name);
-    })
+    socket.on('LoginInfo', function(name)
+    {
+        loginInfo(name,address,socket);
+    });
+
+    socket.on('disconnect',function()
+    {
+        disconnect(socket,address);
+    });
 });
+
+function loginInfo(name,address,socket)
+{
+    console.log("Login information received for: " + name);
+
+    var newUser = new User(name,address);
+
+    if(!containsUsersWithThatName(newUser))
+    {
+        users.push(newUser);
+        io.sockets.emit('CurrentUsers',users);
+        printUsers();
+    }
+    else
+    {
+        socket.emit('NameTaken');
+    }
+}
+
+function disconnect(socket,address)
+{
+    var usersToDelete = [];
+
+    for (var i=0;i<users.length;i++)
+    { 
+        if(users[i].address == address)
+        {
+            usersToDelete.push(users[i]);
+            console.log("Disconnecting user:" + users[i].name + " - " + users[i].address.address + ":" + users[i].address.port);
+        }
+    }
+
+    for(i=0;i<usersToDelete.length;i++)
+    {
+        if( users.indexOf(usersToDelete[i]) > -1)
+        {
+            remove(users,usersToDelete[i]);
+        }
+    }
+
+    io.sockets.emit('CurrentUsers',users);
+    printUsers();
+}
+
+function containsUsersWithThatName(user)
+{
+    for (var i=0;i<users.length;i++)
+    { 
+        if(users[i].name == user.name)
+        {
+            return true;
+        }
+    }   
+
+    return false;
+}
+
+function printUsers()
+{
+    console.log("CurrentUsers:[\n");
+    for (var i=0;i<users.length;i++)
+    { 
+        console.log("   " + users[i].name + " - " + users[i].address.address + ":" + users[i].address.port + ",\n");
+    }
+    console.log("];\n");
+}
+
+function remove(arr, item) {
+      for(var i = arr.length; i--;) {
+          if(arr[i] === item) {
+              arr.splice(i, 1);
+          }
+      }
+  }
 
 console.log("Server running on port:" + port);
