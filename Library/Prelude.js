@@ -35,7 +35,10 @@
 	either expressed or implied, of the FreeBSD Project.
 */
 
-
+// Primitives are created by first creating a function that takes no arguments and returns some value.
+// That primitive attains arguments by getting them from the VM using Lich.VM.getVar("variableName");
+// next we use the create primitive function to actually add it to the VM using these arguments:
+// createPrimitive("primitiveName", ["Array","Of","Argument","Names"], primitiveFunction);
 
 function add()
 {
