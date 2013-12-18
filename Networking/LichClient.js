@@ -64,20 +64,45 @@ function currentUsers(newUsers)
             	{
 					input.rows = 1;	
 					input.style.width = "100%";
-					input.style.top = "110%";
-					input.style.zIndex = 10;
-					//setTimeout(function(){input.parentNode.removeChild(input);},3000);
+					//input.style.top = "110%";
+					input.style.height = "0%";
+					input.style.zIndex = 1;
+					//setTimeout(function(){input.parentNode.removeChild(input);},4000);
         		}
         	}
 		}
 
-		users = newUsers;
+		users = reorderUserArray(newUsers);
 		createTextAreas();
 	}
 	else
 	{
-		users = newUsers;
+		users = reorderUserArray(newUsers);
+		createTextAreas();
 	}
+
+	socket.emit('Typing',clientName, document.getElementById("terminal" + clientName).value);
+}
+
+function reorderUserArray(oldUsers)
+{
+	var newUsers = [];
+	var us;
+
+	for(i=0;i<oldUsers.length;i++)
+	{
+		if(oldUsers[i].name == clientName)
+		{
+			us = oldUsers[i];
+		}
+		else
+		{
+			newUsers.push(oldUsers[i]);
+		}
+	}
+
+	newUsers.push(us);
+	return newUsers;
 }
 
 function nameTaken()
@@ -142,7 +167,8 @@ function createTextArea(name,num,total)
 		input.spellcheck = false;
 		input.value = name + "'s terminal.";
 		input.readOnly = name != clientName;
-		
+		input.style.zIndex = 10;
+
 		div.appendChild(input);
 	}
 	else 
@@ -154,6 +180,8 @@ function createTextArea(name,num,total)
 	input.style.width = "100%";
 	input.style.top = (document.documentElement.clientHeight * 0.8 * (num/total)) + "px";
 	input.style.height = (document.documentElement.clientHeight * 0.8 * (1/total)) + "px";
+
+
 }
 
 ////////////////////////////////////////////////////////////////////////

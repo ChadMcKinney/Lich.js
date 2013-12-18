@@ -117,13 +117,29 @@ body {
 	z-index:10;
 
 	transition: height 2s;
-	-webkit-transition: height 2s;	
-	transition: top 2s;
-	-webkit-transition: top 2s;
+	-webkit-transition: height 2s,top 2s;
+	transition: height 2s,top 2s;
 	
-	-moz-box-sizing:border-box;
-    -webkit-box-sizing:border-box;
-    box-sizing:border-box;
+	-webkit-box-sizing:border-box;
+	   -moz-box-sizing:border-box;
+    		box-sizing:border-box;
+
+    -webkit-box-shadow: inset 1px 4px 9px -6px  rgba(200,200,255,0.25);;
+	   -moz-box-shadow: inset 1px 4px 9px -6px  rgba(200,200,255,0.25);;
+	        box-shadow: inset 1px 4px 9px -6px  rgba(200,200,255,0.25);;
+}
+
+.terminalName{
+	background-color: transparent;
+	color: white;
+	overflow: auto;
+	resize: none;
+	border: none;
+	outline: 0;
+	outline: none;
+	font-size: 100%;
+	font-family: Ubuntu Mono, DejaVu Sans Mono, Liberation Mono,Bitstream Vera Sans Mono,Consolas,Monaco,Lucida Console,Courier New, monospace;
+	font-smooth: true;
 }
 
 #post {
