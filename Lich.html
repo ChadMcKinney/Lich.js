@@ -155,9 +155,24 @@ This is terminal 3.
 
 --| Lich.js - A Networked Audio / Visual Live Coding Language
 
-let timesTen x = 20 + 10
+-- Recusion
+let fac n = if (n < 1) then 0 else (n + (fac (n - 1)))
+fac 1
+fac 5
+fac 50
 
-timesTen (timesTen 12) (\x y z -> x + y + z)
+-- Currying
+let add5 = add 5
+add5 0.1
+
+-- More Currying
+let vec3 x y z = x + y + z
+let vec2 = vec3 3
+let vec1 = vec2 2
+let vec = vec1 1
+
+let timesTen x = x * 10
+timesTen (timesTen 12)
 
 let ten = 10
 let ten elven = ten + 11

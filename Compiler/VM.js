@@ -83,7 +83,9 @@ Lich.post = function post(text)
 
 Lich.VM.Print = function(object)
 {
-	if(object == Lich.VM.Nothing)
+	if(object.lichType == CLOSURE)
+		printClosure(object);
+	else if(object == Lich.VM.Nothing)
 		Lich.post("Nothing");
 	else if(object != Lich.VM.Void)
 		Lich.post(object);

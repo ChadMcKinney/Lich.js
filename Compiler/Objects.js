@@ -52,6 +52,20 @@ function LichNothing()
 	this.value = null;
 }
 
+function printClosure(closure)
+{
+	var string = "(\\";
+
+	for(var i = 0; i < closure.argNames.length; ++i)
+	{
+		string = string.concat(closure.argNames[i] + " ");
+	}
+
+	string = string.concat("->)");
+
+	Lich.post(string);
+}
+
 function lichClosure(argNames, rhs, mutable, namespace)
 {
 	var _argNames = argNames;
@@ -62,6 +76,8 @@ function lichClosure(argNames, rhs, mutable, namespace)
 	return { // Resolves circular dependencies with Lich.compileAST
 		
 		lichType: CLOSURE,
+
+		argNames: _argNames,
 
 		hasVar: function(name)
 		{
@@ -92,8 +108,6 @@ function lichClosure(argNames, rhs, mutable, namespace)
 
 		invoke: function(args)
 		{
-			Lich.post("LichClosure.invoke(args) = " + args);
-
 			var i;
 			for(i = 0; i < args.length && i < argNames.length; ++i)
 			{
@@ -102,13 +116,11 @@ function lichClosure(argNames, rhs, mutable, namespace)
 
 			if(i < _argNames.length) // Partial application
 			{
-				Lich.post("Partial Application!!!");
-				return new LichClosure(_argNames.slice(i, _argNames.length), _rhs, _mutable, _namespace);
+				return new lichClosure(_argNames.slice(i, _argNames.length), _rhs, _mutable, _namespace);
 			}
 
 			else
 			{
-				Lich.post("LichClosure.invoke.rhs.astType = " + _rhs.astType);
 				Lich.VM.pushProcedure(this);
 				var res = Lich.compileAST(_rhs);
 				Lich.VM.popProcedure();
