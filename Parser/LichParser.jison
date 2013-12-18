@@ -32,6 +32,8 @@ tab = "\t"
 "--".*|"{-".*"-}"       {/* skip whitespace and comments */}
 \s+                         return {val:yytext};
 ("-")?[0-9]+("."[0-9]+)?    return {val:yytext,typ:"float"};
+"["                         return {val:"[",typ:"["};
+"]"                         return {val:"]",typ:"]"};
 "False"|"false"             return {val:"false",typ:"False"};
 "True"|"true"               return {val:"true",typ:"True"};
 "->"                        return {val:"->",typ:"->"};
@@ -62,6 +64,7 @@ tab = "\t"
 ":"                         return {val:":",typ:":"};
 "::"                        return {val:"::",typ:"::"};
 ","                         return {val:",",typ:","};
+"`"                         return {val:"`",typ:"`"};
 <<EOF>>                     return {val:"EOF",typ:"EOF"};
 "where"                     return {val:"where",typ:"where"};
 "if"                        return {val:"if",typ:"if"};
@@ -355,7 +358,7 @@ lexp // : object
   | "case" exp "of" "{" alts "}"    {{$$ = {astType:"case", exp: $2, alts: $5, pos: @$}; }}
   | "let" decls "in" exp            {{$$ = {astType:"let", decls: $2, exp: $4, pos: @$}; }}
   | "let" decl                      {{$$ = {astType:"let-one", decl: $2, pos: @$}; }}
-  | exp qop lexp                    {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
+  | exp qop lexp                    {{$$ = {astType:"binop-exp",op:($2).id.id,lhs:$1,rhs:$3,pos:@$};}}
   ;
 
 // list of 1 or more 'aexp' without separator

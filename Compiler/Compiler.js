@@ -411,6 +411,7 @@ Lich.compileBooleanLit = function(ast)
 
 Lich.compileBinOpExp = function(ast)
 {
+
 	var op = Lich.VM.getVar(ast.op); // Lookup function for operator
 
 	if(op == Lich.VM.Nothing)
