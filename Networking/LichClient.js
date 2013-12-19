@@ -46,7 +46,7 @@ function login()
   	{
   		socket.emit('LoginInfo',clientName);
   	}
-  	
+
   	initGame();
 }
 
@@ -67,8 +67,9 @@ function currentUsers(newUsers)
 					input.rows = 1;	
 					input.style.width = "100%";
 					//input.style.top = "110%";
-					input.style.height = "0%";
-					input.style.zIndex = 1;
+					//input.style.height = "0%";
+					input.style.zIndex = "1";
+					input.style.opacity = "0.0";
 					//setTimeout(function(){input.parentNode.removeChild(input);},4000);
         		}
         	}
@@ -130,8 +131,11 @@ function connectToWebSocketServer()
 	socket.on('LoginClient', login);
 	socket.on('CurrentUsers', currentUsers);
 	socket.on('NameTaken', nameTaken);
+	socket.on('ChatClient', newChat);
 
 	socket.emit('Login');
+
+	initChat();
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -156,9 +160,9 @@ function removeTextArea()
 function createTextArea(name,num,total)
 {
 	var div = document.getElementById("textdiv");	
-	var input;
+	var input = document.getElementById("terminal"+name);
 	
-	if(document.getElementById("terminal"+name) == null)
+	if( input == null)
 	{
 		input = document.createElement("textarea");
 		input.className = "terminal";
@@ -173,17 +177,44 @@ function createTextArea(name,num,total)
 
 		div.appendChild(input);
 	}
-	else 
-	{
-		input = document.getElementById("terminal"+name);
-	}
 		
 	input.rows = 1;	
 	input.style.width = "100%";
+	input.style.opacity = "1.0";
 	input.style.top = (document.documentElement.clientHeight * 0.8 * (num/total)) + "px";
 	input.style.height = (document.documentElement.clientHeight * 0.8 * (1/total)) + "px";
+}
 
+function hideTextAreas()
+{
+	for (var i=0;i<users.length;i++)
+	{ 
+		var input = document.getElementById("terminal"+users[i].name);
+		
+		if(input!= null)
+		{
+			input.style.opacity = "0.0";
+		}
+	}
 
+	var postArea = document.getElementById("post");
+	postArea.style.opacity = "0.0";
+}
+
+function showTextAreas()
+{
+	for (var i=0;i<users.length;i++)
+	{ 
+		var input = document.getElementById("terminal"+users[i].name);
+		
+		if(input!= null)
+		{
+			input.style.opacity = "1.0";
+		}
+	}
+
+	var postArea = document.getElementById("post");
+	postArea.style.opacity = "1.0";
 }
 
 ////////////////////////////////////////////////////////////////////////

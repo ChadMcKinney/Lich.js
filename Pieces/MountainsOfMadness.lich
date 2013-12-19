@@ -1,0 +1,13 @@
+blank     = "_"
+wall      = "+"
+dungeon   = "."
+cave      = ","
+library   = "L"
+dark      = "?"
+bridge    = "="
+
+tile x y t = [x,y,t]
+initMap xSize ySize = map (\x -> map (\y -> tile x y "_") (0..xSize)) (0..ySize)
+zorkMap = initMap 20 20
+
+--( zorkMap !! 0 ) !! 1
