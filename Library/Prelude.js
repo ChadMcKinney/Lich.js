@@ -40,6 +40,20 @@
 // next we use the create primitive function to actually add it to the VM using these arguments:
 // createPrimitive("primitiveName", ["Array","Of","Argument","Names"], primitiveFunction);
 
+function chatPrimitive()
+{
+	var chatString = Lich.VM.getVar("_R");
+
+	if(!(typeof chatString === "string"))
+		throw new Error("chat can only be applied to strings!");
+
+	sendChat(chatString);
+
+	return Lich.VM.Void;
+}
+
+createPrimitive("chat", ["_R"], chatPrimitive);
+
 function add()
 {
 	return Lich.VM.getVar("_L") + Lich.VM.getVar("_R");
