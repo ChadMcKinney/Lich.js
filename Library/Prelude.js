@@ -162,11 +162,49 @@ function mapList()
 
 	for(var i = 0; i < list.length; ++i)
 	{
-		res.push(func.invoke([list[i]]));
+		// Iterate over each item in the list and invoke the function passing [item]. It must be as an array to work correctly.
+		res.push(func.invoke([list[i]])); 
 	}
 
 	return res;
 }
 
 createPrimitive("map", ["_L", "_R"], mapList);
+
+
+function consList()
+{
+	var value = Lich.VM.getVar("_L");
+	var list = Lich.VM.getVar("_R");
+
+	if(!(list instanceof Array || typeof list === "string"))
+		throw new Error("Cons can only be applied to lists.");
+
+	var res;
+
+	if(value instanceof Array && list instanceof Array 
+		|| typeof value === "string" && typeof list === "string")
+		res = value.concat(list);
+	else
+		res = [value].concat(list);
+
+	return typeof res === "undefined" ? Lich.VM.Nothing : res;
+}
+
+createPrimitive(":", ["_L", "_R"], consList);
+
+function concatList()
+{
+	var list = Lich.VM.getVar("_L");
+	var value = Lich.VM.getVar("_R");
+
+	if(!(list instanceof Array || typeof list === "string"))
+		throw new Error("Concat can only be applied to lists.");
+
+	var res = list.concat(value);
+
+	return typeof res === "undefined" ? Lich.VM.Nothing : res;
+}
+
+createPrimitive("++", ["_L", "_R"], concatList);
 

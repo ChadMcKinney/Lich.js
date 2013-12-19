@@ -48,6 +48,7 @@ tab = "\t"
 "*"                         return {val:"*",typ:"*"};
 "/"                         return {val:"/",typ:"/"};
 "-"                         return {val:"-",typ:"-"};
+"++"                        return {val:"++",typ:"++"};
 "+"                         return {val:"+",typ:"+"};
 "^"                         return {val:"^",typ:"^"};
 "="                         return {val:"=",typ:"="};
@@ -115,9 +116,11 @@ qconsym = qs:(conid ".")+ ref:((!"." consym) !".") {qs = flatten(qs).join(""); r
 %left '+' '-' '%'
 %left '*' '/'
 %left '^'
+%left '++'
 //%left '==' '>' '<' 
 //%left '/=' '>=' '<='
 //%left UMINUS
+%right ':'
 
 
 %start start_
@@ -328,6 +331,9 @@ exp // : object
   | exp ">=" exp        {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
   | exp "<=" exp        {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
   | exp "!!" exp        {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
+  | exp ":" exp         {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
+  | exp "++" exp        {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
+  | "[" "]"             {{ $$ = {astType: "listexp", members: [], pos: @$}; }}
   ;
 
 /*
@@ -522,8 +528,8 @@ qvar // : Lich.VarName
     ;
 
 gconsym // : object
-    : ':'           {{$$ = new Lich.ConsDaCon(@$);}}
-    | qconsym       {{$$ = new Lich.DaCon($1, @$, true, yy.lexer.previous.qual);}}
+    //: ':'           {{$$ = new Lich.ConsDaCon(@$);}}
+    : qconsym       {{$$ = new Lich.DaCon($1, @$, true, yy.lexer.previous.qual);}}
     ;
 
 ////////////////////////////////////////////////////////////////////////////////
