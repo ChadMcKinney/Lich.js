@@ -456,8 +456,6 @@ Lich.compileListRange = function(ast)
 	if(typeof lower !== "number" || typeof skip !== "number" || typeof skip !== "number")
 		throw new Error("List range syntax can only be used with numbers.");
 
-	Lich.post("Lich.compileListRange lower: " + lower + ", upper: " + upper + ", skip: " + skip);
-
 	var array = new Array();
 
 	if(skip <= 0)
