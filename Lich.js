@@ -221,6 +221,8 @@ function keyDown(thisEvent)
 	switch(thisEvent.keyCode)
 	{
 	case 9: // Tab key
+		// Prevent line return in the textarea. We have to check which method to use. Web development is fun. Yaaay.......
+		(arguments[0].preventDefault) ? arguments[0].preventDefault() : arguments[0].returnValue = false;
 		return tab();
 		break;
 
