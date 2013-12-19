@@ -141,6 +141,8 @@ Lich.compileAST = function(ast)
 				break;
 			case "negate":
 				return Lich.compileNegate(ast);
+			case "listrange":
+				return Lich.compileListRange(ast);
 			default:
 				Lich.unsupportedSemantics(ast);
 				break;
@@ -430,4 +432,49 @@ Lich.compileBinOpExp = function(ast)
 Lich.compileNegate = function(ast)
 { 
 	return Lich.VM.getVar("subtract").invoke([0, Lich.compileAST(ast.rhs)]);
+}
+
+Lich.compileListRange = function(ast)
+{
+	var lower = Lich.compileAST(ast.lower);
+	var upper = Lich.compileAST(ast.upper);
+	var skip = 0;
+
+	if(typeof ast.skip == "undefined")
+	{
+		if(lower < upper)
+			skip = 1;
+		else
+			skip = -1;
+	}
+	
+	else
+	{
+		skip = Lich.compileAST(ast.skip) - lower;
+	}
+
+	if(typeof lower !== "number" || typeof skip !== "number" || typeof skip !== "number")
+		throw new Error("List range syntax can only be used with numbers.");
+
+	var array = new Array();
+
+	if(skip <= 0)
+	{
+		for(var i = lower; i >= upper; i += skip)
+		{
+			array.push(i);
+		}
+
+		return array;
+	}
+
+	else
+	{
+		for(var i = lower; i <= upper; i += skip)
+		{
+			array.push(i);
+		}
+
+		return array;
+	}
 }

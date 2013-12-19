@@ -59,6 +59,7 @@ tab = "\t"
 "#"                         return {val:"#",typ:"#"};
 "$"                         return {val:"$",typ:"$"};
 "&"                         return {val:"&",typ:"&"};
+".."                         return {val:"..",typ:".."};
 "."                         return {val:".",typ:"."};
 "@"                         return {val:"@",typ:"@"};
 "\\"                        return {val:"\\",typ:"\\"};      
@@ -334,6 +335,8 @@ exp // : object
   | exp ":" exp         {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
   | exp "++" exp        {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
   | "[" "]"             {{ $$ = {astType: "listexp", members: [], pos: @$}; }}
+  | "[" exp ".." exp "]"         {{ $$ = {astType: "listrange", lower: $2, upper: $4, pos: @$}; }}
+  | "[" exp "," exp ".." exp "]" {{ $$ = {astType: "listrange", lower: $2, upper: $6, skip: $4, pos: @$}; }}
   ;
 
 /*
