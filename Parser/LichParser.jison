@@ -335,8 +335,6 @@ exp // : object
   | exp ":" exp         {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
   | exp "++" exp        {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
   | "[" "]"             {{ $$ = {astType: "listexp", members: [], pos: @$}; }}
-  | "[" exp ".." exp "]"         {{ $$ = {astType: "listrange", lower: $2, upper: $4, pos: @$}; }}
-  | "[" exp "," exp ".." exp "]" {{ $$ = {astType: "listrange", lower: $2, upper: $6, skip: $4, pos: @$}; }}
   ;
 
 /*
@@ -434,6 +432,8 @@ tuple // : object
 
 listexp // : object
     : "[" list_exp_1_comma "]" {{ $$ = {astType: "listexp", members: $2, pos: @$}; }}
+    | "(" exp ".." exp ")"         {{ $$ = {astType: "listrange", lower: $2, upper: $4, pos: @$}; }}
+    | "(" exp "," exp ".." exp ")" {{ $$ = {astType: "listrange", lower: $2, upper: $6, skip: $4, pos: @$}; }}
     ;
 
 list_exp_1_comma
