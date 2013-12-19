@@ -120,7 +120,7 @@ function getInputSelection(el)
 
 function getCaretPosition () 
 {
-	var ctrl = document.getElementById("terminal"+clientName);
+	var ctrl = document.getElementById("terminal");
 	var CaretPos = 0;	// IE Support
 	
 	if(document.selection) 
@@ -140,7 +140,7 @@ function getCaretPosition ()
 
 function setCaretPosition(pos)
 {
-	var ctrl = document.getElementById("terminal"+clientName);
+	var ctrl = document.getElementById("terminal");
 	
 	if(ctrl.setSelectionRange)
 	{
@@ -162,7 +162,7 @@ function insertText(text, caretOffset) // Text to insert, offset for caret after
 {
 	var currentCaretPosition, newCaretPosition, textarea;
 	currentCaretPosition = getCaretPosition();
-	textarea = document.getElementById("terminal"+clientName);
+	textarea = document.getElementById("terminal");
     newCaretPosition = currentCaretPosition + text.length;
     
     textarea.value = textarea.value.substring(0, currentCaretPosition) + text 
@@ -180,8 +180,8 @@ function tab()
 
 function login()
 {
-	//loginName = document.getElementById("userName").value;
-	Lich.post("Logging in as user: "+clientName);
+	loginName = document.getElementById("userName").value;
+	Lich.post("Logging in as user: "+loginName);
 }
 
 function currentLine(name)
@@ -229,8 +229,6 @@ function keyDown(thisEvent)
 		if(ctrlDown)
 		{
 			parseCurrentLine();
-			// Prevent line return in the textarea. We have to check which method to use. Web development is fun. Yaaay.......
-			(arguments[0].preventDefault) ? arguments[0].preventDefault() : arguments[0].returnValue = false;
         	return false; // do nothing
 		}
 	
@@ -241,15 +239,14 @@ function keyDown(thisEvent)
 		shiftDown = true;
 		break;
 
-		/*
 	case 57:
 
 		if(shiftDown) // ( begin parentheses
 		{
-			return insertText(")", -1);
+			return insertText("()", -1);
 		}
 
-		break;*/
+		break;
 
 	case 17: // Ctrl
 	case 18: // alt
@@ -259,11 +256,10 @@ function keyDown(thisEvent)
 		ctrlDown = true;
 		break;
 
-		/*
 	case 219: // [ square bracket
-		if(!shiftDown) // ( begin square bracket
+		if(!shiftDown) // ( begin parentheses
 		{
-			return insertText("]", -1);
+			return insertText("[]", -1);
 		}
 
 		break;
@@ -278,13 +274,11 @@ function keyDown(thisEvent)
 
 		// else // ' single
 		if(!shiftDown) {
-			return insertText("'", -1);
+			return insertText("''", -1);
 		}
 		
-		break;*/
+		break;
 	}
-
-	broadcastTyping(document.getElementById("terminal"+clientName).value);
 }
 
 function keyUp(thisEvent)
@@ -304,26 +298,328 @@ function keyUp(thisEvent)
 		ctrlDown = false;
 		break;
 	}
-
-	broadcastTyping(document.getElementById("terminal"+clientName).value);
 }
 
 function parseCurrentLine()
 {
 	var tokens, objects, line,str;
-	line = currentLine("terminal"+clientName);
+	line = currentLine("terminal");
 	str = line.line;
 
 	try
 	{
 		var res = Lich.parse(str);
-		// Lich.post(Lich.showAST(res));
+		Lich.post(Lich.showAST(res));
 		Lich.VM.Print(Lich.compileAST(res));
 	}
 	
 	catch(e)
 	{
 		Lich.post(e);
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Lich Virtual Machine
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// Lich machine commands
+var OP_NOP = 0;
+var OP_VOID = 1; 
+var OP_COMPEQ = 2;
+var OP_COMPNEQ = 3;
+var OP_COMPGT = 4;
+var OP_COMPLT = 5;
+var OP_COMPGTEQ = 6;
+var OP_COMPLTEQ = 7;
+var OP_PLUS = 8;
+var OP_MINUS = 9;
+var OP_MUL = 10;
+var OP_DIVIDE = 11;
+var OP_NEG = 12;
+var OP_POW = 13;
+var OP_MOD = 14
+var OP_IF = 15;
+var OP_ASSIGN = 16;
+var OP_FUNCASSIGN = 17;
+var OP_FUNCINVOKE = 18;
+
+// Parse Node types
+var NODE_OP = 19;
+var NODE_VAR = 20;
+var NODE_CONST = 21;
+var NODE_FUNC = 22;
+var NODE_LIST = 23;
+var NODE_ARGLIST = 24;
+var NODE_EXPRLIST = 25;
+
+// Object types
+var LICH_CLOSURE = 26;
+
+// Parse node, these are used to combine AST creation and code generation as this is just a simple script language.
+function node()
+{
+	var type;
+	var value;
+	var children;
+}
+
+function createNode(type, value, children)
+{
+	var n = new node();
+	n.type = type;
+	n.value = value;
+	n.children = new Array();
+
+	for(var i = 2; i < arguments.length; ++i)
+	{
+		n.children.push(arguments[i]);
+	}
+
+	return n;
+}
+
+function LichClosure(parameterNames, expression, namespace, definedArguments)
+{
+	this.parameterNames = parameterNames ? parameterNames : new Array();
+	this.numArgs = this.parameterNames.size;
+	this.definedArguments = definedArguments ? definedArguments : 0;
+	this.namespace = namespace ? namespace : {};
+	this.type = LICH_CLOSURE;
+	this.expression = expression;
+
+	this.invoke = function(parameterValues)
+	{
+		for(var i = definedArguments; i < parameterValues.length; ++i)
+		{
+			this.namespace[this.parameterNames[i]] = parameterValues[i];
+			this.definedArguments += 1;
+		}
+
+		if(this.definedArguments < this.parameterNames.length) // This allows partial application
+		{
+			return new LichClosure(this.parameterNames, this.expression, this.namespace, this.definedArguments);
+		}
+
+		else
+		{
+			LichVM.pushScope(this.namespace);
+			var result = LichVM.interpretNode(this.expression);
+			LichVM.popScope();
+			return result;
+		}
+	}
+}
+
+function lichVirtualMachine()
+{
+	this.namespace = {};
+	this.scopeStack = new Array();
+
+	// pushScope and popScope allow for 
+	this.pushScope = function(scope)
+	{
+		this.scopeStack.push(scope);
+	}
+
+	this.popScope = function()
+	{
+		this.scopeStack.pop();
+	}
+	
+	this.getVar = function(varName) // Dynamically check scopes for a variable's value
+	{
+		var v = null;
+		
+		for(var i = this.scopeStack.length - 1; i >= 0; --i)
+		{
+			if(this.scopeStack[i][varName] != undefined)
+				return this.scopeStack[i][varName];
+		}
+
+		v = this.namespace[varName];
+
+		if(v == undefined)
+			v = null;
+
+		// Lich.post("LichVM.getVar("+varName+") = " + v);
+		return v;
+	}
+
+	this.setVar = function(varName, value)
+	{
+		// Lich.post("LichVM.setVar("+varName+") = " + value);
+
+		if(this.scopeStack.length > 0)
+		 	this.scopeStack[this.scopeStack.length - 1][varName] = value;
+		else
+			this.namespace[varName] = value;
+	}
+
+	this.executeOperation = function(node)
+	{
+		switch(node.value)
+		{
+			case OP_NOP:
+			case OP_VOID:
+				return null;
+				break;
+
+			case OP_COMPEQ:
+				return this.interpretNode(node.children[0]) == this.interpretNode(node.children[1]);
+				break;
+
+			case OP_COMPNEQ:
+				return this.interpretNode(node.children[0]) != this.interpretNode(node.children[1]);
+				break;
+
+			case OP_COMPGT:
+				return this.interpretNode(node.children[0]) > this.interpretNode(node.children[1]);
+				break;
+
+			case OP_COMPLT:
+				return this.interpretNode(node.children[0]) < this.interpretNode(node.children[1]);
+				break;
+
+			case OP_COMPGTEQ:
+				return this.interpretNode(node.children[0]) >= this.interpretNode(node.children[1]);
+				break;
+
+			case OP_COMPLTEQ:
+				return this.interpretNode(node.children[0]) <= this.interpretNode(node.children[1]);
+				break;
+
+			case OP_PLUS:
+				return this.interpretNode(node.children[0]) + this.interpretNode(node.children[1]);
+				break;
+
+			case OP_MINUS:
+				return this.interpretNode(node.children[0]) - this.interpretNode(node.children[1]);
+				break;
+
+			case OP_MUL:
+				return this.interpretNode(node.children[0]) * this.interpretNode(node.children[1]);
+				break;
+
+			case OP_DIVIDE:
+				return this.interpretNode(node.children[0]) / this.interpretNode(node.children[1]);
+				break;
+
+			case OP_NEG:
+				return -this.interpretNode(node.children[0]);
+				break;
+
+			case OP_POW:
+				return Math.pow(this.interpretNode(node.children[0]), this.interpretNode(node.children[1]));
+				break;
+
+			case OP_MOD:
+				return this.interpretNode(node.children[0]) % this.interpretNode(node.children[1]);
+				break;
+
+			case OP_IF:
+				if(this.interpretNode(node.children[0]))
+					return this.interpretNode(node.children[1]);
+				else
+					return this.interpretNode(node.children[2]);
+				break;
+
+			case OP_ASSIGN:
+				var value = this.interpretNode(node.children[1]);
+				this.setVar(node.children[0], value);
+				return value;
+				break;
+
+			case OP_FUNCASSIGN:
+				var argList = this.interpretNode(node.children[1]);
+				var func = new LichClosure(argList, node.children[2]); // parameterNames, expression, namespace, definedArguments
+				func = func.invoke(new Array());
+				this.setVar(node.children[0], func);
+				return func;
+				break;
+
+			case OP_FUNCINVOKE:
+				var closure = this.getVar(node.children[0]);
+				
+				if(closure.type == LICH_CLOSURE) // Check to see if the result has been collapsed or not
+				{
+					var parameterValues = this.interpretNode(node.children[1]);
+					return closure.invoke(parameterValues);
+				}
+
+				else // It's been collapsed, just return the result directly
+				{
+					return closure;
+				}
+
+				break;
+
+			default:
+				return node; // Raw values
+				break;
+		}
+	}
+
+	this.interpretNode = function(node)
+	{
+		if(node == null)
+			return null;
+
+		switch(node.type)
+		{
+			case NODE_OP:
+				return this.executeOperation(node);
+				break;
+
+			case NODE_VAR:
+				return LichVM.getVar(node.value);
+				break;
+
+			case NODE_FUNC:
+				return LichVM.getVar(node.value);
+				break;
+			
+			case NODE_CONST:
+				return node.value;
+				break;
+
+			case NODE_ARGLIST:
+				var args = new Array();
+				args.push(node.value);
+				
+				for(var i = 0; i < node.children.length; ++i)
+				{
+					var val = this.interpretNode(node.children[i]);
+					if(val != undefined)
+						args.push(val);
+				}
+				
+				return args;
+				break;
+
+			case NODE_EXPRLIST:
+				var exprs = new Array();
+				
+				for(var i = 0; i < node.children.length; ++i)
+				{
+					var val = this.interpretNode(node.children[i]);
+					if(val != undefined)
+						exprs.push(val);
+				}
+				
+				return exprs;
+				break;
+
+			default:
+				return node;
+				break;				
+		}
+	}
+
+	this.compileProgram = function(program)
+	{
+		this.state = this.interpretNode(program);
+		Lich.post(this.state);
 	}
 }
 
@@ -6860,5 +7156,5 @@ function compileLich()
 
 function compileLich()
 {
-	// COMPILE THE DEFAULT LIBRARY HERE!
+	LichVM = new lichVirtualMachine();
 }

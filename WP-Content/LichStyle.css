@@ -64,9 +64,16 @@ body {
 	z-index: -10;
 }
 
-::selection {
-  background: #00ccff; /* -webkit browser*/
+textarea::selection {
+  	color: #000000;
+	background: #00ccff;
 }
+
+::selection {
+  	color: #000000;
+	background-color: #00ccff;
+}
+
 
 ::-moz-selection {
 	color: #000000;

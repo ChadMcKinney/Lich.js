@@ -12,6 +12,7 @@ Have two parsing modes. One for library code and one for interactive mode. Lib c
 // Dec 14, 2013
 
 Need to add the nice haskell list creation syntax. Examples:
+[1,2,3,4]
 [1..7]
 [2,5..99]
 
@@ -38,16 +39,6 @@ map (+2) [1,2,3]
 
 
 //////////////////////////////
-// end line comments broken
-// Dec 13, 2013
-
-Comments at the end of lines aren't correctly ignored. Example:
-
-1 + 2 -- Commenting is cool!
-
-
-
-//////////////////////////////
 // Multiple let declarations
 // Dec 14, 2013
 
@@ -56,3 +47,18 @@ let one = 1
 let two = 2
 
 
+//////////////////////////////
+// Let In Statements
+// Dec 17, 2013
+
+Let In statements don't parse. Example:
+
+let x = 20 in x + y
+
+
+//////////////////////////////
+// Strings in where statement
+// Dec 17, 2013
+
+Strings in a where statement don't parse correctly. This is because of the formatting fix I made to allow for spaces in a string, such as "Hello, world."
+The solution needs to allow for both spaces in strings and string in where statements and likely any other kind of indented syntax.

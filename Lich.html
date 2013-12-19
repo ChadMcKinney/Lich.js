@@ -89,6 +89,9 @@
 	<script src="third-party/three.js/shaders/VerticalTiltShiftShader.js"></script>
 	<script src="third-party/three.js/shaders/VignetteShader.js"></script>
 
+	<script type="text/javascript" src="Compiler/Objects.js"></script>
+	<script type="text/javascript" src="Compiler/VM.js"></script>
+	<script type="text/javascript" src="Compiler/Compiler.js"></script>
 	<script type="text/javascript" src="Soliton.js/Soliton.js"></script>
 	<script type="text/javascript" src="CloudChamber.js/CloudChamber.js"></script>
 	<script type="text/javascript" src="CloudChamber.js/MarchingCubes.js"></script>
@@ -101,8 +104,8 @@
 	<script type="text/javascript" src="Parser/iterL.js"></script>
 	<script type="text/javascript" src="Parser/parse.js"></script>
 	<script type="text/javascript" src="Parser/LichParser.js"></script>
+	<script type="text/javascript" src="Library/Prelude.js"></script>
 	<script type="text/javascript" src="Lich.js"></script>
-
 	<script type="text/javascript" src="Networking/LichClient.js"></script>
 	<script type="text/javascript" src="Pieces/OpenField.js"></script>
 
@@ -112,24 +115,24 @@
 
 	<canvas id="canvas">
 
-	</canvas>
+    </canvas>
 
-	<div id="pageDiv">
-	
-	<div id="textdiv">
-	</div>
-	
-	<textarea id="post" rows="6" spellcheck="false" readonly="true">Lich.js&#10;</textarea>
-	
-	</div>
-	
-	<script LANGUAGE="JavaScript" type="text/javascript">
-		compileLich();
-	</script>
-	<script src="http://173.203.102.166:80/socket.io/socket.io.js"></script>
-	<script LANGUAGE="JavaScript" type="text/javascript">
-  		connectToWebSocketServer();
-	</script>
+    <div id="pageDiv">
+        
+    <div id="textdiv">
+    </div>
+        
+    <textarea id="post" rows="6" spellcheck="false" readonly="true">Lich.js&#10;</textarea>
+        
+    </div>
+        
+    <script LANGUAGE="JavaScript" type="text/javascript">
+            compileLich();
+    </script>
+    <script src="http://173.203.102.166:80/socket.io/socket.io.js"></script>
+    <script LANGUAGE="JavaScript" type="text/javascript">
+              connectToWebSocketServer();
+    </script>
 
 </body>
 

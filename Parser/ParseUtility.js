@@ -1,20 +1,9 @@
 /*
 
  	Utility objects/functions for Lich parsing
-	Most of this is taken from the Lich project, modified for use with the Lich language. 
+	Most of this is taken from the JSHC project, modified for use with the Lich language. 
 */
 
-function post(text)
-{
-	var obj = document.getElementById("post");
-	var appendedText = document.createTextNode(text + "\n");
-	obj.appendChild(appendedText);
-	obj.scrollTop = obj.scrollHeight;
-}
-
-
-var Lich = new Object();
-Lich.post = post;
 Lich.Parser = new Object() // Global Lich object for lexing/parsing
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -43,7 +32,7 @@ assert.AssertionError = function(obj){
        //document.write("key:"+k+",value:"+err[k]+"<br>");
     }
 
-    this.name = "AssertionError";
+    this.astType = "AssertionError";
 
     if( obj !== undefined ){
         this.message = obj.message;
@@ -131,7 +120,7 @@ Lich.Name.prototype.equal = function(other){
 
 // no location parameter as module names are never qualified and always global.
 Lich.ModName = function(id,pos){
-    this.name = "modname";
+    this.astType = "modname";
     this.id = id;
     if( pos !== undefined ){
         this.pos = pos;
@@ -170,7 +159,7 @@ Lich.ModName.prefixes = function(id){
 ////////////////////////////////////////////////////////////////////////////////
 
 Lich.TyCls = function(id,pos,loc){
-    this.name = "tycls";
+    this.astType = "tycls";
     if( loc !== undefined ){
         this.loc = loc;
         if( id.substr(0,loc.length) == loc ){
@@ -200,7 +189,7 @@ Lich.TyCls.prototype.toString = Lich.TyCls.prototype.toStringN;
 
 // no location parameter as they are never top-level names.
 Lich.TyVar = function(id,pos){
-    this.name = "tyvar";
+    this.astType = "tyvar";
     this.id = id;
     if( pos !== undefined ){
         this.pos = pos;
@@ -223,7 +212,7 @@ Lich.TyVar.prototype.toString = Lich.TyVar.prototype.toStringN;
 ////////////////////////////////////////////////////////////////////////////////
 
 Lich.TyCon = function(id,pos,loc){
-    this.name = "tycon";
+    this.astType = "tycon";
     if( loc !== undefined ){
         this.loc = loc;
         if( id.substr(0,loc.length) == loc ){
@@ -253,7 +242,7 @@ Lich.TyCon.prototype.toString = Lich.TyCon.prototype.toStringN;
 
 Lich.DaCon = function(id,pos,isSymbol,loc){
     assert.ok( typeof isSymbol === "boolean" );
-    this.name = "dacon";
+    this.astType = "dacon";
     if( loc !== undefined ){
         this.loc = loc;
         if( id.substr(0,loc.length) == loc ){
@@ -285,7 +274,7 @@ Lich.DaCon.prototype.toString = Lich.DaCon.prototype.toStringN;
 
 Lich.VarName = function(id,pos,isSymbol,loc){
     assert.ok( typeof isSymbol === "boolean" );
-    this.name = "varname";
+    this.astType = "varname";
     if( loc !== undefined ){
         this.loc = loc;
         if( id.substr(0,loc.length) == loc ){
@@ -379,7 +368,7 @@ Lich.TupleTyCon.prototype = new Lich.TyCon(null,{});
 ////////////////////////////////////////////////////////////////////////////////
 
 Lich.ConPat = function(con, pats, pos){
-    this.name = "conpat";
+    this.astType = "conpat";
     
     this.con = con;
     this.pats = pats;
@@ -415,14 +404,21 @@ Lich.showAST = (function(){
 	        if( err.message == "too much recursion" && err.name == "InternalError" ){
 	            sb.unshift("too much recursion while showing: ");
 	        } else {
-	            post(err);
+	            Lich.post(err);
 	        }
 	    }
 	    return sb.join("");
 	};
 
-	var showAST2 = function(sb,ast){
-        // post("AST TYPE: " + (typeof ast));
+	var showAST2 = function(sb,ast, depth){
+        // Lich.post("AST TYPE: " + (typeof ast));
+
+        var depthN = typeof depth == "undefined" ? 0 : depth;
+        var tabSpace = Array.apply(null, new Array(depthN)).map(String.prototype.valueOf,"  ").join("");
+        
+        sb.push("\n");
+        sb.push(tabSpace);
+
 	    if( typeof ast === "string" ){
 		sb.push("\"" + ast.toString() + "\"");
 	    } else if( typeof ast === "number" ){
@@ -431,7 +427,7 @@ Lich.showAST = (function(){
 		sb.push(ast.toString());
 	    } else if( ast instanceof Array ){
 		sb.push("[");
-		sb.push(showNode(sb,ast));
+		sb.push(showNode(sb,ast,depthN));
 		sb.push("]");
 	    } else if( ast instanceof Object ){
 		//        if (typeof ast.toString === "function") {
@@ -443,7 +439,7 @@ Lich.showAST = (function(){
 	            if (typeof ast[k] !== "function") {
 	                sb.push(k+": ");
 	                //if( k==="rhs" )document.write("yy"+ast[k] +"<br>");
-	                showAST2(sb,ast[k]);
+	                showAST2(sb,ast[k], depthN + 1);
 	                //document.write(s +"<br>");
 	                sb.push(", ");
 	                empty = false;
@@ -462,21 +458,21 @@ Lich.showAST = (function(){
 	    //return "(" + typeof ast + ast.toString() + ")";
 	};
 
-	var showNode = function(sb,l){
+	var showNode = function(sb,l,depth){
 	    if ( l.length == 0 ) {
 		    return;
 	    }
 	    //document.write(s +"<br>");
-	    showNodeNE(sb,l);
+	    showNodeNE(sb,l,depth + 1);
 	};
 	
-	var showNodeNE = function(sb,l){
+	var showNodeNE = function(sb,l,depth){
 	    for(var i=0 ; i<l.length-1 ; i=i+1){
-	        showAST2(sb,l[i]);
+	        showAST2(sb,l[i], depth + 1);
 		    sb.push(", ");
 	    }
 	    //document.write(s +"<br>");
-	    showAST2(sb,l[l.length-1]);
+	    showAST2(sb,l[l.length-1], depth + 1);
 	}
 
 	return showAST;
