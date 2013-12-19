@@ -72,6 +72,14 @@ function div()
 createPrimitive("/", ["_L", "_R"], div);
 createPrimitive("div", ["_L", "_R"], div);
 
+function divR()
+{
+	return Lich.VM.getVar("_L") / Lich.VM.getVar("_R");
+}
+
+// Swapped for use with (/3) type currying
+createPrimitive("/R", ["_R", "_L"], divR);
+
 function pow()
 {
 	return Math.pow(Lich.VM.getVar("_L"), Lich.VM.getVar("_R"));
@@ -79,6 +87,14 @@ function pow()
 
 createPrimitive("^", ["_L", "_R"], pow);
 createPrimitive("**", ["_L", "_R"], pow);
+
+function powR()
+{
+	return Math.pow(Lich.VM.getVar("_L"), Lich.VM.getVar("_R"));
+}
+
+createPrimitive("^R", ["_R", "_L"], powR);
+
 
 function mod()
 {
@@ -111,6 +127,13 @@ function greater()
 
 createPrimitive(">", ["_L", "_R"], greater);
 
+function greaterR()
+{
+	return Lich.VM.getVar("_L") > Lich.VM.getVar("_R");
+}
+
+createPrimitive(">R", ["_R", "_L"], greaterR);
+
 
 function lesser()
 {
@@ -119,6 +142,13 @@ function lesser()
 
 createPrimitive("<", ["_L", "_R"], lesser);
 
+function lesserR()
+{
+	return Lich.VM.getVar("_L") < Lich.VM.getVar("_R");
+}
+
+createPrimitive("<R", ["_R", "_L"], lesserR);
+
 function greaterEqual()
 {
 	return Lich.VM.getVar("_L") >= Lich.VM.getVar("_R");
@@ -126,12 +156,26 @@ function greaterEqual()
 
 createPrimitive(">=", ["_L", "_R"], greaterEqual);
 
+function greaterEqualR()
+{
+	return Lich.VM.getVar("_L") >= Lich.VM.getVar("_R");
+}
+
+createPrimitive(">=R", ["_R", "_L"], greaterEqualR);
+
 function lesserEqual()
 {
 	return Lich.VM.getVar("_L") <= Lich.VM.getVar("_R");
 }
 
 createPrimitive("<=", ["_L", "_R"], lesserEqual);
+
+function lesserEqualR()
+{
+	return Lich.VM.getVar("_L") <= Lich.VM.getVar("_R");
+}
+
+createPrimitive("<=R", ["_R", "_L"], lesserEqualR);
 
 function indexList()
 {

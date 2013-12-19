@@ -423,7 +423,16 @@ aexp // : object
   | '(' '-' exp ')'     {{$$ = {astType:"negate",rhs:$3};}}
   | tuple               {{$$ = $1;}}
   | listexp             {{$$ = $1;}}
-  // TODO: incomplete
+  | "(" "+" aexp ")"    {{ $$ = {astType:"application", exps:[new Lich.VarName($2, @$, true, yy.lexer.previous.qual),$3],pos:@$};}}
+  | "(" "*" aexp ")"    {{ $$ = {astType:"application", exps:[new Lich.VarName($2, @$, true, yy.lexer.previous.qual),$3],pos:@$};}}
+  | "(" "/" aexp ")"    {{ $$ = {astType:"application", exps:[new Lich.VarName("/R", @$, true, yy.lexer.previous.qual),$3],pos:@$};}}
+  | "(" "^" aexp ")"    {{ $$ = {astType:"application", exps:[new Lich.VarName("^R", @$, true, yy.lexer.previous.qual),$3],pos:@$};}}
+  | "(" "==" aexp ")"    {{ $$ = {astType:"application", exps:[new Lich.VarName("==", @$, true, yy.lexer.previous.qual),$3],pos:@$};}}
+  | "(" "/=" aexp ")"    {{ $$ = {astType:"application", exps:[new Lich.VarName("/=", @$, true, yy.lexer.previous.qual),$3],pos:@$};}}
+  | "(" ">" aexp ")"    {{ $$ = {astType:"application", exps:[new Lich.VarName(">R", @$, true, yy.lexer.previous.qual),$3],pos:@$};}}
+  | "(" ">=" aexp ")"    {{ $$ = {astType:"application", exps:[new Lich.VarName(">=R", @$, true, yy.lexer.previous.qual),$3],pos:@$};}}
+  | "(" "<" aexp ")"    {{ $$ = {astType:"application", exps:[new Lich.VarName("<R", @$, true, yy.lexer.previous.qual),$3],pos:@$};}}
+  | "(" "<=" aexp ")"    {{ $$ = {astType:"application", exps:[new Lich.VarName("<=R", @$, true, yy.lexer.previous.qual),$3],pos:@$};}}
   ;
 
 tuple // : object

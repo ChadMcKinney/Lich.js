@@ -7,6 +7,16 @@
 
 Have two parsing modes. One for library code and one for interactive mode. Lib code is like .hs files, with modules and imports at the top and normal, but interactive mode requiring the use of 'let' for global scope variable declaration.
 
+
+// NEED TO IMPLEMENT
+Maps (dictionaries)
+Algabraeic Data types or someother kind of basic Struct (record syntax?)
+foldl, foldr, zip, zipWith, filter, other various prelude functions
+curried operators (+2) (/3) etc...
+Case statements
+Pattern matching?
+Guards?
+
 /////////////////////////
 // List creation syntax
 // Dec 14, 2013
@@ -15,6 +25,10 @@ Need to add the nice haskell list creation syntax. Examples:
 [1,2,3,4]
 [1..7]
 [2,5..99]
+
+This works currently but it uses the SuperCollider version of the syntax:
+(1..9)
+(3,6..99)
 
 //////////////////
 // Guard Patterns
