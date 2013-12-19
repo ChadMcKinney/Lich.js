@@ -143,6 +143,8 @@ Lich.compileAST = function(ast)
 				return Lich.compileNegate(ast);
 			case "listrange":
 				return Lich.compileListRange(ast);
+			case "dictionary":
+				return Lich.compileDictionary(ast);
 			default:
 				Lich.unsupportedSemantics(ast);
 				break;
@@ -477,4 +479,16 @@ Lich.compileListRange = function(ast)
 
 		return array;
 	}
+}
+
+Lich.compileDictionary = function(ast)
+{
+	var dict = {lichType: DICTIONARY};
+	
+	for(var i = 0; i < ast.pairs.length; i += 2)
+	{
+		dict[Lich.compileAST(ast.pairs[i])] = Lich.compileAST(ast.pairs[i+1]);
+	}
+
+	return dict;
 }

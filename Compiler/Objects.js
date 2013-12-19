@@ -39,6 +39,7 @@
 var VOID = 0;
 var NOTHING = 1;
 var CLOSURE = 2;
+var DICTIONARY = 3;
 
 function LichVoid() // Non-return value for the VM. 
 {

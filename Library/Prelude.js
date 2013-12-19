@@ -190,6 +190,32 @@ function indexList()
 
 createPrimitive("!!", ["_L", "_R"], indexList);
 
+function deepCopy(obj) 
+{
+    if (Object.prototype.toString.call(obj) === '[object Array]') 
+    {
+        var out = [], i = 0, len = obj.length;
+        for ( ; i < len; i++) 
+        {
+            out[i] = arguments.callee(obj[i]);
+        }
+        return out;
+    }
+
+    if (typeof obj === 'object') 
+    {
+        var out = {}, i;
+        for (i in obj) 
+        {
+            out[i] = arguments.callee(obj[i]);
+        }
+        
+        return out;
+    }
+    
+    return obj;
+}
+
 
 function mapList()
 {
@@ -215,27 +241,54 @@ function mapList()
 
 createPrimitive("map", ["_L", "_R"], mapList);
 
+function mergeDictionaries(obj1, obj2) 
+{
+	obj1 = deepCopy(obj1);
+	obj2 = deepCopy(obj2);
+	
+	for (var p in obj2) 
+	{
+    	try 
+    	{
+      		obj1[p] = obj2[p];
+    	} 
 
-function consList()
+    	catch(e) 
+    	{
+      		// Property in destination object not set; create it and set its value.
+      		obj1[p] = obj2[p];
+    	}
+  }
+
+  return obj1;
+}
+
+
+function cons()
 {
 	var value = Lich.VM.getVar("_L");
 	var list = Lich.VM.getVar("_R");
 
-	if(!(list instanceof Array || typeof list === "string"))
+	if(!(list instanceof Array || typeof list === "string" || list.lichType == DICTIONARY))
 		throw new Error("Cons can only be applied to lists.");
+
+	// list = deepCopy(list);
+	// value = deepCopy(value);
 
 	var res;
 
 	if(value instanceof Array && list instanceof Array 
 		|| typeof value === "string" && typeof list === "string")
 		res = value.concat(list);
+	else if(list.lichType == DICTIONARY)
+		res = mergeDictionaries(list, value);
 	else
 		res = [value].concat(list);
 
 	return typeof res === "undefined" ? Lich.VM.Nothing : res;
 }
 
-createPrimitive(":", ["_L", "_R"], consList);
+createPrimitive(":", ["_L", "_R"], cons);
 
 function concatList()
 {
@@ -245,6 +298,7 @@ function concatList()
 	if(!(list instanceof Array || typeof list === "string"))
 		throw new Error("Concat can only be applied to lists.");
 
+	// list = deepCopy(list);
 	var res = list.concat(value);
 
 	return typeof res === "undefined" ? Lich.VM.Nothing : res;
@@ -252,3 +306,15 @@ function concatList()
 
 createPrimitive("++", ["_L", "_R"], concatList);
 
+function indexDictionary()
+{
+	var dictionary = Lich.VM.getVar("_L");
+
+	if(!(dictionary instanceof Object))
+		throw new Error("indexing via :: can only be applied to dictionary.");
+
+	var res = dictionary[Lich.VM.getVar("_R")];
+	return typeof res === "undefined" ? Lich.VM.Nothing : res;
+}
+
+createPrimitive("::", ["_L", "_R"], indexDictionary);

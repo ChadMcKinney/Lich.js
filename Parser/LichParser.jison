@@ -36,6 +36,7 @@ tab = "\t"
 "]"                         return {val:"]",typ:"]"};
 "False"|"false"             return {val:"false",typ:"False"};
 "True"|"true"               return {val:"true",typ:"True"};
+"=>"                        return {val:"=>",typ:"=>"};
 "->"                        return {val:"->",typ:"->"};
 "=="                        return {val:"==",typ:"=="};
 "/="                        return {val:"/=",typ:"/="};
@@ -43,6 +44,7 @@ tab = "\t"
 "<="                        return {val:"<=",typ:"<="};
 ">"                         return {val:">",typ:">"};
 "<"                         return {val:"<",typ:"<"};
+"()"                        return {val:"()",typ:"()"};
 "("                         return {val:"(",typ:"("};
 ")"                         return {val:")",typ:")"};
 "*"                         return {val:"*",typ:"*"};
@@ -65,8 +67,8 @@ tab = "\t"
 "\\"                        return {val:"\\",typ:"\\"};      
 "|"                         return {val:"|",typ:"|"};
 "~"                         return {val:"~",typ:"~"};
-":"                         return {val:":",typ:":"};
 "::"                        return {val:"::",typ:"::"};
+":"                         return {val:":",typ:":"};
 ","                         return {val:",",typ:","};
 "`"                         return {val:"`",typ:"`"};
 <<EOF>>                     return {val:"EOF",typ:"EOF"};
@@ -334,6 +336,7 @@ exp // : object
   | exp "!!" exp        {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
   | exp ":" exp         {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
   | exp "++" exp        {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
+  | exp "::" exp        {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
   | "[" "]"             {{ $$ = {astType: "listexp", members: [], pos: @$}; }}
   ;
 
@@ -416,28 +419,56 @@ cname // : VarName | DaCon
     ;
 
 aexp // : object
-  : qvar                {{$$ = $1;}}
-  | gcon                {{$$ = $1;}}
-  | literal             {{$$ = $1;}}
-  | "(" exp ")"         {{$$ = $2;}}
-  | '(' '-' exp ')'     {{$$ = {astType:"negate",rhs:$3};}}
-  | tuple               {{$$ = $1;}}
-  | listexp             {{$$ = $1;}}
-  | "(" "+" aexp ")"    {{ $$ = {astType:"application", exps:[new Lich.VarName($2, @$, true, yy.lexer.previous.qual),$3],pos:@$};}}
-  | "(" "*" aexp ")"    {{ $$ = {astType:"application", exps:[new Lich.VarName($2, @$, true, yy.lexer.previous.qual),$3],pos:@$};}}
-  | "(" "/" aexp ")"    {{ $$ = {astType:"application", exps:[new Lich.VarName("/R", @$, true, yy.lexer.previous.qual),$3],pos:@$};}}
-  | "(" "^" aexp ")"    {{ $$ = {astType:"application", exps:[new Lich.VarName("^R", @$, true, yy.lexer.previous.qual),$3],pos:@$};}}
-  | "(" "==" aexp ")"    {{ $$ = {astType:"application", exps:[new Lich.VarName("==", @$, true, yy.lexer.previous.qual),$3],pos:@$};}}
-  | "(" "/=" aexp ")"    {{ $$ = {astType:"application", exps:[new Lich.VarName("/=", @$, true, yy.lexer.previous.qual),$3],pos:@$};}}
-  | "(" ">" aexp ")"    {{ $$ = {astType:"application", exps:[new Lich.VarName(">R", @$, true, yy.lexer.previous.qual),$3],pos:@$};}}
-  | "(" ">=" aexp ")"    {{ $$ = {astType:"application", exps:[new Lich.VarName(">=R", @$, true, yy.lexer.previous.qual),$3],pos:@$};}}
-  | "(" "<" aexp ")"    {{ $$ = {astType:"application", exps:[new Lich.VarName("<R", @$, true, yy.lexer.previous.qual),$3],pos:@$};}}
-  | "(" "<=" aexp ")"    {{ $$ = {astType:"application", exps:[new Lich.VarName("<=R", @$, true, yy.lexer.previous.qual),$3],pos:@$};}}
+  : qvar                    {{$$ = $1;}}
+  | gcon                    {{$$ = $1;}}
+  | literal                 {{$$ = $1;}}
+  | "(" exp ")"             {{$$ = $2;}}
+  | '(' '-' exp ')'         {{$$ = {astType:"negate",rhs:$3};}}
+  | dictexp                 {{$$ = $1;}}
+  | tuple                   {{$$ = $1;}}
+  | listexp                 {{$$ = $1;}}
+  | "(" "+" aexp ")"        {{ $$ = {astType:"application", exps:[new Lich.VarName($2, @$, true, yy.lexer.previous.qual),$3],pos:@$};}}
+  | "(" "*" aexp ")"        {{ $$ = {astType:"application", exps:[new Lich.VarName($2, @$, true, yy.lexer.previous.qual),$3],pos:@$};}}
+  | "(" "/" aexp ")"        {{ $$ = {astType:"application", exps:[new Lich.VarName("/R", @$, true, yy.lexer.previous.qual),$3],pos:@$};}}
+  | "(" "^" aexp ")"        {{ $$ = {astType:"application", exps:[new Lich.VarName("^R", @$, true, yy.lexer.previous.qual),$3],pos:@$};}}
+  | "(" "==" aexp ")"       {{ $$ = {astType:"application", exps:[new Lich.VarName("==", @$, true, yy.lexer.previous.qual),$3],pos:@$};}}
+  | "(" "/=" aexp ")"       {{ $$ = {astType:"application", exps:[new Lich.VarName("/=", @$, true, yy.lexer.previous.qual),$3],pos:@$};}}
+  | "(" ">" aexp ")"        {{ $$ = {astType:"application", exps:[new Lich.VarName(">R", @$, true, yy.lexer.previous.qual),$3],pos:@$};}}
+  | "(" ">=" aexp ")"       {{ $$ = {astType:"application", exps:[new Lich.VarName(">=R", @$, true, yy.lexer.previous.qual),$3],pos:@$};}}
+  | "(" "<" aexp ")"        {{ $$ = {astType:"application", exps:[new Lich.VarName("<R", @$, true, yy.lexer.previous.qual),$3],pos:@$};}}
+  | "(" "<=" aexp ")"       {{ $$ = {astType:"application", exps:[new Lich.VarName("<=R", @$, true, yy.lexer.previous.qual),$3],pos:@$};}}
+  | "(" "+" ")"             {{ $$ = new Lich.VarName($2, @$, true, yy.lexer.previous.qual);}}
+  | "(" "-" ")"             {{ $$ = new Lich.VarName($2, @$, true, yy.lexer.previous.qual);}}
+  | "(" "*" ")"             {{ $$ = new Lich.VarName($2, @$, true, yy.lexer.previous.qual);}}
+  | "(" "/" ")"             {{ $$ = new Lich.VarName($2, @$, true, yy.lexer.previous.qual);}}
+  | "(" "^" ")"             {{ $$ = new Lich.VarName($2, @$, true, yy.lexer.previous.qual);}}
+  | "(" "==" ")"            {{ $$ = new Lich.VarName($2, @$, true, yy.lexer.previous.qual);}}
+  | "(" "/=" ")"            {{ $$ = new Lich.VarName($2, @$, true, yy.lexer.previous.qual);}}
+  | "(" ">" ")"             {{ $$ = new Lich.VarName($2, @$, true, yy.lexer.previous.qual);}}
+  | "(" "<" ")"             {{ $$ = new Lich.VarName($2, @$, true, yy.lexer.previous.qual);}}
+  | "(" ">=" ")"            {{ $$ = new Lich.VarName($2, @$, true, yy.lexer.previous.qual);}}
+  | "(" "<=" ")"            {{ $$ = new Lich.VarName($2, @$, true, yy.lexer.previous.qual);}}
   ;
 
+dictexp
+  : "(" dictexp_1_comma ")"    {{$$ = {astType:"dictionary", pairs:$2};}}
+  | "()"                       {{$$ = {astType:"dictionary", pairs:[]};}}
+  ;
+
+dictexp_1_comma
+  : dictexp_1_comma "," dictpair           {{$$ = $1.concat($3);}}
+  | dictpair                               {{$$ = $1;}}
+  ;
+
+dictpair
+  : exp "=>" exp               {{$$ = [$1,$3];}}
+  ;
+
+/* Lists are basically better tuples in our dynamically typed language
 tuple // : object
     : "(" exp "," list_exp_1_comma ")" {{$4.unshift($2); $$ = {astType: "tuple", members: $4, pos: @$}; }}
     ;
+*/
 
 listexp // : object
     : "[" list_exp_1_comma "]" {{ $$ = {astType: "listexp", members: $2, pos: @$}; }}
