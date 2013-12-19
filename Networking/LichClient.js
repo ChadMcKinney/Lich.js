@@ -124,8 +124,8 @@ function nameTaken()
 
 function connectToWebSocketServer()
 {
-	//socket = io.connect('ws://173.203.102.166:80');	
-	socket = io.connect('ws://127.0.0.1');
+	socket = io.connect('ws://173.203.102.166:80');	
+	//socket = io.connect('ws://127.0.0.1');
 	socket.on('TypingClient', receivedTyping);
 	socket.on('BroadcastCodeClient', receivedLichCode);
 	socket.on('LoginClient', login);
