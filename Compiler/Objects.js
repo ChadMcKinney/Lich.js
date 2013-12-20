@@ -42,6 +42,7 @@ var CLOSURE = 2;
 var DICTIONARY = 3;
 var THUNK = 4;
 var WILDCARD = 5;
+var DATA = 6;
 
 function LichVoid() // Non-return value for the VM. 
 {
@@ -105,6 +106,10 @@ function lichClosure(argNames, rhs, mutable, namespace, decls)
 
 		setVar: function(name, value)
 		{
+			if(Lich.VM.reserved.hasOwnProperty(name))
+				throw new Error("Cannot set variable " + name + " because it is reserved by the language.");
+
+
 			if(_namespace.hasOwnProperty(name))
 			{
 				if(_mutable)
@@ -153,4 +158,5 @@ function createPrimitive(name, argNames, primitiveFunc)
 {
 	primitiveFunc.astType = "primitive";
 	Lich.VM.setVar(name, new lichClosure(argNames, primitiveFunc));
+	Lich.VM.reserved[name] = true;
 }

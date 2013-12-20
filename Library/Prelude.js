@@ -195,14 +195,15 @@ function indexList()
 {
 	var list = Lich.VM.getVar("_L");
 
-	if(!(list instanceof Array))
-		throw new Error("indexing via !! can only be applied to lists.");
+	if(!((list instanceof Array) || (list.lichType == DICTIONARY)))
+		throw new Error("indexing via !! can only be applied to lists and dictionaries.");
 
 	var res = list[Lich.VM.getVar("_R")];
 	return typeof res === "undefined" ? Lich.VM.Nothing : res;
 }
 
 createPrimitive("!!", ["_L", "_R"], indexList);
+createPrimitive("lookup", ["_R", "_L"], indexList); // Container is on the right when using lookup
 
 function deepCopy(obj) 
 {
@@ -304,6 +305,21 @@ function cons()
 
 createPrimitive(":", ["_L", "_R"], cons);
 
+
+function insert()
+{
+	var value = Lich.VM.getVar("_L");
+	var list = Lich.VM.getVar("_R");
+
+	if(!(list.lichType == DICTIONARY))
+		throw new Error("Cons can only be applied to lists.");
+
+	var res = mergeDictionaries(list, value);
+	return typeof res === "undefined" ? Lich.VM.Nothing : res;
+}
+
+createPrimitive("insert", ["_L", "_R"], insert);
+
 function concatList()
 {
 	var list = Lich.VM.getVar("_L");
@@ -320,15 +336,21 @@ function concatList()
 
 createPrimitive("++", ["_L", "_R"], concatList);
 
-function indexDictionary()
+/*
+function indexData()
 {
-	var dictionary = Lich.VM.getVar("_L");
+	var data = Lich.VM.getVar("_L");
 
 	if(!(dictionary instanceof Object))
-		throw new Error("indexing via :: can only be applied to dictionary.");
+		throw new Error("indexing via :: can only be applied to data structures.");
 
-	var res = dictionary[Lich.VM.getVar("_R")];
+	var res;
+
+	if(dictionary.lichType == DICTIONARY)
+		
+	else if(dictionary.lichType == DATA)
+		res = dictionary
 	return typeof res === "undefined" ? Lich.VM.Nothing : res;
 }
 
-createPrimitive("::", ["_L", "_R"], indexDictionary);
+createPrimitive("::", ["_L", "_R"], indexDictionary);*/

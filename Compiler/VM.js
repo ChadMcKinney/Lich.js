@@ -43,6 +43,7 @@ Lich.VM.main = lichClosure([], null, true); // We allow mutability at the global
 Lich.VM.procedureStack.push(Lich.VM.main);
 Lich.VM.Nothing = new LichNothing(); // We only need one Nothing value because they're immutable and identical.
 Lich.VM.Void = new LichVoid(); // Same as Nothing, we only need one.
+Lich.VM.reserved = {}; // For variables reserved by the language
 
 Lich.VM.pushProcedure = function(procedure)
 {
@@ -85,8 +86,10 @@ Lich.VM.Print = function(object)
 {
 	if(typeof object === "undefined")
 		Lich.post(object);
-	if(object.lichType == CLOSURE || object.lichType == THUNK)
+	else if(object.lichType == CLOSURE || object.lichType == THUNK)
 		printClosure(object);
+	else if(object.lichType == DATA)
+		Lich.post(object._datatype);
 	else if(object == Lich.VM.Nothing)
 		Lich.post("Nothing");
 	else if(object != Lich.VM.Void)

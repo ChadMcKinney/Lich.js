@@ -69,12 +69,6 @@ Lich.compileAST = function(ast)
 			case "thunk":
 				return Lich.compileDeclThunk(ast);
 				break
-			case "module":
-				return Lich.compileModule(ast);
-				break;
-			case "body":
-				return Lich.compileBody(ast);
-				break;
 			case "decl-fun":
 				return Lich.compileDeclFun(ast);
 				break;
@@ -96,12 +90,6 @@ Lich.compileAST = function(ast)
 			case "let-one": // ghci style let expression for global definitions
 				return Lich.compileLetOne(ast);
 				break;
-			case "alt":
-				return Lich.compileAlt(ast);
-				break;
-			case "tuple":
-				return Lich.compileTuple(ast);
-				break;
 			case "listexp":
 				return Lich.compileListExp(ast);
 				break;
@@ -113,9 +101,6 @@ Lich.compileAST = function(ast)
 				break;
 			case "wildcard":
 				return { lichType: WILDCARD };
-				break;
-			case "tuple_pat":
-				return Lich.compileTuplePat(ast);
 				break;
 			case "integer-lit":
 				return Lich.compileIntegerLit(ast);
@@ -144,12 +129,33 @@ Lich.compileAST = function(ast)
 				break;
 			case "negate":
 				return Lich.compileNegate(ast);
+				break;
 			case "listrange":
 				return Lich.compileListRange(ast);
+				break;
 			case "dictionary":
 				return Lich.compileDictionary(ast);
+				break;
 			case "case":
 				return Lich.compileCase(ast);
+				break;
+			case "module":
+				return Lich.compileModule(ast);
+				break;
+			case "body":
+				return Lich.compileBody(ast);
+				break;
+			case "data-decl":
+				return Lich.compileDataDecl(ast);
+				break;
+			case "data-inst":
+				return Lich.compileDataInst(ast);
+				break;
+			case "data-lookup":
+				return Lich.compileDataLookup(ast);
+				break;
+			case "data-mem":
+				return ast;	
 			default:
 				Lich.unsupportedSemantics(ast);
 				break;
@@ -234,72 +240,7 @@ Lich.compileFunWhere = function(ast)
 	return new lichClosure([], ast.exp, false, {}, ast.decls).invoke([]);
 }
 
-Lich.compileFixity = function(ast)
-{
-	Lich.unsupportedSemantics(ast);
-}
-
-Lich.compileSimpleType = function(ast)
-{
-	Lich.unsupportedSemantics(ast);
-}
-
 Lich.compileConstr = function(ast)
-{
-	Lich.unsupportedSemantics(ast);
-}
-
-Lich.compileExportQvar = function(ast)
-{
-	Lich.unsupportedSemantics(ast);
-}
-
-Lich.compileExportModule = function(ast)
-{
-	Lich.unsupportedSemantics(ast);
-}
-
-Lich.compileExportTypeUnspec = function(ast)
-{
-	Lich.unsupportedSemantics(ast);
-}
-
-Lich.compileExportTypeAll = function(ast)
-{
-	Lich.unsupportedSemantics(ast);
-}
-
-Lich.compileExportTypeVars = function(ast)
-{
-	Lich.unsupportedSemantics(ast);
-}
-
-Lich.compileImpDecl = function(ast)
-{
-	Lich.unsupportedSemantics(ast);
-}
-
-Lich.compileImpSpec = function(ast)
-{
-	Lich.unsupportedSemantics(ast);
-}
-
-Lich.compileImpSpecHiding = function(ast)
-{
-	Lich.unsupportedSemantics(ast);
-}
-
-Lich.compileImportVar = function(ast)
-{
-	Lich.unsupportedSemantics(ast);
-}
-
-Lich.compileImportTycon = function(ast)
-{
-	Lich.unsupportedSemantics(ast);
-}
-
-Lich.compileTypeSignature = function(ast)
 {
 	Lich.unsupportedSemantics(ast);
 }
@@ -364,16 +305,6 @@ Lich.compileLetOne = function(ast)
 	return Lich.compileAST(ast.decl);
 }
 
-Lich.compileAlt = function(ast)
-{
-	Lich.unsupportedSemantics(ast);
-}
-
-Lich.compileTuple = function(ast)
-{
-	Lich.unsupportedSemantics(ast);
-}
-
 Lich.compileListExp = function(ast)
 {
 	var res = new Array();
@@ -397,11 +328,6 @@ Lich.compileConPat = function(ast)
 }
 
 Lich.compileWildCard = function(ast)
-{
-	Lich.unsupportedSemantics(ast);
-}
-
-Lich.compileTuplePat = function(ast)
 {
 	Lich.unsupportedSemantics(ast);
 }
@@ -433,14 +359,64 @@ Lich.compileVarName = function(ast)
 
 Lich.compileDacon = function(ast)
 {
-	if(ast == "True")
-		return true;
-	else if(ast == "False")
-		return false;
-	else if(ast == "Nothing")
+	if(ast == "Nothing")
 		return Lich.VM.Nothing;
 	else
 		Lich.unsupportedSemantics({astType:ast});
+}
+
+Lich.compileDataDecl = function(ast)
+{
+	var data = {
+		_argNames: new Array(),
+		_datatype: ast.id,
+		lichType: DATA
+	}
+
+	for(var i = 0; i < ast.members.length; ++i)
+	{
+		data._argNames.push(ast.members[i].id);
+		data[ast.members[i].id] = Lich.compileAST(ast.members[i].exp);
+		Lich.post("data["+ast.members[i].id+"] = " + data[ast.members[i].id]);	
+	}
+
+	Lich.VM.setVar(ast.id, data);
+	return data;
+}
+
+Lich.compileDataInst = function(ast)
+{
+	var dataCon = Lich.VM.getVar(ast.id);
+
+	if(dataCon == Lich.VM.Nothing)
+		throw new Error("Unable to find data constructor for " + ast.id);
+
+	var data = deepCopy(dataCon);
+
+	if(dataCon._argNames.length < ast.members.length)
+		throw new Error("Too many arguments for data constructor " + ast.id);
+
+	for(var i = 0; i < ast.members.length; ++i)
+	{
+		data[dataCon._argNames[i]] = Lich.compileAST(ast.members[i]);
+	}
+
+	return data;
+}
+
+Lich.compileDataLookup = function(ast)
+{
+	var data = Lich.compileAST(ast.data);
+
+	if(data == Lich.VM.Nothing)
+		throw new Error("Unable to find data constructor");
+
+	var res = data[ast.member];
+
+	if(typeof res === "undefined")
+		throw new Error("Data constructor " + data._datatype + " does not contain member " + ast.member);
+
+	return res;	
 }
 
 Lich.compileBooleanLit = function(ast)

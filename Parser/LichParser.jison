@@ -34,6 +34,8 @@ tab = "\t"
 ("-")?[0-9]+("."[0-9]+)?    return {val:yytext,typ:"float"};
 "["                         return {val:"[",typ:"["};
 "]"                         return {val:"]",typ:"]"};
+"{"                         return {val:"{",typ:"{"};
+"}"                         return {val:"}",typ:"}"};
 "False"|"false"             return {val:"false",typ:"False"};
 "True"|"true"               return {val:"true",typ:"True"};
 "=>"                        return {val:"=>",typ:"=>"};
@@ -80,7 +82,7 @@ tab = "\t"
 "hiding"                    return {val:"hiding",typ:"hiding"};
 "case"                      return {val:"case",typ:"case"};
 "class"                     return {val:"class",typ:"class"};
-"data"                      return {val:"dat",typ:"data"};
+"data"                      return {val:"data",typ:"data"};
 "default"                   return {val:"default",typ:"default"};
 "deriving"                  return {val:"deriving",typ:"deriving"};
 "do"                        return {val:"do",typ:"do"};
@@ -336,8 +338,10 @@ exp // : object
   | exp "!!" exp        {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
   | exp ":" exp         {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
   | exp "++" exp        {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
-  | exp "::" exp        {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
+  | exp "::" varid      {{$$ = {astType:"data-lookup",data:$1,member:$3,pos:@$};}}
   | "[" "]"             {{ $$ = {astType: "listexp", members: [], pos: @$}; }}
+  | dataexp             {{$$ = $1;}}
+  | datainst            {{$$ = $1;}}
   ;
 
 /*
@@ -464,6 +468,25 @@ dictpair
   : exp "=>" exp               {{$$ = [$1,$3];}}
   ;
 
+dataexp
+  : data conid "{" datamems "}"   {{$$ = {astType:"data-decl", id: $2, members: $4};}}
+  ;
+
+datamems
+  : datamems "," datamem            {{($1).push($3); $$ = $1;}}
+  | datamem                         {{$$ = [$1];}}
+  ;
+
+datamem
+  : varid "=" exp                   {{$$ = {astType:"data-mem",id:$1, exp:$3};}}  
+  ;
+
+
+datainst
+  : conid fexp                      {{$$ = {astType:"data-inst", id: $1, members: $2};}}
+  | conid                           {{$$ = {astType:"data-inst", id: $1, members: []};}}
+  ;
+
 /* Lists are basically better tuples in our dynamically typed language
 tuple // : object
     : "(" exp "," list_exp_1_comma ")" {{$4.unshift($2); $$ = {astType: "tuple", members: $4, pos: @$}; }}
@@ -481,10 +504,11 @@ list_exp_1_comma
     | exp                        {{$$ = [$1];}}
     ;
 
+/*
 modid // : object # {conid .} conid
     : qconid              {{$$ = new Lich.ModName($1, @$, yy.lexer.previous.qual);}}
     | conid               {{$$ = new Lich.ModName($1, @$);}}
-    ;
+    ;*/
 
 // optionally qualified binary operators in infix expressions
 qop // : object
@@ -533,8 +557,8 @@ tyvars // : [TyVar]
 
 // non-qualified data constructor id (or symbol in parentheses) name
 con // : Lich.DaCon
-    : conid              {{$$ = new Lich.DaCon($1, @$, false);}}
-    | '(' consym ')'     {{$$ = new Lich.DaCon($2, @$, true);}}
+    //: conid              {{$$ = new Lich.DaCon($1, @$, false);}}
+    : '(' consym ')'     {{$$ = new Lich.DaCon($2, @$, true);}}
     ;
 
 // optionally qualified data constructor id (or symbol in parentheses) name

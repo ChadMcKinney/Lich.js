@@ -10,16 +10,20 @@
 (someVar => 555, "A String" => [1,2,3], 1.5 => "Three")
 let doom = ("Doom" => 3)
 
-// Dictionary look up uses the :: operator.
-doom :: "Doom"
+// Dictionary look up uses the !! operator or the lookup function.
+doom !! "Doom"
+lookup "Doom" doom -- Note that the dictionary is the last argument for the lookup function
 
 // Insertion uses cons, and essentially merges two dictionaries returning a new one, with the left hand overwriting the right.
 let gloom = ("Gloom" => "doom") : doom
 let doom2 = ("Doom3" => 2, "Liar" => "Face") : doom
 
-doom2 :: "Doom" -- returns 3
-doom2 :: "Doom3" -- returns 2
-doom2 :: "Liar" -- returns "Face"
+// You can also use the insert function
+insert ("frogs" => [0,1,2]) doom
+
+doom2 !! "Doom" -- returns 3
+lookup "Doom3" doom2 -- returns 2
+doom2 !! "Liar" -- returns "Face"
 
 //////////////////////////////////////////
 // Case Statements Now Work
@@ -67,11 +71,39 @@ Have two parsing modes. One for library code and one for interactive mode. Lib c
 
 
 // NEED TO IMPLEMENT
-Algabraeic Data types or someother kind of basic Struct (record syntax?)
 foldl, foldr, zip, zipWith, filter, other various prelude functions
-Case statements
+function composition:
+func1 <<< func2 <<< func3 << func4
 Pattern matching?
 Guards?
+list comprehension
+primitives need to reserve varnames!!!!!!!!!!
+
+//////////////////////
+// Data 
+//////////////////////
+
+-- data declaration using record like syntax
+data MyData { 
+	thisThing = 1,
+	two = 2,
+	three = 44
+}
+
+-- data instantiation, less than the total number of members in the constructor will return with default value
+MyData 0.1 0.5 0.2 -- returns MyData 1 2 44
+MyData 0.1 0.5 -- returns MyData 0.1 0.5 44
+MyData 666 -- returns MyData 666 2 44
+let myCoolObject = MyData -- returns MyData 1 2 44
+
+-- lookup is similar to namespace resolution in C++.
+myCoolObject :: thisThing -- returns 1
+myCoolObject :: two -- returns 2
+myCoolObject :: three -- returns 44
+
+data MyData { one = 1, two = 2, three = 3 }
+
+let m = MyData 0.1 0.2 0.3
 
 /////////////////////////
 // List creation syntax
@@ -93,8 +125,8 @@ This works currently but it uses the SuperCollider version of the syntax:
 Need to add syntax for guard patterns, for example:
 
 myGuard x
-	| x > 4 -> 99
-	| otherwise -> 100
+	| x > 4 = 99
+	| otherwise = 100
 
 //////////////////////////////
 // Known Bugs
