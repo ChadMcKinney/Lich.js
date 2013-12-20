@@ -2,7 +2,15 @@
 // Dev Notes
 //////////////////////////////
 
-// Dictionaries have no been implemented as such
+let add2 = add 2
+add2 3
+add 777 3
+
+let adds = map (add) (1..9)
+map (\x -> x 0.6) adds
+
+
+// Dictionaries have been implemented as such
 
 // Dictionary creation
 ("fives" => 555)
@@ -13,6 +21,7 @@ let doom = ("Doom" => 3)
 doom :: "Doom"
 
 // Insertion uses cons, and essentially merges two dictionaries returning a new one, with the left hand overwriting the right.
+let gloom = ("Gloom" => "doom") : doom
 let doom2 = ("Doom3" => 2, "Liar" => "Face") : doom
 
 doom2 :: "Doom" -- returns 3
@@ -26,21 +35,12 @@ Have two parsing modes. One for library code and one for interactive mode. Lib c
 
 
 // NEED TO IMPLEMENT
+where statements!!!!
 Algabraeic Data types or someother kind of basic Struct (record syntax?)
 foldl, foldr, zip, zipWith, filter, other various prelude functions
 Case statements
 Pattern matching?
 Guards?
-
-
-Implement Dictionaries like in SuperCollider because Tuples are useless for us. Might as well steal the syntax. Example:
-
-("key" -> value, "key2" -> value)
-
-or
-
-"String" -> 1 : "String2" -> 3
-"MyKey" -> 2 : "key" -> 4
 
 /////////////////////////
 // List creation syntax
@@ -65,32 +65,9 @@ myGuard x
 	| x > 4 -> 99
 	| otherwise -> 100
 
-///////////////////////////////
-// Curried operator expression
-// Dec 14, 2013
-
-Partial operator expressions don't parser. For example:
-map (+2) [1,2,3]
-
 //////////////////////////////
 // Known Bugs
 //////////////////////////////
-
-
-//////////////////////////////
-// Mapping curried functions
-// Dec 19, 2013
-
-Mapping of curried functions appears to only use the last result. Example:
-
-let adds = map (add) (1..9)
-map (\x -> x 1) adds
-
-This should return:
-[2,3,4,5,6,7,8,9,10]
-
-But instead returns:
-[10,10,10,10,10,10,10,10,10]
 
 //////////////////////////////
 // Multiple let declarations

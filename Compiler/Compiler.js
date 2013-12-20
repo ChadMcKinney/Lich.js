@@ -66,6 +66,9 @@ Lich.compileAST = function(ast)
 			case "primitive":
 				return ast();
 				break;
+			case "thunk":
+				return Lich.compileDeclThunk(ast);
+				break
 			case "module":
 				return Lich.compileModule(ast);
 				break;
@@ -186,27 +189,47 @@ Lich.compileDeclFun = function(ast)
 {
 	if(ast.args.length == 0)
 	{
-		var expRes = Lich.compileAST(ast.rhs);
-		Lich.VM.setVar(ast.ident, expRes);
-		return expRes;
+		var res = Lich.compileAST(ast.rhs);
+		Lich.VM.setVar(ast.ident, res);
+		return res;
 	}
 
 	else
 	{
-		var closure = lichClosure(ast.args, ast.rhs);
+		var closure = new lichClosure(ast.args, ast.rhs);
 		Lich.VM.setVar(ast.ident, closure);
 		return closure;
 	}
 }
 
-Lich.compileTypeSignature = function(ast)
+Lich.compileDeclThunk = function(ast)
 {
-	Lich.unsupportedSemantics(ast);
+	if(ast.args.length == 0)
+	{
+		var thunk = new lichClosure([], ast.rhs);
+		Lich.VM.setVar(ast.ident, thunk);
+		thunk.lichType = THUNK;
+		return thunk;
+	}
+
+	else
+	{
+		var closure = new lichClosure(ast.args, ast.rhs);
+		Lich.VM.setVar(ast.ident, closure);
+		return closure;
+	}
 }
 
 Lich.compileFunWhere = function(ast)
 {
-	Lich.unsupportedSemantics(ast);
+	// CHECK WHERE VARS AGAINST FUNC VARS!!!!!!!!!!??????????
+
+	for(var i = 0; i < ast.decls.length; ++i)
+	{
+		ast.decls[i].astType = "thunk";
+	}
+
+	return new lichClosure([], ast.exp, false, {}, ast.decls).invoke([]);
 }
 
 Lich.compileFixity = function(ast)
@@ -304,6 +327,9 @@ Lich.compileApplication = function(ast)
 {
 	var closure = Lich.compileAST(ast.exps[0]);
 
+	if(typeof closure === "undefined")
+		throw new Error("Cannot invoke an undefined object");
+
 	if(closure.lichType != CLOSURE)
 	{
 		throw new Error("Unable to use application on " + closure.astType);
@@ -323,7 +349,7 @@ Lich.compileApplication = function(ast)
 
 Lich.compileLambda = function(ast)
 {
-	return lichClosure(ast.args, ast.rhs);
+	return new lichClosure(ast.args, ast.rhs);
 }
 
 Lich.compileLet = function(ast)
