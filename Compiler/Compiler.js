@@ -112,7 +112,7 @@ Lich.compileAST = function(ast)
 				return Lich.compileConPat(ast);
 				break;
 			case "wildcard":
-				return Lich.compileWildCard(ast);
+				return { lichType: WILDCARD };
 				break;
 			case "tuple_pat":
 				return Lich.compileTuplePat(ast);
@@ -148,6 +148,8 @@ Lich.compileAST = function(ast)
 				return Lich.compileListRange(ast);
 			case "dictionary":
 				return Lich.compileDictionary(ast);
+			case "case":
+				return Lich.compileCase(ast);
 			default:
 				Lich.unsupportedSemantics(ast);
 				break;
@@ -517,4 +519,19 @@ Lich.compileDictionary = function(ast)
 	}
 
 	return dict;
+}
+
+Lich.compileCase = function(ast)
+{
+	var exp = Lich.compileAST(ast.exp);
+
+	for(var i = 0; i < ast.alts.length; ++i)
+	{
+		var pat = Lich.compileAST(ast.alts[i].pat);
+
+		if(pat.lichType == WILDCARD || pat == exp)
+			return Lich.compileAST(ast.alts[i].exp);
+	}
+
+	return Lich.VM.Nothing;
 }

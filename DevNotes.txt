@@ -2,13 +2,6 @@
 // Dev Notes
 //////////////////////////////
 
-let add2 = add 2
-add2 3
-add 777 3
-
-let adds = map (add) (1..9)
-map (\x -> x 0.6) adds
-
 
 // Dictionaries have been implemented as such
 
@@ -28,6 +21,45 @@ doom2 :: "Doom" -- returns 3
 doom2 :: "Doom3" -- returns 2
 doom2 :: "Liar" -- returns "Face"
 
+//////////////////////////////////////////
+// Case Statements Now Work
+
+examples:
+
+-- Returns (\x y -> x + y)
+case False of
+    "String" -> True
+    20.1 -> "Good jarb"
+    30 -> one
+    False -> (\x y -> x + y)
+
+
+-- Returns one
+case 30 of
+    "String" -> True
+    20.1 -> "Good jarb"
+    30 -> one
+    False -> (\x y -> x + y)
+
+
+-- Returns Nothing
+case 0.5 of
+    "String" -> True
+    20.1 -> "Good jarb"
+    30 -> one
+    False -> (\x y -> x + y)
+
+
+-- Returns "YOYOYO"
+case "Zombie" of
+    "String" -> True
+    20.1 -> "Good jarb"
+    30 -> one
+    False -> (\x y -> x + y)
+    _ -> "YOYOYO"
+
+
+
 /////////////////////////////////////////
 // Parsing modes: Module and Interactive
 
@@ -35,7 +67,6 @@ Have two parsing modes. One for library code and one for interactive mode. Lib c
 
 
 // NEED TO IMPLEMENT
-where statements!!!!
 Algabraeic Data types or someother kind of basic Struct (record syntax?)
 foldl, foldr, zip, zipWith, filter, other various prelude functions
 Case statements
@@ -85,11 +116,3 @@ let two = 2
 Let In statements don't parse. Example:
 
 let x = 20 in x + y
-
-
-//////////////////////////////
-// Strings in where statement
-// Dec 17, 2013
-
-Strings in a where statement don't parse correctly. This is because of the formatting fix I made to allow for spaces in a string, such as "Hello, world."
-The solution needs to allow for both spaces in strings and string in where statements and likely any other kind of indented syntax.

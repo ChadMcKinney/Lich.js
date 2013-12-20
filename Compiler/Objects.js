@@ -41,6 +41,7 @@ var NOTHING = 1;
 var CLOSURE = 2;
 var DICTIONARY = 3;
 var THUNK = 4;
+var WILDCARD = 5;
 
 function LichVoid() // Non-return value for the VM. 
 {
