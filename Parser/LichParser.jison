@@ -123,10 +123,12 @@ qconsym = qs:(conid ".")+ ref:((!"." consym) !".") {qs = flatten(qs).join(""); r
 %left '*' '/'
 %left '^'
 %left '++'
+%left '::'
 //%left '==' '>' '<' 
 //%left '/=' '>=' '<='
 //%left UMINUS
 %right ':'
+
 
 
 %start start_
@@ -502,14 +504,15 @@ tuple // : object
 */
 
 listexp // : object
-    : "[" list_exp_1_comma "]" {{ $$ = {astType: "listexp", members: $2, pos: @$}; }}
-    | "(" exp ".." exp ")"         {{ $$ = {astType: "listrange", lower: $2, upper: $4, pos: @$}; }}
-    | "(" exp "," exp ".." exp ")" {{ $$ = {astType: "listrange", lower: $2, upper: $6, skip: $4, pos: @$}; }}
+    : "[" list_exp_1_comma "]"     {{ $$ = {astType: "listexp", members: $2, pos: @$}; }}
+    | "[" exp ".." exp "]"         {{ $$ = {astType: "listrange", lower: $2, upper: $4, pos: @$}; }}
+    | "[" exp "," exp ".." exp "]" {{ $$ = {astType: "listrange", lower: $2, upper: $6, skip: $4, pos: @$}; }}
     ;
 
 list_exp_1_comma
     : list_exp_1_comma ',' exp   {{$1.push($3); $$ = $1; }}
     | exp                        {{$$ = [$1];}}
+    |
     ;
 
 /*
