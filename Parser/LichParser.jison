@@ -32,6 +32,7 @@ tab = "\t"
 "--".*|"{-".*"-}"       {/* skip whitespace and comments */}
 \s+                         return {val:yytext};
 ("-")?[0-9]+("."[0-9]+)?    return {val:yytext,typ:"float"};
+"::"                        return {val:"::",typ:"::"};
 "["                         return {val:"[",typ:"["};
 "]"                         return {val:"]",typ:"]"};
 "{"                         return {val:"{",typ:"{"};
@@ -69,7 +70,6 @@ tab = "\t"
 "\\"                        return {val:"\\",typ:"\\"};      
 "|"                         return {val:"|",typ:"|"};
 "~"                         return {val:"~",typ:"~"};
-"::"                        return {val:"::",typ:"::"};
 ":"                         return {val:":",typ:":"};
 ","                         return {val:",",typ:","};
 "`"                         return {val:"`",typ:"`"};
@@ -341,7 +341,7 @@ exp // : object
   | exp "!!" exp        {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
   | exp ":" exp         {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
   | exp "++" exp        {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
-  | exp "::" varid      {{$$ = {astType:"data-lookup",data:$1,member:$3,pos:@$};}}
+  | datalookup          {{$$ = $1;}}
   | "[" "]"             {{ $$ = {astType: "listexp", members: [], pos: @$}; }}
   | dataexp             {{$$ = $1;}}
   | datainst            {{$$ = $1;}}
@@ -349,6 +349,9 @@ exp // : object
   | "Nothing"           {{$$ = {astType: "Nothing"};}}
   ;
 
+datalookup
+  : exp "::" varid      {{$$ = {astType:"data-lookup",data:$1,member:$3,pos:@$};}}  
+  ;
 /*
 infixexp // : [lexp | qop | '-']
   : infixexpLR lexp     %prec INFIXEXP          {{
@@ -614,7 +617,9 @@ gconsym // : object
 // 3.17 Pattern Matching
 
 pat // : object
-    : lpat             {{$$ = $1;}}
+    // : lpat             {{$$ = $1;}}
+    : exp                 {{$$ = $1;}}
+    | "_"                 {{$$ = {astType:"wildcard", pos: @$}; }}
     // TODO: incomplete
     ;
 
@@ -631,12 +636,13 @@ apats // : [apat]
     ;
 
 apat // : object
-    : var               {{$$ = $1; }}
-    | gcon              {{$$ = $1; }}
-    | literal           {{$$ = $1; }}
-    | '_'               {{$$ = {astType:"wildcard", pos: @$}; }}
-    | tuple_pat         {{$$ = $1; }}
-    | "(" pat ")"       {{$$ = $2; }}
+    : var                 {{$$ = $1; }}
+    | gcon                {{$$ = $1; }}
+    | literal             {{$$ = $1; }}
+    | '_'                 {{$$ = {astType:"wildcard", pos: @$}; }}
+    | tuple_pat           {{$$ = $1; }}
+    | "(" pat ")"         {{$$ = $2; }}
+    | "(" datalookup ")"  {{$$ = $1; }}
     ;
 
 tuple_pat // object
