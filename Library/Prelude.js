@@ -262,7 +262,8 @@ function mapContainer()
 
 		for(n in container)
 		{
-			res[n] = func.invoke([container[n]]);
+			if(n != "lichType")
+				res[n] = func.invoke([container[n]]);
 		}
 
 		res.lichType = DICTIONARY;
@@ -374,3 +375,274 @@ function concatList()
 }
 
 createPrimitive("++", ["_L", "_R"], concatList);
+
+function foldl()
+{
+	var func = Lich.VM.getVar("_F");
+	var initialValue = Lich.VM.getVar("_I");
+	var container = Lich.VM.getVar("_C");
+
+	if(func.lichType != CLOSURE)
+		throw new Error("foldl can only be applied using: foldl function container");
+
+	var res = container;
+
+	if((container instanceof Array) || (typeof container === "string"))
+	{
+		res = initialValue;
+
+		for(var i = 0; i < container.length; ++i)
+		{
+			res = func.invoke([res, container[i]]); 
+		}
+	}
+
+	else if(container.lichType == DICTIONARY)
+	{
+		res = initialValue;
+
+		for(n in container)
+		{
+			if(n != "lichType")
+				res = func.invoke([res, container[n]]);
+		}
+	}
+
+	else
+	{
+		throw new Error("foldl can only be applied to lists and dictionaries.");	
+	}
+
+	return res;
+}
+
+createPrimitive("foldl", ["_F", "_I", "_C"], foldl);
+
+function foldr()
+{
+	var func = Lich.VM.getVar("_F");
+	var initialValue = Lich.VM.getVar("_I");
+	var container = Lich.VM.getVar("_C");
+
+	if(func.lichType != CLOSURE)
+		throw new Error("foldr can only be applied using: foldr function container");
+
+	var res = container;
+
+	if((container instanceof Array) || (typeof container === "string"))
+	{
+		res = initialValue;
+
+		for(var i = (container.length - 1); i >= 0; --i)
+		{
+			res = func.invoke([container[i], res]); 
+		}
+	}
+
+	else if(container.lichType == DICTIONARY)
+	{
+		res = initialValue;
+
+		for(n in container)
+		{
+			if(n != "lichType")
+				res = func.invoke([container[n], res]);
+			else
+				Lich.post("lichType in foldl.");
+		}
+	}
+
+	else
+	{
+		throw new Error("foldr can only be applied to lists and dictionaries.");	
+	}
+
+	return res;
+}
+
+createPrimitive("foldr", ["_F", "_I", "_C"], foldr);
+
+function zip()
+{
+	var lcontainer = Lich.VM.getVar("_L");
+	var rcontainer = Lich.VM.getVar("_R");
+
+	var res = new Array();
+
+	if((lcontainer instanceof Array) || (typeof lcontainer === "string")
+		&& (rcontainer instanceof Array) || (typeof rcontainer === "string"))
+	{
+		for(var i = 0; i < lcontainer.length && i < rcontainer.length; ++i)
+		{
+			res.push([lcontainer[i], rcontainer[i]]); 
+		}
+	}
+
+	else
+	{
+		throw new Error("zip can only be applied to lists.");	
+	}
+
+	return res;
+}
+
+createPrimitive("zip", ["_L", "_R"], zip);
+
+function zipWith()
+{	
+	var func = Lich.VM.getVar("_F");
+	var lcontainer = Lich.VM.getVar("_L");
+	var rcontainer = Lich.VM.getVar("_R");
+
+	var res = new Array();
+
+	if((lcontainer instanceof Array) || (typeof lcontainer === "string")
+		&& (rcontainer instanceof Array) || (typeof rcontainer === "string"))
+	{
+		for(var i = 0; i < lcontainer.length && i < rcontainer.length; ++i)
+		{
+			res.push(func.invoke([lcontainer[i], rcontainer[i]])); 
+		}
+	}
+
+	else
+	{
+		throw new Error("zipWith can only be applied to lists.");	
+	}
+
+	return res;
+}
+
+createPrimitive("zipWith", ["_F", "_L", "_R"], zipWith);
+
+function filter()
+{
+	var func = Lich.VM.getVar("_L");
+	var container = Lich.VM.getVar("_R");
+
+	if(func.lichType != CLOSURE)
+		throw new Error("filter can only be applied using: filter function container");
+
+	var res = container;
+
+	if((container instanceof Array) || (typeof container === "string"))
+	{
+		res = new Array();
+
+		for(var i = 0; i < container.length; ++i)
+		{
+			// Iterate over each item in the container and invoke the function passing [item]. It must be as an array to work correctly.
+			if(func.invoke([container[i]]))
+				res.push(container[i]); 
+		}
+
+		if(typeof container === "string")
+			res = res.join("");	
+	}
+
+	else if(container.lichType == DICTIONARY)
+	{
+		res = {};
+
+		for(n in container)
+		{
+			if(n != "lichType")
+				if(func.invoke([container[n]]))
+					res[n] = container[n]; 
+		}
+
+		res.lichType = DICTIONARY;
+	}
+
+	else
+	{
+		throw new Error("map can only be applied to lists and dictionaries.");	
+	}
+
+	return res;
+}
+
+createPrimitive("filter", ["_L", "_R"], filter);
+
+function head()
+{
+	var container = Lich.VM.getVar("_C");
+
+	if((container instanceof Array) || (typeof container === "string"))
+	{
+		if(container.length == 0)
+			return Lich.VM.Nothing;
+		else
+			return container[0];
+	}
+
+	else
+	{
+		throw new Error("head can only be applied to lists.");	
+	}
+}
+
+createPrimitive("head", ["_C"], head);
+
+function tail()
+{
+	var container = Lich.VM.getVar("_C");
+
+	if((container instanceof Array) || (typeof container === "string"))
+	{
+		if(container.length == 0)
+			return Lich.VM.Nothing;
+		else
+			return container.slice(1, container.length);
+	}
+
+	else
+	{
+		throw new Error("tail can only be applied to lists.");	
+	}
+}
+
+createPrimitive("tail", ["_C"], tail);
+
+function init()
+{
+	var container = Lich.VM.getVar("_C");
+
+	if((container instanceof Array) || (typeof container === "string"))
+	{
+		if(container.length == 0)
+			return Lich.VM.Nothing;
+		else
+			return container.slice(0, container.length - 1);
+	}
+
+	else
+	{
+		throw new Error("init can only be applied to lists.");	
+	}
+}
+
+createPrimitive("init", ["_C"], init);
+
+function last()
+{
+	var container = Lich.VM.getVar("_C");
+
+	if((container instanceof Array) || (typeof container === "string"))
+	{
+		if(container.length == 0)
+			return Lich.VM.Nothing;
+		else
+			return container[container.length - 1];
+	}
+
+	else
+	{
+		throw new Error("last can only be applied to lists.");	
+	}
+}
+
+createPrimitive("last", ["_C"], last);
+
+
+// head, tail, init, last

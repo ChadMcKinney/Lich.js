@@ -131,10 +131,6 @@ textarea::selection {
 	-webkit-box-sizing:border-box;
 	   -moz-box-sizing:border-box;
     		box-sizing:border-box;
-
-    -webkit-box-shadow: inset 1px 4px 9px -6px  rgba(200,200,255,0.25);;
-	   -moz-box-shadow: inset 1px 4px 9px -6px  rgba(200,200,255,0.25);;
-	        box-shadow: inset 1px 4px 9px -6px  rgba(200,200,255,0.25);;
 }
 
 .chat{
@@ -158,9 +154,9 @@ textarea::selection {
 	   -moz-box-sizing:border-box;
     		box-sizing:border-box;
 
-    -webkit-box-shadow: inset 1px 4px 9px -6px  rgba(200,200,255,0.25);;
-	   -moz-box-shadow: inset 1px 4px 9px -6px  rgba(200,200,255,0.25);;
-	        box-shadow: inset 1px 4px 9px -6px  rgba(200,200,255,0.25);;
+    -webkit-box-shadow: inset 1px 4px 9px -6px  rgba(200,200,255,0.25);
+	   -moz-box-shadow: inset 1px 4px 9px -6px  rgba(200,200,255,0.25);
+	        box-shadow: inset 1px 4px 9px -6px  rgba(200,200,255,0.25);
 }
 
 .terminalName{
@@ -209,4 +205,32 @@ textarea::selection {
 	font-family: Ubuntu Mono, DejaVu Sans Mono, Liberation Mono,Bitstream Vera Sans Mono,Consolas,Monaco,Lucida Console,Courier New, monospace;
 	font-smooth: true;
 	overflow: hidden;
+}
+
+.nameTag {
+	background-color: transparent;
+	position: absolute;
+	float: right;
+	padding-top: 0em;
+	padding-left: 0.2em;
+	opacity: 0.0;
+	height: 0%;
+	top: 0px;
+	left: 90%;
+	width:10%;
+	color: rgb(48,144,144);
+	border: none;
+	z-index: 20;
+	resize: none;
+	font-size: 100%;
+	font-family: Ubuntu Mono, DejaVu Sans Mono, Liberation Mono,Bitstream Vera Sans Mono,Consolas,Monaco,Lucida Console,Courier New, monospace;
+	font-smooth: true;
+	overflow: hidden;
+
+	-webkit-box-shadow: inset 0px 4px 9px -6px  rgba(200,200,255,0.25);
+	   -moz-box-shadow: inset 0px 4px 9px -6px  rgba(200,200,255,0.25);
+	        box-shadow: inset 0px 4px 9px -6px  rgba(200,200,255,0.25);
+
+	-webkit-transition: height 2s,top 2s, opacity 2s;
+			transition: height 2s,top 2s, opacity 2s;
 }

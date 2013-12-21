@@ -1,13 +1,316 @@
-blank     = "_"
-wall      = "+"
-dungeon   = "."
-cave      = ","
-library   = "L"
-dark      = "?"
-bridge    = "="
+--Mountains of Madness
 
-tile x y t = [x,y,t]
-initMap xSize ySize = map (\x -> map (\y -> tile x y "_") (0..xSize)) (0..ySize)
-zorkMap = initMap 20 20
+--Runes of warding
+--Traps / Curses
+--One player, Multiple Monsters
+--See everyone's text fields, but translate enemy text fields into "lovecraftian" language
+--Fixed map, with randomized contents
 
---( zorkMap !! 0 ) !! 1
+------------------------------------------------------------------------------------------------
+--Data Types
+------------------------------------------------------------------------------------------------
+
+let nullAction receiver game = game{narration="That has no effect"}
+
+data Item {
+	name  			= "Not an item.",
+	description 	= "Not an Item.",
+	carryable		= True,
+	action 			= nullAction,
+	cursed 			= False
+}
+
+data Location {
+	name 			= "Nowhere",
+	north 			= "Nowhere",
+	south 			= "Nowhere",
+	east 			= "Nowhere",
+	west 			= "Nowhere",
+	up 				= "Nowhere",
+	down 			= "Nowhere",
+	description 	= "Nothing to see here.",
+	farDescription 	= "Nothing to see in the distance.",
+	items 			= (),
+	moveable 		= False
+}
+
+data Player {
+	name 		= "New Player",
+	health 		= 100,
+	location 	= "Nowhere",
+	description = "A rather academic looking researcher. Cold, but healthy.",
+	items 		= (),
+	sanity 		= 100
+}
+
+data Monster {
+	name 		= "Nobody",
+	health 		= 100,
+	location 	= "Nowhere",
+	description = "Not actually a monster.",
+	items 		= (),
+	attack 		= 25,
+	dementia	= 25
+}
+
+data Game {
+	players		= (),
+	monsters 	= (),
+	locations 	= ("Nowhere" => Location),
+	narration 	= "You are nowhere.",
+	gameOver	= False
+}
+
+data Cardinal {
+	north = 0,
+	south = 1,
+	east  = 2,
+	west  = 3,
+	up    = 4,
+	down  = 5
+}
+
+let north = Cardinal :: north
+let south = Cardinal :: south
+let east  = Cardinal :: east
+let west  = Cardinal :: west
+let up    = Cardinal :: up
+let down  = Cardinal :: down
+
+------------------------------------------------------------------------------------------------
+--Game Actions
+------------------------------------------------------------------------------------------------
+
+-- |placeItemAtLocation Item Location => Location
+let placeItemAtLocation item location = location {items = newItems}
+	where
+		newItems = ((item :: name) => item) : (location :: items)
+
+-- |removeItemFromLocation Item Location => Location
+let removeItemFromLocation item location = location{items = newItems}
+	where
+		newItems = delete (item::name) (location::items)
+
+-- |giveItemToPlayer Item Player => Player
+let giveItemToPlayer item player = player{items = newItems}
+	where
+		newItems = ((item::name) => item) : (player::items)
+
+-- |removeItemFromPlayer Item Player => Player
+let removeItemFromPlayer item player = player{items = newItems}
+	where
+		newItems = delete (item::name) (player::items)
+
+-- |updateLocation Location Game => Game
+let updateLocation location game = game{locations = newLocations}
+	where
+		newLocations = ((location::name) => location) : (game::locations)
+
+-- |getPlayer String     Game => Player
+let getPlayer playerName game = (game :: players) !! playerName
+
+-- |updatePlayer Player Game => Game
+let updatePlayer player game = game{players = newPlayers}
+	where
+		newPlayers = ((player::name) => player) : (game::players)
+
+-- |updateMonster Monster Game => Game
+let updateMonster monster game = game{monsters = newMonsters}
+	where
+		newMonsters = (monster::name => monster) : game::monsters
+
+-- |moveItemFromPlayerToLocation Item Location Player Game => Game
+let moveItemFromPlayerToLocation item location player game = updatePlayer newPlayer newGame
+	where
+		newLocation = placeItemAtLocation 	item location
+		newPlayer 	= removeItemFromPlayer 	item player
+		newGame		= updateLocation newLocation game
+
+-- |pickupCarryableItemFromLocation Item Location Player Game => Game
+let pickupCarryableItemFromLocation item location player game = updatePlayer newPlayer newGame
+	where
+		newLocation = removeItemFromLocation item location
+		newPlayer 	= giveItemToPlayer 		 item player
+		newGame		= updateLocation newLocation game
+
+-- |pickupItemFromLocation Item Location Player Game => Game
+let pickupItemFromLocation item location player game = 
+	if item :: carryable
+		then pickupCarryableItemFromLocation item location player game
+		else game{narration="I can't carry that!"}
+
+-- |playerLocation Player Game => Location
+let playerLocation player game = (game::locations) !! (player::location)
+
+-- |locationAtCardinal Cardinal Player Game => Location
+let locationAtCardinal cardinal player game = 
+	case cardinal of
+		north -> ( playerLocation player game ) :: north
+		south -> ( playerLocation player game ) :: south
+		east  -> ( playerLocation player game ) :: east
+		west  -> ( playerLocation player game ) :: west
+		up    -> ( playerLocation player game ) :: up
+		down  -> ( playerLocation player game ) :: down
+
+-- |lookAtCardinal Cardinal Player Game => Game
+let lookAtCardinal cardinal player game = game{narration = (location::farDescription)}
+	where
+		location = locationAtCardinal cardinal player game
+
+-- |movePlayer Cardinal Player Game => Game
+let movePlayer cardinal player game = result
+	where
+		locationAt = locationAtCardinal cardinal player game
+		result	= if locationAt :: moveable
+			then updatePlayer (player{location = (locationAt::name)}) game
+			else game{narration = "That way is blocked"}
+	
+-- |checkPlayerDeath Player Game => Game
+let checkPlayerDeath player game = 
+	if (player :: health) < 1
+		then game{narration = "You died!",gameOver = True}
+		else game
+
+-- |damagePlayer Int Player Game => Game
+let damagePlayer damage player game = checkPlayerDeath damagedPlayer newGame
+	where
+		damagedPlayer 	= player{health = ( (player :: health) - damage)}
+		newGame 		= updatePlayer damagedPlayer game
+
+-- |monsterAttacksPlayer Monster Player Game => Game
+let monsterAttacksPlayer monster player game = damagePlayer (monster :: attack) player game
+
+let player = Player "casiosk1"
+let shoggoth = Monster "Shoggoth"
+
+let demoGame = gameWithMonster
+	where
+		initGame = Game
+		gameWithPlayer = updatePlayer player initGame
+		gameWithMonster = updateMonster shoggoth gameWithPlayer
+
+------------------------------------------------------------------------------------------------
+--Items and Locations
+------------------------------------------------------------------------------------------------
+
+--Zork Above ground
+--29 	Rooms
+--40ish Connections
+
+--Mountains of Madness
+--18 	Rooms
+--19 	Connections
+
+------------------------------------------------------------------------------------------------
+--ASCII MAP
+------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------
+----------------------------------------------[Exit2]-------------------------------------------
+------------------------------------------------||----------------------------------------------
+------------------------------------[Exit1]==[IcePlateau]==[Exit3]------------------------------
+-----------------------------------------------||-----------------------------------------------
+--------------------------------------------[RuneStairs]----------------------------------------
+-----------------------------------------------U|-----------------------------------------------
+-----------------------------------------------U|-----------------------------------------------
+---------------------------[SecretVault]====[RuneTunnel]----------------------------------------
+-------------------------------||---------------------------------------------------------------
+------------------------||===[Library]===||-----------------------------------------------------
+------------------------||---------------||-----------------------------------------------------
+------------------------||---------------||-----------------------------------------------------
+----------------[UndergroundLake]===[CityCenter]------------------------------------------------
+-----------------------------------------||-----------------------------------------------------
+-----------------------------||====[CityEntrance]===||------------------------------------------
+-----------------------------||---------------------||------------------------------------------
+-------------------------[UnderRuins]-----------[MuralsBottom]----------------------------------
+-----------------------------D|---------------------D|------------------------------------------
+--------------------------[Ruins]===[Mountains]===[MuralsTop]-----------------------------------
+-----------------------------------------||-----------------------------------------------------
+-----------------------------------------||-----------------------------------------------------
+---------------------------------||====[mound]====||--------------------------------------------
+---------------------------------||      ||       ||--------------------------------------------
+-----------------------------[mound2]==[Camp]==[mound3]-----------------------------------------
+------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------
+
+let dogCorpse 	= Item name description False
+	where
+		name 	= "DogCorpse"
+		desc 	= "A dessicated dog corpse. It appears to have been...dissected."
+
+let corpse 		= Item name description False
+	where
+		name 	= "Corpse"
+		desc 	= "A dessicated corpse. It appears to have been...dissected."
+
+let corpse2 	= Item name description False
+	where
+		name 	= "Corpse2"
+		desc 	= "A bloated corpse. It appears to have been...amputated."
+
+let camp 		= Location "Camp" n s e w u d desc fDesc items mov
+	where
+		n 		= "Mound"
+		s 		= "Nothing"
+		e 		= "Mound3"
+		w 		= "Mound2"
+		u 		= "Nothing"
+		d 		= "Nothing"
+		desc 	= "A base camp for a previous expedition to Antartica."
+		fDesc 	= "a white blasted, frigid looking camp."	
+		items 	= ()
+		mov 	= True
+
+let mound 		= Location "Mound" n s e w u d desc fDesc items mov
+	where
+		n 		= "Mountains"
+		s 		= "Camp"
+		e 		= "Mound3"
+		w 		= "Mound2"
+		u 		= "Nothing"
+		d 		= "Nothing"
+		desc 	= "A strange greenish mound in the snow. There appears to be something at the top of it."
+		fDesc 	= "the vauge outline of a small hill of some kind in the snow."	
+		items 	= ("DogCorpse" => dogCorpse)
+		mov 	= True
+
+let mound2 		= Location "Mound2" n s e w u d desc fDesc items mov
+	where
+		n 		= "Mound"
+		s 		= "Nothing"
+		e 		= "Camp"
+		w 		= "Nothing"
+		u 		= "Nothing"
+		d 		= "Nothing"
+		desc 	= "A strange redish mound in the snow. There appears to be something at the top of it."
+		fDesc 	= "the vauge outline of a small hill of some kind in the snow."	
+		items 	= ("Corpse" => corpse)
+		mov 	= True
+
+let mound3 		= Location "Mound3" n s e w u d desc fDesc items mov
+	where
+		n 		= "Mound"
+		s 		= "Nothing"
+		e 		= "Nothing"
+		w 		= "Camp"
+		u 		= "Nothing"
+		d 		= "Nothing"
+		desc 	= "A strange brownish mound in the snow. There appears to be something at the top of it."
+		fDesc 	= "the vauge outline of a small hill of some kind in the snow."	
+		items 	= ("Corpse2" => corpse2)
+		mov 	= True
+
+let mountain 	= Location "Mountain" n s e w u d desc fDesc items mov
+	where
+		n 		= "Nothing"
+		s 		= "Mound"
+		e 		= "MuralsTop"
+		w 		= "Ruins"
+		u 		= "Nothing"
+		d 		= "Nothing"
+		desc 	= "A series of precipitous and daunting cliffs. Arduous hiking."
+		fDesc 	= "the peaks of a chain of peaks and cliffs. Looks dangerous."	
+		items 	= ()
+		mov 	= True	
