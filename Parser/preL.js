@@ -19,7 +19,7 @@ Lich.Parser.preL = function(input) {
 	
 	//If the first lexeme of a module is not { or module, then it is preceded 
 	//by {n} where n is the indentation of the lexeme
-	if (input[0].val === "{" || input[0].val === "module"){
+	if (input[0].val === "†" || input[0].val === "module"){
 //        result.push(new Token(input[0].val,line,column,input[0].typ));
         result.push(mkToken(input[0],line,column));
 	    column += input[0].val.length;
@@ -29,7 +29,7 @@ Lich.Parser.preL = function(input) {
 	        line += lim;
 	        column = 1;
 	    }
-	    if (input[1].val !== "{" && input[1].val !== "module") {
+	    if (input[1].val !== "†" && input[1].val !== "module") {
 	        newBlock = true;
 	    } 
 	    try {
@@ -69,7 +69,7 @@ Lich.Parser.preL = function(input) {
 		} else {
 		//input[i] is a lexeme
 		    if (newBlock) {
-                if (input[i].val !== "{" && input[i+1])
+                if (input[i].val !== "†" && input[i+1])
 		            result.push(new Ind(column, line, BLOCKIND()));
 		        newBlock = false;
 		        newLine = false;

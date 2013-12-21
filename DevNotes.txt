@@ -82,6 +82,7 @@ Pattern matching?
 Guards?
 list comprehension
 
+
 //////////////////////
 // Data 
 //////////////////////
@@ -107,6 +108,10 @@ myCoolObject :: three -- returns 44
 data MyData { one = 1, two = 2, three = 3 }
 
 let m = MyData 0.1 0.2 0.3
+
+Update?
+m { two = 66 }
+
 
 /////////////////////////
 // List creation syntax

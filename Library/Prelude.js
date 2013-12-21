@@ -320,6 +320,23 @@ function insert()
 
 createPrimitive("insert", ["_L", "_R"], insert);
 
+
+function deleteEntry()
+{
+	var value = Lich.VM.getVar("_L");
+	var dict = Lich.VM.getVar("_R");
+
+	if(!(dict.lichType == DICTIONARY))
+		throw new Error("Cons can only be applied to lists.");
+
+	var newDict = deepCopy(dict);
+	delete newDict[value];
+	return newDict;
+}
+
+createPrimitive("delete", ["_L", "_R"], deleteEntry); // delete "key" myMap
+
+
 function concatList()
 {
 	var list = Lich.VM.getVar("_L");
