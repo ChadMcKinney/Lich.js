@@ -2,6 +2,10 @@
 // Dev Notes
 //////////////////////////////
 
+
+// These now work!
+foldl, foldr, zip, zipWith, filter, head, tail, init, and last
+
 // List creation syntax
 [1,2,3,4] -- 1,2,3,4
 [1..7] -- 1,2,3,4,5,6,7
@@ -75,22 +79,33 @@ case "Zombie" of
 
 Have two parsing modes. One for library code and one for interactive mode. Lib code is like .hs files, with modules and imports at the top and normal, but interactive mode requiring the use of 'let' for global scope variable declaration.
 
+!!!!!!!!!!!!!!!!!!!!!!!!!
+!!&&, || operators!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!
 
 // NEED TO IMPLEMENT
-foldl, foldr, zip, zipWith, filter, other various prelude functions
 function composition?:
 func1 <<< func2 <<< func3 << func4
 func1 . func2 . func3 $ func4
 
 arrows:
 func1 >>> func2 >>> func3 >>> func4
-Pattern matching?
-Guards?
-list comprehension
+
 
 where statements in data constructors
-enums or true algebraic data types such as:
-	data Cordinal = North | East | South | West
+
+list comprehension
+func1 . func2 . func3 $ func4
+foldl, foldr, zip, zipWith, filter, other various prelude functions
+
+
+/////////////////////////////////////////
+POST 1.0 FEATURES
+Pattern matching
+Guards
+/////////////////////////////////////////
+
+
 
 //////////////////////
 // Data 

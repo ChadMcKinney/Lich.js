@@ -33,6 +33,7 @@ tab = "\t"
 \s+                         return {val:yytext};
 ("-")?[0-9]+("."[0-9]+)?    return {val:yytext,typ:"float"};
 "::"                        return {val:"::",typ:"::"};
+"[]"                        return {val:"[]",typ:"[]"};
 "["                         return {val:"[",typ:"["};
 "]"                         return {val:"]",typ:"]"};
 "{"                         return {val:"{",typ:"{"};
@@ -345,7 +346,6 @@ exp // : object
   | exp ":" exp         {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
   | exp "++" exp        {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
   | datalookup          {{$$ = $1;}}
-  | "[" "]"             {{ $$ = {astType: "listexp", members: [], pos: @$}; }}
   | dataexp             {{$$ = $1;}}
   | datainst            {{$$ = $1;}}
   | dataupdate          {{$$ = $1;}}
@@ -521,6 +521,7 @@ listexp // : object
     : "[" exp list_exp_1_comma          {{ $$ = {astType: "listexp", members: [$2].concat($3), pos: @$}; }}
     | "[" exp ".." exp "]"              {{ $$ = {astType: "listrange", lower: $2, upper: $4, pos: @$}; }}
     | "[" exp "," exp ".." exp "]"      {{ $$ = {astType: "listrange", lower: $2, upper: $6, skip: $4, pos: @$}; }}
+    | "[]"                              {{ $$ = {astType: "listexp", members: [], pos: @$}; }}
     ;
 
 list_exp_1_comma
