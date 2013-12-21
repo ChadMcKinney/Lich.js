@@ -472,7 +472,8 @@ dictpair
   ;
 
 dataexp
-  : data conid "{" datamems "}"   {{$$ = {astType:"data-decl", id: $2, members: $4};}}
+  : data conid "{" datamems "}"       {{$$ = {astType:"data-decl", id: $2, members: $4};}}
+  | data conid "{" datamems ";" "}"   {{$$ = {astType:"data-decl", id: $2, members: $4};}}
   ;
 
 dataupdate

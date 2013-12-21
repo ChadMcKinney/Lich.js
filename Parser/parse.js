@@ -62,7 +62,7 @@ Lich.parse = function(input) {
     }*/
 
     var y = Lich.Parser.preL(x);
-    // Lich.post("Lich.Parser.preL(x) = " + y);
+    //Lich.post("Lich.Parser.preL(x) = " + y);
     /*
     LichParser.lexer = new iterL();
 
