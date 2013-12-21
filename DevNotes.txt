@@ -82,6 +82,9 @@ Pattern matching?
 Guards?
 list comprehension
 
+where statements in data constructors
+enums or true algebraic data types such as:
+	data Cordinal = North | East | South | West
 
 //////////////////////
 // Data 
@@ -108,9 +111,7 @@ myCoolObject :: three -- returns 44
 data MyData { one = 1, two = 2, three = 3 }
 
 let m = MyData 0.1 0.2 0.3
-
-Update?
-m { two = 66 }
+let m2 = m { two = 66 } -- returns 0.1 666 0.3
 
 
 /////////////////////////
