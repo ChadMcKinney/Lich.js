@@ -139,6 +139,9 @@ Lich.compileAST = function(ast)
 			case "case":
 				return Lich.compileCase(ast);
 				break;
+			case "Nothing":
+				return Lich.VM.Nothing;
+				break;
 			case "module":
 				return Lich.compileModule(ast);
 				break;
@@ -260,7 +263,7 @@ Lich.compileInfixExp = function(ast)
 Lich.compileIte = function(ast)
 {
 	var expRes = Lich.compileAST(ast.e1); 
-	if(expRes == true) // explicit to avoid false positives
+	if(expRes === true) // explicit to avoid false positives
 		return Lich.compileAST(ast.e2);
 	else
 		return Lich.compileAST(ast.e3);

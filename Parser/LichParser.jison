@@ -95,6 +95,7 @@ tab = "\t"
 "newtype"                   return {val:"newtype",typ:"newtype"};
 "of"                        return {val:"of",typ:"of"};
 "type"                      return {val:"type",typ:"type"};
+"Nothing"                   return {val:"Nothing",typ:"Nothing"};
 [a-z][A-Za-z0-9_]*          return {val:yytext,typ:"varid"};
 [A-Z][A-Za-z0-9_]*          return {val:yytext,typ:"conid"};
 \"([^\"])*\"                return {val:yytext,typ:"string"};
@@ -342,6 +343,7 @@ exp // : object
   | "[" "]"             {{ $$ = {astType: "listexp", members: [], pos: @$}; }}
   | dataexp             {{$$ = $1;}}
   | datainst            {{$$ = $1;}}
+  | "Nothing"           {{$$ = {astType: "Nothing"};}}
   ;
 
 /*

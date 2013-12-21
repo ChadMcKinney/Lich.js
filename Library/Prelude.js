@@ -335,22 +335,3 @@ function concatList()
 }
 
 createPrimitive("++", ["_L", "_R"], concatList);
-
-/*
-function indexData()
-{
-	var data = Lich.VM.getVar("_L");
-
-	if(!(dictionary instanceof Object))
-		throw new Error("indexing via :: can only be applied to data structures.");
-
-	var res;
-
-	if(dictionary.lichType == DICTIONARY)
-		
-	else if(dictionary.lichType == DATA)
-		res = dictionary
-	return typeof res === "undefined" ? Lich.VM.Nothing : res;
-}
-
-createPrimitive("::", ["_L", "_R"], indexDictionary);*/
