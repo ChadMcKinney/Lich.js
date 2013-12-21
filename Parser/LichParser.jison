@@ -119,6 +119,7 @@ qconsym = qs:(conid ".")+ ref:((!"." consym) !".") {qs = flatten(qs).join(""); r
 
 /* operator associations and precedence */
 
+%right '$'
 // %nonassoc '='
 %left '+' '-' '%'
 %left '*' '/'
@@ -382,7 +383,8 @@ infixexpLR // : [lexp | qop | '-']. re-written to be left recursive.
 
 lexp // : object
   : "if" exp "then" exp "else" exp  {{$$ = {astType:"ite",e1:$2,e2:$4,e3:$6,pos:@$}; }}
-  | fexp                            {{ $$ = ($1.length === 1) ? ($1[0]) : {astType:"application", exps:$1,pos:@$}; }}
+  | fexp                            {{$$ = ($1.length === 1) ? ($1[0]) : {astType:"application", exps:$1,pos:@$}; }}
+  | exp "$" exp                     {{$$ = {astType:"function-application-op", exp1: $1, exp2: $3};}}
   | '\' apats "->" exp              {{$$ = {astType:"lambda", args: $2, rhs: $4, pos: @$}; }}
   | "case" exp "of" "†" alts "‡"    {{$$ = {astType:"case", exp: $2, alts: $5, pos: @$}; }}
   | "let" decls "in" exp            {{$$ = {astType:"let", decls: $2, exp: $4, pos: @$}; }}

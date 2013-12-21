@@ -3,6 +3,10 @@
 //////////////////////////////
 
 
+// $ function application works!
+mul 3 $ mul 3 $ div 2 $ add 3 $ 1 -- returns 4.5
+
+
 // These now work!
 foldl, foldr, zip, zipWith, filter, head, tail, init, and last
 
@@ -96,8 +100,6 @@ where statements in data constructors
 
 list comprehension
 func1 . func2 . func3 $ func4
-foldl, foldr, zip, zipWith, filter, other various prelude functions
-
 
 /////////////////////////////////////////
 POST 1.0 FEATURES

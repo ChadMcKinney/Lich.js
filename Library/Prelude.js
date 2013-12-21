@@ -643,6 +643,3 @@ function last()
 }
 
 createPrimitive("last", ["_C"], last);
-
-
-// head, tail, init, last

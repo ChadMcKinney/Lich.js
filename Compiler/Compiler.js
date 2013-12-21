@@ -81,6 +81,9 @@ Lich.compileAST = function(ast)
 			case "application":
 				return Lich.compileApplication(ast);
 				break;
+			case "function-application-op":
+				return Lich.compileFunctionApplicationOp(ast);
+				break;
 			case "lambda":
 				return Lich.compileLambda(ast);
 				break;
@@ -295,6 +298,18 @@ Lich.compileApplication = function(ast)
 
 		return closure.invoke(args);
 	}
+}
+
+Lich.compileFunctionApplicationOp = function(ast)
+{
+	var exp1 = Lich.compileAST(ast.exp1);
+
+	if(exp1.lichType != CLOSURE)
+		throw new Error("$ can only be applied using: function $ expression");
+
+	var exp2 = Lich.compileAST(ast.exp2);
+
+	return exp1.invoke([exp2]);
 }
 
 Lich.compileLambda = function(ast)
