@@ -72,12 +72,15 @@ case "Zombie" of
 
 -- NEED TO IMPLEMENT
 foldl, foldr, zip, zipWith, filter, other various prelude functions
-function composition:
+function composition?:
 func1 <<< func2 <<< func3 << func4
+func1 . func2 . func3 $ func4
+
+arrows:
+func1 >>> func2 >>> func3 >>> func4
 Pattern matching?
 Guards?
 list comprehension
-primitives need to reserve varnames!!!!!!!!!!
 
 //////////////////////
 // Data 
