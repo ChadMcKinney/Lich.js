@@ -158,7 +158,11 @@ Lich.compileAST = function(ast)
 				return Lich.compileDataLookup(ast);
 				break;
 			case "data-update":
-				return Lich.compileDataUpdate(ast);	
+				return Lich.compileDataUpdate(ast);
+				break;
+			case "data-enum":
+				return Lich.compileDataEnum(ast);
+				break;	
 			default:
 				Lich.unsupportedSemantics(ast);
 				break;
@@ -435,6 +439,24 @@ Lich.compileDataUpdate = function(ast)
 		data[ast.members[i].id] = Lich.compileAST(ast.members[i].exp);
 	}
 
+	return data;
+}
+
+Lich.compileDataEnum = function(ast)
+{
+	var data = {
+		_argNames: new Array(),
+		_datatype: ast.id,
+		lichType: DATA
+	}
+
+	for(var i = 0; i < ast.members.length; ++i)
+	{
+		data._argNames.push(ast.members[i]);
+		data[ast.members[i]] = i;
+	}
+
+	Lich.VM.setVar(ast.id, data);
 	return data;
 }
 

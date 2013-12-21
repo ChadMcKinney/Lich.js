@@ -353,7 +353,8 @@ exp // : object
   ;
 
 datalookup
-  : exp "::" varid      {{$$ = {astType:"data-lookup",data:$1,member:$3,pos:@$};}}  
+  : exp "::" varid      {{$$ = {astType:"data-lookup",data:$1,member:$3,pos:@$};}}
+  | exp "::" conid      {{$$ = {astType:"data-lookup",data:$1,member:$3,pos:@$};}}    
   ;
 /*
 infixexp // : [lexp | qop | '-']
@@ -482,7 +483,14 @@ dictpair
 dataexp
   : data conid "{" datamems "}"       {{$$ = {astType:"data-decl", id: $2, members: $4};}}
   | data conid "{" datamems ";" "}"   {{$$ = {astType:"data-decl", id: $2, members: $4};}}
+  | data conid "=" enums                {{$$ = {astType:"data-enum", id: $2, members: $4};}}}
   ;
+
+enums
+  : enums "|" conid                   {{$1.push($3); $$ = $1;}}
+  | conid                             {{$$ = [$1];}}
+  ;
+
 
 dataupdate
   : exp "{" datamems "}"            {{$$ = {astType:"data-update", data: $1, members: $3};}}

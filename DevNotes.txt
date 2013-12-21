@@ -92,8 +92,6 @@ where statements in data constructors
 enums or true algebraic data types such as:
 	data Cordinal = North | East | South | West
 
-map (and filter and anything else) with dictionaries!!!!!!!
-
 //////////////////////
 // Data 
 //////////////////////
