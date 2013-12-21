@@ -32,6 +32,7 @@ tab = "\t"
 "--".*|"{-".*"-}"       {/* skip whitespace and comments */}
 \s+                         return {val:yytext};
 ("-")?[0-9]+("."[0-9]+)?    return {val:yytext,typ:"float"};
+"::"                        return {val:"::",typ:"::"};
 "["                         return {val:"[",typ:"["};
 "]"                         return {val:"]",typ:"]"};
 "{"                         return {val:"{",typ:"{"};
@@ -63,15 +64,14 @@ tab = "\t"
 "#"                         return {val:"#",typ:"#"};
 "$"                         return {val:"$",typ:"$"};
 "&"                         return {val:"&",typ:"&"};
+","                         return {val:",",typ:","};
 ".."                         return {val:"..",typ:".."};
 "."                         return {val:".",typ:"."};
 "@"                         return {val:"@",typ:"@"};
 "\\"                        return {val:"\\",typ:"\\"};      
 "|"                         return {val:"|",typ:"|"};
 "~"                         return {val:"~",typ:"~"};
-"::"                        return {val:"::",typ:"::"};
 ":"                         return {val:":",typ:":"};
-","                         return {val:",",typ:","};
 "`"                         return {val:"`",typ:"`"};
 <<EOF>>                     return {val:"EOF",typ:"EOF"};
 "where"                     return {val:"where",typ:"where"};
@@ -123,10 +123,15 @@ qconsym = qs:(conid ".")+ ref:((!"." consym) !".") {qs = flatten(qs).join(""); r
 %left '*' '/'
 %left '^'
 %left '++'
+%left '::'
 //%left '==' '>' '<' 
 //%left '/=' '>=' '<='
 //%left UMINUS
 %right ':'
+
+//%right ".."
+//%right ","
+
 
 
 %start start_
@@ -339,7 +344,7 @@ exp // : object
   | exp "!!" exp        {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
   | exp ":" exp         {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
   | exp "++" exp        {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
-  | exp "::" varid      {{$$ = {astType:"data-lookup",data:$1,member:$3,pos:@$};}}
+  | datalookup          {{$$ = $1;}}
   | "[" "]"             {{ $$ = {astType: "listexp", members: [], pos: @$}; }}
   | dataexp             {{$$ = $1;}}
   | datainst            {{$$ = $1;}}
@@ -347,6 +352,9 @@ exp // : object
   | "Nothing"           {{$$ = {astType: "Nothing"};}}
   ;
 
+datalookup
+  : exp "::" varid      {{$$ = {astType:"data-lookup",data:$1,member:$3,pos:@$};}}  
+  ;
 /*
 infixexp // : [lexp | qop | '-']
   : infixexpLR lexp     %prec INFIXEXP          {{
@@ -502,14 +510,14 @@ tuple // : object
 */
 
 listexp // : object
-    : "[" list_exp_1_comma "]" {{ $$ = {astType: "listexp", members: $2, pos: @$}; }}
-    | "(" exp ".." exp ")"         {{ $$ = {astType: "listrange", lower: $2, upper: $4, pos: @$}; }}
-    | "(" exp "," exp ".." exp ")" {{ $$ = {astType: "listrange", lower: $2, upper: $6, skip: $4, pos: @$}; }}
+    : "[" exp list_exp_1_comma          {{ $$ = {astType: "listexp", members: [$2].concat($3), pos: @$}; }}
+    | "[" exp ".." exp "]"              {{ $$ = {astType: "listrange", lower: $2, upper: $4, pos: @$}; }}
+    | "[" exp "," exp ".." exp "]"      {{ $$ = {astType: "listrange", lower: $2, upper: $6, skip: $4, pos: @$}; }}
     ;
 
 list_exp_1_comma
-    : list_exp_1_comma ',' exp   {{$1.push($3); $$ = $1; }}
-    | exp                        {{$$ = [$1];}}
+    : ',' exp list_exp_1_comma   {{ $$ = [$2].concat($3); }}
+    | "]"                        {{ $$ = [];}}
     ;
 
 /*
@@ -611,7 +619,9 @@ gconsym // : object
 // 3.17 Pattern Matching
 
 pat // : object
-    : lpat             {{$$ = $1;}}
+    // : lpat             {{$$ = $1;}}
+    : exp                 {{$$ = $1;}}
+    | "_"                 {{$$ = {astType:"wildcard", pos: @$}; }}
     // TODO: incomplete
     ;
 
@@ -628,12 +638,13 @@ apats // : [apat]
     ;
 
 apat // : object
-    : var               {{$$ = $1; }}
-    | gcon              {{$$ = $1; }}
-    | literal           {{$$ = $1; }}
-    | '_'               {{$$ = {astType:"wildcard", pos: @$}; }}
-    | tuple_pat         {{$$ = $1; }}
-    | "(" pat ")"       {{$$ = $2; }}
+    : var                 {{$$ = $1; }}
+    | gcon                {{$$ = $1; }}
+    | literal             {{$$ = $1; }}
+    | '_'                 {{$$ = {astType:"wildcard", pos: @$}; }}
+    | tuple_pat           {{$$ = $1; }}
+    | "(" pat ")"         {{$$ = $2; }}
+    | "(" datalookup ")"  {{$$ = $1; }}
     ;
 
 tuple_pat // object

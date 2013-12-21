@@ -232,29 +232,51 @@ function deepCopy(obj)
 }
 
 
-function mapList()
+function mapContainer()
 {
 	var func = Lich.VM.getVar("_L");
-	var list = Lich.VM.getVar("_R");
+	var container = Lich.VM.getVar("_R");
 
 	if(func.lichType != CLOSURE)
-		throw new Error("map can only be applied using: map function list");
+		throw new Error("map can only be applied using: map function container");
 
-	if(!(list instanceof Array))
-		throw new Error("map can only be applied to lists.");
+	var res = container;
 
-	var res = new Array();
-
-	for(var i = 0; i < list.length; ++i)
+	if((container instanceof Array) || (typeof container === "string"))
 	{
-		// Iterate over each item in the list and invoke the function passing [item]. It must be as an array to work correctly.
-		res.push(func.invoke([list[i]])); 
+		res = new Array();
+
+		for(var i = 0; i < container.length; ++i)
+		{
+			// Iterate over each item in the container and invoke the function passing [item]. It must be as an array to work correctly.
+			res.push(func.invoke([container[i]])); 
+		}
+
+		if(typeof container === "string")
+			res = res.join("");	
+	}
+
+	else if(container.lichType == DICTIONARY)
+	{
+		res = {};
+
+		for(n in container)
+		{
+			res[n] = func.invoke([container[n]]);
+		}
+
+		res.lichType = DICTIONARY;
+	}
+
+	else
+	{
+		throw new Error("map can only be applied to lists and dictionaries.");	
 	}
 
 	return res;
 }
 
-createPrimitive("map", ["_L", "_R"], mapList);
+createPrimitive("map", ["_L", "_R"], mapContainer);
 
 function mergeDictionaries(obj1, obj2) 
 {
@@ -285,7 +307,7 @@ function cons()
 	var list = Lich.VM.getVar("_R");
 
 	if(!(list instanceof Array || typeof list === "string" || list.lichType == DICTIONARY))
-		throw new Error("Cons can only be applied to lists.");
+		throw new Error("Cons can only be applied to lists and dictionaries.");
 
 	// list = deepCopy(list);
 	// value = deepCopy(value);

@@ -2,6 +2,12 @@
 // Dev Notes
 //////////////////////////////
 
+// List creation syntax
+[1,2,3,4] -- 1,2,3,4
+[1..7] -- 1,2,3,4,5,6,7
+[2,5..99] -- 2,5,8,11,14,17,20,23,26,29,32,35,38,41,44,47,50,53,56,59,62,65,68,71,74,77,80,83,86,89,92,95,98
+
+
 
 // Dictionaries have been implemented as such
 
@@ -86,6 +92,8 @@ where statements in data constructors
 enums or true algebraic data types such as:
 	data Cordinal = North | East | South | West
 
+map (and filter and anything else) with dictionaries!!!!!!!
+
 //////////////////////
 // Data 
 //////////////////////
@@ -114,27 +122,11 @@ let m = MyData 0.1 0.2 0.3
 let m2 = m { two = 66 } -- returns 0.1 666 0.3
 
 
-// THIS DOESNT WORK, Functions in data constructors
-data Player { attack x = deal X damage }
-let player = Player
-player :: attack something
-
-/////////////////////////
-// List creation syntax
-// Dec 14, 2013
-
-Need to add the nice haskell list creation syntax. Examples:
-[1,2,3,4]
-[1..7]
-[2,5..99]
-
-This works currently but it uses the SuperCollider version of the syntax:
-(1..9)
-(3,6..99)
-
 //////////////////
 // Guard Patterns
 // Dec 14, 2013
+
+Is this any useful with Case statements the way they are?
 
 Need to add syntax for guard patterns, for example:
 
