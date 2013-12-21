@@ -64,6 +64,7 @@ tab = "\t"
 "#"                         return {val:"#",typ:"#"};
 "$"                         return {val:"$",typ:"$"};
 "&"                         return {val:"&",typ:"&"};
+","                         return {val:",",typ:","};
 ".."                         return {val:"..",typ:".."};
 "."                         return {val:".",typ:"."};
 "@"                         return {val:"@",typ:"@"};
@@ -71,7 +72,6 @@ tab = "\t"
 "|"                         return {val:"|",typ:"|"};
 "~"                         return {val:"~",typ:"~"};
 ":"                         return {val:":",typ:":"};
-","                         return {val:",",typ:","};
 "`"                         return {val:"`",typ:"`"};
 <<EOF>>                     return {val:"EOF",typ:"EOF"};
 "where"                     return {val:"where",typ:"where"};
@@ -128,6 +128,9 @@ qconsym = qs:(conid ".")+ ref:((!"." consym) !".") {qs = flatten(qs).join(""); r
 //%left '/=' '>=' '<='
 //%left UMINUS
 %right ':'
+
+//%right ".."
+//%right ","
 
 
 
@@ -507,15 +510,14 @@ tuple // : object
 */
 
 listexp // : object
-    : "[" list_exp_1_comma "]"     {{ $$ = {astType: "listexp", members: $2, pos: @$}; }}
-    | "[" exp ".." exp "]"         {{ $$ = {astType: "listrange", lower: $2, upper: $4, pos: @$}; }}
-    | "[" exp "," exp ".." exp "]" {{ $$ = {astType: "listrange", lower: $2, upper: $6, skip: $4, pos: @$}; }}
+    : "[" exp list_exp_1_comma          {{ $$ = {astType: "listexp", members: [$2].concat($3), pos: @$}; }}
+    | "[" exp ".." exp "]"              {{ $$ = {astType: "listrange", lower: $2, upper: $4, pos: @$}; }}
+    | "[" exp "," exp ".." exp "]"      {{ $$ = {astType: "listrange", lower: $2, upper: $6, skip: $4, pos: @$}; }}
     ;
 
 list_exp_1_comma
-    : list_exp_1_comma ',' exp   {{$1.push($3); $$ = $1; }}
-    | exp                        {{$$ = [$1];}}
-    |
+    : ',' exp list_exp_1_comma   {{ $$ = [$2].concat($3); }}
+    | "]"                        {{ $$ = [];}}
     ;
 
 /*
