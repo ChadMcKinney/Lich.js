@@ -157,8 +157,8 @@ Lich.compileAST = function(ast)
 			case "data-lookup":
 				return Lich.compileDataLookup(ast);
 				break;
-			case "data-mem":
-				return ast;	
+			case "data-update":
+				return Lich.compileDataUpdate(ast);	
 			default:
 				Lich.unsupportedSemantics(ast);
 				break;
@@ -380,7 +380,6 @@ Lich.compileDataDecl = function(ast)
 	{
 		data._argNames.push(ast.members[i].id);
 		data[ast.members[i].id] = Lich.compileAST(ast.members[i].exp);
-		Lich.post("data["+ast.members[i].id+"] = " + data[ast.members[i].id]);	
 	}
 
 	Lich.VM.setVar(ast.id, data);
@@ -411,7 +410,7 @@ Lich.compileDataLookup = function(ast)
 {
 	var data = Lich.compileAST(ast.data);
 
-	if(data == Lich.VM.Nothing)
+	if(data.lichType != DATA)
 		throw new Error("Unable to find data constructor");
 
 	var res = data[ast.member];
@@ -420,6 +419,23 @@ Lich.compileDataLookup = function(ast)
 		throw new Error("Data constructor " + data._datatype + " does not contain member " + ast.member);
 
 	return res;	
+}
+
+Lich.compileDataUpdate = function(ast)
+{
+	var dataCon = Lich.compileAST(ast.data);
+
+	if(dataCon == Lich.VM.Nothing)
+		throw new Error("Unable to find data object for update");
+
+	var data = deepCopy(dataCon);
+
+	for(var i = 0; i < ast.members.length; ++i)
+	{
+		data[ast.members[i].id] = Lich.compileAST(ast.members[i].exp);
+	}
+
+	return data;
 }
 
 Lich.compileBooleanLit = function(ast)

@@ -31,7 +31,7 @@ var iterL = function() {
         }
         var x = peek(this.input);
         if (this.emptyBlock)
-            return (new Token("}",x.row,x.col,"}"));
+            return (new Token("‡",x.row,x.col,"‡"));
         if (this.input.length <= 0) {
             if (this.stack.length <= 0) {
                 this.updRecent(new Token("EOF",Number.POSITIVE_INFINITY,
@@ -39,8 +39,8 @@ var iterL = function() {
                 return this.yyname;//TODO: what kind of message does parser want at EOF?
             } else {
                 if (peek(this.stack) > 0) {
-                    this.updRecent(new Token("}", Number.POSITIVE_INFINITY, 
-                              Number.POSITIVE_INFINITY, "}"));
+                    this.updRecent(new Token("‡", Number.POSITIVE_INFINITY, 
+                              Number.POSITIVE_INFINITY, "‡"));
                     this.stack.pop();
                     return this.yyname;
                 } else {
@@ -53,8 +53,8 @@ var iterL = function() {
         //an array of different Object types.
         var what = (x instanceof Ind && x.isBlock)? "BI":
                (x instanceof Ind && !x.isBlock)? "RI":
-               (x instanceof Token && x.val == "{")? "OB":
-               (x instanceof Token && x.val == "}")? "CB":
+               (x instanceof Token && x.val == "†")? "OB":
+               (x instanceof Token && x.val == "‡")? "CB":
                (x instanceof Token)? "T":
                "ERR";
 //        if (this.pErr) 
@@ -68,7 +68,7 @@ var iterL = function() {
                     if (x.col > 0) {
                         this.input.pop();
                         this.stack.push(x.col);
-                        this.updRecent(new Token("{",x.row,x.col,"{"));
+                        this.updRecent(new Token("†",x.row,x.col,"†"));
                         return this.yyname;
                     } else {
                         throw new Error("Layout error at row " + x.row + ", col " + x.col);
@@ -77,14 +77,14 @@ var iterL = function() {
                 } else if (x.col > peek(this.stack)) {
                     this.stack.push(x.col);
                     this.input.pop();
-                    this.updRecent(new Token("{",x.row,x.col,"{"));
+                    this.updRecent(new Token("†",x.row,x.col,"†"));
                     return this.yyname;
             //L {fn} : ts) ms = { : } : (L (< n >: ts) ms) (Note 2)
                 } else {
                     this.emptyBlock = true;
                     this.input.pop();
                     this.input.push(new Ind(x.col, x.row, ROWIND()));
-                    this.updRecent(new Token("{",x.row,x.col,"{"));
+                    this.updRecent(new Token("†",x.row,x.col,"†"));
                     return this.yyname;
                     //replace the BLOCKIND with a ROWIND
                 }
@@ -100,7 +100,7 @@ var iterL = function() {
                 } else if (this.stack.length > 0 && x.col < peek(this.stack)) {
                     this.stack.pop();
 //                    this.input.pop();
-                    this.updRecent(new Token("}",x.row,x.col,"}"));
+                    this.updRecent(new Token("‡",x.row,x.col,"‡"));
                     return this.yyname;
             //L (< n >: ts) ms = L ts ms
                 } else {
@@ -108,7 +108,7 @@ var iterL = function() {
                     return this.lex();
                 }
             break;
-            //current element is a Token "{"
+            //current element is a Token "†"
             case "OB":
             //L ({ : ts) ms = { : (L ts (0 : ms)) (Note 4)
                 this.input.pop();
@@ -116,7 +116,7 @@ var iterL = function() {
                 this.updRecent(x);
                 return this.yyname;
             break;
-            //current element is a Token "}"
+            //current element is a Token "‡"
             case "CB":
             //L (} : ts) (0 : ms) = } : (L ts ms) (Note 3)
                 if (peek(this.stack) === 0) {
@@ -138,7 +138,7 @@ var iterL = function() {
                     this.hadAnError = true;
 //                    document.writeln("<p>recent is now: " + this.recent + "</p>");
                     troublemaker = this.recent;
-                    this.updRecent(new Token("}",x.row,x.col,"}"),"ERROR");
+                    this.updRecent(new Token("‡",x.row,x.col,"‡"),"ERROR");
 //                    document.writeln("<p>recent is now: " + this.recent + "</p>");
                     return this.yyname;
             //L (t : ts) ms = t : (L ts ms)

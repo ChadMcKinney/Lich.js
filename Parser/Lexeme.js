@@ -16,7 +16,7 @@ function Ind (c, r, b) {
     this.isBlock = b;
     this.toString = function() {
         if (b)
-            return ("{" + this.col + "}");
+            return ("†" + this.col + "‡");
         else
             return ("<" + this.col + ">");
     }

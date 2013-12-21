@@ -135,7 +135,7 @@ qconsym = qs:(conid ".")+ ref:((!"." consym) !".") {qs = flatten(qs).join(""); r
 %% /* language grammar */
 
 start_
-    : "{" exp "}" EOF         { return $2; }
+    : "†" exp "‡" EOF         { return $2; }
     // : module_ EOF          { return $1; }
     ;
 
@@ -158,7 +158,7 @@ module_ // : object
 // top-level declarations, but perform a post-check that enforces that there are
 // no imports after the first other declaration.  
 body // : object
-  : '{' topdecls '}'    
+  : "†" topdecls "‡"    
         {{ 
         var imps = [], decs = [], atdecs = false;
         for (var i = 0; i < $2.length; i++) {
@@ -207,10 +207,10 @@ topdecl // : object
 
 
 decls // : [decl]
-  : '{' '}'                           {{ $$ = []; }}
-  | '{' list_decl_comma_1 '}'         {{ $$ = $2; }}
-  | '{' error '}'                        {{ $$ = []; }}
-  | '{' list_decl_comma_1 error '}'      {{ $$ = $2; }}
+  : "†" "‡"                           {{ $$ = []; }}
+  | "†" list_decl_comma_1 "‡"         {{ $$ = $2; }}
+  | "†" error "‡"                        {{ $$ = []; }}
+  | "†" list_decl_comma_1 error "‡"      {{ $$ = $2; }}
   ;
 
 list_decl_comma_1 // : [decl]
@@ -343,6 +343,7 @@ exp // : object
   | "[" "]"             {{ $$ = {astType: "listexp", members: [], pos: @$}; }}
   | dataexp             {{$$ = $1;}}
   | datainst            {{$$ = $1;}}
+  | dataupdate          {{$$ = $1;}}
   | "Nothing"           {{$$ = {astType: "Nothing"};}}
   ;
 
@@ -374,7 +375,7 @@ lexp // : object
   : "if" exp "then" exp "else" exp  {{$$ = {astType:"ite",e1:$2,e2:$4,e3:$6,pos:@$}; }}
   | fexp                            {{ $$ = ($1.length === 1) ? ($1[0]) : {astType:"application", exps:$1,pos:@$}; }}
   | '\' apats "->" exp              {{$$ = {astType:"lambda", args: $2, rhs: $4, pos: @$}; }}
-  | "case" exp "of" "{" alts "}"    {{$$ = {astType:"case", exp: $2, alts: $5, pos: @$}; }}
+  | "case" exp "of" "†" alts "‡"    {{$$ = {astType:"case", exp: $2, alts: $5, pos: @$}; }}
   | "let" decls "in" exp            {{$$ = {astType:"let", decls: $2, exp: $4, pos: @$}; }}
   | "let" decl                      {{$$ = {astType:"let-one", decl: $2, pos: @$}; }}
   | exp qop lexp                    {{$$ = {astType:"binop-exp",op:($2).id.id,lhs:$1,rhs:$3,pos:@$};}}
@@ -472,6 +473,10 @@ dictpair
 
 dataexp
   : data conid "{" datamems "}"   {{$$ = {astType:"data-decl", id: $2, members: $4};}}
+  ;
+
+dataupdate
+  : exp "{" datamems "}"            {{$$ = {astType:"data-update", data: $1, members: $3};}}
   ;
 
 datamems
