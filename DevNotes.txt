@@ -114,6 +114,11 @@ let m = MyData 0.1 0.2 0.3
 let m2 = m { two = 66 } -- returns 0.1 666 0.3
 
 
+// THIS DOESNT WORK, Functions in data constructors
+data Player { attack x = deal X damage }
+let player = Player
+player :: attack something
+
 /////////////////////////
 // List creation syntax
 // Dec 14, 2013
