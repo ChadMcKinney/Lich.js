@@ -346,6 +346,7 @@ exp // : object
   | exp "!!" exp        {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
   | exp ":" exp         {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
   | exp "++" exp        {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
+  | exp "." exp         {{$$ = {astType:"function-composition", exp1: $1, exp2: $3};}}
   | datalookup          {{$$ = $1;}}
   | dataexp             {{$$ = $1;}}
   | datainst            {{$$ = $1;}}

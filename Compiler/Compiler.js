@@ -84,6 +84,8 @@ Lich.compileAST = function(ast)
 			case "function-application-op":
 				return Lich.compileFunctionApplicationOp(ast);
 				break;
+			case "function-composition":
+				return Lich.compileFunctionComposition(ast);
 			case "lambda":
 				return Lich.compileLambda(ast);
 				break;
@@ -310,6 +312,21 @@ Lich.compileFunctionApplicationOp = function(ast)
 	var exp2 = Lich.compileAST(ast.exp2);
 
 	return exp1.invoke([exp2]);
+}
+
+Lich.compileFunctionComposition = function(ast)
+{
+	var exp1 = Lich.compileAST(ast.exp1);
+
+	if(exp1.lichType != CLOSURE)
+		throw new Error("function composition can only be applied using: function . function");
+
+	var exp2 = Lich.compileAST(ast.exp2);
+
+	if(exp2.lichType != CLOSURE)
+		throw new Error("function composition can only be applied using: function . function");
+
+	return exp1.invoke([exp2]);	
 }
 
 Lich.compileLambda = function(ast)
