@@ -326,7 +326,8 @@ Lich.compileFunctionComposition = function(ast)
 	if(exp2.lichType != CLOSURE)
 		throw new Error("function composition can only be applied using: function . function");
 
-	return exp1.invoke([exp2]);	
+	var res = deepCopy exp1;
+	res.rhs = 	
 }
 
 Lich.compileLambda = function(ast)
