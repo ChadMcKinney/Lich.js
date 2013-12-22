@@ -315,6 +315,7 @@ function parseCurrentLine()
 	var tokens, objects, line,str;
 	line = currentLine("terminal"+clientName);
 	str = line.line;
+	broadcastLichCode(str);
 
 	try
 	{

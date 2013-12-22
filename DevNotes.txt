@@ -81,13 +81,14 @@ case "Zombie" of
 /////////////////////////////////////////
 // Parsing modes: Module and Interactive
 
-Have two parsing modes. One for library code and one for interactive mode. Lib code is like .hs files, with modules and imports at the top and normal, but interactive mode requiring the use of 'let' for global scope variable declaration.
+--Have two parsing modes. One for library code and one for interactive mode. Lib code is like .hs files, with modules and imports at the top and normal, but interactive mode requiring the use of 'let' for global scope variable declaration.
 
 !!!!!!!!!!!!!!!!!!!!!!!!!
 !!&&, || operators!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!
 
-// NEED TO IMPLEMENT
+-- NEED TO IMPLEMENT
+foldl, foldr, zip, zipWith, filter, other various prelude functions
 function composition?:
 func1 <<< func2 <<< func3 << func4
 func1 . func2 . func3 $ func4
@@ -115,9 +116,9 @@ Guards
 
 -- data declaration using record like syntax
 data MyData { 
-	thisThing = 1,
-	two = 2,
-	three = 44
+    thisThing = 1,
+    two = 2,
+    three = 44
 }
 
 -- data instantiation, less than the total number of members in the constructor will return with default value
@@ -146,8 +147,8 @@ Is this any useful with Case statements the way they are?
 Need to add syntax for guard patterns, for example:
 
 myGuard x
-	| x > 4 = 99
-	| otherwise = 100
+    | x > 4 = 99
+    | otherwise = 100
 
 //////////////////////////////
 // Known Bugs
