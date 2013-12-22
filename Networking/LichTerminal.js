@@ -55,6 +55,8 @@ function createTextArea(name,num,total)
 
 		if(name == clientName)
 			input.focus();
+		else
+			nameTag.style.color = "rgb(166,48,48)";
 	}
 		
 	
@@ -76,27 +78,24 @@ function removeTextArea(id)
 		var nameTag = document.getElementById("nameTag" + id);
 		nameTag.style.zIndex = "1";
 		nameTag.style.opacity = "0.0";
+
+		//setTimeout(function(){
+		//	input.parentNode.removeChild(input);
+		//	nameTag.parentNode.removeChild(nameTag);
+		//},6000);
     }
 }
 
 function removeDeadUserTerminals(oldUsers,newUsers)
 {
-	//console.log("removeDeadUserTerminal START");
-
-	//printUsers(oldUsers,"CurrentUsers");
-	//printUsers(newUsers,"NewUsers");
-
 	for(i=0;i<oldUsers.length;i++)
 	{
 		var userToCheck = oldUsers[i];
-		//console.log("Should I remove?: " + printUserString(userToCheck));
 		if(!containsUser(userToCheck,newUsers))
        	{
-       		//console.log("Remove: " + printUserString(userToCheck));
            	removeTextArea(userToCheck.name);
        	}
 	}
-	//console.log("removeDeadUserTerminal END");
 }
 
 function containsUser(user, usersToCheck)

@@ -125,6 +125,16 @@ function readFileDataFromServer(fileData)
 	document.getElementById("terminal"+clientName).value = fileData;
 }
 
+function compileLib(libName)
+{
+	socket.emit('CompileLib',libName);
+}
+
+function compileLibFromServer(libData)
+{
+	
+}
+
 function connectToWebSocketServer()
 {
 	//socket = io.connect('ws://173.203.102.166:80');	
@@ -137,6 +147,7 @@ function connectToWebSocketServer()
 	socket.on('NameTaken', nameTaken);
 	socket.on('ChatClient', newChat);
 	socket.on('ReadFileClient',readFileDataFromServer);
+	socket.on('CompileLibClient',compileLibFromServer);
 	socket.emit('Login');
 	initChat();
 }
