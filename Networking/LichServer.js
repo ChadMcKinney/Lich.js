@@ -63,7 +63,7 @@ io.sockets.on('connection', function (socket) {
     });
 
     socket.on('BroadcastCode', function (data) {
-        io.sockets.emit('BroadcastCodeClient',data);
+        socket.broadcast.emit('BroadcastCodeClient',data);
     });
 
     socket.on('Chat', function (data) {

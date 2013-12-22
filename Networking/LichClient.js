@@ -27,6 +27,15 @@ function receivedTyping(id,text)
 function receivedLichCode(code)
 {
 	console.log("Received Code:" + code);	
+	try
+    {
+    	var res = Lich.parse(code);
+        Lich.VM.Print(Lich.compileAST(res));
+    }   
+    catch(e)
+    {
+		Lich.post(e);
+	}
 }
 
 function login()
