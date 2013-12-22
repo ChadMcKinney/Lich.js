@@ -643,3 +643,24 @@ function last()
 }
 
 createPrimitive("last", ["_C"], last);
+
+// We don't use createPrimitive directly, this gets called at runtime.
+function composeFunction(_functions)
+{
+	var functions = _functions;
+	var newFunc = function()
+	{
+		var arg = Lich.VM.getVar("X");
+		var res = arg;
+
+		for(var i = functions.length - 1; i >= 0; --i)
+		{
+			res = functions[i].invoke([res]);
+		}
+
+		return res;
+	}
+
+	newFunc.astType = "primitive";
+	return newFunc;
+}

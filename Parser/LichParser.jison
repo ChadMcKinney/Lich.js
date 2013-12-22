@@ -130,7 +130,7 @@ qconsym = qs:(conid ".")+ ref:((!"." consym) !".") {qs = flatten(qs).join(""); r
 //%left '/=' '>=' '<='
 //%left UMINUS
 %right ':'
-
+%left '.'
 //%right ".."
 //%right ","
 
@@ -346,7 +346,7 @@ exp // : object
   | exp "!!" exp        {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
   | exp ":" exp         {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
   | exp "++" exp        {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
-  | exp "." exp         {{$$ = {astType:"function-composition", exp1: $1, exp2: $3};}}
+  | funccomp            {{$$ = $1;}}
   | datalookup          {{$$ = $1;}}
   | dataexp             {{$$ = $1;}}
   | datainst            {{$$ = $1;}}
@@ -531,6 +531,12 @@ list_exp_1_comma
     : ',' exp list_exp_1_comma   {{ $$ = [$2].concat($3); }}
     | "]"                        {{ $$ = [];}}
     ;
+
+
+funccomp
+  : exp "." exp         {{$$ = {astType:"function-composition", exps:[$1,$3]};}}
+  | funccomp "." exp    {{$1.exps.push($3); $$ = $1;}}
+  ;
 
 /*
 modid // : object # {conid .} conid

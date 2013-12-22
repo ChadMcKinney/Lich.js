@@ -3,8 +3,13 @@
 //////////////////////////////
 
 
-// $ function application works!
+// $ function application and composition works!
 mul 3 $ mul 3 $ div 2 $ add 3 $ 1 -- returns 4.5
+
+(+) 2 . (/3) $ 3 + 4 -- returns 4.333333333333334
+(+) 2 . (/3) . (^) 3 $ 3 + 4 -- returns 731
+map ((+) 2 . (/3) . (^) 3) [1..9] -- returns 3,5,11,29,83,245,731,2189,6563
+map ((+) 2 . (/) 3) [1..9] -- returns 5,3.5,3,2.75,2.6,2.5,2.4285714285714284,2.375,2.3333333333333335
 
 
 // These now work!

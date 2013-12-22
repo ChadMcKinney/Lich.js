@@ -316,18 +316,20 @@ Lich.compileFunctionApplicationOp = function(ast)
 
 Lich.compileFunctionComposition = function(ast)
 {
-	var exp1 = Lich.compileAST(ast.exp1);
+	var funcs = new Array();
 
-	if(exp1.lichType != CLOSURE)
-		throw new Error("function composition can only be applied using: function . function");
+	for(var i = 0; i < ast.exps.length; ++i)
+	{
+		var func = Lich.compileAST(ast.exps[i]);
 
-	var exp2 = Lich.compileAST(ast.exp2);
+		if(func.lichType != CLOSURE)
+			throw new Error("function composition can only be applied using: function . function");
 
-	if(exp2.lichType != CLOSURE)
-		throw new Error("function composition can only be applied using: function . function");
+		funcs.push(func);
+	}
 
-	var res = deepCopy exp1;
-	res.rhs = 	
+	var composed = composeFunction(funcs);
+	return new lichClosure(["X"], composed);
 }
 
 Lich.compileLambda = function(ast)
