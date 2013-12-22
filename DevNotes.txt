@@ -3,6 +3,9 @@
 //////////////////////////////
 
 
+// More prelude functions!
+sum, take, drop, length, null,maximum, minimum, product, elem, replicate, slice
+
 // $ function application and composition works!
 mul 3 $ mul 3 $ div 2 $ add 3 $ 1 -- returns 4.5
 
@@ -88,11 +91,9 @@ case "Zombie" of
 
 --Have two parsing modes. One for library code and one for interactive mode. Lib code is like .hs files, with modules and imports at the top and normal, but interactive mode requiring the use of 'let' for global scope variable declaration.
 
--- NEED TO IMPLEMENT
 arrows:
 func1 >>> func2 >>> func3 >>> func4
 func1 <<< func2 <<< func3 << func4
-
 where statements in data constructors?
 
 

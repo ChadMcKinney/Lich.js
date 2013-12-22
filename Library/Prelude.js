@@ -672,7 +672,7 @@ function last()
 
 createPrimitive("last", ["_C"], last);
 
-// We don't use createPrimitive directly, this gets called at runtime.
+// We don't use createPrimitive directly, this gets called at runtime with function composition like: func1 . func2
 function composeFunction(_functions)
 {
 	var functions = _functions;
@@ -691,4 +691,296 @@ function composeFunction(_functions)
 
 	newFunc.astType = "primitive";
 	return newFunc;
+}
+
+function sum()
+{
+	var container = Lich.VM.getVar("_C");
+
+	if(container instanceof Array)
+	{
+		if(container.length == 0)
+			return 0;
+		
+		var res = 0;
+
+		for(var i = 0; i < container.length; ++i)
+		{
+			res += container[i];
+		}
+
+		return res;
+	}
+
+	else
+	{
+		throw new Error("sum can only be applied to lists.");	
+	}
+}
+
+createPrimitive("sum", ["_C"], sum);
+
+
+function take()
+{
+	var num = Lich.VM.getVar("_N");
+	var container = Lich.VM.getVar("_C");
+
+	if(container instanceof Array)
+	{
+		if(container.length == 0)
+			return [];
+		
+		return container.slice(0, num);
+	}
+
+	else
+	{
+		throw new Error("take can only be applied to lists.");	
+	}
+}
+
+createPrimitive("take", ["_N", "_C"], take);
+
+function drop()
+{
+	var num = Lich.VM.getVar("_N");
+	var container = Lich.VM.getVar("_C");
+
+	if(container instanceof Array)
+	{
+		if(container.length == 0)
+			return container;
+		
+		return container.slice(num, container.length);
+	}
+
+	else
+	{
+		throw new Error("drop can only be applied to lists.");	
+	}
+}
+
+createPrimitive("drop", ["_N", "_C"], drop);
+
+function lengthList()
+{
+	var container = Lich.VM.getVar("_C");
+
+	if((container instanceof Array) || (typeof container === "string"))
+	{
+		return container.length;
+	}
+
+	else
+	{
+		throw new Error("length can only be applied to lists.");	
+	}
+}
+
+createPrimitive("length", ["_C"], lengthList);
+
+function nullList()
+{
+	var container = Lich.VM.getVar("_C");
+
+	if((container instanceof Array) || (typeof container === "string"))
+	{
+		return container.length == 0;
+	}
+
+	else
+	{
+		throw new Error("null can only be applied to lists.");	
+	}
+}
+
+createPrimitive("null", ["_C"], nullList);
+
+
+function maximum()
+{
+	var container = Lich.VM.getVar("_C");
+
+	if((container instanceof Array) || (typeof container === "string"))
+	{
+		if(container.length == 0)
+			return Lich.VM.Nothing;
+
+		res = container[0];
+
+		for(var i = 0; i < container.length; ++i)
+		{
+			if(container[i] > res)
+				res = container[i];
+		}
+
+		return res;
+	}
+
+	else
+	{
+		throw new Error("maximum can only be applied to lists.");	
+	}
+}
+
+createPrimitive("maximum", ["_C"], maximum);
+
+function minimum()
+{
+	var container = Lich.VM.getVar("_C");
+
+	if((container instanceof Array) || (typeof container === "string"))
+	{
+		if(container.length == 0)
+			return Lich.VM.Nothing;
+
+		res = container[0];
+
+		for(var i = 0; i < container.length; ++i)
+		{
+			if(container[i] < res)
+				res = container[i];
+		}
+
+		return res;
+	}
+
+	else
+	{
+		throw new Error("minimum can only be applied to lists.");	
+	}
+}
+
+createPrimitive("minimum", ["_C"], minimum);
+
+function product()
+{
+	var container = Lich.VM.getVar("_C");
+
+	if(container instanceof Array)
+	{
+		if(container.length == 0)
+			return 0;
+		
+		var res = 1;
+
+		for(var i = 0; i < container.length; ++i)
+		{
+			res *= container[i];
+		}
+
+		return res;
+	}
+
+	else
+	{
+		throw new Error("product can only be applied to lists.");	
+	}
+}
+
+createPrimitive("product", ["_C"], product);
+
+function elem()
+{
+	var item = Lich.VM.getVar("_I");
+	var container = Lich.VM.getVar("_C");
+
+	if((container instanceof Array) || (typeof container === "string"))
+	{
+		for(var i = 0; i < container.length; ++i)
+		{
+			if(container[i] == item)
+				return true;
+		}
+
+		return false;
+	}
+
+	else if(container.lichType == DICTIONARY)
+	{
+		for(n in container)
+		{
+			if(container[n] == item)
+				return true;
+		}
+
+		return false;
+	}
+
+	else
+	{
+		throw new Error("elem can only be applied to lists and dictionaries.");	
+	}
+}
+
+createPrimitive("elem", ["_I", "_C"], elem);
+
+function replicate()
+{
+	var number = Lich.VM.getVar("_N");
+	var item = Lich.VM.getVar("_I");
+
+	if(typeof number === "number")
+	{
+		var res = new Array();
+
+		for(var i = 0; i < number; ++i)
+		{
+			res.push(item);
+		}
+
+		return res;
+	}
+
+	else
+	{
+		throw new Error("replicate must be used like: replicate number value");	
+	}
+}
+
+createPrimitive("replicate", ["_N", "_I"], replicate);
+
+function reverse()
+{
+	var container = Lich.VM.getVar("_C");
+
+	if((container instanceof Array) || (typeof container === "string"))
+	{
+		if(container.length == 0)
+			return [];
+
+		var res = new Array();
+
+		for(var i = container.length -1; i >= 0; --i)
+		{
+			res.push(container[i]);
+		}
+
+		return res;
+	}
+
+	else
+	{
+		throw new Error("reverse can only be applied to lists.");	
+	}
+}
+
+createPrimitive("reverse", ["_C"], reverse);
+
+function slice()
+{
+	var lower = Lich.VM.getVar("_L");
+	var upper = Lich.VM.getVar("_U");
+	var container = Lich.VM.getVar("_C");
+
+	if((container instanceof Array) || (typeof container === "string"))
+	{
+		return container.slice(lower, upper);
+	}
+
+	else
+	{
+		throw new Error("slice can only be applied to lists.");	
+	}
 }
