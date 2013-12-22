@@ -40,6 +40,20 @@
 // next we use the create primitive function to actually add it to the VM using these arguments:
 // createPrimitive("primitiveName", ["Array","Of","Argument","Names"], primitiveFunction);
 
+function load()
+{
+	var fileName = Lich.VM.getVar("_R");	
+
+	if(!(typeof fileName === "string"))
+		throw new Error("load can only be applied to a string!");
+
+	askForFileFromServer(fileName);
+
+	return Lich.VM.Void;
+}
+
+createPrimitive("load", ["_R"], load);
+
 function chatPrimitive()
 {
 	var chatString = Lich.VM.getVar("_R");
