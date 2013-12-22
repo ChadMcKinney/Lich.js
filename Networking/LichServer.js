@@ -83,6 +83,25 @@ io.sockets.on('connection', function (socket) {
     {
         disconnect(socket,address);
     });
+
+    socket.on('ReadFile',function(fileName)
+    {
+        fs.readFile(fileName, 'utf8', function(err, data) {
+            //if (err) throw err;
+
+            try
+            {
+                if(err) throw err;
+            }
+            catch(err)
+            {
+                console.log("couldn't load file: " + fileName);
+                console.log(err.message);
+            }
+
+            socket.emit('ReadFileClient',data);
+        });
+    });
 });
 
 function loginInfo(name,address,socket)

@@ -115,6 +115,16 @@ function nameTaken()
   	}
 }
 
+function askForFileFromServer(fileName)
+{
+	socket.emit('ReadFile',fileName);
+}
+
+function readFileDataFromServer(fileData)
+{
+	document.getElementById("terminal"+clientName).value = fileData;
+}
+
 function connectToWebSocketServer()
 {
 	//socket = io.connect('ws://173.203.102.166:80');	
@@ -126,6 +136,7 @@ function connectToWebSocketServer()
 	socket.on('CurrentUsers', currentUsers);
 	socket.on('NameTaken', nameTaken);
 	socket.on('ChatClient', newChat);
+	socket.on('ReadFileClient',readFileDataFromServer);
 	socket.emit('Login');
 	initChat();
 }
