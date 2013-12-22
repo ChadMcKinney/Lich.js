@@ -205,6 +205,20 @@ function lesserEqualR()
 
 createPrimitive("<=R", ["_R", "_L"], lesserEqualR);
 
+function andand()
+{
+	return Lich.VM.getVar("_L") && Lich.VM.getVar("_R");
+}
+
+createPrimitive("&&", ["_R", "_L"], andand);
+
+function oror()
+{
+	return Lich.VM.getVar("_L") || Lich.VM.getVar("_R");
+}
+
+createPrimitive("||", ["_R", "_L"], oror);
+
 function indexList()
 {
 	var list = Lich.VM.getVar("_L");

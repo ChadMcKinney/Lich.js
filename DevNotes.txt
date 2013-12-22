@@ -88,29 +88,19 @@ case "Zombie" of
 
 --Have two parsing modes. One for library code and one for interactive mode. Lib code is like .hs files, with modules and imports at the top and normal, but interactive mode requiring the use of 'let' for global scope variable declaration.
 
-!!!!!!!!!!!!!!!!!!!!!!!!!
-!!&&, || operators!!!!!!!
-!!!!!!!!!!!!!!!!!!!!!!!!!
-
 -- NEED TO IMPLEMENT
-foldl, foldr, zip, zipWith, filter, other various prelude functions
-function composition?:
-func1 <<< func2 <<< func3 << func4
-func1 . func2 . func3 $ func4
-
 arrows:
 func1 >>> func2 >>> func3 >>> func4
+func1 <<< func2 <<< func3 << func4
 
+where statements in data constructors?
 
-where statements in data constructors
-
-list comprehension
-func1 . func2 . func3 $ func4
 
 /////////////////////////////////////////
 POST 1.0 FEATURES
 Pattern matching
 Guards
+list comprehension
 /////////////////////////////////////////
 
 

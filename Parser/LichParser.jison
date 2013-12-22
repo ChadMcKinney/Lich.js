@@ -40,6 +40,8 @@ tab = "\t"
 "}"                         return {val:"}",typ:"}"};
 "False"|"false"             return {val:"false",typ:"False"};
 "True"|"true"               return {val:"true",typ:"True"};
+"&&"                        return {val:"&&",typ:"&&"};
+"||"                        return {val:"||",typ:"||"};
 "=>"                        return {val:"=>",typ:"=>"};
 "->"                        return {val:"->",typ:"->"};
 "=="                        return {val:"==",typ:"=="};
@@ -346,6 +348,8 @@ exp // : object
   | exp "!!" exp        {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
   | exp ":" exp         {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
   | exp "++" exp        {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
+  | exp "&&" exp        {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
+  | exp "||" exp        {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
   | funccomp            {{$$ = $1;}}
   | datalookup          {{$$ = $1;}}
   | dataexp             {{$$ = $1;}}
