@@ -82,6 +82,9 @@ let down  = Cardinal :: down
 --Game Actions
 ------------------------------------------------------------------------------------------------
 
+-- |addNarration String Game => Game
+let addNarration story game = game{narration = (game::narration)+"\n"+story}
+
 -- |placeItemAtLocation Item Location => Location
 let placeItemAtLocation item location = location {items = newItems}
 	where
@@ -118,7 +121,7 @@ let updatePlayer player game = game{players = newPlayers}
 -- |updateMonster Monster Game => Game
 let updateMonster monster game = game{monsters = newMonsters}
 	where
-		newMonsters = (monster::name => monster) : game::monsters
+		newMonsters = (monster::name => monster) : (game::monsters)
 
 -- |moveItemFromPlayerToLocation Item Location Player Game => Game
 let moveItemFromPlayerToLocation item location player game = updatePlayer newPlayer newGame
@@ -154,38 +157,42 @@ let locationAtCardinal cardinal player game =
 		down  -> ( playerLocation player game ) :: down
 
 -- |lookAtCardinal Cardinal Player Game => Game
-let lookAtCardinal cardinal player game = game{narration = (location::farDescription)}
+let lookAtCardinal cardinal player game = addNarration description game
 	where
-		location = locationAtCardinal cardinal player game
+		description = (locationAtCardinal cardinal player game) :: farDescription
+
+let movePlayerResult moveAble player game = 
+	if moveAble
+		then updatePlayer newPlayer game
+		else addNarration "That way is blocked." game
 
 -- |movePlayer Cardinal Player Game => Game
-let movePlayer cardinal player game = result
+let movePlayer cardinal player game = movePlayerResult newPlayer game
 	where
-		locationAt = locationAtCardinal cardinal player game
-		result	= if locationAt :: moveable
-			then updatePlayer (player{location = (locationAt::name)}) game
-			else game{narration = "That way is blocked"}
+		locationAt 	= locationAtCardinal cardinal player game
+		newPlayer 	= player{location = (locationAt::name)}			
 	
 -- |checkPlayerDeath Player Game => Game
 let checkPlayerDeath player game = 
 	if (player :: health) < 1
-		then game{narration = "You died!",gameOver = True}
+		then (addNarration "You died." game){gameOver = True}
 		else game
 
 -- |damagePlayer Int Player Game => Game
 let damagePlayer damage player game = checkPlayerDeath damagedPlayer newGame
 	where
-		damagedPlayer 	= player{health = ( (player :: health) - damage)}
+		newHealth		= player::health - damage
+		damagedPlayer 	= player {health = newHealth}
 		newGame 		= updatePlayer damagedPlayer game
 
 -- |monsterAttacksPlayer Monster Player Game => Game
-let monsterAttacksPlayer monster player game = damagePlayer (monster :: attack) player game
+let monsterAttacksPlayer monster player game = damagePlayer (monster::attack) player game
 
-let player = Player "casiosk1"
-let shoggoth = Monster "Shoggoth"
-
+-- |demoGame => Game
 let demoGame = gameWithMonster
 	where
+		player 	 = Player "casiosk1"
+		shoggoth = Monster "Shoggoth"
 		initGame = Game
 		gameWithPlayer = updatePlayer player initGame
 		gameWithMonster = updateMonster shoggoth gameWithPlayer
@@ -236,17 +243,19 @@ let demoGame = gameWithMonster
 ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------
 
-let dogCorpse 	= Item name description False
+-- |dogCorpse 	=>Item
+let dogCorpse 	= Item name description
 	where
 		name 	= "DogCorpse"
 		desc 	= "A dessicated dog corpse. It appears to have been...dissected."
 
-let corpse 		= Item name description False
+-- |corpse2 	=>Item
+let corpse 		= Item name description
 	where
 		name 	= "Corpse"
 		desc 	= "A dessicated corpse. It appears to have been...dissected."
 
-let corpse2 	= Item name description False
+let corpse2 	= Item name description
 	where
 		name 	= "Corpse2"
 		desc 	= "A bloated corpse. It appears to have been...amputated."
@@ -303,7 +312,7 @@ let mound3 		= Location "Mound3" n s e w u d desc fDesc items mov
 		items 	= ("Corpse2" => corpse2)
 		mov 	= True
 
-let mountain 	= Location "Mountain" n s e w u d desc fDesc items mov
+let mountain 	= Location "Mountains" n s e w u d desc fDesc items mov
 	where
 		n 		= "Nothing"
 		s 		= "Mound"
@@ -315,3 +324,72 @@ let mountain 	= Location "Mountain" n s e w u d desc fDesc items mov
 		fDesc 	= "the peaks of a chain of peaks and cliffs. Looks dangerous."	
 		items 	= ()
 		mov 	= True	
+
+let ruins 		= Location "Ruins" n s e w u d desc fDesc items mov
+	where
+		n 		= "Nothing"
+		s 		= "Nothing"
+		e 		= "Mountains"
+		w 		= "Nothing"
+		u 		= "Nothing"
+		d 		= "UnderRuins"
+		desc 	= "There are eldritch ruins; crumbling and falling, yet still holding some of their previous strange, and even dangerous, beauty."
+		fDesc 	= "What appears to be ancient ruins of some sort of city."	
+		items 	= ()
+		mov 	= True
+
+let carvings	= Item name description
+	where
+		name 	= "Carvings"
+		desc 	= "Ornate carvings which depict, minimally yet beautifully, a large underground city. On closer inspection strange creatures can be seen inhabiting the structures. They appear to be dissecting...or dining...on something."
+
+let underRuins 	= Location "UnderRuins" n s e w u d desc fDesc items mov
+	where
+		n 		= "CityEntrance"
+		s 		= "Nothing"
+		e 		= "Nothing"
+		w 		= "Nothing"
+		u 		= "Ruins"
+		d 		= "UnderRuins"
+		desc 	= "The structures open up into an intricately carved passageway."
+		fDesc 	= "There seems to be some kind of passageway leading underground."	
+		items 	= ("Carvings" => carvings)
+		mov 	= True
+
+
+let mural 		= Item name description
+	where
+		name 	= "Mural"
+		desc 	= "An intricately constructed mural, made of some kind of crystalline materia. Seems almost religious or iconic in nature. Depicts a vaugely orb shaped creature with a multitude of appendages and sub-orb like structures. It appears to be swallowing something...or perhaps talking to it?"
+
+let murals 		= Location "Murals" n s e w u d desc fDesc items mov
+	where
+		n 		= "Nothing"
+		s 		= "Nothing"
+		e 		= "Nothing"
+		w 		= "Mountains"
+		u 		= "Nothing"
+		d 		= "UnderMurals"
+		desc 	= "A strange room-like structure, made of an unknown metallic material, and containing several crystalline murals. A portal seems to lead deeper down."
+		fDesc 	= "There appears to be ruins of somekind, with glints of glass gleaming from them."	
+		items 	= ("Mural" => mural)
+		mov 	= True
+
+let mural2 		= Item name description
+	where
+		name 	= "Mural2"
+		desc 	= ""
+
+let underMurals = Location "UnderMurals" n s e w u d desc fDesc items mov
+	where
+		n 		= "CityEntrance"
+		s 		= "Nothing"
+		e 		= "Nothing"
+		w 		= "Nothing"
+		u 		= "Murals"
+		d 		= "Nothing"
+		desc 	= "The portal leads deeper into the structure. There are more murals, and though you have clearly descended several hundred feet below the surface, an impossible light still radiates from behind them."
+		fDesc 	= "It appears to be a portal leading deep underground."	
+		items 	= ("Mural2" => mural2)
+		mov 	= True
+
