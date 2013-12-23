@@ -73,7 +73,7 @@ Lich.parseLibrary = function(input) {
       }
     }
 
-    LichParser.lexer = new iterL();
+    LichLibraryParser.lexer = new iterL();
     Lich.LibraryLexer.setInput(input);
     var x = new Array();
     var token;
