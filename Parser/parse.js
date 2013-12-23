@@ -93,6 +93,6 @@ Lich.parseLibrary = function(input) {
     var y = Lich.LibraryParser.preL(x);
     //Lich.post("Lich.Parser.preL(x) = " + y);
     
-    return LichParser.LibraryParser(y);
+    return LichLibraryParser.parse(y);
 }
 
