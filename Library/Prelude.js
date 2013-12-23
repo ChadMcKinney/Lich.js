@@ -40,6 +40,20 @@
 // next we use the create primitive function to actually add it to the VM using these arguments:
 // createPrimitive("primitiveName", ["Array","Of","Argument","Names"], primitiveFunction);
 
+function compileLib()
+{
+	var libName = Lich.VM.getVar("_R");	
+
+	if(!(typeof libName === "string"))
+		throw new Error("compileLib can only be applied to a string!");
+
+	compileLibClient(libName);
+
+	return Lich.VM.Void;
+}
+
+createPrimitive("compileLib", ["_R"], compileLib);
+
 function load()
 {
 	var fileName = Lich.VM.getVar("_R");	

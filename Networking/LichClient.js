@@ -125,14 +125,16 @@ function readFileDataFromServer(fileData)
 	document.getElementById("terminal"+clientName).value = fileData;
 }
 
-function compileLib(libName)
+function compileLibClient(libName)
 {
+	console.log("Sent CompileLib to server.");
 	socket.emit('CompileLib',libName);
 }
 
 function compileLibFromServer(libData)
 {
-	
+	console.log("compiling from server");
+	Lich.parseLibrary(libData);	
 }
 
 function connectToWebSocketServer()

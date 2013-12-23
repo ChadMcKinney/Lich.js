@@ -87,18 +87,35 @@ io.sockets.on('connection', function (socket) {
     socket.on('ReadFile',function(fileName)
     {
         fs.readFile(fileName, 'utf8', function(err, data) {
-        try
-        {
-            if(err) throw err;
-        }
-        catch(err)
-        {
-            console.log("couldn't load file: " + fileName);
-            console.log(err.message);
-        }
+            try
+            {
+                if(err) throw err;
+            }
+            catch(err)
+            {
+                console.log("couldn't load file: " + fileName);
+                console.log(err.message);
+            }
         
-        socket.emit('ReadFileClient',data);
-    });    
+            socket.emit('ReadFileClient',data);
+        });    
+    });
+
+    socket.on('CompileLib',function(libName)
+    {
+        fs.readFile(libName, 'utf8', function(err, data) {
+            try
+            {
+                if(err) throw err;
+            }
+            catch(err)
+            {
+                console.log("couldn't load file: " + libName);
+                console.log(err.message);
+            }
+        
+            socket.emit('CompileLibClient',data);
+        });    
     });
 });
 
@@ -175,24 +192,5 @@ function remove(arr, item) {
         }
     }
 }
-
-function compileLib(libName)
-{
-    fs.readFile(fileName, 'utf8', function(err, data) {
-        try
-        {
-            if(err) throw err;
-        }
-        catch(err)
-        {
-            console.log("couldn't load file: " + fileName);
-            console.log(err.message);
-        }
-        
-        socket.emit('CompileLibClient',data);
-    });
-}
-
-
 
 console.log("Server running on port:" + port);
