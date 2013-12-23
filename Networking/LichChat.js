@@ -28,7 +28,7 @@ function initChat()
 	hideChat();
 }
 
-function sendChat(name,chatString)
+function sendChat(chatString)
 {
 	socket.emit('Chat',clientName + ":\n" + chatString + "\n");
 }
