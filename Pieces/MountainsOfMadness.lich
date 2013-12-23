@@ -113,6 +113,9 @@ let updateLocation location game = game{locations = newLocations}
 -- |getPlayer String     Game => Player
 let getPlayer playerName game = (game :: players) !! playerName
 
+-- |getMonster String     Game => Player
+let getMonster monsterName game = (game :: monsters) !! monsterName
+
 -- |updatePlayer Player Game => Game
 let updatePlayer player game = game{players = newPlayers}
 	where
@@ -163,11 +166,11 @@ let lookAtCardinal cardinal player game = addNarration description game
 
 let movePlayerResult moveAble player game = 
 	if moveAble
-		then updatePlayer newPlayer game
+		then updatePlayer player game
 		else addNarration "That way is blocked." game
 
 -- |movePlayer Cardinal Player Game => Game
-let movePlayer cardinal player game = movePlayerResult newPlayer game
+let movePlayer cardinal player game = movePlayerResult (locationAt::moveable) newPlayer game
 	where
 		locationAt 	= locationAtCardinal cardinal player game
 		newPlayer 	= player{location = (locationAt::name)}			
