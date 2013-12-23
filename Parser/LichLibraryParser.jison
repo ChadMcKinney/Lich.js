@@ -194,6 +194,7 @@ body // : object
         }
 
         $$ = {astType: "body", impdecls: imps, topdecls: decs, pos:@$}; }}
+  // | body "‡"    {{$$ = $1;}}
   |   {{$$ = {astType: "body", impdecls: [], topdecls: [], pos:@$}; }}
   ;
   
@@ -202,8 +203,8 @@ topdecls // : [topdecl]
   ;
   
 topdecls_nonempty // : [topdecl]
-  : topdecls_nonempty ";" topdecl     {{ $1.push($3); $$ = $1; }}
-  | topdecl                           {{ $$ = [$1]; }}
+  : topdecls_nonempty ";" topdecl             {{ $1.push($3); $$ = $1; }}
+  | topdecl                                   {{ $$ = [$1]; }}
   ;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -212,6 +213,7 @@ topdecls_nonempty // : [topdecl]
 topdecl // : object
     : decl                          {{$$ = {astType: "topdecl-decl", decl: $1, pos: @$};}}
     | impdecl                       {{$$ = $1;}}
+    | dataexp                       {{$$ = $1;}}
     ;
 
 
@@ -393,7 +395,7 @@ lexp // : object
   | '\' apats "->" exp              {{$$ = {astType:"lambda", args: $2, rhs: $4, pos: @$}; }}
   | "case" exp "of" "†" alts "‡"    {{$$ = {astType:"case", exp: $2, alts: $5, pos: @$}; }}
   | "let" decls "in" exp            {{$$ = {astType:"let", decls: $2, exp: $4, pos: @$}; }}
-  | "let" decl                      {{$$ = {astType:"let-one", decl: $2, pos: @$}; }}
+  // | "let" decl                      {{$$ = {astType:"let-one", decl: $2, pos: @$}; }} 
   | exp qop lexp                    {{$$ = {astType:"binop-exp",op:($2).id.id,lhs:$1,rhs:$3,pos:@$};}}
   ;
 
@@ -488,9 +490,10 @@ dictpair
   ;
 
 dataexp
-  : data conid "{" datamems "}"       {{$$ = {astType:"data-decl", id: $2, members: $4};}}
-  | data conid "{" datamems ";" "}"   {{$$ = {astType:"data-decl", id: $2, members: $4};}}
-  | data conid "=" enums                {{$$ = {astType:"data-enum", id: $2, members: $4};}}}
+  : data conid "{" datamems "}"               {{$$ = {astType:"data-decl", id: $2, members: $4};}}
+  | data conid "{" datamems ";" "}"           {{$$ = {astType:"data-decl", id: $2, members: $4};}}
+  // | data conid "{" datamems ";" "}" "‡"       {{$$ = {astType:"data-decl", id: $2, members: $4};}}
+  | data conid "=" enums                      {{$$ = {astType:"data-enum", id: $2, members: $4};}}}
   ;
 
 enums
@@ -542,11 +545,10 @@ funccomp
   | funccomp "." exp    {{$1.exps.push($3); $$ = $1;}}
   ;
 
-/*
 modid // : object # {conid .} conid
     : qconid              {{$$ = new Lich.ModName($1, @$, yy.lexer.previous.qual);}}
     | conid               {{$$ = new Lich.ModName($1, @$);}}
-    ;*/
+    ;
 
 // optionally qualified binary operators in infix expressions
 qop // : object

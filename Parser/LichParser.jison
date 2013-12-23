@@ -194,6 +194,7 @@ body // : object
         }
 
         $$ = {astType: "body", impdecls: imps, topdecls: decs, pos:@$}; }}
+  // | body "‡"    {{$$ = $1;}}
   |   {{$$ = {astType: "body", impdecls: [], topdecls: [], pos:@$}; }}
   ;
   
@@ -202,8 +203,8 @@ topdecls // : [topdecl]
   ;
   
 topdecls_nonempty // : [topdecl]
-  : topdecls_nonempty ";" topdecl     {{ $1.push($3); $$ = $1; }}
-  | topdecl                           {{ $$ = [$1]; }}
+  : topdecls_nonempty ";" topdecl             {{ $1.push($3); $$ = $1; }}
+  | topdecl                                   {{ $$ = [$1]; }}
   ;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -212,6 +213,7 @@ topdecls_nonempty // : [topdecl]
 topdecl // : object
     : decl                          {{$$ = {astType: "topdecl-decl", decl: $1, pos: @$};}}
     | impdecl                       {{$$ = $1;}}
+    | dataexp                       {{$$ = $1;}}
     ;
 
 
@@ -488,9 +490,10 @@ dictpair
   ;
 
 dataexp
-  : data conid "{" datamems "}"       {{$$ = {astType:"data-decl", id: $2, members: $4};}}
-  | data conid "{" datamems ";" "}"   {{$$ = {astType:"data-decl", id: $2, members: $4};}}
-  | data conid "=" enums                {{$$ = {astType:"data-enum", id: $2, members: $4};}}}
+  : data conid "{" datamems "}"               {{$$ = {astType:"data-decl", id: $2, members: $4};}}
+  | data conid "{" datamems ";" "}"           {{$$ = {astType:"data-decl", id: $2, members: $4};}}
+  // | data conid "{" datamems ";" "}" "‡"       {{$$ = {astType:"data-decl", id: $2, members: $4};}}
+  | data conid "=" enums                      {{$$ = {astType:"data-enum", id: $2, members: $4};}}}
   ;
 
 enums
@@ -542,11 +545,10 @@ funccomp
   | funccomp "." exp    {{$1.exps.push($3); $$ = $1;}}
   ;
 
-/*
 modid // : object # {conid .} conid
     : qconid              {{$$ = new Lich.ModName($1, @$, yy.lexer.previous.qual);}}
     | conid               {{$$ = new Lich.ModName($1, @$);}}
-    ;*/
+    ;
 
 // optionally qualified binary operators in infix expressions
 qop // : object
