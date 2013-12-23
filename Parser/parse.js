@@ -90,7 +90,7 @@ Lich.parseLibrary = function(input) {
 
     x.pop(); // Remove trailing EOF
 
-    var y = Lich.LibraryParser.preL(x);
+    var y = LibraryParser.preL(x);
     //Lich.post("Lich.Parser.preL(x) = " + y);
     
     return LichLibraryParser.parse(y);
