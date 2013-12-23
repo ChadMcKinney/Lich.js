@@ -74,6 +74,12 @@ Lich.VM.setVar = function(varName, value)
 		throw new Error("Lich.VM.Main procedure is missing. Fatal exception. WTF THE WORLD IS ENDING!!!");
 }
 
+Lich.VM.reserveVar = function(varName, value)
+{
+	Lich.VM.setVar(varName, value);
+	Lich.VM.reserved[varName] = true;
+}
+
 Lich.post = function post(text)
 {
     var obj = document.getElementById("post");

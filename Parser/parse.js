@@ -48,34 +48,51 @@ Lich.parse = function(input) {
 
     x.pop(); // Remove trailing EOF
 
-    /*
-    for(var i = 0; i < x.length; ++i)
-    {
-      Lich.post("Jison lexer["+i+"] = { val: " + x[i].val + ", typ: " + x[i].typ + "}");
-    }
-    
-
-    for(var i = 0; i < z.length; ++i)
-    {
-      Lich.post("Peg lexer["+i+"] = { val: " + z[i].val + ", typ: " + z[i].typ + "}");
-      // Lich.post("Peg lexer["+i+"].length = " + typeof z[i].length);
-    }*/
-
     var y = Lich.Parser.preL(x);
     //Lich.post("Lich.Parser.preL(x) = " + y);
-    /*
-    LichParser.lexer = new iterL();
-
-    LichParser.yy.parseError = function (str, hash) {
-        if (LichParser.yy.lexer.debugArr !== undefined)
-            console.log("parse error happened, lexer has so far returned:  " + LichParser.yy.lexer.debugArr)
-        if (!LichParser.yy.lexer.parseError()) {
-            throw new Lich.ParseError(str + " expected: " + hash.expected +
-                                 "  Lexer returned: " + LichParser.yy.lexer.recent,
-                                  LichParser.yy.lexer.yylloc);
-        } 
-    }*/
     
     return LichParser.parse(y);
+}
+
+Lich.parseLibrary = function(input) {
+    // var z = Lich.Parser.tokenize.parse(input);
+    if(typeof Lich.LibraryLexer === "undefined")
+    {
+      Lich.LibraryLexer = LichLibraryParser.lexer;
+      Lich.LibraryLexer.yy = LichParser.yy;
+      Lich.LibraryLexer.EOF = 1; //End of File
+
+      Lich.LibraryLexer.yy.parseError = function (str, hash) {
+        if (Lich.LibraryLexer.yy.lexer.debugArr !== undefined)
+            console.log("parse error happened, lexer has so far returned:  " + Lich.LibraryLexer.yy.lexer.debugArr)
+        if (!Lich.LibraryLexer.yy.lexer.parseError()) {
+            throw new Lich.ParseError(str + " expected: " + hash.expected +
+                                 "  Lexer returned: " + Lich.LibraryLexer.yy.lexer.recent,
+                                  Lich.LibraryLexer.yy.lexer.yylloc);
+        }
+      }
+    }
+
+    LichParser.lexer = new iterL();
+    Lich.LibraryLexer.setInput(input);
+    var x = new Array();
+    var token;
+
+    while(true)
+    {
+      token = Lich.LibraryLexer.lex();
+      // Lich.post("Lich.LibraryLexer.lex() = " + token.typ);
+      if(token == Lich.LibraryLexer.EOF)
+        break;
+
+      x.push(token);
+    }
+
+    x.pop(); // Remove trailing EOF
+
+    var y = Lich.LibraryParser.preL(x);
+    //Lich.post("Lich.Parser.preL(x) = " + y);
+    
+    return LichParser.LibraryParser(y);
 }
 

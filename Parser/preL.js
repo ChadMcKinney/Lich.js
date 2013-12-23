@@ -148,3 +148,5 @@ function countvalues(arr,que) {
 	
 	return j;
 }
+
+Lich.LibraryParser = Lich.parser.preL;

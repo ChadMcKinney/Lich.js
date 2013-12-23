@@ -157,6 +157,5 @@ function lichClosure(argNames, rhs, mutable, namespace, decls)
 function createPrimitive(name, argNames, primitiveFunc)
 {
 	primitiveFunc.astType = "primitive";
-	Lich.VM.setVar(name, new lichClosure(argNames, primitiveFunc));
-	Lich.VM.reserved[name] = true;
+	Lich.VM.reserveVar(name, new lichClosure(argNames, primitiveFunc));
 }

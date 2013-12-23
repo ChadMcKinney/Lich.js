@@ -984,3 +984,52 @@ function slice()
 		throw new Error("slice can only be applied to lists.");	
 	}
 }
+
+createPrimitive("slice", ["_L", "_U", "_C"], slice);
+
+
+function randF()
+{
+	var lower = Lich.VM.getVar("_L");
+	var upper = Lich.VM.getVar("_U");
+
+	if(typeof lower === "number" && typeof upper === "number")
+	{
+		return Math.random() * (upper - lower) + lower
+	}
+
+	else
+	{
+		throw new Error("randF can only be applied to numbers.");	
+	}
+}
+
+createPrimitive("rand", ["_L", "_U"], randF);
+createPrimitive("random", ["_L", "_U"], randF);
+createPrimitive("randF", ["_L", "_U"], randF);
+
+function randI()
+{
+	var lower = Lich.VM.getVar("_L");
+	var upper = Lich.VM.getVar("_U");
+
+	if(typeof lower === "number" && typeof upper === "number")
+	{
+		return Math.floor(Math.random() * (upper - lower) + lower)
+	}
+
+	else
+	{
+		throw new Error("randF can only be applied to numbers.");	
+	}
+}
+
+createPrimitive("randI", ["_L", "_U"], randI);
+createPrimitive("randomI", ["_L", "_U"], randI);
+
+// Constants
+Lich.VM.reserveVar("pi", 3.141592653589793);
+
+Soliton.print = Lich.post; // Set Soliton.print to our Lich.post function
+Soliton.printError = Lich.post; // Set Soliton.print to our Lich.post function
+LichVM.scheduler = Soliton.Clock.default.scheduler;
