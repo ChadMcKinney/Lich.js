@@ -123,7 +123,6 @@ where statements in data constructors?
 POST 1.0 FEATURES
 Pattern matching
 Guards
-list comprehension
 /////////////////////////////////////////
 
 
