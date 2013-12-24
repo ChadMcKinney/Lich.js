@@ -56,20 +56,6 @@ function LichNothing()
 	this.value = null;
 }
 
-function printClosure(closure)
-{
-	var string = "(\\";
-
-	for(var i = 0; i < closure.argNames.length; ++i)
-	{
-		string = string.concat(closure.argNames[i] + " ");
-	}
-
-	string = string.concat("->)");
-
-	Lich.post(string);
-}
-
 function lichClosure(argNames, rhs, mutable, namespace, decls)
 {
 	var _argNames = argNames;

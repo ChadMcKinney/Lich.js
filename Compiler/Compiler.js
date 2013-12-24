@@ -41,9 +41,12 @@ Lich.compileAST = function(ast)
 	if(ast instanceof Array)
 	{
 		var res = null;
-		for(n in ast)
+		for(var i = 0; i < ast.length; ++i)
 		{	
-			res = Lich.compileAST(ast[n]);
+			res = Lich.compileAST(ast[i]);
+
+			if(i < ast.length - 1)
+				Lich.VM.Print(res);
 		}
 
 		return res;
@@ -146,6 +149,9 @@ Lich.compileAST = function(ast)
 				break;
 			case "Nothing":
 				return Lich.VM.Nothing;
+				break;
+			case "list-comprehension":
+				return Lich.compileListComprehension(ast);
 				break;
 			case "module":
 				return Lich.compileModule(ast);
@@ -349,6 +355,16 @@ Lich.compileLambda = function(ast)
 Lich.compileLet = function(ast)
 {
 	Lich.unsupportedSemantics(ast);
+}
+
+Lich.compileLet = function(ast)
+{
+	for(var i = 0; i < ast.decls.length; ++i)
+	{
+		ast.decls[i].astType = "thunk";
+	}
+
+	return new lichClosure([], ast.exp, false, {}, ast.decls).invoke([]);
 }
 
 Lich.compileLetOne = function(ast)
@@ -594,4 +610,79 @@ Lich.compileCase = function(ast)
 	}
 
 	return Lich.VM.Nothing;
+}
+
+Lich.compileListComprehension = function(ast)
+{
+	var closure = new lichClosure([], ast.exp);
+	var generatorScope = {}
+	var generatorLoop = new Array();
+	var res = new Array();
+	var filters = new Array();
+
+	// First we collect all the filter functions
+	for(var i = 0; i < ast.generators.length; ++i)
+	{
+		if(ast.generators[i].astType != "decl-fun")
+			filters.push(ast.generators[i]);
+	}
+
+	// Collect all the lists from the generators
+	for(var i = 0; i < ast.generators.length; ++i)
+	{
+		if(ast.generators[i].astType == "decl-fun")
+		{
+			var list = Lich.compileAST(ast.generators[i].rhs);
+
+			if(!(list instanceof Array))
+				throw new Error("List comprehensions can only be created with list generators and boolean expressions such as: [x | x <- [1..9], x /= 3]");
+
+			generatorScope[ast.generators[i].ident] = list;
+			generatorLoop.push(ast.generators[i].ident);
+		}
+	}
+
+	res = new Array();
+
+	// Then iterate over the lists, creating all the combinations of the lists and applying the filters to each item.
+	var nestLoop = function(nI, nScope) // recusrive nested looping over each list from the generators
+	{
+		var loopID = generatorLoop[nI];
+		var currentList = generatorScope[loopID];
+		var scope = typeof nScope !== "undefined" ? nScope : {};
+
+		for(var j = 0; j < currentList.length; ++j)
+		{
+			scope[loopID] = currentList[j];
+
+			if(nI < generatorLoop.length - 1)
+			{
+				nestLoop(nI + 1, scope);
+			}
+
+			else
+			{
+				closure = new lichClosure([], ast.exp, false, scope);
+				var temp = closure.invoke([]);
+				var collect = true;
+
+				for(var k = 0; k < filters.length; ++k)
+				{
+					var filterClosure = new lichClosure([], filters[k], false, scope);
+					
+					if(!filterClosure.invoke([]))
+					{
+						collect = false;
+						break;
+					}
+				}
+
+				if(collect)
+					res.push(temp);
+			}	
+		}
+	}
+	
+	nestLoop(0);
+	return res;
 }

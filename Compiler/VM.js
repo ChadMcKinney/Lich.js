@@ -80,7 +80,35 @@ Lich.VM.reserveVar = function(varName, value)
 	Lich.VM.reserved[varName] = true;
 }
 
-Lich.post = function post(text)
+// http://www.rajeshsegu.com/2012/07/js-pretty-print-an-object/
+Lich.VM.printArray = function(object)
+{
+    var string = "[";
+
+    for(var i = 0; i < object.length; ++i)
+    {
+    	if(i < object.length - 1)
+    		string = string + Lich.VM.PrettyPrint(object[i]) + ",";
+    	else
+    		string = string + Lich.VM.PrettyPrint(object[i]);
+    }
+
+    return string + "]";
+}
+
+Lich.VM.printClosure = function(closure)
+{
+	var string = "(\\";
+
+	for(var i = 0; i < closure.argNames.length; ++i)
+	{
+		string = string.concat(closure.argNames[i] + " ");
+	}
+
+	return string.concat("->)");
+}
+
+Lich.post = function(text)
 {
     var obj = document.getElementById("post");
     var appendedText = document.createTextNode(text + "\n");
@@ -88,16 +116,24 @@ Lich.post = function post(text)
     obj.scrollTop = obj.scrollHeight;
 }
 
-Lich.VM.Print = function(object)
+Lich.VM.PrettyPrint = function(object)
 {
 	if(typeof object === "undefined")
-		Lich.post(object);
+		return "undefined";
+	else if(object instanceof Array)
+		return Lich.VM.printArray(object);
 	else if(object.lichType == CLOSURE || object.lichType == THUNK)
-		printClosure(object);
+		return Lich.VM.printClosure(object);
 	else if(object.lichType == DATA)
-		Lich.post(object._datatype);
+		return object._datatype;
 	else if(object == Lich.VM.Nothing)
-		Lich.post("Nothing");
-	else if(object != Lich.VM.Void)
-		Lich.post(object);
+		return "Nothing";
+	else
+		return object;
+}
+
+Lich.VM.Print = function(object)
+{
+	if(object != Lich.VM.Void)
+		Lich.post(Lich.VM.PrettyPrint(object));
 }

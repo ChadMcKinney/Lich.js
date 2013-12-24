@@ -1009,7 +1009,7 @@ function randF()
 
 	if(typeof lower === "number" && typeof upper === "number")
 	{
-		return Math.random() * (upper - lower) + lower
+		return Math.random() * (upper - lower) + lower;
 	}
 
 	else
@@ -1029,7 +1029,7 @@ function randI()
 
 	if(typeof lower === "number" && typeof upper === "number")
 	{
-		return Math.floor(Math.random() * (upper - lower) + lower)
+		return Math.floor(Math.random() * (upper - lower) + lower);
 	}
 
 	else
@@ -1040,6 +1040,41 @@ function randI()
 
 createPrimitive("randI", ["_L", "_U"], randI);
 createPrimitive("randomI", ["_L", "_U"], randI);
+
+
+function odd()
+{
+	var num = Lich.VM.getVar("_N");
+
+	if(typeof num === "number")
+	{
+		return (num % 2) == 1;		
+	}
+
+	else
+	{
+		throw new Error("odd can only be applied to numbers.");	
+	}
+}
+
+createPrimitive("odd", ["_N"], odd);
+
+function even()
+{
+	var num = Lich.VM.getVar("_N");
+
+	if(typeof num === "number")
+	{
+		return (num % 2) == 0;
+	}
+
+	else
+	{
+		throw new Error("even can only be applied to numbers.");	
+	}
+}
+
+createPrimitive("even", ["_N"], even);
 
 // Constants
 Lich.VM.reserveVar("pi", 3.141592653589793);

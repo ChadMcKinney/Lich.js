@@ -48,6 +48,7 @@ tab = "\t"
 "/="                        return {val:"/=",typ:"/="};
 ">="                        return {val:">=",typ:">="};
 "<="                        return {val:"<=",typ:"<="};
+"<-"                        return {val:"<-",typ:"<-"};
 ">"                         return {val:">",typ:">"};
 "<"                         return {val:"<",typ:"<"};
 "()"                        return {val:"()",typ:"()"};
@@ -123,6 +124,8 @@ qconsym = qs:(conid ".")+ ref:((!"." consym) !".") {qs = flatten(qs).join(""); r
 
 %right '$'
 // %nonassoc '='
+%left '='
+%left 'let'
 %left '+' '-' '%'
 %left '*' '/'
 %left '^'
@@ -144,7 +147,7 @@ qconsym = qs:(conid ".")+ ref:((!"." consym) !".") {qs = flatten(qs).join(""); r
 %% /* language grammar */
 
 start_
-    : "†" exp "‡" EOF         { return $2; }
+    : "†" topexp "‡" EOF      { return $2; }
     // : module_ EOF          { return $1; }
     ;
 
@@ -332,9 +335,20 @@ exps // : [exp]
   | exp                 {{ $$ = [$1]; }}
   ;
 
+topexp
+  : "let" decl          {{$$ = {astType:"let-one", decl: $2, pos: @$}; }}
+  | exp                 {{$$ = $1;}}
+  | topexp ";" topexps  {{$$ = [$1].concat($3);}}
+  ;
+
+topexps
+  : topexps ";" topexp  {{$$ = $1.push($3);}}
+  | topexp              {{$$ = [$1];}}
+  ;
+
 exp // : object
   // : infixexp %prec NOSIGNATURE  {{$$ = $1;}}
-  : lexp          {{$$ = $1}}
+  : lexp                {{$$ = $1}}
   | exp "+" exp         {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
   | exp "-" exp         {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
   | exp "*" exp         {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
@@ -357,7 +371,6 @@ exp // : object
   | dataexp             {{$$ = $1;}}
   | datainst            {{$$ = $1;}}
   | dataupdate          {{$$ = $1;}}
-  | "Nothing"           {{$$ = {astType: "Nothing"};}}
   ;
 
 datalookup
@@ -395,7 +408,6 @@ lexp // : object
   | '\' apats "->" exp              {{$$ = {astType:"lambda", args: $2, rhs: $4, pos: @$}; }}
   | "case" exp "of" "†" alts "‡"    {{$$ = {astType:"case", exp: $2, alts: $5, pos: @$}; }}
   | "let" decls "in" exp            {{$$ = {astType:"let", decls: $2, exp: $4, pos: @$}; }}
-  | "let" decl                      {{$$ = {astType:"let-one", decl: $2, pos: @$}; }}
   | exp qop lexp                    {{$$ = {astType:"binop-exp",op:($2).id.id,lhs:$1,rhs:$3,pos:@$};}}
   ;
 
@@ -473,6 +485,7 @@ aexp // : object
   | "(" "<" ")"             {{ $$ = new Lich.VarName($2, @$, true, yy.lexer.previous.qual);}}
   | "(" ">=" ")"            {{ $$ = new Lich.VarName($2, @$, true, yy.lexer.previous.qual);}}
   | "(" "<=" ")"            {{ $$ = new Lich.VarName($2, @$, true, yy.lexer.previous.qual);}}
+  | "Nothing"               {{$$ = {astType: "Nothing"};}}
   ;
 
 dictexp
@@ -528,10 +541,11 @@ tuple // : object
 */
 
 listexp // : object
-    : "[" exp list_exp_1_comma          {{ $$ = {astType: "listexp", members: [$2].concat($3), pos: @$}; }}
-    | "[" exp ".." exp "]"              {{ $$ = {astType: "listrange", lower: $2, upper: $4, pos: @$}; }}
-    | "[" exp "," exp ".." exp "]"      {{ $$ = {astType: "listrange", lower: $2, upper: $6, skip: $4, pos: @$}; }}
-    | "[]"                              {{ $$ = {astType: "listexp", members: [], pos: @$}; }}
+    : "[" exp list_exp_1_comma            {{ $$ = {astType: "listexp", members: [$2].concat($3), pos: @$}; }}
+    | "[" exp ".." exp "]"                {{ $$ = {astType: "listrange", lower: $2, upper: $4, pos: @$}; }}
+    | "[" exp "," exp ".." exp "]"        {{ $$ = {astType: "listrange", lower: $2, upper: $6, skip: $4, pos: @$}; }}
+    | "[]"                                {{ $$ = {astType: "listexp", members: [], pos: @$}; }}
+    | "[" exp "|" qual list_qual_1_comma  {{ $$ = {astType: "list-comprehension", exp: $2, generators: [$4].concat($5), pos: @$}; }}
     ;
 
 list_exp_1_comma
@@ -539,6 +553,15 @@ list_exp_1_comma
     | "]"                        {{ $$ = [];}}
     ;
 
+list_qual_1_comma
+    : ',' qual list_qual_1_comma   {{ $$ = [$2].concat($3); }}
+    | "]"                         {{ $$ = [];}}
+    ;
+
+qual
+  : varid "<-" exp            {{$$ = {astType:"decl-fun", ident: $1, args: [], rhs: $3, pos: @$};}}
+  | exp                       {{$$ = $1;}}
+  ;
 
 funccomp
   : exp "." exp         {{$$ = {astType:"function-composition", exps:[$1,$3]};}}
