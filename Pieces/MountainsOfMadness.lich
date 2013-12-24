@@ -116,6 +116,8 @@ updateLocation location game = game{locations = newLocations}
 	where
 		newLocations = ((location::name) => location) : (game::locations)
 
+getLocation locationName game = game::locations !! locationName
+
 -- |getPlayer String     Game => Player
 getPlayer playerName game = (game :: players) !! playerName
 
@@ -170,16 +172,15 @@ lookAtCardinal cardinal player game = addNarration description game
 	where
 		description = (locationAtCardinal cardinal player game) :: farDescription
 
-movePlayerResult moveAble player game = 
-	if moveAble
+movePlayerToLocation location player game = 
+	if (getLocation location game) ::moveable
 		then updatePlayer player game
-		else addNarration "That way is blocked." game
+		else addNarration "That way is blocked." game 
 
 -- |movePlayer Cardinal Player Game => Game
-movePlayer cardinal player game = movePlayerResult (locationAt::moveable) newPlayer game
+movePlayer cardinal player game = movePlayerToLocation location player game
 	where
-		locationAt 	= locationAtCardinal cardinal player game
-		newPlayer 	= player{location = (locationAt::name)}			
+		location = locationAtCardinal cardinal player game
 	
 -- |checkPlayerDeath Player Game => Game
 checkPlayerDeath player game = 
