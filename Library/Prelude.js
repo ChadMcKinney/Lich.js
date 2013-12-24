@@ -96,9 +96,30 @@ function chatPrimitive()
 
 createPrimitive("chat", ["_R"], chatPrimitive);
 
+function checkNumStringOpError(l, op, r)
+{
+	if((typeof l !== "number" && typeof l !== "string")
+		|| (typeof r !== "number" && typeof r !== "string"))
+		throw new Error(op + " can only be used with numbers and strings. Cannont use " + op + " with: " 
+			+ Lich.VM.PrettyPrint(l) + " " + op + " " + Lich.VM.PrettyPrint(r));
+}
+
+function checkNumOpError(l, op, r)
+{
+	if((typeof l !== "number")
+		|| (typeof r !== "number"))
+		throw new Error(op + " can only be used with numbers. Cannont use " + op + " with: " 
+			+ Lich.VM.PrettyPrint(l) + " " + op + " " + Lich.VM.PrettyPrint(r));
+}
+
 function add()
 {
-	return Lich.VM.getVar("_L") + Lich.VM.getVar("_R");
+	var l = Lich.VM.getVar("_L");
+	var r = Lich.VM.getVar("_R");
+
+	checkNumStringOpError(l, "+", r);
+
+	return  l + r;
 }
 
 createPrimitive("+", ["_L", "_R"], add);
@@ -106,7 +127,12 @@ createPrimitive("add", ["_L", "_R"], add);
 
 function subtract()
 {
-	return Lich.VM.getVar("_L") - Lich.VM.getVar("_R");
+	var l = Lich.VM.getVar("_L");
+	var r = Lich.VM.getVar("_R");
+
+	checkNumOpError(l, "-", r);
+
+	return  l - r;
 }
 
 createPrimitive("-", ["_L", "_R"], subtract);
@@ -114,7 +140,12 @@ createPrimitive("subtract", ["_L", "_R"], subtract);
 
 function mul()
 {
-	return Lich.VM.getVar("_L") * Lich.VM.getVar("_R");
+	var l = Lich.VM.getVar("_L");
+	var r = Lich.VM.getVar("_R");
+
+	checkNumOpError(l, "*", r);
+
+	return  l * r;
 }
 
 createPrimitive("*", ["_L", "_R"], mul);
@@ -122,39 +153,43 @@ createPrimitive("mul", ["_L", "_R"], mul);
 
 function div()
 {
-	return Lich.VM.getVar("_L") / Lich.VM.getVar("_R");
+	var l = Lich.VM.getVar("_L");
+	var r = Lich.VM.getVar("_R");
+
+	checkNumOpError(l, "/", r);
+
+	return  l / r;
 }
 
 createPrimitive("/", ["_L", "_R"], div);
 createPrimitive("div", ["_L", "_R"], div);
 
-function divR()
-{
-	return Lich.VM.getVar("_L") / Lich.VM.getVar("_R");
-}
-
 // Swapped for use with (/3) type currying
-createPrimitive("/R", ["_R", "_L"], divR);
+createPrimitive("/R", ["_R", "_L"], div);
 
 function pow()
 {
-	return Math.pow(Lich.VM.getVar("_L"), Lich.VM.getVar("_R"));
+	var l = Lich.VM.getVar("_L");
+	var r = Lich.VM.getVar("_R");
+
+	checkNumOpError(l, "^", r);
+
+	return  Math.pow(l, r);
 }
 
 createPrimitive("^", ["_L", "_R"], pow);
 createPrimitive("**", ["_L", "_R"], pow);
-
-function powR()
-{
-	return Math.pow(Lich.VM.getVar("_L"), Lich.VM.getVar("_R"));
-}
-
-createPrimitive("^R", ["_R", "_L"], powR);
+createPrimitive("^R", ["_R", "_L"], pow);
 
 
 function mod()
 {
-	return Lich.VM.getVar("_L") % Lich.VM.getVar("_R");
+	var l = Lich.VM.getVar("_L");
+	var r = Lich.VM.getVar("_R");
+
+	checkNumOpError(l, "%", r);
+
+	return  l % r;
 }
 
 createPrimitive("%", ["_L", "_R"], mod);
@@ -178,71 +213,79 @@ createPrimitive("/=", ["_L", "_R"], notequivalent);
 
 function greater()
 {
-	return Lich.VM.getVar("_L") > Lich.VM.getVar("_R");
+	var l = Lich.VM.getVar("_L");
+	var r = Lich.VM.getVar("_R");
+
+	checkNumOpError(l, ">", r);
+
+	return  l > r;
 }
 
 createPrimitive(">", ["_L", "_R"], greater);
-
-function greaterR()
-{
-	return Lich.VM.getVar("_L") > Lich.VM.getVar("_R");
-}
-
-createPrimitive(">R", ["_R", "_L"], greaterR);
+createPrimitive(">R", ["_R", "_L"], greater);
 
 
 function lesser()
 {
-	return Lich.VM.getVar("_L") < Lich.VM.getVar("_R");
+	var l = Lich.VM.getVar("_L");
+	var r = Lich.VM.getVar("_R");
+
+	checkNumOpError(l, "<", r);
+
+	return  l < r;
 }
 
 createPrimitive("<", ["_L", "_R"], lesser);
-
-function lesserR()
-{
-	return Lich.VM.getVar("_L") < Lich.VM.getVar("_R");
-}
-
-createPrimitive("<R", ["_R", "_L"], lesserR);
+createPrimitive("<R", ["_R", "_L"], lesser);
 
 function greaterEqual()
 {
-	return Lich.VM.getVar("_L") >= Lich.VM.getVar("_R");
+	var l = Lich.VM.getVar("_L");
+	var r = Lich.VM.getVar("_R");
+
+	checkNumOpError(l, ">=", r);
+
+	return  l >= r;
 }
 
 createPrimitive(">=", ["_L", "_R"], greaterEqual);
-
-function greaterEqualR()
-{
-	return Lich.VM.getVar("_L") >= Lich.VM.getVar("_R");
-}
-
-createPrimitive(">=R", ["_R", "_L"], greaterEqualR);
+createPrimitive(">=R", ["_R", "_L"], greaterEqual);
 
 function lesserEqual()
 {
-	return Lich.VM.getVar("_L") <= Lich.VM.getVar("_R");
+	var l = Lich.VM.getVar("_L");
+	var r = Lich.VM.getVar("_R");
+
+	checkNumOpError(l, "<=", r);
+
+	return  l <= r;
 }
 
 createPrimitive("<=", ["_L", "_R"], lesserEqual);
-
-function lesserEqualR()
-{
-	return Lich.VM.getVar("_L") <= Lich.VM.getVar("_R");
-}
-
-createPrimitive("<=R", ["_R", "_L"], lesserEqualR);
+createPrimitive("<=R", ["_R", "_L"], lesserEqual);
 
 function andand()
 {
-	return Lich.VM.getVar("_L") && Lich.VM.getVar("_R");
+	var l = Lich.VM.getVar("_L");
+	var r = Lich.VM.getVar("_R");
+
+	if(typeof l !== "boolean" || typeof r !== "boolean")
+		throw new Error("Cannot use && operator with: " + Lich.VM.PrettyPrint(l) + " && " + Lich.VM.PrettyPrint(r));
+
+	return  l && r;
 }
 
 createPrimitive("&&", ["_R", "_L"], andand);
 
 function oror()
 {
-	return Lich.VM.getVar("_L") || Lich.VM.getVar("_R");
+	var l = Lich.VM.getVar("_L");
+	var r = Lich.VM.getVar("_R");
+
+	if(typeof l !== "boolean" || typeof r !== "boolean")
+		throw new Error("Cannot use && operator with: " + Lich.VM.PrettyPrint(l) + " || " + Lich.VM.PrettyPrint(r));
+
+	return  l || r;
 }
 
 createPrimitive("||", ["_R", "_L"], oror);
@@ -250,11 +293,13 @@ createPrimitive("||", ["_R", "_L"], oror);
 function indexList()
 {
 	var list = Lich.VM.getVar("_L");
+	var key = Lich.VM.getVar("_R");
 
 	if(!((list instanceof Array) || (list.lichType == DICTIONARY)))
-		throw new Error("indexing via !! can only be applied to lists and dictionaries.");
+		throw new Error("indexing via !! or lookup can only be applied to lists and dictionaries as: lookup key container or: container !! key. Failed with: lookup " 
+			+ Lich.VM.PrettyPrint(key) + " " + Lich.VM.PrettyPrint(list));
 
-	var res = list[Lich.VM.getVar("_R")];
+	var res = list[key];
 	return typeof res === "undefined" ? Lich.VM.Nothing : res;
 }
 
@@ -294,7 +339,8 @@ function mapContainer()
 	var container = Lich.VM.getVar("_R");
 
 	if(func.lichType != CLOSURE)
-		throw new Error("map can only be applied using: map function container");
+		throw new Error("map can only be applied using: map function container. Failed with: map " + Lich.VM.PrettyPrint(func) 
+			+ " " + Lich.VM.PrettyPrint(container));
 
 	var res = container;
 
@@ -327,7 +373,8 @@ function mapContainer()
 
 	else
 	{
-		throw new Error("map can only be applied to lists and dictionaries.");	
+		throw new Error("map can only be applied to lists and dictionaries. Failed with: map " + Lich.VM.PrettyPrint(func) 
+			+ " " + Lich.VM.PrettyPrint(container));	
 	}
 
 	return res;
@@ -364,7 +411,8 @@ function cons()
 	var list = Lich.VM.getVar("_R");
 
 	if(!(list instanceof Array || typeof list === "string" || list.lichType == DICTIONARY))
-		throw new Error("Cons can only be applied to lists and dictionaries.");
+		throw new Error("Cons can only be applied to lists and dictionaries. Failed with: cons " + Lich.VM.PrettyPrint(value) 
+			+ " " + Lich.VM.PrettyPrint(list));
 
 	// list = deepCopy(list);
 	// value = deepCopy(value);
@@ -391,7 +439,7 @@ function insert()
 	var list = Lich.VM.getVar("_R");
 
 	if(!(list.lichType == DICTIONARY))
-		throw new Error("Cons can only be applied to lists.");
+		throw new Error("insert can only be applied to lists. Failed with: insert " + Lich.VM.PrettyPrint(value) + " " + Lich.VM.PrettyPrint(list));
 
 	var res = mergeDictionaries(list, value);
 	return typeof res === "undefined" ? Lich.VM.Nothing : res;
@@ -406,7 +454,7 @@ function deleteEntry()
 	var dict = Lich.VM.getVar("_R");
 
 	if(!(dict.lichType == DICTIONARY))
-		throw new Error("Cons can only be applied to lists.");
+		throw new Error("Cons can only be applied to lists. Failed with: delete " + Lich.VM.PrettyPrint(value) + " " + Lich.VM.PrettyPrint(dict));
 
 	var newDict = deepCopy(dict);
 	delete newDict[value];
@@ -422,7 +470,7 @@ function concatList()
 	var value = Lich.VM.getVar("_R");
 
 	if(!(list instanceof Array || typeof list === "string"))
-		throw new Error("Concat can only be applied to lists.");
+		throw new Error("Concat can only be applied to lists. Failed with: " + Lich.VM.PrettyPrint(list) + " ++ " + Lich.VM.PrettyPrint(value));
 
 	// list = deepCopy(list);
 	var res = list.concat(value);
@@ -439,7 +487,8 @@ function foldl()
 	var container = Lich.VM.getVar("_C");
 
 	if(func.lichType != CLOSURE)
-		throw new Error("foldl can only be applied using: foldl function container");
+		throw new Error("foldl can only be applied using: foldl function container. Failed with: foldr " + Lich.VM.PrettyPrint(func) 
+			+ " " + Lich.VM.PrettyPrint(initialValue) + " " + Lich.VM.PrettyPrint(container));
 
 	var res = container;
 
@@ -466,7 +515,8 @@ function foldl()
 
 	else
 	{
-		throw new Error("foldl can only be applied to lists and dictionaries.");	
+		throw new Error("foldl can only be applied to lists and dictionaries. Failed with: foldl " + Lich.VM.PrettyPrint(func) 
+			+ " " + Lich.VM.PrettyPrint(initialValue) + " " + Lich.VM.PrettyPrint(container));	
 	}
 
 	return res;
@@ -481,7 +531,8 @@ function foldr()
 	var container = Lich.VM.getVar("_C");
 
 	if(func.lichType != CLOSURE)
-		throw new Error("foldr can only be applied using: foldr function container");
+		throw new Error("foldr can only be applied using: foldr function container. Failed with: foldr " + Lich.VM.PrettyPrint(func) 
+			+ " " + Lich.VM.PrettyPrint(initialValue) + " " + Lich.VM.PrettyPrint(container));
 
 	var res = container;
 
@@ -510,7 +561,8 @@ function foldr()
 
 	else
 	{
-		throw new Error("foldr can only be applied to lists and dictionaries.");	
+		throw new Error("foldr can only be applied to lists and dictionaries. Failed with: foldr " + Lich.VM.PrettyPrint(func) 
+			+ " " + Lich.VM.PrettyPrint(initialValue) + " " + Lich.VM.PrettyPrint(container));	
 	}
 
 	return res;
@@ -536,7 +588,7 @@ function zip()
 
 	else
 	{
-		throw new Error("zip can only be applied to lists.");	
+		throw new Error("zip can only be applied to lists. Failed with: zip " + Lich.VM.PrettyPrint(lcontainer) + " " + Lich.VM.PrettyPrint(rcontainer));	
 	}
 
 	return res;
@@ -563,7 +615,8 @@ function zipWith()
 
 	else
 	{
-		throw new Error("zipWith can only be applied to lists.");	
+		throw new Error("zipWith can only be applied to lists. Failed with: zipWith " + Lich.VM.PrettyPrint(func) 
+			+ " " + Lich.VM.PrettyPrint(lcontainer) + " " + Lich.VM.PrettyPrint(rcontainer));	
 	}
 
 	return res;
@@ -577,7 +630,8 @@ function filter()
 	var container = Lich.VM.getVar("_R");
 
 	if(func.lichType != CLOSURE)
-		throw new Error("filter can only be applied using: filter function container");
+		throw new Error("filter can only be applied using: filter function container. Failed with: filter " + Lich.VM.PrettyPrint(func) 
+			+ " " + Lich.VM.PrettyPrint(container));
 
 	var res = container;
 
@@ -612,7 +666,8 @@ function filter()
 
 	else
 	{
-		throw new Error("map can only be applied to lists and dictionaries.");	
+		throw new Error("map can only be applied to lists and dictionaries. Failed with: filter " + Lich.VM.PrettyPrint(func) 
+			+ " " + Lich.VM.PrettyPrint(container));	
 	}
 
 	return res;
@@ -634,7 +689,7 @@ function head()
 
 	else
 	{
-		throw new Error("head can only be applied to lists.");	
+		throw new Error("head can only be applied to lists. Failed with: head " + Lich.VM.PrettyPrint(container));	
 	}
 }
 
@@ -654,7 +709,7 @@ function tail()
 
 	else
 	{
-		throw new Error("tail can only be applied to lists.");	
+		throw new Error("tail can only be applied to lists. Failed with: tail " + Lich.VM.PrettyPrint(container));	
 	}
 }
 
@@ -674,7 +729,7 @@ function init()
 
 	else
 	{
-		throw new Error("init can only be applied to lists.");	
+		throw new Error("init can only be applied to lists. Failed with: init " + Lich.VM.PrettyPrint(container));	
 	}
 }
 
@@ -694,7 +749,7 @@ function last()
 
 	else
 	{
-		throw new Error("last can only be applied to lists.");	
+		throw new Error("last can only be applied to lists. Failed with: last " + Lich.VM.PrettyPrint(container));	
 	}
 }
 
@@ -711,7 +766,12 @@ function composeFunction(_functions)
 
 		for(var i = functions.length - 1; i >= 0; --i)
 		{
-			res = functions[i].invoke([res]);
+			var func = functions[i];
+
+			if(typeof func === "undefined" || func.lichType != CLOSURE)
+				throw new Error("function composition with the (.) operator can only be used with functions. Failed with " + Lich.VM.PrettyPrint(func));
+
+			res = func.invoke([res]);
 		}
 
 		return res;
@@ -734,6 +794,11 @@ function sum()
 
 		for(var i = 0; i < container.length; ++i)
 		{
+			var item = container[i];
+
+			if(typeof item !== "number")
+				throw new Error("sum can only be applied to lists containing numbers. Failed with " + Lich.VM.PrettyPrint(item));
+
 			res += container[i];
 		}
 
@@ -742,7 +807,7 @@ function sum()
 
 	else
 	{
-		throw new Error("sum can only be applied to lists.");	
+		throw new Error("sum can only be applied to lists. Failed with: sum " + Lich.VM.PrettyPrint(container));	
 	}
 }
 
@@ -754,7 +819,7 @@ function take()
 	var num = Lich.VM.getVar("_N");
 	var container = Lich.VM.getVar("_C");
 
-	if(container instanceof Array)
+	if(((container instanceof Array) || (typeof container === "string")) && (typeof num === "number"))
 	{
 		if(container.length == 0)
 			return [];
@@ -764,7 +829,7 @@ function take()
 
 	else
 	{
-		throw new Error("take can only be applied to lists.");	
+		throw new Error("take can only be applied to lists. Failed with: take " + Lich.VM.PrettyPrint(num) + " " + Lich.VM.PrettyPrint(container));	
 	}
 }
 
@@ -775,7 +840,7 @@ function drop()
 	var num = Lich.VM.getVar("_N");
 	var container = Lich.VM.getVar("_C");
 
-	if(container instanceof Array)
+	if(((container instanceof Array) || (typeof container === "string")) && (typeof num === "number"))
 	{
 		if(container.length == 0)
 			return container;
@@ -785,7 +850,7 @@ function drop()
 
 	else
 	{
-		throw new Error("drop can only be applied to lists.");	
+		throw new Error("drop can only be applied to lists. Failed with: drop " + Lich.VM.PrettyPrint(num) + " " + Lich.VM.PrettyPrint(container));	
 	}
 }
 
@@ -802,7 +867,7 @@ function lengthList()
 
 	else
 	{
-		throw new Error("length can only be applied to lists.");	
+		throw new Error("length can only be applied to lists. Failed with: length " + Lich.VM.PrettyPrint(container));	
 	}
 }
 
@@ -819,7 +884,7 @@ function nullList()
 
 	else
 	{
-		throw new Error("null can only be applied to lists.");	
+		throw new Error("null can only be applied to lists. Failed with: null " + Lich.VM.PrettyPrint(container));	
 	}
 }
 
@@ -839,8 +904,11 @@ function maximum()
 
 		for(var i = 0; i < container.length; ++i)
 		{
-			if(container[i] > res)
-				res = container[i];
+			if(typeof item !== "number")
+				throw new Error("maximum can only be used on lists containing numbers. Failed with " + Lich.VM.PrettyPrint(item));
+
+			if(item > res)
+				res = item;
 		}
 
 		return res;
@@ -848,7 +916,7 @@ function maximum()
 
 	else
 	{
-		throw new Error("maximum can only be applied to lists.");	
+		throw new Error("maximum can only be applied to lists. Failed with: maximum " + Lich.VM.PrettyPrint(container));	
 	}
 }
 
@@ -867,8 +935,13 @@ function minimum()
 
 		for(var i = 0; i < container.length; ++i)
 		{
-			if(container[i] < res)
-				res = container[i];
+			var item = container[i];
+
+			if(typeof item !== "number")
+				throw new Error("minimum can only be used on lists containing numbers. Failed with " + Lich.VM.PrettyPrint(item));
+
+			if(item < res)
+				res = item;
 		}
 
 		return res;
@@ -876,7 +949,7 @@ function minimum()
 
 	else
 	{
-		throw new Error("minimum can only be applied to lists.");	
+		throw new Error("minimum can only be applied to lists. Failed with: minimum " + Lich.VM.PrettyPrint(container));	
 	}
 }
 
@@ -895,7 +968,12 @@ function product()
 
 		for(var i = 0; i < container.length; ++i)
 		{
-			res *= container[i];
+			var item = container[i];
+
+			if(typeof item !== "number")
+				throw new Error("Can't use product on lists containing non-numbers. Failed with " + Lich.VM.PrettyPrint(item));
+
+			res *= item;
 		}
 
 		return res;
@@ -903,7 +981,7 @@ function product()
 
 	else
 	{
-		throw new Error("product can only be applied to lists.");	
+		throw new Error("product can only be applied to lists. Failed with: product " + Lich.VM.PrettyPrint(container));	
 	}
 }
 
@@ -938,7 +1016,8 @@ function elem()
 
 	else
 	{
-		throw new Error("elem can only be applied to lists and dictionaries.");	
+		throw new Error("elem can only be applied to lists and dictionaries. Failed with: elem " + Lich.VM.PrettyPrint(item) 
+			+ " " + Lich.VM.PrettyPrint(container));	
 	}
 }
 
@@ -963,7 +1042,8 @@ function replicate()
 
 	else
 	{
-		throw new Error("replicate must be used like: replicate number value");	
+		throw new Error("replicate must be used like: replicate number value. Failed with: replicate " + Lich.VM.PrettyPrint(number) 
+			+ " " + Lich.VM.PrettyPrint(item));	
 	}
 }
 
@@ -990,7 +1070,7 @@ function reverse()
 
 	else
 	{
-		throw new Error("reverse can only be applied to lists.");	
+		throw new Error("reverse can only be applied to lists. Failed with: reverse " + Lich.VM.PrettyPrint(container));	
 	}
 }
 
@@ -1009,7 +1089,8 @@ function slice()
 
 	else
 	{
-		throw new Error("slice can only be applied to lists.");	
+		throw new Error("slice can only be applied to lists. Failed with: slice " + Lich.VM.PrettyPrint(lower) + " " + Lich.VM.PrettyPrint(upper) 
+			+ Lich.VM.PrettyPrint(container));	
 	}
 }
 
@@ -1028,7 +1109,7 @@ function randF()
 
 	else
 	{
-		throw new Error("randF can only be applied to numbers.");	
+		throw new Error("randF can only be applied to numbers. Failed with: randF " + Lich.VM.PrettyPrint(lower) + " " + Lich.VM.PrettyPrint(upper));	
 	}
 }
 
@@ -1048,7 +1129,7 @@ function randI()
 
 	else
 	{
-		throw new Error("randF can only be applied to numbers.");	
+		throw new Error("randF can only be applied to numbers. Failed with: randI " + Lich.VM.PrettyPrint(lower) + " " + Lich.VM.PrettyPrint(upper));	
 	}
 }
 
@@ -1067,7 +1148,7 @@ function odd()
 
 	else
 	{
-		throw new Error("odd can only be applied to numbers.");	
+		throw new Error("odd can only be applied to numbers. Failed with: odd " + Lich.VM.PrettyPrint(num));	
 	}
 }
 
@@ -1084,11 +1165,28 @@ function even()
 
 	else
 	{
-		throw new Error("even can only be applied to numbers.");	
+		throw new Error("even can only be applied to numbers. Failed with: even " + Lich.VM.PrettyPrint(num));	
 	}
 }
 
 createPrimitive("even", ["_N"], even);
+
+function sqrt()
+{
+	var num = Lich.VM.getVar("_N");
+
+	if(typeof num === "number")
+	{
+		return Math.sqrt(num);		
+	}
+
+	else
+	{
+		throw new Error("sqrt can only be applied to numbers. Failed with: sqrt " + Lich.VM.PrettyPrint(num));	
+	}
+}
+
+createPrimitive("sqrt", ["_N"], sqrt);
 
 // Constants
 Lich.VM.reserveVar("pi", 3.141592653589793);

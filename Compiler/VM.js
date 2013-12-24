@@ -55,6 +55,12 @@ Lich.VM.popProcedure = function()
 	Lich.VM.procedureStack.pop();
 }
 
+Lich.VM.clearProcedureStack = function()
+{
+	while(Lich.VM.procedureStack.length > 1)
+		Lich.VM.popProcedure();
+}
+
 Lich.VM.getVar = function(varName) // Dynamically check scopes for a variable's value
 {
 	for(var i = Lich.VM.procedureStack.length - 1; i >= 0; --i)
@@ -80,7 +86,6 @@ Lich.VM.reserveVar = function(varName, value)
 	Lich.VM.reserved[varName] = true;
 }
 
-// http://www.rajeshsegu.com/2012/07/js-pretty-print-an-object/
 Lich.VM.printArray = function(object)
 {
     var string = "[";
@@ -94,6 +99,24 @@ Lich.VM.printArray = function(object)
     }
 
     return string + "]";
+}
+
+Lich.VM.printDictionary = function(object)
+{
+    var string = "(";
+
+    for(n in object)
+    {
+    	if(n != "lichType")
+    	{
+    		string = string + "\"" + n + "\" => " + Lich.VM.PrettyPrint(object[n]) + ", ";
+    	}
+    }
+
+    if(string.length > 1)
+    	return string.substring(0, string.length - 2) + ")";
+	else
+		return string + ")";
 }
 
 Lich.VM.printClosure = function(closure)
@@ -119,13 +142,17 @@ Lich.post = function(text)
 Lich.VM.PrettyPrint = function(object)
 {
 	if(typeof object === "undefined")
-		return "undefined";
+		return "Nothing"; // undefined == Nothing
+	else if(typeof object === "string")
+		return "\"" + object + "\"";
 	else if(object instanceof Array)
 		return Lich.VM.printArray(object);
 	else if(object.lichType == CLOSURE || object.lichType == THUNK)
 		return Lich.VM.printClosure(object);
 	else if(object.lichType == DATA)
 		return object._datatype;
+	else if(object.lichType == DICTIONARY)
+		return Lich.VM.printDictionary(object);
 	else if(object == Lich.VM.Nothing)
 		return "Nothing";
 	else

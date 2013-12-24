@@ -38,154 +38,163 @@
 // The Lich.js compiler traverse the abstract syntax tree returned by the parser and calls native JavaScript
 Lich.compileAST = function(ast)
 {
-	if(ast instanceof Array)
+	try
 	{
-		var res = null;
-		for(var i = 0; i < ast.length; ++i)
-		{	
-			res = Lich.compileAST(ast[i]);
+		if(ast instanceof Array)
+		{
+			var res = null;
+			for(var i = 0; i < ast.length; ++i)
+			{	
+				res = Lich.compileAST(ast[i]);
 
-			if(i < ast.length - 1)
-				Lich.VM.Print(res);
+				if(i < ast.length - 1)
+					Lich.VM.Print(res);
+			}
+
+			return res;
 		}
 
-		return res;
-	}
-
-	else if(ast instanceof Object)
-	{
-		/*
-		if (typeof ast === "function")
+		else if(ast instanceof Object)
 		{
-			Lich.post("AST FUNCTION?!: " + ast);
-			return; // Do nothing, this is a tail end function given by the parser we don't need.
-		}*/
+			/*
+			if (typeof ast === "function")
+			{
+				Lich.post("AST FUNCTION?!: " + ast);
+				return; // Do nothing, this is a tail end function given by the parser we don't need.
+			}*/
 
-		// Lich.post("AST name: " + ast.astType);
-		// Lich.post(ast);
+			// Lich.post("AST name: " + ast.astType);
+			// Lich.post(ast);
 
-		switch(ast.astType)
+			switch(ast.astType)
+			{
+				case "primitive":
+					return ast();
+					break;
+				case "thunk":
+					return Lich.compileDeclThunk(ast);
+					break
+				case "decl-fun":
+					return Lich.compileDeclFun(ast);
+					break;
+				case "fun-where":
+					return Lich.compileFunWhere(ast);
+					break;
+				case "ite":
+					return Lich.compileIte(ast);
+					break;
+				case "application":
+					return Lich.compileApplication(ast);
+					break;
+				case "function-application-op":
+					return Lich.compileFunctionApplicationOp(ast);
+					break;
+				case "function-composition":
+					return Lich.compileFunctionComposition(ast);
+				case "lambda":
+					return Lich.compileLambda(ast);
+					break;
+				case "let":
+					return Lich.compileLet(ast);
+					break;
+				case "let-one": // ghci style let expression for global definitions
+					return Lich.compileLetOne(ast);
+					break;
+				case "listexp":
+					return Lich.compileListExp(ast);
+					break;
+				case "qop":
+					return Lich.compileQop(ast);
+					break;
+				case "conpat":
+					return Lich.compileConPat(ast);
+					break;
+				case "wildcard":
+					return { lichType: WILDCARD };
+					break;
+				case "integer-lit":
+					return Lich.compileIntegerLit(ast);
+					break;
+				case "string-lit":
+					return Lich.compileStringLit(ast);
+					break;
+				case "char-lit":
+					return Lich.compileCharLit(ast);
+					break;
+				case "number":
+				case "float-lit":
+					return Lich.compileFloatLit(ast);
+					break;
+				case "varname":
+					return Lich.compileVarName(ast);
+					break;
+				case "dacon":
+					return Lich.compileDacon(ast);
+					break;
+				case "boolean-lit":
+					return Lich.compileBooleanLit(ast);
+					break;
+				case "binop-exp":
+					return Lich.compileBinOpExp(ast);
+					break;
+				case "negate":
+					return Lich.compileNegate(ast);
+					break;
+				case "listrange":
+					return Lich.compileListRange(ast);
+					break;
+				case "dictionary":
+					return Lich.compileDictionary(ast);
+					break;
+				case "case":
+					return Lich.compileCase(ast);
+					break;
+				case "Nothing":
+					return Lich.VM.Nothing;
+					break;
+				case "list-comprehension":
+					return Lich.compileListComprehension(ast);
+					break;
+				case "module":
+					return Lich.compileModule(ast);
+					break;
+				case "body":
+					return Lich.compileBody(ast);
+					break;
+				case "data-decl":
+					return Lich.compileDataDecl(ast);
+					break;
+				case "data-inst":
+					return Lich.compileDataInst(ast);
+					break;
+				case "data-lookup":
+					return Lich.compileDataLookup(ast);
+					break;
+				case "data-update":
+					return Lich.compileDataUpdate(ast);
+					break;
+				case "data-enum":
+					return Lich.compileDataEnum(ast);
+					break;
+				case "topdecl-decl":
+					return Lich.compileTopdeclDecl(ast);
+					break;	
+				default:
+					Lich.unsupportedSemantics(ast);
+					break;
+			}
+		}
+
+		else
 		{
-			case "primitive":
-				return ast();
-				break;
-			case "thunk":
-				return Lich.compileDeclThunk(ast);
-				break
-			case "decl-fun":
-				return Lich.compileDeclFun(ast);
-				break;
-			case "fun-where":
-				return Lich.compileFunWhere(ast);
-				break;
-			case "ite":
-				return Lich.compileIte(ast);
-				break;
-			case "application":
-				return Lich.compileApplication(ast);
-				break;
-			case "function-application-op":
-				return Lich.compileFunctionApplicationOp(ast);
-				break;
-			case "function-composition":
-				return Lich.compileFunctionComposition(ast);
-			case "lambda":
-				return Lich.compileLambda(ast);
-				break;
-			case "let":
-				return Lich.compileLet(ast);
-				break;
-			case "let-one": // ghci style let expression for global definitions
-				return Lich.compileLetOne(ast);
-				break;
-			case "listexp":
-				return Lich.compileListExp(ast);
-				break;
-			case "qop":
-				return Lich.compileQop(ast);
-				break;
-			case "conpat":
-				return Lich.compileConPat(ast);
-				break;
-			case "wildcard":
-				return { lichType: WILDCARD };
-				break;
-			case "integer-lit":
-				return Lich.compileIntegerLit(ast);
-				break;
-			case "string-lit":
-				return Lich.compileStringLit(ast);
-				break;
-			case "char-lit":
-				return Lich.compileCharLit(ast);
-				break;
-			case "number":
-			case "float-lit":
-				return Lich.compileFloatLit(ast);
-				break;
-			case "varname":
-				return Lich.compileVarName(ast);
-				break;
-			case "dacon":
-				return Lich.compileDacon(ast);
-				break;
-			case "boolean-lit":
-				return Lich.compileBooleanLit(ast);
-				break;
-			case "binop-exp":
-				return Lich.compileBinOpExp(ast);
-				break;
-			case "negate":
-				return Lich.compileNegate(ast);
-				break;
-			case "listrange":
-				return Lich.compileListRange(ast);
-				break;
-			case "dictionary":
-				return Lich.compileDictionary(ast);
-				break;
-			case "case":
-				return Lich.compileCase(ast);
-				break;
-			case "Nothing":
-				return Lich.VM.Nothing;
-				break;
-			case "list-comprehension":
-				return Lich.compileListComprehension(ast);
-				break;
-			case "module":
-				return Lich.compileModule(ast);
-				break;
-			case "body":
-				return Lich.compileBody(ast);
-				break;
-			case "data-decl":
-				return Lich.compileDataDecl(ast);
-				break;
-			case "data-inst":
-				return Lich.compileDataInst(ast);
-				break;
-			case "data-lookup":
-				return Lich.compileDataLookup(ast);
-				break;
-			case "data-update":
-				return Lich.compileDataUpdate(ast);
-				break;
-			case "data-enum":
-				return Lich.compileDataEnum(ast);
-				break;
-			case "topdecl-decl":
-				return Lich.compileTopdeclDecl(ast);
-				break;	
-			default:
-				Lich.unsupportedSemantics(ast);
-				break;
+			Lich.post("Unknown AST Type: " + (typeof ast));
 		}
 	}
 
-	else
+	catch(e)
 	{
-		Lich.post("Unknown AST Type: " + (typeof ast));
+		Lich.VM.clearProcedureStack();
+		throw e;
 	}
 }
 
