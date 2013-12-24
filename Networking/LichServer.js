@@ -90,7 +90,7 @@ io.sockets.on('connection', function (socket) {
 
     socket.on('ReadFile',function(fileName)
     {
-        fs.readFile(fileName, 'utf8', function(err, data) {
+        fs.readFile("./Pieces/"+fileName+".lich", 'utf8', function(err, data) {
             try
             {
                 if(err) throw err;
@@ -107,7 +107,7 @@ io.sockets.on('connection', function (socket) {
 
     socket.on('CompileLib',function(libName)
     {
-        fs.readFile(libName, 'utf8', function(err, data) {
+        fs.readFile("./Pieces/"+libName+".lich", 'utf8', function(err, data) {
             try
             {
                 if(err) throw err;
