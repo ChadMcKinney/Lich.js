@@ -17,14 +17,22 @@
 --Data Types
 ------------------------------------------------------------------------------------------------
 
-nullAction receiver game = game{narration="That has no effect"}
+nullAction item holder receiver game = game{narration="That has no effect"}
+
+data Type {
+	item 		= 0,
+	monster 	= 1,
+	player 		= 2,
+	location 	= 3
+}
 
 data Item {
 	name  			= "Not an item.",
 	description 	= "Not an Item.",
 	carryable		= True,
 	action 			= nullAction,
-	cursed 			= False
+	cursed 			= False,
+	dataType 		= Type ::item
 }
 
 data Location {
@@ -38,7 +46,8 @@ data Location {
 	description 	= "Nothing to see here.",
 	farDescription 	= "Nothing to see in the distance.",
 	items 			= (),
-	moveable 		= False
+	moveable 		= False,
+	dataType 		= Type ::location
 }
 
 data Player {
@@ -47,7 +56,8 @@ data Player {
 	location 	= "Nowhere",
 	description = "A rather academic looking researcher. Cold, but healthy.",
 	items 		= (),
-	sanity 		= 100
+	sanity 		= 100,
+	dataType 	= Type::player
 }
 
 data Monster {
@@ -57,7 +67,8 @@ data Monster {
 	description = "Not actually a monster.",
 	items 		= (),
 	attack 		= 25,
-	dementia	= 25
+	dementia	= 25,
+	dataType 	= Type::monster
 }
 
 data Game {
@@ -116,6 +127,7 @@ updateLocation location game = game{locations = newLocations}
 	where
 		newLocations = ((location::name) => location) : (game::locations)
 
+-- |getLocation String     Game => Player
 getLocation locationName game = game::locations !! locationName
 
 -- |getPlayer String     Game => Player
@@ -150,7 +162,7 @@ pickupCarryableItemFromLocation item location player game = updatePlayer newPlay
 
 -- |pickupItemFromLocation Item Location Player Game => Game
 pickupItemFromLocation item location player game = 
-	if item :: carryable
+	if ((player::location) == (location::name)) && item :: carryable
 		then pickupCarryableItemFromLocation item location player game
 		else game{narration="I can't carry that!"}
 
@@ -200,6 +212,27 @@ damagePlayer damage player game = checkPlayerDeath damagedPlayer newGame
 -- |monsterAttacksPlayer Monster Player Game => Game
 monsterAttacksPlayer monster player game = damagePlayer (monster::attack) player game
 
+updateItemInHolder item itemName holder game = newGame
+	where
+		newHolder = (itemName=>item) : holder::items
+		newGame =
+			case newHolder ::dataType of
+				Type::monster 	-> updateMonster newHolder game
+				Type::player 	-> updatePlayer newHolder game
+				Type::location 	-> updateLocation newHolder game
+				_ 				-> game
+
+eraseItemInHolder item holder game = newGame
+	where
+		newHolder = holder{items = delete (item::name) (holder::items)}
+		newGame =
+			case newHolder::dataType of
+				Type::monster 	-> updateMonster newHolder game
+				Type::player 	-> updatePlayer newHolder game
+				Type::location 	-> updateLocation newHolder game
+				_ 				-> game
+
+
 ------------------------------------------------------------------------------------------------
 --Items and Locations
 ------------------------------------------------------------------------------------------------
@@ -211,6 +244,8 @@ monsterAttacksPlayer monster player game = damagePlayer (monster::attack) player
 --Mountains of Madness
 --18 	Rooms
 --19 	Connections
+
+--Baroque leit motiff?
 
 ------------------------------------------------------------------------------------------------
 --ASCII MAP
@@ -246,19 +281,28 @@ monsterAttacksPlayer monster player game = damagePlayer (monster::attack) player
 ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------
 
+acidTrapAction item holder recepient game = narratedGame
+	where
+		damagedPlayerGame 	= damagePlayer 25 player game
+		destroyedItemGame 	= eraseItemInHolder item holder damagedPlayerGame
+		narration 			= "As you go to pick it up, it explodes into a rain of acid, severely burning you." 
+		narratedGame 		= addNarration narration destroyedItemGame
+
 -- |dogCorpse 	=>Item
-dogCorpse 	= Item name description
+dogCorpse 		= Item name desc carry action
 	where
 		name 	= "DogCorpse"
 		desc 	= "A dessicated dog corpse. It appears to have been...dissected."
+		carry	= True
+		action 	= acidTrapAction
 
 -- |corpse2 	=>Item
-corpse 		= Item name description
+corpse 			= Item name desc
 	where
 		name 	= "Corpse"
 		desc 	= "A dessicated corpse. It appears to have been...dissected."
 
-corpse2 	= Item name description
+corpse2 		= Item name desc
 	where
 		name 	= "Corpse2"
 		desc 	= "A bloated corpse. It appears to have been...amputated."
@@ -396,16 +440,13 @@ underMurals 	= Location "UnderMurals" n s e w u d desc fDesc items mov
 		items 	= ("Mural2" => mural2)
 		mov 	= True
 
-gameLocations = finalDic
+gameLocations 	 = finalDic
 	where
-		locDic  = ("Camp"=>camp,"Mound"=>mound,"Mound2"=>mound2,"Mound3"=>mound3,"Mountains"=>mountains)
-		locDic2 = ("Ruins"=>ruins,"UnderRuins"=>underRuins,"Murals"=>murals,"UnderMurals"=>underMurals)
+		locDic   = ("Camp"=>camp,"Mound"=>mound,"Mound2"=>mound2,"Mound3"=>mound3,"Mountains"=>mountains)
+		locDic2  = ("Ruins"=>ruins,"UnderRuins"=>underRuins,"Murals"=>murals,"UnderMurals"=>underMurals)
 		finalDic =  locDic : locDic2
 
--- |demoGame => Game
-demoGame = initGame
-	where
-		player 	 = Player "casiosk1" 100 "Camp"
-		shoggoth = Monster "Shoggoth"
-		initGame = Game ("casiosk1"=>player) ("Shoggoth"=>shoggoth) gameLocations
+demoPlayer 		= Player "casiosk1" 100 "Camp"
+demoShoggoth 	= Monster "Shoggoth"
+demoGame 		= Game ("casiosk1"=>demoPlayer) ("Shoggoth"=>demoShoggoth) gameLocations
 
