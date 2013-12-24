@@ -77,12 +77,12 @@ data Cardinal {
 	down  = 5
 }
 
-north = Cardinal :: north
-south = Cardinal :: south
-east  = Cardinal :: east
-west  = Cardinal :: west
-up    = Cardinal :: up
-down  = Cardinal :: down
+north = Cardinal::north
+south = Cardinal::south
+east  = Cardinal::east
+west  = Cardinal::west
+up    = Cardinal::up
+down  = Cardinal::down
 
 ------------------------------------------------------------------------------------------------
 --Game Actions
@@ -158,29 +158,31 @@ pickupItemFromLocation item location player game =
 playerLocation player game = (game::locations) !! (player::location)
 
 -- |locationAtCardinal Cardinal Player Game => Location
-locationAtCardinal cardinal player game = 
-	case cardinal of
-		north -> ( playerLocation player game ) :: north
-		south -> ( playerLocation player game ) :: south
-		east  -> ( playerLocation player game ) :: east
-		west  -> ( playerLocation player game ) :: west
-		up    -> ( playerLocation player game ) :: up
-		down  -> ( playerLocation player game ) :: down
+locationAtCardinal cardinal player game = newLocation
+	where
+		oldLocation = playerLocation player game
+		newLocation =
+			case cardinal of
+				(Cardinal::north) -> getLocation (oldLocation :: north) game
+				(Cardinal::south) -> getLocation (oldLocation :: south) game
+				(Cardinal::east ) -> getLocation (oldLocation :: east ) game
+				(Cardinal::west ) -> getLocation (oldLocation :: west ) game
+				(Cardinal::up   ) -> getLocation (oldLocation :: up   ) game
+				(Cardinal::down ) -> getLocation (oldLocation :: down ) game
 
 -- |lookAtCardinal Cardinal Player Game => Game
 lookAtCardinal cardinal player game = addNarration description game
 	where
 		description = (locationAtCardinal cardinal player game) :: farDescription
 
-movePlayerToLocation location player game = 
-	if (getLocation location game) ::moveable
-		then updatePlayer player game
-		else addNarration "That way is blocked." game 
-
 -- |movePlayer Cardinal Player Game => Game
-movePlayer cardinal player game = movePlayerToLocation location player game
+movePlayer cardinal player game = 
+	if newLocation ::moveable
+		then updatePlayer newPlayer game
+		else addNarration "That way is blocked." game 
 	where
-		location = locationAtCardinal cardinal player game
+		newLocation 	= locationAtCardinal cardinal player game
+		newPlayer 		= player{location=newLocation::name}
 	
 -- |checkPlayerDeath Player Game => Game
 checkPlayerDeath player game = 
@@ -197,15 +199,6 @@ damagePlayer damage player game = checkPlayerDeath damagedPlayer newGame
 
 -- |monsterAttacksPlayer Monster Player Game => Game
 monsterAttacksPlayer monster player game = damagePlayer (monster::attack) player game
-
--- |demoGame => Game
-demoGame = gameWithMonster
-	where
-		player 	 = Player "casiosk1"
-		shoggoth = Monster "Shoggoth"
-		initGame = Game
-		gameWithPlayer = updatePlayer player initGame
-		gameWithMonster = updateMonster shoggoth gameWithPlayer
 
 ------------------------------------------------------------------------------------------------
 --Items and Locations
@@ -402,4 +395,17 @@ underMurals 	= Location "UnderMurals" n s e w u d desc fDesc items mov
 		fDesc 	= "It appears to be a portal leading deep underground."	
 		items 	= ("Mural2" => mural2)
 		mov 	= True
+
+gameLocations = finalDic
+	where
+		locDic  = ("Camp"=>camp,"Mound"=>mound,"Mound2"=>mound2,"Mound3"=>mound3,"Mountains"=>mountains)
+		locDic2 = ("Ruins"=>ruins,"UnderRuins"=>underRuins,"Murals"=>murals,"UnderMurals"=>underMurals)
+		finalDic =  locDic : locDic2
+
+-- |demoGame => Game
+demoGame = initGame
+	where
+		player 	 = Player "casiosk1" 100 "Camp"
+		shoggoth = Monster "Shoggoth"
+		initGame = Game ("casiosk1"=>player) ("Shoggoth"=>shoggoth) gameLocations
 
