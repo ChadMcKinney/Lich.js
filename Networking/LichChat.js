@@ -58,7 +58,7 @@ function showChat2()
 	if(fadeOut!=null)
 		clearTimeout(fadeOut);
 
-	fadeOut = setTimeout(hideChat,3500);
+	fadeOut = setTimeout(hideChat,4500);
 }
 
 function chatScroll()

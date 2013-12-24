@@ -59,10 +59,11 @@ function createTextArea(name,num,total)
 			nameTag.style.color = "rgb(166,48,48)";
 	}
 		
-	
+	input.style.opacity = "1.0";
 	input.style.top = (document.documentElement.clientHeight * 0.8 * (num/total)) + "px";
 	input.style.height = (document.documentElement.clientHeight * 0.8 * (1/total)) + "px";
 
+	nameTag.style.opacity = "0.75";
 	nameTag.style.top = (document.documentElement.clientHeight * 0.8 * (num/total)) + "px";
 	nameTag.style.height = (document.documentElement.clientHeight * 0.8 * (1/total)) + "px";
 }

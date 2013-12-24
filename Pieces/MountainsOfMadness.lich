@@ -7,11 +7,17 @@
 --See everyone's text fields, but translate enemy text fields into "lovecraftian" language
 --Fixed map, with randomized contents
 
+-- Low: 10 kb/s Med: 50 kb/s High: 200 kb/s
+
+--Story KEYS instead of STORY in demoGame object? Optimization for laterrrr
+
+--pooling data structure.
+
 ------------------------------------------------------------------------------------------------
 --Data Types
 ------------------------------------------------------------------------------------------------
 
-let nullAction receiver game = game{narration="That has no effect"}
+nullAction receiver game = game{narration="That has no effect"}
 
 data Item {
 	name  			= "Not an item.",
@@ -71,134 +77,128 @@ data Cardinal {
 	down  = 5
 }
 
-let north = Cardinal :: north
-let south = Cardinal :: south
-let east  = Cardinal :: east
-let west  = Cardinal :: west
-let up    = Cardinal :: up
-let down  = Cardinal :: down
+north = Cardinal::north
+south = Cardinal::south
+east  = Cardinal::east
+west  = Cardinal::west
+up    = Cardinal::up
+down  = Cardinal::down
 
 ------------------------------------------------------------------------------------------------
 --Game Actions
 ------------------------------------------------------------------------------------------------
 
 -- |addNarration String Game => Game
-let addNarration story game = game{narration = (game::narration)+"\n"+story}
+addNarration story game = game{narration = (game::narration)+"\n"+story}
 
 -- |placeItemAtLocation Item Location => Location
-let placeItemAtLocation item location = location {items = newItems}
+placeItemAtLocation item location = location {items = newItems}
 	where
 		newItems = ((item :: name) => item) : (location :: items)
 
 -- |removeItemFromLocation Item Location => Location
-let removeItemFromLocation item location = location{items = newItems}
+removeItemFromLocation item location = location{items = newItems}
 	where
 		newItems = delete (item::name) (location::items)
 
 -- |giveItemToPlayer Item Player => Player
-let giveItemToPlayer item player = player{items = newItems}
+giveItemToPlayer item player = player{items = newItems}
 	where
 		newItems = ((item::name) => item) : (player::items)
 
 -- |removeItemFromPlayer Item Player => Player
-let removeItemFromPlayer item player = player{items = newItems}
+removeItemFromPlayer item player = player{items = newItems}
 	where
 		newItems = delete (item::name) (player::items)
 
 -- |updateLocation Location Game => Game
-let updateLocation location game = game{locations = newLocations}
+updateLocation location game = game{locations = newLocations}
 	where
 		newLocations = ((location::name) => location) : (game::locations)
 
+getLocation locationName game = game::locations !! locationName
+
 -- |getPlayer String     Game => Player
-let getPlayer playerName game = (game :: players) !! playerName
+getPlayer playerName game = (game :: players) !! playerName
 
 -- |getMonster String     Game => Player
-let getMonster monsterName game = (game :: monsters) !! monsterName
+getMonster monsterName game = (game :: monsters) !! monsterName
 
 -- |updatePlayer Player Game => Game
-let updatePlayer player game = game{players = newPlayers}
+updatePlayer player game = game{players = newPlayers}
 	where
 		newPlayers = ((player::name) => player) : (game::players)
 
 -- |updateMonster Monster Game => Game
-let updateMonster monster game = game{monsters = newMonsters}
+updateMonster monster game = game{monsters = newMonsters}
 	where
 		newMonsters = (monster::name => monster) : (game::monsters)
 
 -- |moveItemFromPlayerToLocation Item Location Player Game => Game
-let moveItemFromPlayerToLocation item location player game = updatePlayer newPlayer newGame
+moveItemFromPlayerToLocation item location player game = updatePlayer newPlayer newGame
 	where
 		newLocation = placeItemAtLocation 	item location
 		newPlayer 	= removeItemFromPlayer 	item player
 		newGame		= updateLocation newLocation game
 
 -- |pickupCarryableItemFromLocation Item Location Player Game => Game
-let pickupCarryableItemFromLocation item location player game = updatePlayer newPlayer newGame
+pickupCarryableItemFromLocation item location player game = updatePlayer newPlayer newGame
 	where
 		newLocation = removeItemFromLocation item location
 		newPlayer 	= giveItemToPlayer 		 item player
 		newGame		= updateLocation newLocation game
 
 -- |pickupItemFromLocation Item Location Player Game => Game
-let pickupItemFromLocation item location player game = 
+pickupItemFromLocation item location player game = 
 	if item :: carryable
 		then pickupCarryableItemFromLocation item location player game
 		else game{narration="I can't carry that!"}
 
 -- |playerLocation Player Game => Location
-let playerLocation player game = (game::locations) !! (player::location)
+playerLocation player game = (game::locations) !! (player::location)
 
 -- |locationAtCardinal Cardinal Player Game => Location
-let locationAtCardinal cardinal player game = 
-	case cardinal of
-		north -> ( playerLocation player game ) :: north
-		south -> ( playerLocation player game ) :: south
-		east  -> ( playerLocation player game ) :: east
-		west  -> ( playerLocation player game ) :: west
-		up    -> ( playerLocation player game ) :: up
-		down  -> ( playerLocation player game ) :: down
+locationAtCardinal cardinal player game = newLocation
+	where
+		oldLocation = playerLocation player game
+		newLocation =
+			case cardinal of
+				(Cardinal::north) -> getLocation (oldLocation :: north) game
+				(Cardinal::south) -> getLocation (oldLocation :: south) game
+				(Cardinal::east ) -> getLocation (oldLocation :: east ) game
+				(Cardinal::west ) -> getLocation (oldLocation :: west ) game
+				(Cardinal::up   ) -> getLocation (oldLocation :: up   ) game
+				(Cardinal::down ) -> getLocation (oldLocation :: down ) game
 
 -- |lookAtCardinal Cardinal Player Game => Game
-let lookAtCardinal cardinal player game = addNarration description game
+lookAtCardinal cardinal player game = addNarration description game
 	where
 		description = (locationAtCardinal cardinal player game) :: farDescription
 
-let movePlayerResult moveAble player game = 
-	if moveAble
-		then updatePlayer player game
-		else addNarration "That way is blocked." game
-
 -- |movePlayer Cardinal Player Game => Game
-let movePlayer cardinal player game = movePlayerResult (locationAt::moveable) newPlayer game
+movePlayer cardinal player game = 
+	if newLocation ::moveable
+		then updatePlayer newPlayer game
+		else addNarration "That way is blocked." game 
 	where
-		locationAt 	= locationAtCardinal cardinal player game
-		newPlayer 	= player{location = (locationAt::name)}			
+		newLocation 	= locationAtCardinal cardinal player game
+		newPlayer 		= player{location=newLocation::name}
 	
 -- |checkPlayerDeath Player Game => Game
-let checkPlayerDeath player game = 
+checkPlayerDeath player game = 
 	if (player :: health) < 1
 		then (addNarration "You died." game){gameOver = True}
 		else game
 
 -- |damagePlayer Int Player Game => Game
-let damagePlayer damage player game = checkPlayerDeath damagedPlayer newGame
+damagePlayer damage player game = checkPlayerDeath damagedPlayer newGame
 	where
 		newHealth		= player::health - damage
 		damagedPlayer 	= player {health = newHealth}
 		newGame 		= updatePlayer damagedPlayer game
 
 -- |monsterAttacksPlayer Monster Player Game => Game
-let monsterAttacksPlayer monster player game = damagePlayer (monster::attack) player game
-
--- |demoGame => Game
-let demoGame = gameWithMonster
-	where
-		player 	 = Player "casiosk1"
-		shoggoth = Monster "Shoggoth"
-		initGame = Game
-		gameWithPlayer = updatePlayer player initGame
-		gameWithMonster = updateMonster shoggoth gameWithPlayer
+monsterAttacksPlayer monster player game = damagePlayer (monster::attack) player game
 
 ------------------------------------------------------------------------------------------------
 --Items and Locations
@@ -247,23 +247,23 @@ let demoGame = gameWithMonster
 ------------------------------------------------------------------------------------------------
 
 -- |dogCorpse 	=>Item
-let dogCorpse 	= Item name description
+dogCorpse 	= Item name description
 	where
 		name 	= "DogCorpse"
 		desc 	= "A dessicated dog corpse. It appears to have been...dissected."
 
 -- |corpse2 	=>Item
-let corpse 		= Item name description
+corpse 		= Item name description
 	where
 		name 	= "Corpse"
 		desc 	= "A dessicated corpse. It appears to have been...dissected."
 
-let corpse2 	= Item name description
+corpse2 	= Item name description
 	where
 		name 	= "Corpse2"
 		desc 	= "A bloated corpse. It appears to have been...amputated."
 
-let camp 		= Location "Camp" n s e w u d desc fDesc items mov
+camp 			= Location "Camp" n s e w u d desc fDesc items mov
 	where
 		n 		= "Mound"
 		s 		= "Nothing"
@@ -276,7 +276,7 @@ let camp 		= Location "Camp" n s e w u d desc fDesc items mov
 		items 	= ()
 		mov 	= True
 
-let mound 		= Location "Mound" n s e w u d desc fDesc items mov
+mound 		= Location "Mound" n s e w u d desc fDesc items mov
 	where
 		n 		= "Mountains"
 		s 		= "Camp"
@@ -289,7 +289,7 @@ let mound 		= Location "Mound" n s e w u d desc fDesc items mov
 		items 	= ("DogCorpse" => dogCorpse)
 		mov 	= True
 
-let mound2 		= Location "Mound2" n s e w u d desc fDesc items mov
+mound2  		= Location "Mound2" n s e w u d desc fDesc items mov
 	where
 		n 		= "Mound"
 		s 		= "Nothing"
@@ -302,7 +302,7 @@ let mound2 		= Location "Mound2" n s e w u d desc fDesc items mov
 		items 	= ("Corpse" => corpse)
 		mov 	= True
 
-let mound3 		= Location "Mound3" n s e w u d desc fDesc items mov
+mound3 			= Location "Mound3" n s e w u d desc fDesc items mov
 	where
 		n 		= "Mound"
 		s 		= "Nothing"
@@ -315,7 +315,7 @@ let mound3 		= Location "Mound3" n s e w u d desc fDesc items mov
 		items 	= ("Corpse2" => corpse2)
 		mov 	= True
 
-let mountain 	= Location "Mountains" n s e w u d desc fDesc items mov
+mountains 	 	= Location "Mountains" n s e w u d desc fDesc items mov
 	where
 		n 		= "Nothing"
 		s 		= "Mound"
@@ -328,7 +328,7 @@ let mountain 	= Location "Mountains" n s e w u d desc fDesc items mov
 		items 	= ()
 		mov 	= True	
 
-let ruins 		= Location "Ruins" n s e w u d desc fDesc items mov
+ruins 	 		= Location "Ruins" n s e w u d desc fDesc items mov
 	where
 		n 		= "Nothing"
 		s 		= "Nothing"
@@ -341,12 +341,12 @@ let ruins 		= Location "Ruins" n s e w u d desc fDesc items mov
 		items 	= ()
 		mov 	= True
 
-let carvings	= Item name description
+carvings 		= Item name description
 	where
 		name 	= "Carvings"
 		desc 	= "Ornate carvings which depict, minimally yet beautifully, a large underground city. On closer inspection strange creatures can be seen inhabiting the structures. They appear to be dissecting...or dining...on something."
 
-let underRuins 	= Location "UnderRuins" n s e w u d desc fDesc items mov
+underRuins 		= Location "UnderRuins" n s e w u d desc fDesc items mov
 	where
 		n 		= "CityEntrance"
 		s 		= "Nothing"
@@ -360,12 +360,12 @@ let underRuins 	= Location "UnderRuins" n s e w u d desc fDesc items mov
 		mov 	= True
 
 
-let mural 		= Item name description
+mural 	 		= Item name description
 	where
 		name 	= "Mural"
 		desc 	= "An intricately constructed mural, made of some kind of crystalline materia. Seems almost religious or iconic in nature. Depicts a vaugely orb shaped creature with a multitude of appendages and sub-orb like structures. It appears to be swallowing something...or perhaps talking to it?"
 
-let murals 		= Location "Murals" n s e w u d desc fDesc items mov
+murals 	 		= Location "Murals" n s e w u d desc fDesc items mov
 	where
 		n 		= "Nothing"
 		s 		= "Nothing"
@@ -378,12 +378,12 @@ let murals 		= Location "Murals" n s e w u d desc fDesc items mov
 		items 	= ("Mural" => mural)
 		mov 	= True
 
-let mural2 		= Item name description
+mural2  		= Item name description
 	where
 		name 	= "Mural2"
 		desc 	= ""
 
-let underMurals = Location "UnderMurals" n s e w u d desc fDesc items mov
+underMurals 	= Location "UnderMurals" n s e w u d desc fDesc items mov
 	where
 		n 		= "CityEntrance"
 		s 		= "Nothing"
@@ -395,4 +395,17 @@ let underMurals = Location "UnderMurals" n s e w u d desc fDesc items mov
 		fDesc 	= "It appears to be a portal leading deep underground."	
 		items 	= ("Mural2" => mural2)
 		mov 	= True
+
+gameLocations = finalDic
+	where
+		locDic  = ("Camp"=>camp,"Mound"=>mound,"Mound2"=>mound2,"Mound3"=>mound3,"Mountains"=>mountains)
+		locDic2 = ("Ruins"=>ruins,"UnderRuins"=>underRuins,"Murals"=>murals,"UnderMurals"=>underMurals)
+		finalDic =  locDic : locDic2
+
+-- |demoGame => Game
+demoGame = initGame
+	where
+		player 	 = Player "casiosk1" 100 "Camp"
+		shoggoth = Monster "Shoggoth"
+		initGame = Game ("casiosk1"=>player) ("Shoggoth"=>shoggoth) gameLocations
 
