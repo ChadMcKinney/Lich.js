@@ -59,7 +59,7 @@ Lich.parseLibrary = function(input) {
     if(typeof Lich.LibraryLexer === "undefined")
     {
       Lich.LibraryLexer = LichLibraryParser.lexer;
-      Lich.LibraryLexer.yy = LichParser.yy;
+      Lich.LibraryLexer.yy = LichLibraryParser.yy;
       Lich.LibraryLexer.EOF = 1; //End of File
 
       Lich.LibraryLexer.yy.parseError = function (str, hash) {
@@ -81,7 +81,14 @@ Lich.parseLibrary = function(input) {
     while(true)
     {
       token = Lich.LibraryLexer.lex();
-      // Lich.post("Lich.LibraryLexer.lex() = " + token.typ);
+
+      // Printing
+      /*
+      if(typeof token.val !== "undefined")
+        Lich.post("Lich.LibraryLexer.lex() = " + token.val);
+      else
+        Lich.post("Lich.LibraryLexer.lex() = " + token);*/
+
       if(token == Lich.LibraryLexer.EOF)
         break;
 
@@ -90,7 +97,7 @@ Lich.parseLibrary = function(input) {
 
     x.pop(); // Remove trailing EOF
 
-    var y = LibraryParser.preL(x);
+    var y = Lich.LibraryParser.preL(x);
     //Lich.post("Lich.Parser.preL(x) = " + y);
     
     return LichLibraryParser.parse(y);

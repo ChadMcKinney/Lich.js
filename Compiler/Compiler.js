@@ -167,6 +167,9 @@ Lich.compileAST = function(ast)
 				break;
 			case "data-enum":
 				return Lich.compileDataEnum(ast);
+				break;
+			case "topdecl-decl":
+				return Lich.compileTopdeclDecl(ast);
 				break;	
 			default:
 				Lich.unsupportedSemantics(ast);
@@ -187,17 +190,23 @@ Lich.unsupportedSemantics = function(ast)
 
 Lich.compileModule = function(ast)
 {
-	Lich.unsupportedSemantics(ast);
+	Lich.post("Compiling module: " + ast.modid);
+	Lich.compileAST(ast.body);
+	Lich.post("Done compiling module: " + ast.modid);
+	return Lich.VM.Void;
 }
 
 Lich.compileBody = function(ast)
 {
-	Lich.unsupportedSemantics(ast);
+	for(var i = 0; i < ast.topdecls.length; ++i)
+	{
+		Lich.compileAST(ast.topdecls[i]);
+	}
 }
 
 Lich.compileTopdeclDecl = function(ast)
 {
-	Lich.unsupportedSemantics(ast);
+	return Lich.compileAST(ast.decl);
 }
 
 Lich.compileTopdeclData = function(ast)

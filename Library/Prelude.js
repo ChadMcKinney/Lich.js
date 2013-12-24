@@ -1058,6 +1058,8 @@ createPrimitive("randomI", ["_L", "_U"], randI);
 // Constants
 Lich.VM.reserveVar("pi", 3.141592653589793);
 
+/*
 Soliton.print = Lich.post; // Set Soliton.print to our Lich.post function
 Soliton.printError = Lich.post; // Set Soliton.print to our Lich.post function
-LichVM.scheduler = Soliton.Clock.default.scheduler;
+Lich.scheduler = Soliton.Clock.default.scheduler;
+*/

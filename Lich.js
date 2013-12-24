@@ -319,9 +319,10 @@ function parseCurrentLine()
 
 	try
 	{
-		var res = Lich.parse(str);
-		// Lich.post(Lich.showAST(res));
-		Lich.VM.Print(Lich.compileAST(res));
+		var ast = Lich.parse(str); // interactive parsing
+		// var ast = Lich.parseLibrary(str); // For library parsing testing
+		// Lich.post(Lich.showAST(ast));
+		Lich.VM.Print(Lich.compileAST(ast));
 	}
 	
 	catch(e)

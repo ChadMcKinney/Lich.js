@@ -134,7 +134,8 @@ function compileLibClient(libName)
 function compileLibFromServer(libData)
 {
 	console.log("compiling from server");
-	Lich.parseLibrary(libData);	
+	var ast = Lich.parseLibrary(libData);
+	Lich.VM.Print(Lich.compileAST(ast));	
 }
 
 function connectToWebSocketServer()
