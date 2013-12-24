@@ -66,6 +66,10 @@ io.sockets.on('connection', function (socket) {
         socket.broadcast.emit('BroadcastCodeClient',data);
     });
 
+    socket.on('StateSync', function (state) {
+        io.sockets.emit('StateSyncClient',state);
+    });
+
     socket.on('Chat', function (data) {
         io.sockets.emit('ChatClient',data);
     });

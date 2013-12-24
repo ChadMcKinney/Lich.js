@@ -150,11 +150,21 @@ function connectToWebSocketServer()
 	socket.on('ChatClient', newChat);
 	socket.on('ReadFileClient',readFileDataFromServer);
 	socket.on('CompileLibClient',compileLibFromServer);
+	socket.on('StateSyncClient',receiveStateSync);
 	socket.emit('Login');
 	initChat();
 }
 
+function sendStateSync(state)
+{
+	console.log("sending state:\n"+state);
+	socket.emit("StateSync",state);
+}
 
+function receiveStateSync(state)
+{
+	console.log("Received state:\n"+state);
+}
 
 ////////////////////////////////////////////////////////////////////////
 // Cookies

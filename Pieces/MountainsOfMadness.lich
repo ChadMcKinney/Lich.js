@@ -7,6 +7,12 @@
 --See everyone's text fields, but translate enemy text fields into "lovecraftian" language
 --Fixed map, with randomized contents
 
+-- Low: 10 kb/s Med: 50 kb/s High: 200 kb/s
+
+--Story KEYS instead of STORY in demoGame object? Optimization for laterrrr
+
+--pooling data structure.
+
 ------------------------------------------------------------------------------------------------
 --Data Types
 ------------------------------------------------------------------------------------------------
@@ -315,7 +321,7 @@ let mound3 		= Location "Mound3" n s e w u d desc fDesc items mov
 		items 	= ("Corpse2" => corpse2)
 		mov 	= True
 
-let mountain 	= Location "Mountains" n s e w u d desc fDesc items mov
+let mountains 	= Location "Mountains" n s e w u d desc fDesc items mov
 	where
 		n 		= "Nothing"
 		s 		= "Mound"
