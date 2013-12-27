@@ -290,6 +290,18 @@ function oror()
 
 createPrimitive("||", ["_R", "_L"], oror);
 
+function not()
+{
+	var bool = Lich.VM.getVar("_B");
+
+	if(typeof bool !== "boolean")
+		throw new Error("The 'not' function can only be applied to booleans. Cannot use 'not' with: " + Lich.VM.PrettyPrint(bool));
+
+	return  !bool;
+}
+
+createPrimitive("not", ["_B"], not);
+
 function indexList()
 {
 	var list = Lich.VM.getVar("_L");
@@ -438,8 +450,8 @@ function insert()
 	var value = Lich.VM.getVar("_L");
 	var list = Lich.VM.getVar("_R");
 
-	if(!(list.lichType == DICTIONARY))
-		throw new Error("insert can only be applied to lists. Failed with: insert " + Lich.VM.PrettyPrint(value) + " " + Lich.VM.PrettyPrint(list));
+	if(!((list.lichType == DICTIONARY) && (value.lichType == DICTIONARY)))
+		throw new Error("insert can only be applied to dictionaries. Failed with: insert " + Lich.VM.PrettyPrint(value) + " " + Lich.VM.PrettyPrint(list));
 
 	var res = mergeDictionaries(list, value);
 	return typeof res === "undefined" ? Lich.VM.Nothing : res;
@@ -1187,6 +1199,31 @@ function sqrt()
 }
 
 createPrimitive("sqrt", ["_N"], sqrt);
+
+function printLich()
+{
+	var object = Lich.VM.getVar("_L");
+
+	Lich.VM.Print(object);
+	return Lich.VM.Void;
+}
+
+createPrimitive("print", ["_L"], printLich);
+
+/*
+function lichType()
+{
+	var object = Lich.VM.getVar("_O");
+
+	var typeOf = typeof object;
+
+	if(typeOf === "undefined")
+		return Lich.VM.namespace["Nothing"];
+	else if(typeOf === "number")
+		return Lich.VM.namespace["Num"];
+}
+
+createPrimitive("typeof", ["_O"], lichType);*/
 
 // Constants
 Lich.VM.reserveVar("pi", 3.141592653589793);

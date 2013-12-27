@@ -70,118 +70,114 @@ Lich.compileAST = function(ast)
 			{
 				case "primitive":
 					return ast();
-					break;
+					
 				case "thunk":
 					return Lich.compileDeclThunk(ast);
-					break
+
 				case "decl-fun":
 					return Lich.compileDeclFun(ast);
-					break;
+					
 				case "fun-where":
 					return Lich.compileFunWhere(ast);
-					break;
+					
 				case "ite":
 					return Lich.compileIte(ast);
-					break;
+					
 				case "application":
 					return Lich.compileApplication(ast);
-					break;
+					
 				case "function-application-op":
 					return Lich.compileFunctionApplicationOp(ast);
-					break;
+					
 				case "function-composition":
 					return Lich.compileFunctionComposition(ast);
 				case "lambda":
 					return Lich.compileLambda(ast);
-					break;
+					
 				case "let":
 					return Lich.compileLet(ast);
-					break;
+					
 				case "let-one": // ghci style let expression for global definitions
 					return Lich.compileLetOne(ast);
-					break;
+					
 				case "listexp":
 					return Lich.compileListExp(ast);
-					break;
+					
 				case "qop":
 					return Lich.compileQop(ast);
-					break;
+					
 				case "conpat":
 					return Lich.compileConPat(ast);
-					break;
+					
 				case "wildcard":
 					return { lichType: WILDCARD };
-					break;
+					
 				case "integer-lit":
-					return Lich.compileIntegerLit(ast);
-					break;
-				case "string-lit":
-					return Lich.compileStringLit(ast);
-					break;
 				case "char-lit":
-					return Lich.compileCharLit(ast);
-					break;
 				case "number":
 				case "float-lit":
-					return Lich.compileFloatLit(ast);
-					break;
+				case "boolean-lit":
+					return ast.value;
+
+				case "string-lit":
+					return ast.value.replace(/\"/g,""); // remove "" from string literal
+					
 				case "varname":
 					return Lich.compileVarName(ast);
-					break;
+					
 				case "dacon":
 					return Lich.compileDacon(ast);
-					break;
-				case "boolean-lit":
-					return Lich.compileBooleanLit(ast);
-					break;
+					
 				case "binop-exp":
 					return Lich.compileBinOpExp(ast);
-					break;
+					
 				case "negate":
 					return Lich.compileNegate(ast);
-					break;
+					
 				case "listrange":
 					return Lich.compileListRange(ast);
-					break;
+					
 				case "dictionary":
 					return Lich.compileDictionary(ast);
-					break;
+					
 				case "case":
 					return Lich.compileCase(ast);
-					break;
+					
 				case "Nothing":
 					return Lich.VM.Nothing;
-					break;
+					
 				case "list-comprehension":
 					return Lich.compileListComprehension(ast);
-					break;
+					
 				case "module":
 					return Lich.compileModule(ast);
-					break;
+					
 				case "body":
 					return Lich.compileBody(ast);
-					break;
+					
 				case "data-decl":
 					return Lich.compileDataDecl(ast);
-					break;
+					
 				case "data-inst":
 					return Lich.compileDataInst(ast);
-					break;
+					
 				case "data-lookup":
 					return Lich.compileDataLookup(ast);
-					break;
+					
 				case "data-update":
 					return Lich.compileDataUpdate(ast);
-					break;
+					
 				case "data-enum":
 					return Lich.compileDataEnum(ast);
-					break;
+					
+				case "data-match":
+					return Lich.compileDataMatch(ast);
+					
 				case "topdecl-decl":
 					return Lich.compileTopdeclDecl(ast);
-					break;	
+						
 				default:
-					Lich.unsupportedSemantics(ast);
-					break;
+					return Lich.unsupportedSemantics(ast);
 			}
 		}
 
@@ -201,6 +197,99 @@ Lich.compileAST = function(ast)
 Lich.unsupportedSemantics = function(ast)
 {
 	throw new Error("Unsupported semantics for " +ast+" with type "+ ast.astType);
+}
+
+Lich.getType = function(object)
+{
+	var type = typeof object;
+
+	if(type === "undefined")
+		return NOTHING;
+	else if(type === "number")
+		return NUMBER;
+	else if(type === "string")
+		return STRING;
+	else if(type === "object")
+		if(object instanceof Array)
+			return LIST;
+		else
+			throw new Error("uknown object: " + object);
+	else
+		return object.lichType;
+}
+
+Lich.dataMatch = function(object, pat)
+{
+	if(Lich.getType(object) != DATA)
+		return false;
+
+	if(object._datatype == pat.id)
+		return true;
+	else
+		return false;
+}
+
+Lich.match = function(object, pat)
+{
+	Lich.post("Lich.match pat.astType: " + pat.astType);
+	switch(pat.astType)
+	{
+	case "data-match":
+		if(Lich.dataMatch(object, pat))
+		{
+			for(var i = 0; i < pat.members.length; ++i)
+			{
+				Lich.VM.setVar(pat.members[i], object[object._argNames[i]]);
+			}
+
+			return true;
+		}
+		return false;
+
+	case "literal-match":
+		return object === Lich.compileAST(pat.value); // Prevent false positives with true/false
+
+	case "head-tail-match":
+		if(Lich.getType(object) == LIST)
+		{
+			var head = object.length >= 1 ? object[0] : Nothing;
+			var tail = object.slice(1, object.length);
+			Lich.VM.setVar(pat.head, head);
+			Lich.VM.setVar(pat.tail, tail);
+			return true;
+		}
+
+		else
+		{
+			return false;
+		}
+		break;
+
+	case "list-match":
+		if(Lich.getType(object) == LIST)
+		{
+			if(object.length == pat.list.length)
+			{
+				for(var i = 0; i < object.length; ++i)
+				{
+					Lich.VM.setVar(pat.list[i], object[i]);
+				}
+
+				return true;
+			}
+
+			return false;
+		}
+
+		return false;
+		break;
+
+	case "wildcard":
+		return true;
+
+	default:
+		return false;
+	}
 }
 
 Lich.compileModule = function(ast)
@@ -267,7 +356,7 @@ Lich.compileDeclThunk = function(ast)
 Lich.compileFunWhere = function(ast)
 {
 	// CHECK WHERE VARS AGAINST FUNC VARS!!!!!!!!!!??????????
-
+	// Currently the parser doesn't allow for this.
 	for(var i = 0; i < ast.decls.length; ++i)
 	{
 		ast.decls[i].astType = "thunk";
@@ -347,7 +436,7 @@ Lich.compileFunctionComposition = function(ast)
 		var func = Lich.compileAST(ast.exps[i]);
 
 		if(func.lichType != CLOSURE)
-			throw new Error("function composition can only be applied using: function . function");
+			throw new Error("function composition can only be applied using: function . function. Failed with " + Lich.VM.PrettyPrint(func));
 
 		funcs.push(func);
 	}
@@ -359,11 +448,6 @@ Lich.compileFunctionComposition = function(ast)
 Lich.compileLambda = function(ast)
 {
 	return new lichClosure(ast.args, ast.rhs);
-}
-
-Lich.compileLet = function(ast)
-{
-	Lich.unsupportedSemantics(ast);
 }
 
 Lich.compileLet = function(ast)
@@ -406,26 +490,6 @@ Lich.compileConPat = function(ast)
 Lich.compileWildCard = function(ast)
 {
 	Lich.unsupportedSemantics(ast);
-}
-
-Lich.compileIntegerLit = function(ast)
-{
-	return ast.value;
-}
-
-Lich.compileStringLit = function(ast)
-{
-	return ast.value.substring(1, ast.value.length - 1);
-}
-
-Lich.compileCharLit = function(ast)
-{
-	return ast.value.substring(1, ast.value.length - 1);
-}
-
-Lich.compileFloatLit = function(ast)
-{
-	return ast.value;
 }
 
 Lich.compileVarName = function(ast)
@@ -484,7 +548,7 @@ Lich.compileDataLookup = function(ast)
 	var data = Lich.compileAST(ast.data);
 
 	if(data.lichType != DATA)
-		throw new Error("Unable to find data constructor");
+		throw new Error("Unable to find data constructor. Failed with: " + ast.data + " :: " + ast.member);
 
 	var res = data[ast.member];
 
@@ -499,7 +563,7 @@ Lich.compileDataUpdate = function(ast)
 	var dataCon = Lich.compileAST(ast.data);
 
 	if(dataCon == Lich.VM.Nothing)
-		throw new Error("Unable to find data object for update");
+		throw new Error("Unable to find data object for update. Failed on update to " + ast.data);
 
 	var data = deepCopy(dataCon);
 
@@ -529,11 +593,6 @@ Lich.compileDataEnum = function(ast)
 	return data;
 }
 
-Lich.compileBooleanLit = function(ast)
-{
-	return ast.value;
-}
-
 Lich.compileBinOpExp = function(ast)
 {
 	var op = Lich.VM.getVar(ast.op); // Lookup function for operator
@@ -553,9 +612,10 @@ Lich.compileListRange = function(ast)
 {
 	var lower = Lich.compileAST(ast.lower);
 	var upper = Lich.compileAST(ast.upper);
+	var next;
 	var skip = 0;
 
-	if(typeof ast.skip == "undefined")
+	if(typeof ast.skip === "undefined")
 	{
 		if(lower < upper)
 			skip = 1;
@@ -565,11 +625,24 @@ Lich.compileListRange = function(ast)
 	
 	else
 	{
-		skip = Lich.compileAST(ast.skip) - lower;
+		next = Lich.compileAST(ast.skip);
+		skip = next - lower;
 	}
 
-	if(typeof lower !== "number" || typeof skip !== "number" || typeof skip !== "number")
-		throw new Error("List range syntax can only be used with numbers.");
+	if(typeof lower !== "number" || typeof skip !== "number" || typeof upper !== "number")
+	{
+		if(typeof ast.skip === "undefined")
+		{
+			throw new Error("List range syntax can only be used with numbers. failed with: " 
+				+ Lich.VM.PrettyPrint(lower) + ".." + Lich.VM.PrettyPrint(upper));
+		}
+
+		else
+		{
+			throw new Error("List range syntax can only be used with numbers. failed with: " 
+				+ Lich.VM.PrettyPrint(lower) + "," + Lich.VM.PrettyPrint(next) + ".." + Lich.VM.PrettyPrint(upper));
+		}
+	}
 
 	var array = new Array();
 
@@ -609,15 +682,22 @@ Lich.compileDictionary = function(ast)
 Lich.compileCase = function(ast)
 {
 	var exp = Lich.compileAST(ast.exp);
+	var closure = new lichClosure([], {}, false, {});
+	Lich.VM.pushProcedure(closure);
 
 	for(var i = 0; i < ast.alts.length; ++i)
 	{
-		var pat = Lich.compileAST(ast.alts[i].pat);
-
-		if(pat.lichType == WILDCARD || pat == exp)
-			return Lich.compileAST(ast.alts[i].exp);
+		// var pat = Lich.compileAST(ast.alts[i].pat);
+		var pat = ast.alts[i].pat;
+		if(pat.lichType == WILDCARD || Lich.match(exp, pat))
+		{
+			var res = Lich.compileAST(ast.alts[i].exp);
+			Lich.VM.popProcedure();
+			return res;
+		}
 	}
 
+	Lich.VM.popProcedure();
 	return Lich.VM.Nothing;
 }
 
@@ -644,7 +724,8 @@ Lich.compileListComprehension = function(ast)
 			var list = Lich.compileAST(ast.generators[i].rhs);
 
 			if(!(list instanceof Array))
-				throw new Error("List comprehensions can only be created with list generators and boolean expressions such as: [x | x <- [1..9], x /= 3]");
+				throw new Error("List comprehensions can only be created with list generators and boolean expressions such as: [x | x <- [1..9], x /= 3]"
+					+ ". Failed when compiling a generator from: " + Lich.VM.PrettyPrint(list));
 
 			generatorScope[ast.generators[i].ident] = list;
 			generatorLoop.push(ast.generators[i].ident);

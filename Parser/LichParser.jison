@@ -13,23 +13,16 @@
 
 /* lexical grammar */
 %lex
+
+%x comment
+
 %%
 
-/*
-whitespace = w:( whitestuff )+ {return {val: w.join("")}}
-whitestuff = ( whitechar / comment / ncomment )
-whitechar = ( newline / vertab / space / tab ) 
-newline =  ( return linefeed / linefeed / formfeed )
-return = "\r"
-linefeed = "\n"
-vertab = "\v"
-formfeed = "\f"
-space = " "
-tab = "\t"
-*/
-
-
-"--".*|"{-".*"-}"       {/* skip whitespace and comments */}
+"{-"                        this.begin('comment');
+<comment>"-}"               this.begin('INITIAL');
+<comment>[^\n]+             {}// eat comment in chunks
+<comment>\n                 yylineno++;
+"--".*                      {/* skip whitespace and comments */}
 \s+                         return {val:yytext};
 ("-")?[0-9]+("."[0-9]+)?    return {val:yytext,typ:"float"};
 "::"                        return {val:"::",typ:"::"};
@@ -102,7 +95,7 @@ tab = "\t"
 "Nothing"                   return {val:"Nothing",typ:"Nothing"};
 [a-z][A-Za-z0-9_]*          return {val:yytext,typ:"varid"};
 [A-Z][A-Za-z0-9_]*          return {val:yytext,typ:"conid"};
-\"([^\"])*\"                return {val:yytext,typ:"string"};
+\"([^\"])*\"                return {val:yytext,typ:"string-lit"};
 \'(!\')?\'                  return {val:yytext,typ:"char"};
 ["!""#""$""&"".""<"">""=""?""@""\\""|""~"]+     return {val:yytext,typ:"varsym"};
 ":"["!""#""$""&"".""<"">""=""?""@""\\""|""~"]*  return {val:yytext,typ:"consym"};
@@ -484,7 +477,11 @@ aexp // : object
   | "(" "<" ")"             {{ $$ = new Lich.VarName($2, @$, true, yy.lexer.previous.qual);}}
   | "(" ">=" ")"            {{ $$ = new Lich.VarName($2, @$, true, yy.lexer.previous.qual);}}
   | "(" "<=" ")"            {{ $$ = new Lich.VarName($2, @$, true, yy.lexer.previous.qual);}}
-  | "Nothing"               {{$$ = {astType: "Nothing"};}}
+  | nothing                 {{$$ = $1;}}
+  ;
+
+nothing 
+  : "Nothing"               {{$$ = {astType: "Nothing"};}}
   ;
 
 dictexp
@@ -636,7 +633,14 @@ gcon // : object
     | "[" "]"               {{$$ = new Lich.NilDaCon(@$);}}
     | "(" list_1_comma ")"  {{$$ = new Lich.TupleDaCon($2 + 1, @$);}}
     | qcon                  {{$$ = $1;}}
+    | conid                 {{$$ = {astType:"data-match", id: $2, members: $3};}}
+    | "(" conid conlist ")" {{$$ = {astType:"data-match", id: $2, members: $3};}}
     ;
+
+conlist
+  : conlist pat_var   {{$1.push($2); $$ = $1;}}
+  | pat_var           {{$$ = [$1];}}
+  ;
 
 list_1_comma // : integer
     : ","                {{$$ = 1;}}
@@ -665,9 +669,7 @@ gconsym // : object
 // 3.17 Pattern Matching
 
 pat // : object
-    // : lpat             {{$$ = $1;}}
-    : exp                 {{$$ = $1;}}
-    | "_"                 {{$$ = {astType:"wildcard", pos: @$}; }}
+    : lpat                  {{$$ = $1;}}
     // TODO: incomplete
     ;
 
@@ -684,14 +686,35 @@ apats // : [apat]
     ;
 
 apat // : object
-    : var                 {{$$ = $1; }}
-    | gcon                {{$$ = $1; }}
-    | literal             {{$$ = $1; }}
-    | '_'                 {{$$ = {astType:"wildcard", pos: @$}; }}
-    | tuple_pat           {{$$ = $1; }}
-    | "(" pat ")"         {{$$ = $2; }}
-    | "(" datalookup ")"  {{$$ = $1; }}
+    : var                   {{$$ = $1; }}
+    | nothing               {{$$ = $1; }}
+    | gcon                  {{$$ = $1; }}
+    | literal               {{$$ = {astType:"literal-match", value:$1, pos: @$}; }}
+    | wildcard              {{$$ = $1;}}
+    //| tuple_pat           {{$$ = $1; }}
+    | "(" pat ")"           {{$$ = $2; }}
+    | varid ":" varid       {{$$ = {astType:"head-tail-match", head:$1,tail:$3};}}
+    | list_pat              {{$$ = $1;}}
+    //| "(" datalookup ")"  {{$$ = $1; }}
     ;
+
+list_pat // object
+    : "[" list_1_comma "]"  {{$$ = {astType:"list-match", list:$2}; }}
+    ;
+    
+list_1_comma // : [pat]
+    : list_1_comma "," pat_var          {{$1.push($3); $$ = $1; }}
+    | pat_var                           {{$$ = [$1]; }}
+    ;
+
+pat_var
+  : varid         {{$$ = $1;}}
+  | wildcard      {{$$ = $1;}}
+  ;
+
+wildcard
+  : '_'           {{$$ = {astType:"wildcard", pos: @$}; }}
+  ;
 
 tuple_pat // object
     :  "(" pat "," pat_list_1_comma ")" {{$4.unshift($2); $$ = {astType: "tuple_pat", members: $4, pos: @$}; }}
@@ -707,7 +730,7 @@ pat_list_1_comma // : [pat]
 
 literal  // : object
     : integer {{$$ = {astType: "integer-lit", value: Number($1), pos: @$};}}
-    | string {{$$ = {astType: "string-lit", value: $1, pos: @$};}}
+    | string-lit {{$$ = {astType: "string-lit", value: $1, pos: @$};}}
     | char {{$$ = {astType: "char-lit", value: $1, pos: @$};}}
     | float {{$$ = {astType: "float-lit", value: Number($1), pos: @$};}}
     | True {{$$ = {astType: "boolean-lit", value: true, pos: @$};}}

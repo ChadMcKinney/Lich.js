@@ -3,6 +3,11 @@
 //////////////////////////////
 
 
+//////////////////////
+// Queue for compiling
+Will need to implement a queue for compiling commands. Once this becomes networked it's possible commands may try to be compiled in tandem, and espcially if an error is thrown during one of them it could create very bad problems. Using a queue, commands are added to it and the compiler runs on one command at a time in the queue until it's worked through the entire queue. 
+
+
 // List comprehensions work! They're a little bit different than haskell in that the filters are collected up front and called on each item. Examples:
 
 [x | x <- [1..9]] -- returns [1,2,3,4,5,6,7,8,9]
@@ -23,6 +28,9 @@ let q = x / pi -- returns 10.822536130248883
 
 
 make (:: exp) useful for partial application
+? existential argument
+
+cave = bear ? otherBear -- Checks if Bear is nothing, returns if not, otherwise returns otherBear
 
 
 // More prelude functions!
