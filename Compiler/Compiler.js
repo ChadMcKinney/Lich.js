@@ -117,10 +117,8 @@ Lich.compileAST = function(ast)
 				case "number":
 				case "float-lit":
 				case "boolean-lit":
-					return ast.value;
-
 				case "string-lit":
-					return ast.value.replace(/\"/g,""); // remove "" from string literal
+					return ast.value;
 					
 				case "varname":
 					return Lich.compileVarName(ast);
@@ -181,6 +179,11 @@ Lich.compileAST = function(ast)
 			}
 		}
 
+		else if(typeof ast === "undefined")
+		{
+			return Lich.VM.Nothing;
+		}
+
 		else
 		{
 			Lich.post("Unknown AST Type: " + (typeof ast));
@@ -203,19 +206,19 @@ Lich.getType = function(object)
 {
 	var type = typeof object;
 
-	if(type === "undefined")
+	if(object instanceof Array)
+		return LIST;
+	else if(type === "undefined")
 		return NOTHING;
 	else if(type === "number")
 		return NUMBER;
 	else if(type === "string")
 		return STRING;
-	else if(type === "object")
-		if(object instanceof Array)
-			return LIST;
-		else
-			throw new Error("uknown object: " + object);
-	else
+	else if(object.lichType !== "undefined")
 		return object.lichType;
+	else
+		throw new Error("uknown object: " + object);
+	
 }
 
 Lich.dataMatch = function(object, pat)
@@ -231,14 +234,19 @@ Lich.dataMatch = function(object, pat)
 
 Lich.match = function(object, pat)
 {
-	Lich.post("Lich.match pat.astType: " + pat.astType);
 	switch(pat.astType)
 	{
+	case "Nothing":
+		if(object.lichType == NOTHING)
+			return true;
+		else
+			return false;
+
 	case "data-match":
 		if(Lich.dataMatch(object, pat))
 		{
 			for(var i = 0; i < pat.members.length; ++i)
-			{
+			{	
 				Lich.VM.setVar(pat.members[i], object[object._argNames[i]]);
 			}
 
@@ -247,7 +255,7 @@ Lich.match = function(object, pat)
 		return false;
 
 	case "literal-match":
-		return object === Lich.compileAST(pat.value); // Prevent false positives with true/false
+		return object === pat.value.value; // Prevent false positives with true/false
 
 	case "head-tail-match":
 		if(Lich.getType(object) == LIST)
@@ -258,12 +266,8 @@ Lich.match = function(object, pat)
 			Lich.VM.setVar(pat.tail, tail);
 			return true;
 		}
+		return false;
 
-		else
-		{
-			return false;
-		}
-		break;
 
 	case "list-match":
 		if(Lich.getType(object) == LIST)
@@ -274,15 +278,11 @@ Lich.match = function(object, pat)
 				{
 					Lich.VM.setVar(pat.list[i], object[i]);
 				}
-
 				return true;
 			}
-
 			return false;
 		}
-
 		return false;
-		break;
 
 	case "wildcard":
 		return true;
@@ -322,9 +322,15 @@ Lich.compileDeclFun = function(ast)
 {
 	if(ast.args.length == 0)
 	{
+		/*
 		var res = Lich.compileAST(ast.rhs);
 		Lich.VM.setVar(ast.ident, res);
 		return res;
+		*/
+		var thunk = new lichClosure([], ast.rhs);
+		Lich.VM.setVar(ast.ident, thunk);
+		thunk.lichType = THUNK;
+		return thunk;
 	}
 
 	else
@@ -577,16 +583,13 @@ Lich.compileDataUpdate = function(ast)
 
 Lich.compileDataEnum = function(ast)
 {
-	var data = {
-		_argNames: new Array(),
-		_datatype: ast.id,
-		lichType: DATA
-	}
+	var data = lichData(ast.id);
 
 	for(var i = 0; i < ast.members.length; ++i)
 	{
 		data._argNames.push(ast.members[i]);
-		data[ast.members[i]] = i;
+		data[ast.members[i]] = lichData(ast.members[i]);
+		Lich.VM.setVar(ast.members[i], data[ast.members[i]]);
 	}
 
 	Lich.VM.setVar(ast.id, data);

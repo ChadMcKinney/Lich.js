@@ -198,7 +198,8 @@ createPrimitive("mod", ["_L", "_R"], mod);
 
 function equivalent()
 {
-	return Lich.VM.getVar("_L") == Lich.VM.getVar("_R");
+	Lich.post(Lich.VM.getVar("_L") + " === " + Lich.VM.getVar("_R"));
+	return Lich.VM.getVar("_L") === Lich.VM.getVar("_R");
 }
 
 createPrimitive("==", ["_L", "_R"], equivalent);
@@ -1209,6 +1210,14 @@ function printLich()
 }
 
 createPrimitive("print", ["_L"], printLich);
+
+function showLich()
+{
+	var object = Lich.VM.getVar("_L");
+	return Lich.VM.PrettyPrint(object);
+}
+
+createPrimitive("show", ["_L"], showLich);
 
 /*
 function lichType()

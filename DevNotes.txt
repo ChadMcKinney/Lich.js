@@ -3,6 +3,45 @@
 //////////////////////////////
 
 
+
+//////////////////////////////////////////
+// Pattern matching is beginning to work
+
+data Monster { says = "howl" }
+data Species = Hydra | Gorgon | Unspeakable | MindFlay
+
+let m = Monster
+let n = Monster "slither"
+let h = Hydra
+let g = Gorgon
+
+let pattern p = case p of
+    Nothing             -> "Nothing to see here."
+    1                   -> "One is the loneliest number."
+    666                 -> "Hail satan."
+    3.14                -> "Dessert."
+    (Monster says)      -> "Monster says " + says
+    "string"            -> "This is not."
+    [x,y,z]             -> "x: " + x + ", y: " + y + ", z: " + z
+    (x:xs)              -> "x: " + x + ", xs: " + (show xs)
+    Hydra               -> "Cut off all the heads!"
+    Gorgon              -> "Shield your eyes!"
+    _                   -> "Anything goes."
+
+pattern n
+
+data Coordinate = North | East | South | West
+
+let c = East
+
+case c of
+    North    -> "North!"
+    East     -> "East!"
+    South    -> "South!"
+    West     -> "West!"
+
+
+
 //////////////////////
 // Queue for compiling
 Will need to implement a queue for compiling commands. Once this becomes networked it's possible commands may try to be compiled in tandem, and espcially if an error is thrown during one of them it could create very bad problems. Using a queue, commands are added to it and the compiler runs on one command at a time in the queue until it's worked through the entire queue. 

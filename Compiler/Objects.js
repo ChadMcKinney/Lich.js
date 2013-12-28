@@ -59,6 +59,15 @@ function LichNothing()
 	this.value = null;
 }
 
+function lichData(name)
+{
+	return {
+		_argNames: new Array(),
+		_datatype: name,
+		lichType: DATA
+	}
+}
+
 function lichClosure(argNames, rhs, mutable, namespace, decls)
 {
 	var _argNames = argNames;

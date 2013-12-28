@@ -206,7 +206,7 @@ topdecls_nonempty // : [topdecl]
 /* 4 Declarations and Bindings */
 
 topdecl // : object
-    : decl                          {{$$ = {astType: "topdecl-decl", decl: $1, pos: @$};}}
+    : decl                    {{$$ = {astType: "topdecl-decl", decl: $1, pos: @$};}}
     | impdecl                       {{$$ = $1;}}
     | dataexp                       {{$$ = $1;}}
     ;
@@ -230,8 +230,8 @@ list_decl_comma_1 // : [decl]
 //  | gendecl
 //  ;
 decl // : object
-  : decl_fixity           {{$$ = $1;}}
-  | var rhs           {{$$ = {astType:"decl-fun", ident: $1, args: [], rhs: $2, pos: @$};}}
+  //: decl_fixity           {{$$ = $1;}}
+  : var rhs           {{$$ = {astType:"decl-fun", ident: $1, args: [], rhs: $2, pos: @$};}}
   | var apats rhs     {{$$ = {astType:"decl-fun", ident: $1, args: $2, rhs: $3, pos: @$};}}
   | pat varop pat rhs {{$$ = {astType:"decl-fun", ident: $2, args: [$1,$3], rhs: $4, pos: @$, orig: "infix"};}}
   | '(' pat varop pat ')' apats rhs
@@ -454,7 +454,6 @@ aexp // : object
   | "(" exp ")"             {{$$ = $2;}}
   | '(' '-' exp ')'         {{$$ = {astType:"negate",rhs:$3};}}
   | dictexp                 {{$$ = $1;}}
-  | tuple                   {{$$ = $1;}}
   | listexp                 {{$$ = $1;}}
   | "(" "+" aexp ")"        {{ $$ = {astType:"application", exps:[new Lich.VarName($2, @$, true, yy.lexer.previous.qual),$3],pos:@$};}}
   | "(" "*" aexp ")"        {{ $$ = {astType:"application", exps:[new Lich.VarName($2, @$, true, yy.lexer.previous.qual),$3],pos:@$};}}
@@ -616,8 +615,8 @@ tyvars // : [TyVar]
 
 // non-qualified data constructor id (or symbol in parentheses) name
 con // : Lich.DaCon
-    //: conid              {{$$ = new Lich.DaCon($1, @$, false);}}
-    : '(' consym ')'     {{$$ = new Lich.DaCon($2, @$, true);}}
+    : conid              {{$$ = new Lich.VarName($1, @$, false);}}
+    | '(' consym ')'     {{$$ = new Lich.DaCon($2, @$, true);}}
     ;
 
 // optionally qualified data constructor id (or symbol in parentheses) name
@@ -633,8 +632,6 @@ gcon // : object
     | "[" "]"               {{$$ = new Lich.NilDaCon(@$);}}
     | "(" list_1_comma ")"  {{$$ = new Lich.TupleDaCon($2 + 1, @$);}}
     | qcon                  {{$$ = $1;}}
-    | conid                 {{$$ = {astType:"data-match", id: $2, members: $3};}}
-    | "(" conid conlist ")" {{$$ = {astType:"data-match", id: $2, members: $3};}}
     ;
 
 conlist
@@ -696,14 +693,16 @@ apat // : object
     | varid ":" varid       {{$$ = {astType:"head-tail-match", head:$1,tail:$3};}}
     | list_pat              {{$$ = $1;}}
     //| "(" datalookup ")"  {{$$ = $1; }}
+    | conid                 {{$$ = {astType:"data-match", id: $1, members: []};}}
+    | "(" conid conlist ")" {{$$ = {astType:"data-match", id: $2, members: $3};}}
     ;
 
 list_pat // object
-    : "[" list_1_comma "]"  {{$$ = {astType:"list-match", list:$2}; }}
+    : "[" list_pat_1_comma "]"  {{$$ = {astType:"list-match", list:$2}; }}
     ;
     
-list_1_comma // : [pat]
-    : list_1_comma "," pat_var          {{$1.push($3); $$ = $1; }}
+list_pat_1_comma // : [pat]
+    : list_pat_1_comma "," pat_var          {{$1.push($3); $$ = $1; }}
     | pat_var                           {{$$ = [$1]; }}
     ;
 
@@ -730,7 +729,7 @@ pat_list_1_comma // : [pat]
 
 literal  // : object
     : integer {{$$ = {astType: "integer-lit", value: Number($1), pos: @$};}}
-    | string-lit {{$$ = {astType: "string-lit", value: $1, pos: @$};}}
+    | string-lit {{$$ = {astType: "string-lit", value: ($1).replace(/\"/g,""), pos: @$};}}
     | char {{$$ = {astType: "char-lit", value: $1, pos: @$};}}
     | float {{$$ = {astType: "float-lit", value: Number($1), pos: @$};}}
     | True {{$$ = {astType: "boolean-lit", value: true, pos: @$};}}
