@@ -40,6 +40,64 @@
 // next we use the create primitive function to actually add it to the VM using these arguments:
 // createPrimitive("primitiveName", ["Array","Of","Argument","Names"], primitiveFunction);
 
+function netEval()
+{
+	var str = Lich.VM.getVar("_R");	
+
+	if(!(typeof str === "string"))
+		throw new Error("netEval can only be applied to a string!");
+
+	broadcastNetEval(str);
+	
+}
+createPrimitive("netEval", ["_R"], netEval);
+
+function lichEval()
+{
+	var str = Lich.VM.getVar("_R");	
+
+	if(!(typeof str === "string"))
+		throw new Error("eval can only be applied to a string!");
+	try
+    {
+    	var res = Lich.parse(str);
+        //Lich.VM.Print(L);
+        return Lich.compileAST(res);
+    }   
+    catch(e)
+    {
+		Lich.post(e);
+		return Lich.VM.Void;
+	}
+}
+
+createPrimitive("eval", ["_R"], lichEval);
+
+function lichPrint()
+{
+	var printString = Lich.VM.getVar("_R");	
+
+	//if(!(typeof printString === "string" || typeof printString === "number"))
+	//	throw new Error("print can only be applied to a string or a number!\nAttempted to print object of type: " + (typeof printString) + " . Value of the object is: " + printString);
+
+	Lich.VM.PrettyPrint(printString);
+
+	return printString;
+}
+createPrimitive("print", ["_R"], lichPrint);
+
+
+function lichClientName()
+{
+	var printString = Lich.VM.getVar("_R");
+	return clientName;
+}
+
+createPrimitive("clientName", ["_R"], lichClientName);
+
+//Lich.VM.reserveVar("clientName", lichClientName);
+
+
 function stateSync()
 {
 	var state = Lich.VM.getVar("_R");	
@@ -59,14 +117,14 @@ function compileLib()
 	var libName = Lich.VM.getVar("_R");	
 
 	if(!(typeof libName === "string"))
-		throw new Error("compileLib can only be applied to a string!");
+		throw new Error("compile can only be applied to a string!");
 
 	compileLibClient(libName);
 
 	return Lich.VM.Void;
 }
 
-createPrimitive("compileLib", ["_R"], compileLib);
+createPrimitive("compile", ["_R"], compileLib);
 
 function load()
 {

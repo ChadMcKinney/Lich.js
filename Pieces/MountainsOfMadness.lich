@@ -450,3 +450,19 @@ demoPlayer 		= Player "casiosk1" 100 "Camp"
 demoShoggoth 	= Monster "Shoggoth"
 demoGame 		= Game ("casiosk1"=>demoPlayer) ("Shoggoth"=>demoShoggoth) gameLocations
 
+myName = (clientName 0)
+
+startMountainsOfMadness playerName = newGame
+	where
+		newPlayer 	= Player playerName 100 "Camp"
+		newGame 	= Game (playerName=>newPlayer) () gameLocations
+
+walk cardinal =
+	if serverGame /= Nothing
+		then movePlayer cardinal (getPlayer myName serverGame) serverGame
+		else Nothing
+
+look cardinal =
+	if serverGame /= Nothing
+		then lookAtCardinal cardinal (getPlayer myName serverGame) serverGame
+		else Nothing

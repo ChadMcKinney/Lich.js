@@ -66,6 +66,10 @@ io.sockets.on('connection', function (socket) {
         socket.broadcast.emit('BroadcastCodeClient',data);
     });
 
+    socket.on('BroadcastNetEval', function (data) {
+        io.sockets.emit('BroadcastCodeClient',data);
+    });
+
     socket.on('StateSync', function (state) {
         io.sockets.emit('StateSyncClient',state);
     });
@@ -196,5 +200,7 @@ function remove(arr, item) {
         }
     }
 }
+
+
 
 console.log("Server running on port:" + port);

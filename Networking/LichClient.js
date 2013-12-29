@@ -11,6 +11,12 @@ function broadcastLichCode(code)
 	socket.emit('BroadcastCode',code);
 }
 
+function broadcastNetEval(code)
+{
+	console.log("Sending Code:" + code);
+	socket.emit('BroadcastNetEval',code);
+}
+
 function broadcastTyping(text)
 {
 	console.log("Sending Typing: " + text);
