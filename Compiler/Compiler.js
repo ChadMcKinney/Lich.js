@@ -322,15 +322,9 @@ Lich.compileDeclFun = function(ast)
 {
 	if(ast.args.length == 0)
 	{
-		/*
 		var res = Lich.compileAST(ast.rhs);
 		Lich.VM.setVar(ast.ident, res);
 		return res;
-		*/
-		var thunk = new lichClosure([], ast.rhs);
-		Lich.VM.setVar(ast.ident, thunk);
-		thunk.lichType = THUNK;
-		return thunk;
 	}
 
 	else

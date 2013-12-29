@@ -225,12 +225,3 @@ myGuard x
 Multi-line compiling with let declarations doesn't parse. For example compiling these two together:
 let one = 1
 let two = 2
-
-
-//////////////////////////////
-// Let In Statements
-// Dec 17, 2013
-
-Let In statements don't parse. Example:
-
-let x = 20 in x + y
