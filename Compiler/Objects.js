@@ -43,6 +43,9 @@ var DICTIONARY = 3;
 var THUNK = 4;
 var WILDCARD = 5;
 var DATA = 6;
+var NUMBER = 7;
+var STRING = 8;
+var LIST = 9;
 
 function LichVoid() // Non-return value for the VM. 
 {
@@ -54,6 +57,15 @@ function LichNothing()
 {
 	this.lichType = NOTHING;
 	this.value = null;
+}
+
+function lichData(name)
+{
+	return {
+		_argNames: new Array(),
+		_datatype: name,
+		lichType: DATA
+	}
 }
 
 function lichClosure(argNames, rhs, mutable, namespace, decls)

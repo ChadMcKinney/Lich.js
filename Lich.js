@@ -6864,5 +6864,31 @@ function compileLich()
 
 function compileLich()
 {
-	// COMPILE THE DEFAULT LIBRARY HERE!
+	try
+	{
+		var oRequest = new XMLHttpRequest();
+		var sURL = "http://"
+		         + self.location.hostname
+		         + "/Library/Prelude.lich";
+
+		oRequest.open("GET",sURL,false);
+		//oRequest.setRequestHeader("User-Agent",navigator.userAgent);
+		oRequest.send(null)
+
+		if(oRequest.status == 200)
+		{
+			var ast = Lich.parseLibrary(oRequest.responseText); // For library parsing testing
+			Lich.VM.Print(Lich.compileAST(ast));
+		}
+		
+		else 
+		{
+			Lich.post("Unable to load Prelude module.");
+		}	
+	}
+	
+	catch(e)
+	{
+		Lich.post(e);
+	}
 }

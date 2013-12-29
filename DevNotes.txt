@@ -3,6 +3,50 @@
 //////////////////////////////
 
 
+
+//////////////////////////////////////////
+// Pattern matching is beginning to work
+
+data Monster { says = "howl" }
+data Species = Hydra | Gorgon | Unspeakable | MindFlay
+
+let m = Monster
+let n = Monster "slither"
+let h = Hydra
+let g = Gorgon
+
+let pattern p = case p of
+    Nothing             -> "Nothing to see here."
+    1                   -> "One is the loneliest number."
+    666                 -> "Hail satan."
+    3.14                -> "Dessert."
+    (Monster says)      -> "Monster says " + says
+    "string"            -> "This is not."
+    [x,y,z]             -> "x: " + x + ", y: " + y + ", z: " + z
+    (x:xs)              -> "x: " + x + ", xs: " + (show xs)
+    Hydra               -> "Cut off all the heads!"
+    Gorgon              -> "Shield your eyes!"
+    _                   -> "Anything goes."
+
+pattern n
+
+data Coordinate = North | East | South | West
+
+let c = East
+
+case c of
+    North    -> "North!"
+    East     -> "East!"
+    South    -> "South!"
+    West     -> "West!"
+
+
+
+//////////////////////
+// Queue for compiling
+Will need to implement a queue for compiling commands. Once this becomes networked it's possible commands may try to be compiled in tandem, and espcially if an error is thrown during one of them it could create very bad problems. Using a queue, commands are added to it and the compiler runs on one command at a time in the queue until it's worked through the entire queue. 
+
+
 // List comprehensions work! They're a little bit different than haskell in that the filters are collected up front and called on each item. Examples:
 
 [x | x <- [1..9]] -- returns [1,2,3,4,5,6,7,8,9]
@@ -23,6 +67,9 @@ let q = x / pi -- returns 10.822536130248883
 
 
 make (:: exp) useful for partial application
+? existential argument
+
+cave = bear ? otherBear -- Checks if Bear is nothing, returns if not, otherwise returns otherBear
 
 
 // More prelude functions!
@@ -178,12 +225,3 @@ myGuard x
 Multi-line compiling with let declarations doesn't parse. For example compiling these two together:
 let one = 1
 let two = 2
-
-
-//////////////////////////////
-// Let In Statements
-// Dec 17, 2013
-
-Let In statements don't parse. Example:
-
-let x = 20 in x + y
