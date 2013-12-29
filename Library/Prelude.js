@@ -256,7 +256,6 @@ createPrimitive("mod", ["_L", "_R"], mod);
 
 function equivalent()
 {
-	Lich.post(Lich.VM.getVar("_L") + " === " + Lich.VM.getVar("_R"));
 	return Lich.VM.getVar("_L") === Lich.VM.getVar("_R");
 }
 
@@ -625,8 +624,6 @@ function foldr()
 		{
 			if(n != "lichType")
 				res = func.invoke([container[n], res]);
-			else
-				Lich.post("lichType in foldl.");
 		}
 	}
 
