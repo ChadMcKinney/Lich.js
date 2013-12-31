@@ -40,6 +40,23 @@
 // next we use the create primitive function to actually add it to the VM using these arguments:
 // createPrimitive("primitiveName", ["Array","Of","Argument","Names"], primitiveFunction);
 
+var lichProcesses = new Object;
+
+function spawnProcess()
+{
+	var processName = Lich.VM.getVar("_Name");	
+	var processFunction = Lich.VM.getVar("_Function");	
+
+	if(!(typeof processName === "string"))
+		throw new Error("spawn can only name a process a string!");
+
+	lichProcesses[processName] = new Worker("MessageProcess.js");
+
+
+	return processName
+}
+createPrimitive("spawn", ["_Name","_Function"], spawnProcess);
+
 function netEval()
 {
 	var str = Lich.VM.getVar("_R");	

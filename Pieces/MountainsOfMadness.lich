@@ -446,10 +446,6 @@ gameLocations 	 = finalDic
 		locDic2  = ("Ruins"=>ruins,"UnderRuins"=>underRuins,"Murals"=>murals,"UnderMurals"=>underMurals)
 		finalDic =  locDic : locDic2
 
-demoPlayer 		= Player "casiosk1" 100 "Camp"
-demoShoggoth 	= Monster "Shoggoth"
-demoGame 		= Game ("casiosk1"=>demoPlayer) ("Shoggoth"=>demoShoggoth) gameLocations
-
 myName = (clientName 0)
 
 startMountainsOfMadness playerName = newGame
@@ -457,12 +453,36 @@ startMountainsOfMadness playerName = newGame
 		newPlayer 	= Player playerName 100 "Camp"
 		newGame 	= Game (playerName=>newPlayer) () gameLocations
 
-walk cardinal =
-	if serverGame /= Nothing
-		then movePlayer cardinal (getPlayer myName serverGame) serverGame
-		else Nothing
+demoPlayer 		= Player "casiosk1" 100 "Camp"
+demoShoggoth 	= Monster "Shoggoth"
+demoGame 		= Game ("casiosk1"=>demoPlayer) ("Shoggoth"=>demoShoggoth) gameLocations
 
-look cardinal =
-	if serverGame /= Nothing
-		then lookAtCardinal cardinal (getPlayer myName serverGame) serverGame
-		else Nothing
+
+
+---------------------------------------------------------------------------------------------------------------------
+-- IO Functions
+---------------------------------------------------------------------------------------------------------------------
+
+--Main Game loop
+madnessLoop game = 
+	receive m of
+		finished 		-> print "Finished!"
+		(Game->Game) 	-> madnessLoop (m game)
+
+--Starts the main game loop
+start = spawn "madnessLoop" (madnessLoop demoGame)
+
+--Sends the game loop a message walk a direction
+walk cardinal = walkFunc +> "madnessLoop"
+	where
+		walkFunc game = movePlayer cardinal (getPlayer myName game) game
+
+--Sends the main game loop a message to look at a direction
+look cardinal = lookFunc +> "madnessLoop"
+	where
+		lookFunc game = lookAtCardinal cardinal (getPlayer myName game) game
+
+
+
+
+
