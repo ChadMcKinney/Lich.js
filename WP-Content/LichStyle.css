@@ -40,14 +40,14 @@ All rights reserved.
 }
 
 body {
-	/*background : #111111;*/
-	background : black;
+	background : #111111;
+	/*background : black;*/
 	/*color: white;*/
 	/*background-color: transparent;*/
     margin-left: auto;
     margin-right: auto;
     overflow: hidden;
-    font-family: 'OCRAMedium',Ubuntu Mono, DejaVu Sans Mono, Liberation Mono,Bitstream Vera Sans Mono,Consolas,Monaco,Lucida Console,Courier New, monospace;
+    font-family: Ubuntu Mono, DejaVu Sans Mono, Liberation Mono,Bitstream Vera Sans Mono,Consolas,Monaco,Lucida Console,Courier New, monospace;
 }
 
 .terminal, .chat, #post {
@@ -58,7 +58,7 @@ body {
 	border: none;
 	outline: 0;
 	outline: none;
-	font-family: 'OCRAMedium',Ubuntu Mono, DejaVu Sans Mono, Liberation Mono,Bitstream Vera Sans Mono,Consolas,Monaco,Lucida Console,Courier New, monospace;
+	font-family: Ubuntu Mono, DejaVu Sans Mono, Liberation Mono,Bitstream Vera Sans Mono,Consolas,Monaco,Lucida Console,Courier New, monospace;
 	/* background : black;
 	color: white; 
 	font-size: 1.125em;
@@ -68,7 +68,7 @@ body {
 
 #canvas {
 	/*background-color: transparent*/;
-	background-color: black;
+	background-color: #111111;
 	position: absolute;
 	top: 0px;
 	left: 0px;
@@ -176,7 +176,7 @@ textarea::selection {
 	outline: 0;
 	outline: none;
 	font-size: 100%;
-	font-family: OCRAMedium,Ubuntu Mono, DejaVu Sans Mono, Liberation Mono,Bitstream Vera Sans Mono,Consolas,Monaco,Lucida Console,Courier New, monospace;
+	font-family: Ubuntu Mono, DejaVu Sans Mono, Liberation Mono,Bitstream Vera Sans Mono,Consolas,Monaco,Lucida Console,Courier New, monospace;
 	font-smooth: true;
 }
 
@@ -210,7 +210,7 @@ textarea::selection {
 	z-index: 20;
 	resize: none;
 	font-size: 1.1em;
-	font-family: 'OCRAMedium',Ubuntu Mono, DejaVu Sans Mono, Liberation Mono,Bitstream Vera Sans Mono,Consolas,Monaco,Lucida Console,Courier New, monospace;
+	font-family: Ubuntu Mono, DejaVu Sans Mono, Liberation Mono,Bitstream Vera Sans Mono,Consolas,Monaco,Lucida Console,Courier New, monospace;
 	font-smooth: true;
 	overflow: hidden;
 }
@@ -231,7 +231,7 @@ textarea::selection {
 	z-index: 20;
 	resize: none;
 	font-size: 100%;
-	font-family: 'OCRAMedium',Ubuntu Mono, DejaVu Sans Mono, Liberation Mono,Bitstream Vera Sans Mono,Consolas,Monaco,Lucida Console,Courier New, monospace;
+	font-family: Ubuntu Mono, DejaVu Sans Mono, Liberation Mono,Bitstream Vera Sans Mono,Consolas,Monaco,Lucida Console,Courier New, monospace;
 	font-smooth: true;
 	overflow: hidden;
 
