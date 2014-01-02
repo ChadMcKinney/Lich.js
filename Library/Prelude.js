@@ -90,18 +90,18 @@ function lichEval()
 
 createPrimitive("eval", ["_R"], lichEval);
 
-function lichPrint()
-{
-	var printString = Lich.VM.getVar("_R");	
+//function lichPrint()
+//{
+//	var printString = Lich.VM.getVar("_R");	
 
 	//if(!(typeof printString === "string" || typeof printString === "number"))
 	//	throw new Error("print can only be applied to a string or a number!\nAttempted to print object of type: " + (typeof printString) + " . Value of the object is: " + printString);
 
-	Lich.VM.PrettyPrint(printString);
+//	Lich.VM.PrettyPrint(printString);
 
-	return printString;
-}
-createPrimitive("print", ["_R"], lichPrint);
+//	return printString;
+//}
+//createPrimitive("print", ["_R"], lichPrint);
 
 
 function lichClientName()
@@ -170,6 +170,21 @@ function chatPrimitive()
 }
 
 createPrimitive("chat", ["_R"], chatPrimitive);
+
+function narrate()
+{
+	var chatString = Lich.VM.getVar("_N");
+	var returnVal = Lich.VM.getVar("_R");
+
+	if(!(typeof chatString === "string"))
+		throw new Error("postNarration can only be applied to strings!");
+
+	updateNarration(chatString);
+
+	return returnVal;
+}
+
+createPrimitive("postNarration", ["_N","_R"], narrate);
 
 function checkNumStringOpError(l, op, r)
 {

@@ -22,19 +22,32 @@ All rights reserved.
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 */
 
+
+@font-face {
+    font-family: 'OCRAMedium';
+    src: url('fonts/ocra-webfont.eot');
+    src: url('fonts/ocra-webfont.eot?#iefix') format('embedded-opentype'),
+         url('fonts/ocra-webfont.woff') format('woff'),
+         url('fonts/ocra-webfont.ttf') format('truetype'),
+         url('fonts/ocra-webfont.svg#OCRAMedium') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
+
 * {
 	margin : 0;
 	padding : 0;
 }
 
 body {
-	background : #111111;
+	/*background : #111111;*/
+	background : black;
 	/*color: white;*/
 	/*background-color: transparent;*/
     margin-left: auto;
     margin-right: auto;
     overflow: hidden;
-    font-family: Ubuntu Mono, DejaVu Sans Mono, Liberation Mono,Bitstream Vera Sans Mono,Consolas,Monaco,Lucida Console,Courier New, monospace;
+    font-family: 'OCRAMedium',Ubuntu Mono, DejaVu Sans Mono, Liberation Mono,Bitstream Vera Sans Mono,Consolas,Monaco,Lucida Console,Courier New, monospace;
 }
 
 .terminal, .chat, #post {
@@ -45,7 +58,7 @@ body {
 	border: none;
 	outline: 0;
 	outline: none;
-	font-family: Ubuntu Mono, DejaVu Sans Mono, Liberation Mono,Bitstream Vera Sans Mono,Consolas,Monaco,Lucida Console,Courier New, monospace;
+	font-family: 'OCRAMedium',Ubuntu Mono, DejaVu Sans Mono, Liberation Mono,Bitstream Vera Sans Mono,Consolas,Monaco,Lucida Console,Courier New, monospace;
 	/* background : black;
 	color: white; 
 	font-size: 1.125em;
@@ -54,7 +67,8 @@ body {
 }
 
 #canvas {
-	background-color: transparent;
+	/*background-color: transparent*/;
+	background-color: black;
 	position: absolute;
 	top: 0px;
 	left: 0px;
@@ -162,7 +176,7 @@ textarea::selection {
 	outline: 0;
 	outline: none;
 	font-size: 100%;
-	font-family: Ubuntu Mono, DejaVu Sans Mono, Liberation Mono,Bitstream Vera Sans Mono,Consolas,Monaco,Lucida Console,Courier New, monospace;
+	font-family: OCRAMedium,Ubuntu Mono, DejaVu Sans Mono, Liberation Mono,Bitstream Vera Sans Mono,Consolas,Monaco,Lucida Console,Courier New, monospace;
 	font-smooth: true;
 }
 
@@ -196,7 +210,7 @@ textarea::selection {
 	z-index: 20;
 	resize: none;
 	font-size: 1.1em;
-	font-family: Ubuntu Mono, DejaVu Sans Mono, Liberation Mono,Bitstream Vera Sans Mono,Consolas,Monaco,Lucida Console,Courier New, monospace;
+	font-family: 'OCRAMedium',Ubuntu Mono, DejaVu Sans Mono, Liberation Mono,Bitstream Vera Sans Mono,Consolas,Monaco,Lucida Console,Courier New, monospace;
 	font-smooth: true;
 	overflow: hidden;
 }
@@ -217,7 +231,7 @@ textarea::selection {
 	z-index: 20;
 	resize: none;
 	font-size: 100%;
-	font-family: Ubuntu Mono, DejaVu Sans Mono, Liberation Mono,Bitstream Vera Sans Mono,Consolas,Monaco,Lucida Console,Courier New, monospace;
+	font-family: 'OCRAMedium',Ubuntu Mono, DejaVu Sans Mono, Liberation Mono,Bitstream Vera Sans Mono,Consolas,Monaco,Lucida Console,Courier New, monospace;
 	font-smooth: true;
 	overflow: hidden;
 
