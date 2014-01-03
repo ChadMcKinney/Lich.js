@@ -612,6 +612,19 @@ function concatList()
 
 createPrimitive("++", ["_L", "_R"], concatList);
 
+function experiential()
+{
+	var l = Lich.VM.getVar("_L");
+	var r = Lich.VM.getVar("_R");
+
+	if(l == Lich.VM.Nothing)
+		return r;
+	else
+		return l;
+}
+
+createPrimitive("?", ["_L", "_R"], experiential);
+
 function foldl()
 {
 	var func = Lich.VM.getVar("_F");

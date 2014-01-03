@@ -68,6 +68,7 @@
 "~"                         return {val:"~",typ:"~"};
 ":"                         return {val:":",typ:":"};
 "`"                         return {val:"`",typ:"`"};
+"?"                         return {val:"?",typ:"?"}; 
 <<EOF>>                     return {val:"EOF",typ:"EOF"};
 "where"                     return {val:"where",typ:"where"};
 "if"                        return {val:"if",typ:"if"};
@@ -371,6 +372,7 @@ binop
   | ">>"        {{$$ = $1;}}
   | "=<<"       {{$$ = $1;}}
   | "<<"        {{$$ = $1;}}
+  | "?"         {{$$ = $1;}}
   ;
 
 //  lexp OP infixexp            {{ ($3).unshift($1,$2); $$ = $3; }}
