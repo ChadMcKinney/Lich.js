@@ -75,16 +75,10 @@ createPrimitive("eval", ["_R"], lichEval);
 
 function lichPrint()
 {
-	var printString = Lich.VM.getVar("_R");	
-
-	//if(!(typeof printString === "string" || typeof printString === "number"))
-	//	throw new Error("print can only be applied to a string or a number!\nAttempted to print object of type: " + (typeof printString) + " . Value of the object is: " + printString);
-
-	Lich.VM.PrettyPrint(printString);
-
-	return printString;
+	Lich.VM.Print(Lich.VM.getVar("_L"));
+	return Lich.VM.Void;
 }
-createPrimitive("print", ["_R"], lichPrint);
+createPrimitive("print", ["_L"], lichPrint);
 
 
 function lichClientName()
@@ -169,6 +163,57 @@ function checkNumOpError(l, op, r)
 		throw new Error(op + " can only be used with numbers. Cannont use " + op + " with: " 
 			+ Lich.VM.PrettyPrint(l) + " " + op + " " + Lich.VM.PrettyPrint(r));
 }
+
+function spawnActor()
+{
+	var closure = Lich.VM.getVar("_function");
+
+	if(closure.lichType != CLOSURE && closure.lichType != THUNK)
+		throw new Error("spawn can only be used with functions. Failed with: spawn " + Lich.VM.PrettyPrint(closure));
+
+	var worker = new Worker("../Compiler/Thread.js");
+		
+	worker.addEventListener(
+		"message",
+		function(event)
+		{
+			if(event.data.message != undefined)
+				Lich.post(event.data.message);
+			else if(event.data.print != undefined)
+				Lich.post(event.data.print);
+		},
+		false
+	);
+
+	worker.addEventListener(
+		"error",
+		function(event)
+		{
+			Lich.post("Actor error: " + event.message);
+		},
+		false
+	);
+
+	worker.postMessage({type:"init", func:Lich.stringify(closure)});
+	worker.lichType = ACTOR;
+	return worker;
+}
+
+createPrimitive("spawn", ["_function"], spawnActor);
+
+function sendActor()
+{
+	var message = Lich.VM.getVar("_message");
+	var actor = Lich.VM.getVar("_actor");
+
+	if(actor.lichType != ACTOR)
+		throw new Error("send can only be used as: send message actor. Failed with send " + Lich.VM.PrettyPrint(message) + " " + Lich.VM.PrettyPrint(actor));
+
+	actor.postMessage({type: "send", message: Lich.stringify(message)});
+	return Lich.VM.Void;
+}
+
+createPrimitive("send", ["_message", "_actor"], sendActor);
 
 function add()
 {
@@ -1144,6 +1189,32 @@ function reverse()
 
 createPrimitive("reverse", ["_C"], reverse);
 
+function sort()
+{
+	var container = Lich.VM.getVar("_C");
+	container = deepCopy(container);
+
+	if(container instanceof Array)
+	{
+		return container.sort(function(a,b)
+		{
+			return a - b;
+		});
+	}
+
+	else if(typeof container === "string")
+	{
+		return container.sort();
+	}
+
+	else
+	{
+		throw new Error("sort can only be applied to lists. Failed with: reverse " + Lich.VM.PrettyPrint(container));	
+	}
+}
+
+createPrimitive("sort", ["_C"], sort);
+
 function slice()
 {
 	var lower = Lich.VM.getVar("_L");
@@ -1256,20 +1327,9 @@ function sqrt()
 
 createPrimitive("sqrt", ["_N"], sqrt);
 
-function printLich()
-{
-	var object = Lich.VM.getVar("_L");
-
-	Lich.VM.Print(object);
-	return Lich.VM.Void;
-}
-
-createPrimitive("print", ["_L"], printLich);
-
 function showLich()
 {
-	var object = Lich.VM.getVar("_L");
-	return Lich.VM.PrettyPrint(object);
+	return Lich.VM.PrettyPrint(Lich.VM.getVar("_L"));
 }
 
 createPrimitive("show", ["_L"], showLich);

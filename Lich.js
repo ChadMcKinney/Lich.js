@@ -319,10 +319,13 @@ function parseCurrentLine()
 
 	try
 	{
-		var ast = Lich.parse(str); // interactive parsing
-		// var ast = Lich.parseLibrary(str); // For library parsing testing
-		// Lich.post(Lich.showAST(ast));
-		Lich.VM.Print(Lich.compileAST(ast));
+		if(/\S/.test(str)) // if not just whitespace
+		{
+			var ast = Lich.parse(str); // interactive parsing
+			// var ast = Lich.parseLibrary(str); // For library parsing testing
+			//Lich.post(Lich.showAST(ast));
+			Lich.VM.Print(Lich.compileAST(ast));
+		}
 	}
 	
 	catch(e)

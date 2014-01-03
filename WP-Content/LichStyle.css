@@ -140,6 +140,7 @@ textarea::selection {
 	height: 0%;
 	top: 0px;
 	overflow: hidden;
+	text-align: right;
 	
 	opacity: 0.0;
 	

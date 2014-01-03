@@ -4,8 +4,45 @@
 
 
 
+send walkFunc madnessLoop
+
+
+What should networking and input look like?
+
+What if we had a declarative tree for all IO? No mutable state (everything happens under the hood). Similar but much more simple than FRP. What would it look like?
+
+
+IO ::  
+    KeyDown k                  -> someIOAction k
+    KeyUp k                    -> someIOAction k
+    MouseMove x y              -> someMouseAction x y
+    MousePress x y             -> someMouseAction x y
+    Draw t <> Player p         -> someDrawFunction p t -- combine draw and player events
+
+
+
+IO :: Player { position = [x,y] }
+
+
+Game = 
+
+Madness
+    main of
+        KeyDown k           -> someIOAction k
+        KeyUp k             -> someIOAction k
+        MouseMove x y       -> someMouseAction x y
+        MousePress x y      -> someMouseAction x y
+        Game                -> gameLoop game
+
+
+
+
 //////////////////////////////////////////
 // Pattern matching is beginning to work
+
+
+need to get unions and == /= comparisons working!!!!!!!!!!!!!!!!!!!!!!
+
 
 data Monster { says = "howl" }
 data Species = Hydra | Gorgon | Unspeakable | MindFlay
@@ -26,9 +63,13 @@ let pattern p = case p of
     (x:xs)              -> "x: " + x + ", xs: " + (show xs)
     Hydra               -> "Cut off all the heads!"
     Gorgon              -> "Shield your eyes!"
+    (\_ _ _ ->)         -> "lambda x y x -> " + (show $ p 6 6 6) 
     _                   -> "Anything goes."
 
 pattern n
+pattern (\y r p -> y + r + p)
+let threeD x y z = [x,y,z]
+pattern threeD
 
 data Coordinate = North | East | South | West
 
@@ -41,6 +82,70 @@ case c of
     West     -> "West!"
 
 
+h == Hydra -- THIS SHOULD WORK BUT DOESN'T!!!
+
+
+
+
+
+let whereFunc x = z x
+    where
+       z x:xs = replicate (length xs) x 
+
+whereFunc (2:[1..4])
+
+Pattern matching function arguments
+
+
+let myFunc (x:xs) []  Nothing _ = x * 2
+
+myFunc [1] -- Curries to (\[] Nothing _ ->)
+myFunc [1] [] -- (\Nothing _ ->)
+myFunc [1] [] Nothing -- (\_ ->)
+myFunc [1] [] Nothing "Anything" -- x * 2 = 1
+myFunc [1] [1] Nothing "Anything" -- Won't match, second arg needs to be []
+myFunc [] [] Nothing "Anything" -- Won't match first arg needs at least a head for x:xs matching
+
+
+let myFunc 1 = "ONE"
+myFunc 1
+myFunc 2 -- error
+
+
+let myFunc (x:xs) = replicate (length xs) x
+myFunc [7..1] -- [7,7,7,7,7,7]
+myFunc [7] -- [], xs has a zero length, so no replication
+myFunc [] -- error, requires at least a head
+
+
+-- lambdas can match numbers of arguments
+let myFunc (\_ _ ->) = print "Lambda with 2 arguments"
+myFunc (\x y -> x + y)
+myFunc (\x -> x) -- Error, requires a function with 2 arguments
+
+let myFunc [] = Nothing
+myFunc [] -- Nothing
+myFunc 1 -- Error
+
+data Monster { mash = "The monster mash." }
+let m = Monster
+m :: mash
+let myFunc (Monster ms) = "What are we going to do? " + ms
+myFunc m
+let n = Monster "Kill all reptilians."
+myFunc n
+myFunc 1 -- Error, requires a monster
+
+
+2 + 3
+
+
+case 3 of
+    3 > 2 -> 1
+
+
+let sums x y = if y > 0 then (sums (x + 1) (y - 1)) else if y < 0 then (sums (x - 1) (y + 1)) else x
+sums 20 100000
 
 //////////////////////
 // Queue for compiling

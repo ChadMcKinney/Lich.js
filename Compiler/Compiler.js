@@ -173,7 +173,16 @@ Lich.compileAST = function(ast)
 					
 				case "topdecl-decl":
 					return Lich.compileTopdeclDecl(ast);
+
+				case "class-exp":
+					return Lich.compileClassExpr(ast);
+
+				case "class-decl":
+					return Lich.compileClassDecl(ast);
 						
+				case "class-binop":
+					return Lich.compileClassBinOp(ast);
+
 				default:
 					return Lich.unsupportedSemantics(ast);
 			}
@@ -214,7 +223,7 @@ Lich.getType = function(object)
 		return NUMBER;
 	else if(type === "string")
 		return STRING;
-	else if(object.lichType !== "undefined")
+	else if(typeof object.lichType !== "undefined")
 		return object.lichType;
 	else
 		throw new Error("uknown object: " + object);
@@ -236,6 +245,10 @@ Lich.match = function(object, pat)
 {
 	switch(pat.astType)
 	{
+	case "varname":
+	case "wildcard":
+		return true;
+
 	case "Nothing":
 		if(object.lichType == NOTHING)
 			return true;
@@ -260,10 +273,20 @@ Lich.match = function(object, pat)
 	case "head-tail-match":
 		if(Lich.getType(object) == LIST)
 		{
-			var head = object.length >= 1 ? object[0] : Nothing;
-			var tail = object.slice(1, object.length);
-			Lich.VM.setVar(pat.head, head);
-			Lich.VM.setVar(pat.tail, tail);
+			if(object.length < 1) // we require at least a head for x:xs matching
+				return false;
+
+			if(pat.head.astType != "wildcard")
+			{
+				var head = object.length >= 1 ? object[0] : Nothing;
+				Lich.VM.setVar(pat.head, head);	
+			}
+			
+			if(pat.tail.astType != "wildcard")
+			{
+				var tail = object.slice(1, object.length);
+				Lich.VM.setVar(pat.tail, tail);
+			}
 			return true;
 		}
 		return false;
@@ -276,7 +299,13 @@ Lich.match = function(object, pat)
 			{
 				for(var i = 0; i < object.length; ++i)
 				{
-					Lich.VM.setVar(pat.list[i], object[i]);
+					if(pat.list[i].astType !== "wildcard")
+					{
+						if(pat.list[i].astType == "varname")
+							Lich.VM.setVar(pat.list[i], object[i]);
+						else if(!Lich.match(object[i], pat.list[i]))
+							return false;
+					}
 				}
 				return true;
 			}
@@ -284,8 +313,12 @@ Lich.match = function(object, pat)
 		}
 		return false;
 
-	case "wildcard":
-		return true;
+	case "lambda-pat":
+	var type = Lich.getType(object);
+	if(type == CLOSURE || type == THUNK)
+		if(object.argPatterns.length == pat.numArgs)
+			return true;
+	return false;
 
 	default:
 		return false;
@@ -406,12 +439,19 @@ Lich.compileApplication = function(ast)
 	else
 	{
 		var args = new Array();
+		Lich.VM.pushProcedure(new lichClosure([], {}, false, {})); // scope for patterns
 		for(var i = 1; i < ast.exps.length; ++i)
 		{
-			args.push(Lich.compileAST(ast.exps[i]));
+			var exp = Lich.compileAST(ast.exps[i]);
+			if(Lich.match(exp, closure.argPatterns[i -1]))
+				args.push(exp);
+			else
+				throw new Error("Non-matching pattern in function " + Lich.VM.PrettyPrint(closure) + " . Failed on: " + Lich.VM.PrettyPrint(exp));
 		}
-
-		return closure.invoke(args);
+		
+		var res = closure.invoke(args);
+		Lich.VM.popProcedure();
+		return res;
 	}
 }
 
@@ -507,11 +547,7 @@ Lich.compileDacon = function(ast)
 
 Lich.compileDataDecl = function(ast)
 {
-	var data = {
-		_argNames: new Array(),
-		_datatype: ast.id,
-		lichType: DATA
-	}
+	var data = lichData(ast.id);
 
 	for(var i = 0; i < ast.members.length; ++i)
 	{
@@ -684,7 +720,6 @@ Lich.compileCase = function(ast)
 
 	for(var i = 0; i < ast.alts.length; ++i)
 	{
-		// var pat = Lich.compileAST(ast.alts[i].pat);
 		var pat = ast.alts[i].pat;
 		if(pat.lichType == WILDCARD || Lich.match(exp, pat))
 		{
@@ -772,4 +807,91 @@ Lich.compileListComprehension = function(ast)
 	
 	nestLoop(0);
 	return res;
+}
+
+// {astType: "class-exp", id:$2, var:$3,members:$6}
+Lich.compileClassExpr = function(ast)
+{
+	var classObject = lichClass(ast.id);
+
+	for(var i = 0; i < ast.members.length; ++i)
+	{
+		classObject[Lich.patternHash(ast.members[i])] = Lich.compileAST(ast.members[i].rhs);
+	}
+
+	Lich.VM.setVar(ast.id, classObject);
+	return data;
+}
+
+// {astType:"class-decl", decl:$1}
+Lich.compileClassDecl = function(ast)
+{
+
+}
+						
+// {astType:"class-binop", left:$1, binop:$2, right:$3}
+Lich.compileClassBinOp = function(ast)
+{
+
+}
+
+function postProcessJSON(object)
+{
+	if (Object.prototype.toString.call(object) === '[object Array]') 
+    {
+        var out = [], i = 0, len = object.length;
+        for ( ; i < len; i++) 
+        {
+			object[i] = postProcessJSON(object[i]);
+        }
+
+        return object;
+    }
+
+	else if(typeof object === 'object') 
+    {
+    	if(object == null || typeof object === "undefined")
+    		return object;
+
+    	if(object.lichType == CLOSURE || object.lichType == THUNK)
+	    {
+	    	var rhs = object.rhs;
+
+	    	if(rhs.lichType == PRIMITIVE)
+	    	{
+		    	rhs = Lich.VM.getVar(rhs.id).rhs;
+			}
+
+			object = new lichClosure(object.argPatterns, rhs, object.mutable, object.namespace, object.decls);
+			object.lichType = object.lichType;
+	    }
+
+        for(var n in object)
+		{
+			object[n] = postProcessJSON(object[n]);
+		}
+
+		return object;
+    }
+
+    return object;
+}
+
+Lich.parseJSON = function(json)
+{
+	return postProcessJSON(JSON.parse(json));
+}
+
+Lich.stringify = function(object)
+{
+	return JSON.stringify(object, function (key, value) 
+	{
+		if(value.astType == "primitive")
+		{
+			return {lichType:PRIMITIVE, id: value.primitiveName};
+		}
+
+	    return value;
+
+	});
 }

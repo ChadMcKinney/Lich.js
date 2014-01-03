@@ -1,14 +1,8 @@
 /*  
-    Grammar specification for Lich. This is essentially a modified version of the parser found in the JSHC project, reworked for Lich.
+    Grammar specification for Lich. This is a greatly modified version of the parser found in the JSHC project, reworked for Lich.
     Thank you JSHC for all the hardwork! You can find more about the project here:
-    https://github.com/evilcandybag/Lich
+    https://github.com/evilcandybag/JSHC
 
-
-    Rules are sorted under their corresponding chapter
-    in the Haskell 2010 Report, for readability and 
-    overview. If a rule is present in several chapters 
-    in the report, it is sorted under the first chapter
-    it appears. 
 */
 
 /* lexical grammar */
@@ -41,6 +35,10 @@
 "/="                        return {val:"/=",typ:"/="};
 ">="                        return {val:">=",typ:">="};
 "<="                        return {val:"<=",typ:"<="};
+">>="                       return {val:">>=",typ:">>="};
+">>"                        return {val:">>",typ:">>"};
+"=<<"                       return {val:"=<<",typ:"=<<"};
+"<<"                        return {val:"<<",typ:"<<"};
 "<-"                        return {val:"<-",typ:"<-"};
 ">"                         return {val:">",typ:">"};
 "<"                         return {val:"<",typ:"<"};
@@ -48,6 +46,7 @@
 "("                         return {val:"(",typ:"("};
 ")"                         return {val:")",typ:")"};
 "*"                         return {val:"*",typ:"*"};
+"\\"                        return {val:"\\",typ:"\\"};
 "/"                         return {val:"/",typ:"/"};
 "-"                         return {val:"-",typ:"-"};
 "++"                        return {val:"++",typ:"++"};
@@ -64,8 +63,7 @@
 ","                         return {val:",",typ:","};
 ".."                         return {val:"..",typ:".."};
 "."                         return {val:".",typ:"."};
-"@"                         return {val:"@",typ:"@"};
-"\\"                        return {val:"\\",typ:"\\"};      
+"@"                         return {val:"@",typ:"@"};   
 "|"                         return {val:"|",typ:"|"};
 "~"                         return {val:"~",typ:"~"};
 ":"                         return {val:":",typ:":"};
@@ -97,7 +95,7 @@
 [A-Z][A-Za-z0-9_]*          return {val:yytext,typ:"conid"};
 \"([^\"])*\"                return {val:yytext,typ:"string-lit"};
 \'(!\')?\'                  return {val:yytext,typ:"char"};
-["!""#""$""&"".""<"">""=""?""@""\\""|""~"]+     return {val:yytext,typ:"varsym"};
+["!""#""$""&"".""<"">""=""?""@""\\""|""~"]+        return {val:yytext,typ:"varsym"};
 ":"["!""#""$""&"".""<"">""=""?""@""\\""|""~"]*  return {val:yytext,typ:"consym"};
 [[A-Z][A-Za-z0-9_]*"."]+[a-z][A-Za-z0-9_]*      return {val:yytext,typ:"qvarid"};
 [[A-Z][A-Za-z0-9_]*"."]+[A-Z][A-Za-z0-9_]*      return {val:yytext,typ:"qconid"};
@@ -236,6 +234,7 @@ decl // : object
   | pat varop pat rhs {{$$ = {astType:"decl-fun", ident: $2, args: [$1,$3], rhs: $4, pos: @$, orig: "infix"};}}
   | '(' pat varop pat ')' apats rhs
     {{$$ = {astType:"decl-fun", ident: $3, args: [$2,$4].concat($6), rhs: $7, pos: @$, orig: "infix"};}}
+  //| guardexp                        {{$$ = $1;}}
   ;
 
 //funlhs // : object
@@ -341,53 +340,38 @@ topexps
 exp // : object
   // : infixexp %prec NOSIGNATURE  {{$$ = $1;}}
   : lexp                {{$$ = $1}}
-  | exp "+" exp         {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
-  | exp "-" exp         {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
-  | exp "*" exp         {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
-  | exp "/" exp         {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
-  | exp "^" exp         {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
-  | exp "%" exp         {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
-  | exp "==" exp        {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
-  | exp "/=" exp        {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
-  | exp ">" exp         {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
-  | exp "<" exp         {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
-  | exp ">=" exp        {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
-  | exp "<=" exp        {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
-  | exp "!!" exp        {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
-  | exp ":" exp         {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
-  | exp "++" exp        {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
-  | exp "&&" exp        {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
-  | exp "||" exp        {{$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
+  | exp binop exp       {$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
   | funccomp            {{$$ = $1;}}
   | datalookup          {{$$ = $1;}}
   | dataexp             {{$$ = $1;}}
   | datainst            {{$$ = $1;}}
   | dataupdate          {{$$ = $1;}}
+  | classexp            {{$$ = $1;}}
   ;
 
-datalookup
-  : exp "::" varid      {{$$ = {astType:"data-lookup",data:$1,member:$3,pos:@$};}}
-  | exp "::" conid      {{$$ = {astType:"data-lookup",data:$1,member:$3,pos:@$};}}    
+binop
+  : "+"         {{$$ = $1;}}
+  | "-"         {{$$ = $1;}}
+  | "*"         {{$$ = $1;}}
+  | "/"         {{$$ = $1;}}
+  | "^"         {{$$ = $1;}}
+  | "%"         {{$$ = $1;}}
+  | "=="        {{$$ = $1;}}
+  | "/="        {{$$ = $1;}}
+  | ">"         {{$$ = $1;}}
+  | "<"         {{$$ = $1;}}
+  | ">="        {{$$ = $1;}}
+  | "<="        {{$$ = $1;}}
+  | "!!"        {{$$ = $1;}}
+  | ":"         {{$$ = $1;}}
+  | "++"        {{$$ = $1;}}
+  | "&&"        {{$$ = $1;}}
+  | "||"        {{$$ = $1;}}
+  | ">>="       {{$$ = $1;}}
+  | ">>"        {{$$ = $1;}}
+  | "=<<"       {{$$ = $1;}}
+  | "<<"        {{$$ = $1;}}
   ;
-/*
-infixexp // : [lexp | qop | '-']
-  : infixexpLR lexp     %prec INFIXEXP          {{
-          ($1).push($2);
-          if( ($1).length == 1 && ($1)[0].name=="infixexp" ){
-                  $$ = ($1)[0];
-          } else {
-              $$ = {astType:"infixexp",exps:$1,pos:@$};
-          }
-      }}
-  ;
-
-infixexpLR // : [lexp | qop | '-']. re-written to be left recursive.
-  : infixexpLR lexp qop           {{($1).push($2,$3); $$ = $1;}}
-  | infixexpLR '-'                {{($1).push($2);    $$ = $2;}}
-  |                               {{$$ = [];}}
-  ;
-*/
-
 
 //  lexp OP infixexp            {{ ($3).unshift($1,$2); $$ = $3; }}
 //  '-' infixexp                {{ ($2).shift($1);      $$ = $2; }}
@@ -430,6 +414,34 @@ alt // : object
     ;
 
 ////////////////////////////////////////////////////////////////////////////////
+// Guards
+
+/*
+myGuard x
+    | x > 4 = 99
+    | otherwise = 100
+*/
+
+/*
+guardexp
+  : var apats "†" grhs-list "‡"    {{$$ = {astType:"guard-fun", ident: $1, args: $2, rhs: $4, pos: @$};}}
+  | pat varop pat "†" grhs-list "‡"{{$$ = {astType:"guard-fun", ident: $2, args: [$1,$3], rhs: $5, pos: @$, orig: "infix"};}}
+  | '(' pat varop pat ')' apats "†" grhs-list "‡"
+    {{$$ = {astType:"guard-fun", ident: $3, args: [$2,$4].concat($6), rhs: $8, pos: @$, orig: "infix"};}}
+  ;
+
+grhs-list
+  : grhs-list ";" "|" grhs          {{$1.push($4); $$ = $1;}}
+  | "|" grhs                        {{$$ = [$2];}}
+  ;
+
+grhs
+  : exp "=" exp           {{$$ = {astType:"grhs",e1: $2, e2:$4};}}
+  | wildcard "=" exp      {{$$ = {astType:"grhs",e1: $2, e2:$4};}}  
+  | "otherwise" "=" exp   {{$$ = {astType:"grhs",e1: {astType:"wildcard", pos: @$}, e2:$4};}}
+  ;
+*/
+////////////////////////////////////////////////////////////////////////////////
 // 3.2 Variables, Constructors, Operators, and Literals
 
 list_cname_0_comma // : [cname]
@@ -455,6 +467,7 @@ aexp // : object
   | '(' '-' exp ')'         {{$$ = {astType:"negate",rhs:$3};}}
   | dictexp                 {{$$ = $1;}}
   | listexp                 {{$$ = $1;}}
+  | "(" binop ")"           {{ $$ = new Lich.VarName($2, @$, true, yy.lexer.previous.qual);}}
   | "(" "+" aexp ")"        {{ $$ = {astType:"application", exps:[new Lich.VarName($2, @$, true, yy.lexer.previous.qual),$3],pos:@$};}}
   | "(" "*" aexp ")"        {{ $$ = {astType:"application", exps:[new Lich.VarName($2, @$, true, yy.lexer.previous.qual),$3],pos:@$};}}
   | "(" "/" aexp ")"        {{ $$ = {astType:"application", exps:[new Lich.VarName("/R", @$, true, yy.lexer.previous.qual),$3],pos:@$};}}
@@ -465,23 +478,16 @@ aexp // : object
   | "(" ">=" aexp ")"       {{ $$ = {astType:"application", exps:[new Lich.VarName(">=R", @$, true, yy.lexer.previous.qual),$3],pos:@$};}}
   | "(" "<" aexp ")"        {{ $$ = {astType:"application", exps:[new Lich.VarName("<R", @$, true, yy.lexer.previous.qual),$3],pos:@$};}}
   | "(" "<=" aexp ")"       {{ $$ = {astType:"application", exps:[new Lich.VarName("<=R", @$, true, yy.lexer.previous.qual),$3],pos:@$};}}
-  | "(" "+" ")"             {{ $$ = new Lich.VarName($2, @$, true, yy.lexer.previous.qual);}}
-  | "(" "-" ")"             {{ $$ = new Lich.VarName($2, @$, true, yy.lexer.previous.qual);}}
-  | "(" "*" ")"             {{ $$ = new Lich.VarName($2, @$, true, yy.lexer.previous.qual);}}
-  | "(" "/" ")"             {{ $$ = new Lich.VarName($2, @$, true, yy.lexer.previous.qual);}}
-  | "(" "^" ")"             {{ $$ = new Lich.VarName($2, @$, true, yy.lexer.previous.qual);}}
-  | "(" "==" ")"            {{ $$ = new Lich.VarName($2, @$, true, yy.lexer.previous.qual);}}
-  | "(" "/=" ")"            {{ $$ = new Lich.VarName($2, @$, true, yy.lexer.previous.qual);}}
-  | "(" ">" ")"             {{ $$ = new Lich.VarName($2, @$, true, yy.lexer.previous.qual);}}
-  | "(" "<" ")"             {{ $$ = new Lich.VarName($2, @$, true, yy.lexer.previous.qual);}}
-  | "(" ">=" ")"            {{ $$ = new Lich.VarName($2, @$, true, yy.lexer.previous.qual);}}
-  | "(" "<=" ")"            {{ $$ = new Lich.VarName($2, @$, true, yy.lexer.previous.qual);}}
   | nothing                 {{$$ = $1;}}
   ;
 
 nothing 
   : "Nothing"               {{$$ = {astType: "Nothing"};}}
   ;
+
+////////////////////
+// Dictionary
+////////////////////
 
 dictexp
   : "(" dictexp_1_comma ")"    {{$$ = {astType:"dictionary", pairs:$2};}}
@@ -497,11 +503,20 @@ dictpair
   : exp "=>" exp               {{$$ = [$1,$3];}}
   ;
 
+
+////////////////////
+// Data
+////////////////////
+
 dataexp
   : data conid "{" datamems "}"               {{$$ = {astType:"data-decl", id: $2, members: $4};}}
   | data conid "{" datamems ";" "}"           {{$$ = {astType:"data-decl", id: $2, members: $4};}}
-  // | data conid "{" datamems ";" "}" "‡"       {{$$ = {astType:"data-decl", id: $2, members: $4};}}
   | data conid "=" enums                      {{$$ = {astType:"data-enum", id: $2, members: $4};}}}
+  ;
+
+datalookup
+  : exp "::" varid      {{$$ = {astType:"data-lookup",data:$1,member:$3,pos:@$};}}
+  | exp "::" conid      {{$$ = {astType:"data-lookup",data:$1,member:$3,pos:@$};}}    
   ;
 
 enums
@@ -523,17 +538,35 @@ datamem
   : varid "=" exp                   {{$$ = {astType:"data-mem",id:$1, exp:$3};}}  
   ;
 
-
 datainst
   : conid fexp                      {{$$ = {astType:"data-inst", id: $1, members: $2};}}
   | conid                           {{$$ = {astType:"data-inst", id: $1, members: []};}}
   ;
 
-/* Lists are basically better tuples in our dynamically typed language
-tuple // : object
-    : "(" exp "," list_exp_1_comma ")" {{$4.unshift($2); $$ = {astType: "tuple", members: $4, pos: @$}; }}
-    ;
-*/
+////////////////////////
+// Class
+////////////////////////
+
+classexp
+  : class conid varid "where" "†" classmems "‡"  {{ $$ = {astType: "class-exp", id:$2, var:$3,members:$6};}}
+  ;
+
+classmems
+  : classmems ";" classmem      {{$1.push($2); $$ = $1;}}
+  | classmem                    {{$$ = [$1];}}
+  ;
+
+classmem
+  : decl                    {{$$ = {astType:"class-decl", decl:$1};}}
+  | varid binop varid rhs   {{$$ = {astType:"class-binop", left:$1, binop:$2, right:$3, rhs:$4};}}
+  | varid varsym varid rhs  {{$$ = {astType:"class-binop", left:$1, binop:$2, right:$3, rhs:$4};}}
+  | varid binop varid       {{$$ = {astType:"class-binop", left:$1, binop:$2, right:$3};}}
+  | varid varsym varid      {{$$ = {astType:"class-binop", left:$1, binop:$2, right:$3};}}
+  ;
+
+///////////////
+// List
+///////////////
 
 listexp // : object
     : "[" exp list_exp_1_comma            {{ $$ = {astType: "listexp", members: [$2].concat($3), pos: @$}; }}
@@ -634,11 +667,6 @@ gcon // : object
     | qcon                  {{$$ = $1;}}
     ;
 
-conlist
-  : conlist pat_var   {{$1.push($2); $$ = $1;}}
-  | pat_var           {{$$ = [$1];}}
-  ;
-
 list_1_comma // : integer
     : ","                {{$$ = 1;}}
     | list_1_comma ","   {{$$ = $1 + 1;}}
@@ -683,27 +711,32 @@ apats // : [apat]
     ;
 
 apat // : object
-    : var                   {{$$ = $1; }}
-    | nothing               {{$$ = $1; }}
-    | gcon                  {{$$ = $1; }}
-    | literal               {{$$ = {astType:"literal-match", value:$1, pos: @$}; }}
-    | wildcard              {{$$ = $1;}}
-    //| tuple_pat           {{$$ = $1; }}
-    | "(" pat ")"           {{$$ = $2; }}
-    | varid ":" varid       {{$$ = {astType:"head-tail-match", head:$1,tail:$3};}}
-    | list_pat              {{$$ = $1;}}
-    //| "(" datalookup ")"  {{$$ = $1; }}
-    | conid                 {{$$ = {astType:"data-match", id: $1, members: []};}}
-    | "(" conid conlist ")" {{$$ = {astType:"data-match", id: $2, members: $3};}}
+    : var                           {{$$ = $1; }}
+    | nothing                       {{$$ = $1; }}
+    | gcon                          {{$$ = $1; }}
+    | literal                       {{$$ = {astType:"literal-match", value:$1, pos: @$}; }}
+    | wildcard                      {{$$ = $1;}}
+    | "(" pat ")"                   {{$$ = $2; }}
+    | "(" pat_var ":" pat_var ")"   {{$$ = {astType:"head-tail-match", head:$2,tail:$4};}}
+    | list_pat                      {{$$ = $1;}}
+    | conid                         {{$$ = {astType:"data-match", id: $1, members: []};}}
+    | conid conlist                 {{$$ = {astType:"data-match", id: $1, members: $2};}}
+    | lambda_pat                    {{$$ = $1;}}
     ;
+
+conlist
+  : conlist pat_var   {{$1.push($2); $$ = $1;}}
+  | pat_var           {{$$ = [$1];}}
+  ;
 
 list_pat // object
     : "[" list_pat_1_comma "]"  {{$$ = {astType:"list-match", list:$2}; }}
+    | "[]"                      {{$$ = {astType:"list-match", list:[]}; }}
     ;
     
 list_pat_1_comma // : [pat]
-    : list_pat_1_comma "," pat_var          {{$1.push($3); $$ = $1; }}
-    | pat_var                           {{$$ = [$1]; }}
+    : list_pat_1_comma "," apat         {{$1.push($3); $$ = $1; }}
+    | apat                              {{$$ = [$1]; }}
     ;
 
 pat_var
@@ -714,15 +747,15 @@ pat_var
 wildcard
   : '_'           {{$$ = {astType:"wildcard", pos: @$}; }}
   ;
-
-tuple_pat // object
-    :  "(" pat "," pat_list_1_comma ")" {{$4.unshift($2); $$ = {astType: "tuple_pat", members: $4, pos: @$}; }}
-    ;
     
-pat_list_1_comma // : [pat]
-    : pat_list_1_comma "," pat      {{$1.push($3); $$ = $1; }}
-    | pat                           {{$$ = [$1]; }}
-    ;
+lambda_pat
+  : "\" lambda_args "->"       {{$$ = {astType:"lambda-pat", numArgs:$2.length}; }}
+  ;
+
+lambda_args
+  : lambda_args wildcard     {{$1.push($2); $$ = $1;}}
+  | wildcard                 {{$$ = [$1];}}
+  ;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Literals

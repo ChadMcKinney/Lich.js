@@ -18,13 +18,14 @@ function initChat()
 	div.appendChild(chat);
 
 	chat.rows = 1;	
-	chat.style.width = "46%";
+	chat.style.width = "53%";
 	chat.style.top = "0px";
-	chat.style.opacity = "0.0"
-	chat.style.left = "55%"
-	chat.style.fontSize = "250%"
+	chat.style.opacity = "0.0";
+	chat.style.left = "45%";
+	chat.style.fontSize = "250%";
 	chat.style.height = (document.documentElement.clientHeight * 1.0) + "px";
-
+	chat.style.textAlign = "right";
+	chat.style.overflow = "hidden";
 	hideChat();
 }
 

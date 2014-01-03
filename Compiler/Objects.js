@@ -35,7 +35,7 @@
 	either expressed or implied, of the FreeBSD Project.
 */
 
-
+// Lich Object type enumeration
 var VOID = 0;
 var NOTHING = 1;
 var CLOSURE = 2;
@@ -43,9 +43,12 @@ var DICTIONARY = 3;
 var THUNK = 4;
 var WILDCARD = 5;
 var DATA = 6;
-var NUMBER = 7;
-var STRING = 8;
-var LIST = 9;
+var CLASS = 7;
+var NUMBER = 8;
+var STRING = 9;
+var LIST = 10;
+var ACTOR = 11;
+var PRIMITIVE = 12;
 
 function LichVoid() // Non-return value for the VM. 
 {
@@ -68,18 +71,30 @@ function lichData(name)
 	}
 }
 
-function lichClosure(argNames, rhs, mutable, namespace, decls)
+function lichClass(name)
 {
-	var _argNames = argNames;
+	return {
+		_classtype: name,
+		lichType: CLASS
+	}
+}
+
+function lichClosure(argPatterns, rhs, mutable, namespace, decls)
+{
+	var _argPatterns = argPatterns;
 	var _rhs = rhs;
 	var _mutable = typeof mutable !== "undefined" ? mutable : false;
 	var _namespace = typeof namespace !== "undefined" ? namespace : {};
 	var _decls = typeof decls !== "undefined" ? decls : [];
 
 	return { // Resolves circular dependencies with Lich.compileAST
-		
+		astType: "closure",
 		lichType: CLOSURE,
-		argNames: _argNames,
+		argPatterns: _argPatterns,
+		rhs: _rhs,
+		mutable: _mutable,
+		namespace: _namespace,
+		decls: _decls,
 
 		hasVar: function(name)
 		{
@@ -125,14 +140,17 @@ function lichClosure(argNames, rhs, mutable, namespace, decls)
 		invoke: function(args)
 		{
 			var i;
-			for(i = 0; i < args.length && i < _argNames.length; ++i)
+			for(i = 0; i < args.length && i < _argPatterns.length; ++i)
 			{
-				_namespace[_argNames[i]] = args[i];
+				if(typeof _argPatterns[i] === "string")
+					_namespace[_argPatterns[i]] = args[i]; // otherwise the variables have already been declared during pattern matching
+				else if(_argPatterns[i].astType == "varname")
+					_namespace[_argPatterns[i].id] = args[i];
 			}
 
-			if(i < _argNames.length) // Partial application
+			if(i < _argPatterns.length) // Partial application
 			{
-				return new lichClosure(_argNames.slice(i, _argNames.length), _rhs, _mutable, deepCopy(_namespace), _decls);
+				return new lichClosure(_argPatterns.slice(i, _argPatterns.length), _rhs, _mutable, deepCopy(_namespace), _decls);
 			}
 
 			else
@@ -155,5 +173,14 @@ function lichClosure(argNames, rhs, mutable, namespace, decls)
 function createPrimitive(name, argNames, primitiveFunc)
 {
 	primitiveFunc.astType = "primitive";
-	Lich.VM.reserveVar(name, new lichClosure(argNames, primitiveFunc));
+	primitiveFunc.primitiveName = name;
+
+	var varNames = new Array();
+
+	for(var i = 0; i < argNames.length; ++i)
+	{
+		varNames.push({astType:"varname", id: argNames[i]});
+	}
+
+	Lich.VM.reserveVar(name, new lichClosure(varNames, primitiveFunc));
 }

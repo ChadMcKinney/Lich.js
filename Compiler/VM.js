@@ -123,12 +123,66 @@ Lich.VM.printClosure = function(closure)
 {
 	var string = "(\\";
 
-	for(var i = 0; i < closure.argNames.length; ++i)
+	for(var i = 0; i < closure.argPatterns.length; ++i)
 	{
-		string = string.concat(closure.argNames[i] + " ");
+		if(closure.argPatterns[i].astType == "wildcard")
+			string = string + "_ ";
+		else
+			string = string.concat(Lich.VM.PrettyPrint(closure.argPatterns[i]) + " ");
 	}
 
 	return string.concat("->)");
+}
+
+Lich.VM.printAST = function(object)
+{
+	switch(object.astType)
+	{
+		case "wildcard":
+			return "_";
+
+		case "varname":
+			return object.id;
+
+		case "literal-match":
+			return object.value.value;
+
+		case "head-tail-match":
+			return "(" + Lich.VM.PrettyPrint(object.head).replace(/\"/g,"") + ":" + Lich.VM.PrettyPrint(object.tail).replace(/\"/g,"") + ")";
+
+		case "data-match":
+			var string = "(" + object.id + " ";
+
+			for(var i = 0; i < object.members.length; ++i)
+			{
+				string = string.concat(Lich.VM.PrettyPrint(object.members[i]).replace(/\"/g,""));
+
+				if(i == object.members.length - 1)
+					string = string.concat(")");
+				else
+					string = string.concat(" ");
+			}
+			return string;
+
+		case "list-match":
+			return Lich.VM.PrettyPrint(object.list);
+
+		case "lambda-pat":
+			var string = "(\\";
+
+			for(var i = 0; i < object.numArgs; ++i)
+			{
+				string = string.concat("_ ");
+
+				if(i == object.numArgs - 1)
+					string = string.concat("->)");
+			}
+
+			return string;
+
+		default:
+			return object.astType;
+	}
 }
 
 Lich.post = function(text)
@@ -145,6 +199,8 @@ Lich.VM.PrettyPrint = function(object)
 		return "Nothing"; // undefined == Nothing
 	else if(typeof object === "string")
 		return "\"" + object + "\"";
+	else if(typeof object === "number")
+		return object;
 	else if(object instanceof Array)
 		return Lich.VM.printArray(object);
 	else if(object.lichType == CLOSURE || object.lichType == THUNK)
@@ -153,14 +209,19 @@ Lich.VM.PrettyPrint = function(object)
 		return object._datatype;
 	else if(object.lichType == DICTIONARY)
 		return Lich.VM.printDictionary(object);
+	else if (object.lichType == ACTOR)
+		return "Actor";
 	else if(object == Lich.VM.Nothing)
 		return "Nothing";
-	else
+	else if(typeof (object.astType) === "undefined")
 		return object;
+	else
+		return Lich.VM.printAST(object);
 }
 
 Lich.VM.Print = function(object)
 {
 	if(object != Lich.VM.Void)
 		Lich.post(Lich.VM.PrettyPrint(object));
+		// Lich.post(Lich.VM.PrettyPrint(JSON.parse(JSON.stringify(object)))); // Message passing translation		
 }
