@@ -40,6 +40,8 @@
 // next we use the create primitive function to actually add it to the VM using these arguments:
 // createPrimitive("primitiveName", ["Array","Of","Argument","Names"], primitiveFunction);
 
+var lichProcesses = new Object;
+
 function netEval()
 {
 	var str = Lich.VM.getVar("_R");	
@@ -147,6 +149,21 @@ function chatPrimitive()
 }
 
 createPrimitive("chat", ["_R"], chatPrimitive);
+
+function narrate()
+{
+	var chatString = Lich.VM.getVar("_N");
+	var returnVal = Lich.VM.getVar("_R");
+
+	if(!(typeof chatString === "string"))
+		throw new Error("postNarration can only be applied to strings!");
+
+	updateNarration(chatString);
+
+	return returnVal;
+}
+
+createPrimitive("postNarration", ["_N","_R"], narrate);
 
 function checkNumStringOpError(l, op, r)
 {

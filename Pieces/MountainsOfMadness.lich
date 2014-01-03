@@ -17,22 +17,22 @@
 --Data Types
 ------------------------------------------------------------------------------------------------
 
-nullAction item holder receiver game = game{narration="That has no effect"}
-
-data Type {
-	item 		= 0,
-	monster 	= 1,
-	player 		= 2,
-	location 	= 3
-}
+--nullAction item holder receiver game = addNarration game "That has no effect."
 
 data Item {
 	name  			= "Not an item.",
+	farDescription  = "Not an item",
 	description 	= "Not an Item.",
 	carryable		= True,
-	action 			= nullAction,
-	cursed 			= False,
-	dataType 		= Type ::item
+	action 			= Nothing,
+	curse 			= Nothing
+}
+
+data Trap {
+	name 			= "Acid Trap",
+	description 	= "A jet of acid suddenly shoots from the ground under you. You are burned.",
+	attack 			= 20
+	dementia		= 5
 }
 
 data Location {
@@ -46,8 +46,7 @@ data Location {
 	description 	= "Nothing to see here.",
 	farDescription 	= "Nothing to see in the distance.",
 	items 			= (),
-	moveable 		= False,
-	dataType 		= Type ::location
+	moveable 		= False
 }
 
 data Player {
@@ -56,8 +55,7 @@ data Player {
 	location 	= "Nowhere",
 	description = "A rather academic looking researcher. Cold, but healthy.",
 	items 		= (),
-	sanity 		= 100,
-	dataType 	= Type::player
+	sanity 		= 100
 }
 
 data Monster {
@@ -67,8 +65,7 @@ data Monster {
 	description = "Not actually a monster.",
 	items 		= (),
 	attack 		= 25,
-	dementia	= 25,
-	dataType 	= Type::monster
+	dementia	= 25
 }
 
 data Game {
@@ -79,21 +76,7 @@ data Game {
 	gameOver	= False
 }
 
-data Cardinal {
-	north = 0,
-	south = 1,
-	east  = 2,
-	west  = 3,
-	up    = 4,
-	down  = 5
-}
-
-north = Cardinal::north
-south = Cardinal::south
-east  = Cardinal::east
-west  = Cardinal::west
-up    = Cardinal::up
-down  = Cardinal::down
+data Cardinal = North | South | East | West | Up | Down
 
 ------------------------------------------------------------------------------------------------
 --Game Actions
@@ -101,6 +84,9 @@ down  = Cardinal::down
 
 -- |addNarration String Game => Game
 addNarration story game = game{narration = (game::narration)+"\n"+story}
+
+-- |narrate Game => Game
+narrate game = postNarration (game::narration) game
 
 -- |placeItemAtLocation Item Location => Location
 placeItemAtLocation item location = location {items = newItems}
@@ -164,7 +150,7 @@ pickupCarryableItemFromLocation item location player game = updatePlayer newPlay
 pickupItemFromLocation item location player game = 
 	if ((player::location) == (location::name)) && item :: carryable
 		then pickupCarryableItemFromLocation item location player game
-		else game{narration="I can't carry that!"}
+		else addNarration game "I can't carray that!"
 
 -- |playerLocation Player Game => Location
 playerLocation player game = (game::locations) !! (player::location)
@@ -175,12 +161,12 @@ locationAtCardinal cardinal player game = newLocation
 		oldLocation = playerLocation player game
 		newLocation =
 			case cardinal of
-				(Cardinal::north) -> getLocation (oldLocation :: north) game
-				(Cardinal::south) -> getLocation (oldLocation :: south) game
-				(Cardinal::east ) -> getLocation (oldLocation :: east ) game
-				(Cardinal::west ) -> getLocation (oldLocation :: west ) game
-				(Cardinal::up   ) -> getLocation (oldLocation :: up   ) game
-				(Cardinal::down ) -> getLocation (oldLocation :: down ) game
+				North -> getLocation (oldLocation :: north) game
+				South -> getLocation (oldLocation :: south) game
+				East  -> getLocation (oldLocation :: east ) game
+				West  -> getLocation (oldLocation :: west ) game
+				Up    -> getLocation (oldLocation :: up   ) game
+				Down  -> getLocation (oldLocation :: down ) game
 
 -- |lookAtCardinal Cardinal Player Game => Game
 lookAtCardinal cardinal player game = addNarration description game
@@ -216,10 +202,10 @@ updateItemInHolder item itemName holder game = newGame
 	where
 		newHolder = (itemName=>item) : holder::items
 		newGame =
-			case newHolder ::dataType of
-				Type::monster 	-> updateMonster newHolder game
-				Type::player 	-> updatePlayer newHolder game
-				Type::location 	-> updateLocation newHolder game
+			case newHolder of
+				(Monster m) 	-> updateMonster newHolder game
+				(Player p)	 	-> updatePlayer newHolder game
+				(Location l) 	-> updateLocation newHolder game
 				_ 				-> game
 
 eraseItemInHolder item holder game = newGame
@@ -227,10 +213,13 @@ eraseItemInHolder item holder game = newGame
 		newHolder = holder{items = delete (item::name) (holder::items)}
 		newGame =
 			case newHolder::dataType of
-				Type::monster 	-> updateMonster newHolder game
-				Type::player 	-> updatePlayer newHolder game
-				Type::location 	-> updateLocation newHolder game
+				(Monster m) 	-> updateMonster newHolder game
+				(Player p)	 	-> updatePlayer newHolder game
+				(Location l) 	-> updateLocation newHolder game
 				_ 				-> game
+
+
+--inspectItem
 
 
 ------------------------------------------------------------------------------------------------
@@ -281,31 +270,41 @@ eraseItemInHolder item holder game = newGame
 ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------
 
-acidTrapAction item holder recepient game = narratedGame
+acidTrap		= Trap name desc attack demen
 	where
-		damagedPlayerGame 	= damagePlayer 25 player game
-		destroyedItemGame 	= eraseItemInHolder item holder damagedPlayerGame
-		narration 			= "As you go to pick it up, it explodes into a rain of acid, severely burning you." 
-		narratedGame 		= addNarration narration destroyedItemGame
+		name 	= "Acid Trap",
+		desc 	= "A jet of acid suddenly shoots from the ground under you. You are burned.",
+		attack 	= 20
+		demen	= 5
+
+revelation		= Trap name desc attack demen
+	where
+		name 	= "A hideous revelation",
+		desc 	= "All at once an insane revelation enters your mind. You are overcome with a vision from beyond dimensions, revealing to you just how small a mote your existence is in comparision to the vast NOTHINGNESS of the entire universe. You feel yourself losing grip with sanity.",
+		attack 	= 0
+		demen	= 20
+
+
 
 -- |dogCorpse 	=>Item
-dogCorpse 		= Item name desc carry action
+dogCorpse 		= Item name fDesc desc
 	where
 		name 	= "DogCorpse"
-		desc 	= "A dessicated dog corpse. It appears to have been...dissected."
-		carry	= True
-		action 	= acidTrapAction
+		fDesc 	= "A dessicated dog corpse."
+		desc 	= "Upon closer inspection you find that it appears to have been...dissected."
 
 -- |corpse2 	=>Item
-corpse 			= Item name desc
+corpse 			= Item name fDesc desc
 	where
 		name 	= "Corpse"
-		desc 	= "A dessicated corpse. It appears to have been...dissected."
+		fDesc 	= "The dessicated corpse of an antarctic researcher."
+		desc 	= "It appears to have been...dissected. The brain is removed, as are several organs. The incisions appear to have been done with surgical precision."
 
-corpse2 		= Item name desc
+corpse2 		= Item name fDesc desc
 	where
 		name 	= "Corpse2"
-		desc 	= "A bloated corpse. It appears to have been...amputated."
+		fDesc 	= "A bloated corpse of a scientist"
+		desc 	= "Several of the scientist's limbs appear to have been amputated. This was not done by a wild animal as the wounds have been cauterized."
 
 camp 			= Location "Camp" n s e w u d desc fDesc items mov
 	where
@@ -316,7 +315,7 @@ camp 			= Location "Camp" n s e w u d desc fDesc items mov
 		u 		= "Nothing"
 		d 		= "Nothing"
 		desc 	= "A base camp for a previous expedition to Antartica."
-		fDesc 	= "a white blasted, frigid looking camp."	
+		fDesc 	= "You see a white blasted, frigid looking camp."	
 		items 	= ()
 		mov 	= True
 
@@ -385,10 +384,11 @@ ruins 	 		= Location "Ruins" n s e w u d desc fDesc items mov
 		items 	= ()
 		mov 	= True
 
-carvings 		= Item name description
+carvings 		= Item name fDesc description
 	where
 		name 	= "Carvings"
-		desc 	= "Ornate carvings which depict, minimally yet beautifully, a large underground city. On closer inspection strange creatures can be seen inhabiting the structures. They appear to be dissecting...or dining...on something."
+		fdesc 	= "Ornate carvings."
+		desc 	= "Otherworldly carvings which depict, minimally yet beautifully, a large underground city. On closer inspection strange creatures can be seen inhabiting the structures. They appear to be dissecting...or dining...on something."
 
 underRuins 		= Location "UnderRuins" n s e w u d desc fDesc items mov
 	where
@@ -404,9 +404,10 @@ underRuins 		= Location "UnderRuins" n s e w u d desc fDesc items mov
 		mov 	= True
 
 
-mural 	 		= Item name description
+mural 	 		= Item name fDesc description
 	where
 		name 	= "Mural"
+		fdesc 	= "Some kind of mural."
 		desc 	= "An intricately constructed mural, made of some kind of crystalline materia. Seems almost religious or iconic in nature. Depicts a vaugely orb shaped creature with a multitude of appendages and sub-orb like structures. It appears to be swallowing something...or perhaps talking to it?"
 
 murals 	 		= Location "Murals" n s e w u d desc fDesc items mov
@@ -422,9 +423,10 @@ murals 	 		= Location "Murals" n s e w u d desc fDesc items mov
 		items 	= ("Mural" => mural)
 		mov 	= True
 
-mural2  		= Item name description
+mural2  		= Item name fDesc description
 	where
 		name 	= "Mural2"
+		fdesc 	= "Some kind of mural."
 		desc 	= ""
 
 underMurals 	= Location "UnderMurals" n s e w u d desc fDesc items mov
@@ -446,23 +448,43 @@ gameLocations 	 = finalDic
 		locDic2  = ("Ruins"=>ruins,"UnderRuins"=>underRuins,"Murals"=>murals,"UnderMurals"=>underMurals)
 		finalDic =  locDic : locDic2
 
+myName = (clientName 0)
+
+
+
 demoPlayer 		= Player "casiosk1" 100 "Camp"
 demoShoggoth 	= Monster "Shoggoth"
 demoGame 		= Game ("casiosk1"=>demoPlayer) ("Shoggoth"=>demoShoggoth) gameLocations
 
-myName = (clientName 0)
+---------------------------------------------------------------------------------------------------------------------
+-- IO Functions
+---------------------------------------------------------------------------------------------------------------------
 
-startMountainsOfMadness playerName = newGame
+--Main Game loop
+madnessLoop game = 
+	receive m of
+		(\x->)	-> madnessLoop $ narrate $ m game
+		_ 		-> print "Finished!"
+
+--Starts the main game loop
+startMountainsOfMadness playerName = spawn "madnessLoop" (madnessLoop newGame)
 	where
 		newPlayer 	= Player playerName 100 "Camp"
 		newGame 	= Game (playerName=>newPlayer) () gameLocations
 
-walk cardinal =
-	if serverGame /= Nothing
-		then movePlayer cardinal (getPlayer myName serverGame) serverGame
-		else Nothing
+--Sends the game loop a message walk a direction
+walk cardinal = send "madnessLoop" walkFunc
+	where
+		walkFunc game = movePlayer cardinal (getPlayer myName game) game
 
-look cardinal =
-	if serverGame /= Nothing
-		then lookAtCardinal cardinal (getPlayer myName serverGame) serverGame
-		else Nothing
+--Sends the main game loop a message to look at a direction
+look cardinal = send "madnessLoop" lookFunc 
+	where
+		lookFunc game = lookAtCardinal cardinal (getPlayer myName game) game
+
+	
+
+
+
+
+

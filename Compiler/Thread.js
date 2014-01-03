@@ -130,10 +130,8 @@ this.addEventListener("message",
 		switch(event.data.type)
 		{
 			case "init":
-				Lich.post("Actor init event.data.func = " + event.data.func);
-				// threadFunc = JSON.parse(event.data.func);
+				//Lich.post("Actor init event.data.func = " + event.data.func);
 				threadFunc = Lich.parseJSON(event.data.func);
-				Lich.post("Actor init threadFunc = " + Lich.VM.PrettyPrint(threadFunc));
 				Lich.post("Actor initialized.");
 				break;
 
@@ -141,9 +139,8 @@ this.addEventListener("message",
 				Lich.VM.post("Actor: send");
 				// var arg = JSON.parse(event.data.message);
 				var arg = Lich.parseJSON(event.data.message);
-				Lich.post("Actor message = " + event.data.message);
-				Lich.post("Actor arg = " + Lich.VM.PrettyPrint(arg));
-				// Lich.VM.Print(threadFunc.invoke([arg]));
+				//Lich.post("Actor message = " + event.data.message);
+				//Lich.post("Actor arg = " + Lich.VM.PrettyPrint(arg));
 				Lich.VM.Print(executeThreadFunc(arg));
 				Lich.VM.post("Actor closing.");
 				self.close();
@@ -151,6 +148,9 @@ this.addEventListener("message",
 
 			case "receive":
 				break;
+
+			case "finish":
+				return self.close();
 
 			default:
 				Lich.post("Actor default event.data.type: " + event.data.type);

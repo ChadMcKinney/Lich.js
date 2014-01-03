@@ -7,26 +7,25 @@ var socket,clientName;
 
 function broadcastLichCode(code)
 {
-	console.log("Sending Code:" + code);
+	//console.log("Sending Code:" + code);
 	socket.emit('BroadcastCode',code);
 }
 
 function broadcastNetEval(code)
 {
-	console.log("Sending Code:" + code);
+	//console.log("Sending Code:" + code);
 	socket.emit('BroadcastNetEval',code);
 }
 
 function broadcastTyping(text)
 {
-	console.log("Sending Typing: " + text);
+	//console.log("Sending Typing: " + text);
 	socket.emit('Typing',clientName, text);
 }
 
 function receivedTyping(id,text)
 {
-	console.log("Received Typing:" + text);
-	
+	//console.log("Received Typing:" + text);
 	writeTextToTerminal(id,text);
 }
 
@@ -160,6 +159,27 @@ function connectToWebSocketServer()
 	socket.on('StateSyncClient',receiveStateSync);
 	socket.emit('Login');
 	initChat();
+
+	document.addEventListener("keydown", function(e) {
+  		if (e.keyCode == 27) {
+    		toggleFullScreen();
+  		}
+	}, false);
+
+	//document.addEventListener("keydown", function(e) {
+ 	//	if (e.keyCode == 27) {
+    //		if (document.cancelFullScreen) {
+    //  			document.cancelFullScreen();
+    //		} else if (document.mozCancelFullScreen) {
+    //  			document.mozCancelFullScreen();
+    //		} else if (document.webkitCancelFullScreen) {
+    //			document.webkitCancelFullScreen();
+    //		}
+ 	//	}
+ 	//	document.location = jQuery('.galleria-thumblink').attr('href');
+	//}, false);
+
+	//toggleFullScreen();
 }
 
 function sendStateSync(state)
@@ -171,6 +191,31 @@ function sendStateSync(state)
 function receiveStateSync(state)
 {
 	console.log("Received state:\n"+state);
+}
+
+////////////////////////////////////////////////////////////////////////
+// Full Screen
+////////////////////////////////////////////////////////////////////////
+
+function toggleFullScreen() {
+  if ((document.fullScreenElement && document.fullScreenElement !== null) ||    // alternative standard method
+      (!document.mozFullScreen && !document.webkitIsFullScreen)) {               // current working methods
+    if (document.documentElement.requestFullScreen) {
+      document.documentElement.requestFullScreen();
+    } else if (document.documentElement.mozRequestFullScreen) {
+      document.documentElement.mozRequestFullScreen();
+    } else if (document.documentElement.webkitRequestFullScreen) {
+      document.documentElement.webkitRequestFullScreen(Element.ALLOW_KEYBOARD_INPUT);
+    }
+  } else {
+    if (document.cancelFullScreen) {
+      document.cancelFullScreen();
+    } else if (document.mozCancelFullScreen) {
+      document.mozCancelFullScreen();
+    } else if (document.webkitCancelFullScreen) {
+      document.webkitCancelFullScreen();
+    }
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////
