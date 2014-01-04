@@ -39,7 +39,8 @@ function createTextArea(name,num,total)
 		input.style.zIndex = 10;
 		input.rows = 1;	
 		input.style.width = "100%";
-		input.style.opacity = "1.0";
+		
+		input.style.opacity = getShowingOpacity();
 		div.appendChild(input);
 
 		//Terminal nameTag
@@ -50,7 +51,7 @@ function createTextArea(name,num,total)
 		nameTag.value = name;
 		nameTag.readOnly = true;
 		nameTag.rows = 1;	
-		nameTag.style.opacity = "0.75";
+		nameTag.style.opacity = getShowingOpacity();
 		div.appendChild(nameTag);
 
 		if(name == clientName)
@@ -59,11 +60,11 @@ function createTextArea(name,num,total)
 			nameTag.style.color = "rgb(166,48,48)";
 	}
 		
-	input.style.opacity = "1.0";
+	input.style.opacity = getShowingOpacity();
 	input.style.top = (document.documentElement.clientHeight * 0.8 * (num/total)) + "px";
 	input.style.height = (document.documentElement.clientHeight * 0.8 * (1/total)) + "px";
 
-	nameTag.style.opacity = "0.75";
+	nameTag.style.opacity = getShowingOpacity();
 	nameTag.style.top = (document.documentElement.clientHeight * 0.8 * (num/total)) + "px";
 	nameTag.style.height = (document.documentElement.clientHeight * 0.8 * (1/total)) + "px";
 }
@@ -115,15 +116,25 @@ function hideTextAreas()
 	for (var i=0;i<users.length;i++)
 	{ 
 		var input = document.getElementById("terminal"+users[i].name);
+		var nameTag  = document.getElementById("nameTag"+users[i].name); 
 		
 		if(input!= null)
 		{
 			input.style.opacity = "0.0";
+			nameTag.style.opacity = "0.0";
 		}
 	}
 
 	var postArea = document.getElementById("post");
 	postArea.style.opacity = "0.0";
+}
+
+function getShowingOpacity()
+{
+	if(playingMadness)
+		return "0.0";
+	else
+		return "1.0";
 }
 
 function showTextAreas()
@@ -134,10 +145,11 @@ function showTextAreas()
 		
 		if(input!= null)
 		{
-			input.style.opacity = "1.0";
+			input.style.opacity = getShowingOpacity();
 		}
 	}
 
 	var postArea = document.getElementById("post");
-	postArea.style.opacity = "1.0";
+	postArea.style.opacity = getShowingOpacity();
 }
+

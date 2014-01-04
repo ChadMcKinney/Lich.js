@@ -38,3 +38,5 @@
 module Prelude where
 
 double x = x * 2
+
+myName = (clientName 0)
