@@ -7,7 +7,7 @@ var socket,clientName;
 
 function broadcastLichCode(code)
 {
-	//console.log("Sending Code:" + code);
+	console.log("Sending Code:" + code);
 	socket.emit('BroadcastCode',code);
 }
 
@@ -165,21 +165,6 @@ function connectToWebSocketServer()
     		toggleFullScreen();
   		}
 	}, false);
-
-	//document.addEventListener("keydown", function(e) {
- 	//	if (e.keyCode == 27) {
-    //		if (document.cancelFullScreen) {
-    //  			document.cancelFullScreen();
-    //		} else if (document.mozCancelFullScreen) {
-    //  			document.mozCancelFullScreen();
-    //		} else if (document.webkitCancelFullScreen) {
-    //			document.webkitCancelFullScreen();
-    //		}
- 	//	}
- 	//	document.location = jQuery('.galleria-thumblink').attr('href');
-	//}, false);
-
-	//toggleFullScreen();
 }
 
 function sendStateSync(state)

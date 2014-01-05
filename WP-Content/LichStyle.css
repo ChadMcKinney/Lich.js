@@ -139,8 +139,8 @@ textarea::selection {
 
 	z-index:10;
 
-	-webkit-transition: height 2s,top 2s, opacity 1s;
-			transition: height 2s,top 2s, opacity 1s;
+	-webkit-transition: height 2s,top 2s, opacity 4s;
+			transition: height 2s,top 2s, opacity 4s;
 	
 	-webkit-box-sizing:border-box;
 	   -moz-box-sizing:border-box;
@@ -181,6 +181,35 @@ textarea::selection {
 	font-smooth: true;
 }
 
+.outerBubble{
+	position: absolute;
+	background-color: transparent;
+	color: white;
+	top: 0px;
+	left: 0px;
+	width: 100px;
+	height: 100px;
+	display: table;
+	opacity: 1.0;
+	font-size: 250%;
+	font-family: 'OCRAMedium';
+	z-index: 21;
+	overflow: hidden;
+}
+
+.outerBubble .innerBubble{
+	display: table-cell;
+    vertical-align: middle;
+    width: 100%;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.fadeElement{
+	-webkit-transition: height 2s,top 2s, opacity 4s;
+			transition: height 2s,top 2s, opacity 4s;
+}
+
 #post {
 	position: absolute;
 	top: 80%;
@@ -214,6 +243,16 @@ textarea::selection {
 	font-family: Ubuntu Mono, DejaVu Sans Mono, Liberation Mono,Menlo,Bitstream Vera Sans Mono,Consolas,Monaco,Lucida Console,Courier New, monospace;
 	font-smooth: true;
 	overflow: hidden;
+}
+
+.redText {
+	color: #8A0808;
+	font-size: 200%;
+}
+
+.playerInputText {
+	color: #8A0808;
+	font-size: 75%;
 }
 
 .nameTag {

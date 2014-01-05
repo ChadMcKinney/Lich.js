@@ -17,7 +17,7 @@
 --Data Types
 ------------------------------------------------------------------------------------------------
 
---nullAction item holder receiver game = addNarration game "That has no effect."
+--
 
 data Item {
 	name  			= "Not an item.",
@@ -78,9 +78,17 @@ data Game {
 
 data Cardinal = North | South | East | West | Up | Down
 
+north 	= North
+south 	= South
+east 	= East
+west 	= West
+up 		= Up
+down 	= Down
+
 ------------------------------------------------------------------------------------------------
 --Game Actions
 ------------------------------------------------------------------------------------------------
+
 
 -- |addNarration String Game => Game
 addNarration story game = game{narration = (game::narration)+"\n"+story}
@@ -175,16 +183,24 @@ lookAtCardinal cardinal player game = addNarration description game
 
 -- |movePlayer Cardinal Player Game => Game
 movePlayer cardinal player game = 
-	if newLocation ::moveable
+	if newLocation::moveable
 		then updatePlayer newPlayer game
 		else addNarration "That way is blocked." game 
 	where
 		newLocation 	= locationAtCardinal cardinal player game
 		newPlayer 		= player{location=newLocation::name}
+
+moveMonster cardinal monster game = 
+	if newLocation::moveable
+		then updateMonster newMonster game
+		else addNarration "That way is blocked." game 
+	where
+		newLocation 	= locationAtCardinal cardinal player game
+		newMonster 		= monster{location=newLocation::name}
 	
 -- |checkPlayerDeath Player Game => Game
 checkPlayerDeath player game = 
-	if (player :: health) < 1
+	if player::health < 1
 		then (addNarration "You died." game){gameOver = True}
 		else game
 
@@ -216,10 +232,82 @@ eraseItemInHolder item holder game = newGame
 				(Monster m) 	-> updateMonster newHolder game
 				(Player p)	 	-> updatePlayer newHolder game
 				(Location l) 	-> updateLocation newHolder game
-				_ 				-> game
+				_ 				-> gam
+				
+curseItem item aCurse location game = updateItemInHolder newItem (item::name) location game
+	where
+		newItem = item{curse = aCurse}
 
+nullAction item holder receiver game = addNarration game "That has no effect."
 
---inspectItem
+--findSomethingWithName String -> Game -> Game
+findSomethingWithName name game = player ? monster ? location
+	where
+		player 		= getPlayer name game
+		monster 	= getMonster name game
+		location 	= getLocation name game
+
+--useItemOnSomething String -> String -> String -> Game -> Game
+useItemOnSomething playerName itemName receiverName game = (item::action) item player something game
+	where
+		player 		= getPlayer playerName game
+		item 		= play::items !! itemName
+		something 	= findSomethingWithName
+
+--contains :: a -> Dict -> Bool
+containsKey key dict = (dict !! key) != Nothing
+
+--nullAction:: Item -> a -> b -> Game -> Game
+nullAction item holder receiver game = addNarration game "That has no effect."
+
+--closedMetalDoor :: String -> Item
+closedMetalDoor name = Item name farDescription description carryable action curse
+	where
+		farDescription  = "A sturdy looking metal door. It's closed.",
+		description 	= "Seems to be made of stern stuff. Not getting through here without the key.",
+		carryable		= False,
+		action 			= Nothing,
+		curse 			= Nothing
+
+--openedMetalDoor :: String -> Item
+openedMetalDoor name = Item name farDescription description carryable action curse
+	where
+		farDescription  = "A sturdy looking metal door. It's wide open.",
+		description 	= "Seems to be made of stern stuff.",
+		carryable		= False,
+		action 			= Nothing,
+		curse 			= Nothing
+
+--openDoorWithKey :: Item -> Player -> Location -> Game -> Game
+openDoorWithKey key player door location game = newGame
+	where
+		newDoor 	= openedMetalDoor "OpenMetalDoor"
+		newPlayer 	= removeItemFromPlayer key player
+		newLocation = placeItemAtLocation newDoor
+		newGame 	= 
+			if member (door::name) (location::items)
+				then updatePlayer newPlayer $ updateLocation newLocation game
+				else game
+
+--closeDoor :: String -> Location -> Game -> Game
+closeDoor doorName location game = newGame
+	where
+		newDoor 	= closedMetalDoor "ClosedMetalDoor"
+		newLocation = placeItemAtLocation newDoor
+		newGame 	=
+			if member (doorName) (location::items)
+				then updateLocation newLocation game
+				else game
+
+--key :: Item
+key = Item name farDescription description carryable action curse
+	where
+		name  			= "Key",
+		farDescription  = "A metal key.",
+		description 	= "The key appears to be made from some kind of metal. Strangely you can feel a slight vibration and warmth emmiting from it.",
+		carryable		= True,
+		action 			= openDoorWithKey,
+		curse 			= Nothing
 
 
 ------------------------------------------------------------------------------------------------
@@ -283,8 +371,6 @@ revelation		= Trap name desc attack demen
 		desc 	= "All at once an insane revelation enters your mind. You are overcome with a vision from beyond dimensions, revealing to you just how small a mote your existence is in comparision to the vast NOTHINGNESS of the entire universe. You feel yourself losing grip with sanity.",
 		attack 	= 0
 		demen	= 20
-
-
 
 -- |dogCorpse 	=>Item
 dogCorpse 		= Item name fDesc desc
@@ -448,8 +534,6 @@ gameLocations 	 = finalDic
 		locDic2  = ("Ruins"=>ruins,"UnderRuins"=>underRuins,"Murals"=>murals,"UnderMurals"=>underMurals)
 		finalDic =  locDic : locDic2
 
-myName = (clientName 0)
-
 
 
 demoPlayer 		= Player "casiosk1" 100 "Camp"
@@ -463,28 +547,29 @@ demoGame 		= Game ("casiosk1"=>demoPlayer) ("Shoggoth"=>demoShoggoth) gameLocati
 --Main Game loop
 madnessLoop game = 
 	receive m of
-		(\x->)	-> madnessLoop $ narrate $ m game
-		_ 		-> print "Finished!"
+		(\x->)		-> tailCall $ madnessLoop $ narrate $ m game
+		"finished" 	-> print "Finished!"
 
 --Starts the main game loop
-startMountainsOfMadness playerName = spawn "madnessLoop" (madnessLoop newGame)
+startMountainsOfMadness playerName = spawn "madnessLoop" madnessLoop [newGame]
 	where
 		newPlayer 	= Player playerName 100 "Camp"
 		newGame 	= Game (playerName=>newPlayer) () gameLocations
 
 --Sends the game loop a message walk a direction
-walk cardinal = send "madnessLoop" walkFunc
+walk cardinal playerName = walkFunc :>> "madnessLoop"
 	where
-		walkFunc game = movePlayer cardinal (getPlayer myName game) game
+		walkFunc game = movePlayer cardinal (getPlayer playerName game) game
 
 --Sends the main game loop a message to look at a direction
-look cardinal = send "madnessLoop" lookFunc 
+look cardinal playerName = lookFunc :>> "madnessLoop"  
 	where
-		lookFunc game = lookAtCardinal cardinal (getPlayer myName game) game
+		lookFunc game = lookAtCardinal cardinal (findSomethingWithName playerName game) game
 
-	
-
-
+--Sends the main game loop a message to walk a MONSTER a certain direction
+shamble cardinal monsterName = shambleFunc :>> "madnessLoop"
+	where
+		shambleFunc game = moveMonster cardinal (getMonster monsterName game) game
 
 
 

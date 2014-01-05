@@ -42,6 +42,19 @@
 
 var lichProcesses = new Object;
 
+function startMadnessIntro(ret)
+{
+	var str = Lich.VM.getVar("_R");	
+	madnessIntro();
+	//if(!(typeof str === "string"))
+	//	throw new Error("netEval can only be applied to a string!");
+
+	//broadcastNetEval(str);
+	ret(Lich.VM.Void);
+}
+
+createPrimitive("madnessIntro", ["_R"], startMadnessIntro);
+
 function netEval(ret)
 {
 	var str = Lich.VM.getVar("_R");	
