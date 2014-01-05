@@ -130,6 +130,13 @@ getPlayer playerName game = (game :: players) !! playerName
 -- |getMonster String     Game => Player
 getMonster monsterName game = (game :: monsters) !! monsterName
 
+--findSomethingWithName String -> Game -> Game
+findSomethingWithName name game = player ? monster ? location
+	where
+		player 		= getPlayer name game
+		monster 	= getMonster name game
+		location 	= getLocation name game
+
 -- |updatePlayer Player Game => Game
 updatePlayer player game = game{players = newPlayers}
 	where
@@ -197,6 +204,15 @@ moveMonster cardinal monster game =
 	where
 		newLocation 	= locationAtCardinal cardinal player game
 		newMonster 		= monster{location=newLocation::name}
+
+movePlayerOrMonster name cardinal game = newGame
+	where
+		something = findSomethingWithName name game
+		newGame =
+			case something of
+				Monster -> moveMonster something game
+				Player 	-> movePlayer something game
+				_		-> game
 	
 -- |checkPlayerDeath Player Game => Game
 checkPlayerDeath player game = 
@@ -239,13 +255,6 @@ curseItem item aCurse location game = updateItemInHolder newItem (item::name) lo
 		newItem = item{curse = aCurse}
 
 nullAction item holder receiver game = addNarration game "That has no effect."
-
---findSomethingWithName String -> Game -> Game
-findSomethingWithName name game = player ? monster ? location
-	where
-		player 		= getPlayer name game
-		monster 	= getMonster name game
-		location 	= getLocation name game
 
 --useItemOnSomething String -> String -> String -> Game -> Game
 useItemOnSomething playerName itemName receiverName game = (item::action) item player something game
@@ -547,7 +556,7 @@ demoGame 		= Game ("casiosk1"=>demoPlayer) ("Shoggoth"=>demoShoggoth) gameLocati
 --Main Game loop
 madnessLoop game = 
 	receive m of
-		(\x->)		-> tailCall $ madnessLoop $ narrate $ m game
+		(\x->)		->  madnessLoop . narrate $ m game
 		"finished" 	-> print "Finished!"
 
 --Starts the main game loop
@@ -559,17 +568,12 @@ startMountainsOfMadness playerName = spawn "madnessLoop" madnessLoop [newGame]
 --Sends the game loop a message walk a direction
 walk cardinal playerName = walkFunc :>> "madnessLoop"
 	where
-		walkFunc game = movePlayer cardinal (getPlayer playerName game) game
+		walkFunc game = movePlayerOrMonster playerName cardinal game
 
 --Sends the main game loop a message to look at a direction
 look cardinal playerName = lookFunc :>> "madnessLoop"  
 	where
 		lookFunc game = lookAtCardinal cardinal (findSomethingWithName playerName game) game
-
---Sends the main game loop a message to walk a MONSTER a certain direction
-shamble cardinal monsterName = shambleFunc :>> "madnessLoop"
-	where
-		shambleFunc game = moveMonster cardinal (getMonster monsterName game) game
 
 
 
