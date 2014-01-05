@@ -142,12 +142,8 @@ function lichClosure(argPatterns, rhs, mutable, namespace, decls)
 			}
 		},
 
-		////////////////////////////////////////////////////////////////////
-		// I NEED TO CONVERT THE DECLS AND RES TO CPS CPS CPS CPS CPS
-		///////////////////////////////////////////////////////////////////
 		invoke: function(args, ret)
 		{
-			Lich.post("Closure.invoke(args) = " + Lich.VM.PrettyPrint(args));
 			var i;
 			for(i = 0; i < args.length && i < _argPatterns.length; ++i)
 			{
@@ -180,10 +176,8 @@ function lichClosure(argPatterns, rhs, mutable, namespace, decls)
 					_decls, 
 					function(elem,index,next)
 					{
-						Lich.post("_decls elem = " + Lich.VM.PrettyPrint(elem));
 						Lich.compileAST(elem, function(declRes)
 						{
-							Lich.post("_decls declRes = " + Lich.VM.PrettyPrint(declRes));
 							next();
 						});
 					},
@@ -191,7 +185,6 @@ function lichClosure(argPatterns, rhs, mutable, namespace, decls)
 					{
 						Lich.compileAST(_rhs, function(res)
 						{
-							Lich.post("closure res = " + res);
 							Lich.VM.popProcedure();
 							ret(res);
 						})

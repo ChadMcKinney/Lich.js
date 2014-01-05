@@ -385,7 +385,6 @@ Lich.dataMatch = function(object, pat)
 
 Lich.match = function(object, pat, ret)
 {
-	Lich.post("Lich.match object = " + object + " pat = " + pat);
 	switch(pat.astType)
 	{
 	case "varname":
@@ -533,7 +532,6 @@ Lich.match = function(object, pat, ret)
 		break;
 
 	case "lambda-pat":
-		Lich.post("LAMBDA PAT!: " + Lich.VM.PrettyPrint(object));
 		var type = Lich.getType(object);
 		if(type == CLOSURE || type == THUNK)
 		{
@@ -622,8 +620,6 @@ Lich.compileDeclFun = function(ast,ret)
 
 Lich.compileDeclThunk = function(ast,ret)
 {
-	Lich.post("compileDeclThunk ast.rhs = " + ast.rhs);
-
 	if(ast.args.length == 0)
 	{
 		var thunk = new lichClosure([], ast.rhs);
@@ -646,7 +642,6 @@ Lich.compileFunWhere = function(ast,ret)
 	// Currently the parser doesn't allow for this.
 	for(var i = 0; i < ast.decls.length; ++i)
 	{
-		Lich.post("compileFunWhere decls[i] = " + Lich.VM.PrettyPrint(ast.decls[i]));
 		ast.decls[i].astType = "thunk";
 	}
 
