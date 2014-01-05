@@ -136,7 +136,7 @@ qconsym = qs:(conid ".")+ ref:((!"." consym) !".") {qs = flatten(qs).join(""); r
 
 
 %start start_
-//%error-verbose
+%error-verbose
 //%debug
 %% /* language grammar */
 

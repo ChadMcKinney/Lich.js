@@ -1056,7 +1056,7 @@ Lich.compileDataUpdate = function(ast,ret)
 			ast.members, 
 			function(elem,i,next)
 			{
-				Lich.compileAST(elem, function(elemRes)
+				Lich.compileAST(elem.exp, function(elemRes)
 				{
 					data[ast.members[i].id] = elemRes;
 					next();

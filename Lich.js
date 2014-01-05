@@ -335,7 +335,7 @@ function parseCurrentLine()
 	
 	catch(e)
 	{
-		Lich.post(e);
+		Lich.post(e + " : " + Lich.Lexer.yy.lexer.yylloc);
 	}
 }
 
