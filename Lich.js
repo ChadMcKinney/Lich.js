@@ -317,8 +317,8 @@ function parseCurrentLine()
 	str = line.line;
 	broadcastLichCode(str);
 
-	//try
-	//{
+	try
+	{
 		if(/\S/.test(str)) // if not just whitespace
 		{
 			var ast = Lich.parse(str); // interactive parsing
@@ -331,12 +331,12 @@ function parseCurrentLine()
 				Lich.VM.Print(res);
 			})
 		}
-	//}
+	}
 	
-	//catch(e)
-	//{
-	//	Lich.post(e);
-	//}
+	catch(e)
+	{
+		Lich.post(e);
+	}
 }
 
 /*
@@ -6872,8 +6872,8 @@ function compileLich()
 
 function compileLich()
 {
-	//try
-	//{
+	try
+	{
 		var oRequest = new XMLHttpRequest();
 		var sURL = "http://"
 		         + self.location.hostname
@@ -6896,10 +6896,10 @@ function compileLich()
 		{
 			Lich.post("Unable to load Prelude module.");
 		}	
-	//}
+	}
 	
-	//catch(e)
-	//{
-	//	Lich.post(e);
-	//}
+	catch(e)
+	{
+		Lich.post(e);
+	}
 }
