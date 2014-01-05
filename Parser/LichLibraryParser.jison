@@ -29,6 +29,8 @@
 "True"|"true"               return {val:"true",typ:"True"};
 "&&"                        return {val:"&&",typ:"&&"};
 "||"                        return {val:"||",typ:"||"};
+":>>"                       return {val:":>>",typ:":>>"};
+"<<:"                       return {val:"<<:",typ:"<<:"};
 "=>"                        return {val:"=>",typ:"=>"};
 "->"                        return {val:"->",typ:"->"};
 "=="                        return {val:"==",typ:"=="};
@@ -92,6 +94,7 @@
 "of"                        return {val:"of",typ:"of"};
 "type"                      return {val:"type",typ:"type"};
 "Nothing"                   return {val:"Nothing",typ:"Nothing"};
+"receive"                   return {val:"receive",typ:"receive"};
 [a-z][A-Za-z0-9_]*          return {val:yytext,typ:"varid"};
 [A-Z][A-Za-z0-9_]*          return {val:yytext,typ:"conid"};
 \"([^\"])*\"                return {val:yytext,typ:"string-lit"};
@@ -373,6 +376,7 @@ binop
   | "=<<"       {{$$ = $1;}}
   | "<<"        {{$$ = $1;}}
   | "?"         {{$$ = $1;}}
+  | ":>>"       {{$$ = $1;}}
   ;
 
 //  lexp OP infixexp            {{ ($3).unshift($1,$2); $$ = $3; }}
@@ -382,9 +386,10 @@ binop
 lexp // : object
   : "if" exp "then" exp "else" exp  {{$$ = {astType:"ite",e1:$2,e2:$4,e3:$6,pos:@$}; }}
   | fexp                            {{$$ = ($1.length === 1) ? ($1[0]) : {astType:"application", exps:$1,pos:@$}; }}
-  | exp "$" exp                     {{$$ = {astType:"function-application-op", exp1: $1, exp2: $3};}}
+  | exp "$" exp                     {{$$ = {astType:"function-application-op", lhs: $1, rhs: $3};}}
   | '\' apats "->" exp              {{$$ = {astType:"lambda", args: $2, rhs: $4, pos: @$}; }}
   | "case" exp "of" "†" alts "‡"    {{$$ = {astType:"case", exp: $2, alts: $5, pos: @$}; }}
+  | "receive" "†" alts "‡"   {{$$ = {astType:"receive", alts:$4, pos:@$};}}
   | "let" decls "in" exp            {{$$ = {astType:"let", decls: $2, exp: $4, pos: @$}; }}
   | exp qop lexp                    {{$$ = {astType:"binop-exp",op:($2).id.id,lhs:$1,rhs:$3,pos:@$};}}
   ;

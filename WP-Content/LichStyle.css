@@ -47,7 +47,7 @@ body {
     margin-left: auto;
     margin-right: auto;
     overflow: hidden;
-    font-family: Ubuntu Mono, DejaVu Sans Mono, Liberation Mono,Bitstream Vera Sans Mono,Consolas,Monaco,Lucida Console,Courier New, monospace;
+    font-family: Ubuntu Mono, DejaVu Sans Mono, Liberation Mono,Menlo,Bitstream Vera Sans Mono,Consolas,Monaco,Lucida Console,Courier New, monospace;
 }
 
 .terminal, .chat, #post {
@@ -58,7 +58,7 @@ body {
 	border: none;
 	outline: 0;
 	outline: none;
-	font-family: Ubuntu Mono, DejaVu Sans Mono, Liberation Mono,Bitstream Vera Sans Mono,Consolas,Monaco,Lucida Console,Courier New, monospace;
+	font-family: Ubuntu Mono, DejaVu Sans Mono, Liberation Mono,Menlo,Bitstream Vera Sans Mono,Consolas,Monaco,Lucida Console,Courier New, monospace;
 	/* background : black;
 	color: white; 
 	font-size: 1.125em;
@@ -177,7 +177,7 @@ textarea::selection {
 	outline: 0;
 	outline: none;
 	font-size: 100%;
-	font-family: Ubuntu Mono, DejaVu Sans Mono, Liberation Mono,Bitstream Vera Sans Mono,Consolas,Monaco,Lucida Console,Courier New, monospace;
+	font-family: Ubuntu Mono, DejaVu Sans Mono, Liberation Mono,Menlo,Bitstream Vera Sans Mono,Consolas,Monaco,Lucida Console,Courier New, monospace;
 	font-smooth: true;
 }
 
@@ -211,7 +211,7 @@ textarea::selection {
 	z-index: 20;
 	resize: none;
 	font-size: 1.1em;
-	font-family: Ubuntu Mono, DejaVu Sans Mono, Liberation Mono,Bitstream Vera Sans Mono,Consolas,Monaco,Lucida Console,Courier New, monospace;
+	font-family: Ubuntu Mono, DejaVu Sans Mono, Liberation Mono,Menlo,Bitstream Vera Sans Mono,Consolas,Monaco,Lucida Console,Courier New, monospace;
 	font-smooth: true;
 	overflow: hidden;
 }
@@ -232,7 +232,7 @@ textarea::selection {
 	z-index: 20;
 	resize: none;
 	font-size: 100%;
-	font-family: Ubuntu Mono, DejaVu Sans Mono, Liberation Mono,Bitstream Vera Sans Mono,Consolas,Monaco,Lucida Console,Courier New, monospace;
+	font-family: Ubuntu Mono, DejaVu Sans Mono, Liberation Mono,Menlo,Bitstream Vera Sans Mono,Consolas,Monaco,Lucida Console,Courier New, monospace;
 	font-smooth: true;
 	overflow: hidden;
 

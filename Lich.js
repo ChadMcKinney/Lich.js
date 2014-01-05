@@ -317,21 +317,26 @@ function parseCurrentLine()
 	str = line.line;
 	broadcastLichCode(str);
 
-	try
-	{
+	//try
+	//{
 		if(/\S/.test(str)) // if not just whitespace
 		{
 			var ast = Lich.parse(str); // interactive parsing
 			// var ast = Lich.parseLibrary(str); // For library parsing testing
 			//Lich.post(Lich.showAST(ast));
-			Lich.VM.Print(Lich.compileAST(ast));
+			
+			//Lich.VM.Print(Lich.compileAST(ast));
+			Lich.compileAST(ast, function(res)
+			{
+				Lich.VM.Print(res);
+			})
 		}
-	}
+	//}
 	
-	catch(e)
-	{
-		Lich.post(e);
-	}
+	//catch(e)
+	//{
+	//	Lich.post(e);
+	//}
 }
 
 /*
@@ -6867,8 +6872,8 @@ function compileLich()
 
 function compileLich()
 {
-	try
-	{
+	//try
+	//{
 		var oRequest = new XMLHttpRequest();
 		var sURL = "http://"
 		         + self.location.hostname
@@ -6881,17 +6886,20 @@ function compileLich()
 		if(oRequest.status == 200)
 		{
 			var ast = Lich.parseLibrary(oRequest.responseText); // For library parsing testing
-			Lich.VM.Print(Lich.compileAST(ast));
+			Lich.compileAST(ast, function(res)
+			{
+				Lich.VM.Print(res);
+			});
 		}
 		
 		else 
 		{
 			Lich.post("Unable to load Prelude module.");
 		}	
-	}
+	//}
 	
-	catch(e)
-	{
-		Lich.post(e);
-	}
+	//catch(e)
+	//{
+	//	Lich.post(e);
+	//}
 }

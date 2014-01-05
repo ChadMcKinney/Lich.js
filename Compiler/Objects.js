@@ -108,7 +108,12 @@ function lichClosure(argPatterns, rhs, mutable, namespace, decls)
 
 			if(res.lichType == THUNK)
 			{
-				return res.invoke([]); // DO WE NEED TO MEMOIZE THIS RESULT?
+				res.invoke([], function(thunkRes)
+				{
+					res = thunkRes; // DO WE NEED TO MEMOIZE THIS RESULT?
+				}); 
+
+				return res;
 			}
 
 			else
@@ -137,8 +142,12 @@ function lichClosure(argPatterns, rhs, mutable, namespace, decls)
 			}
 		},
 
-		invoke: function(args)
+		////////////////////////////////////////////////////////////////////
+		// I NEED TO CONVERT THE DECLS AND RES TO CPS CPS CPS CPS CPS
+		///////////////////////////////////////////////////////////////////
+		invoke: function(args, ret)
 		{
+			Lich.post("Closure.invoke(args) = " + Lich.VM.PrettyPrint(args));
 			var i;
 			for(i = 0; i < args.length && i < _argPatterns.length; ++i)
 			{
@@ -150,13 +159,14 @@ function lichClosure(argPatterns, rhs, mutable, namespace, decls)
 
 			if(i < _argPatterns.length) // Partial application
 			{
-				return new lichClosure(_argPatterns.slice(i, _argPatterns.length), _rhs, _mutable, deepCopy(_namespace), _decls);
+				ret(new lichClosure(_argPatterns.slice(i, _argPatterns.length), _rhs, _mutable, deepCopy(_namespace), _decls));
 			}
 
 			else
 			{
 				Lich.VM.pushProcedure(this);
 
+				/*
 				for(var i = 0; i < _decls.length; ++i) // Evaluate all the declarations in the where statement
 				{
 					Lich.compileAST(_decls[i]);
@@ -164,7 +174,29 @@ function lichClosure(argPatterns, rhs, mutable, namespace, decls)
 
 				var res = Lich.compileAST(_rhs);
 				Lich.VM.popProcedure();
-				return res;
+				ret(res);*/
+
+				forEachCps(
+					_decls, 
+					function(elem,index,next)
+					{
+						Lich.post("_decls elem = " + Lich.VM.PrettyPrint(elem));
+						Lich.compileAST(elem, function(declRes)
+						{
+							Lich.post("_decls declRes = " + Lich.VM.PrettyPrint(declRes));
+							next();
+						});
+					},
+					function()
+					{
+						Lich.compileAST(_rhs, function(res)
+						{
+							Lich.post("closure res = " + res);
+							Lich.VM.popProcedure();
+							ret(res);
+						})
+					}
+				);
 			}
 		}
 	}
@@ -182,5 +214,10 @@ function createPrimitive(name, argNames, primitiveFunc)
 		varNames.push({astType:"varname", id: argNames[i]});
 	}
 
-	Lich.VM.reserveVar(name, new lichClosure(varNames, primitiveFunc));
+	var closure = new lichClosure(varNames, primitiveFunc);
+
+	if(argNames.length == 0)
+		closure.lichType = THUNK; // this will let it actually get invoked on being called
+
+	Lich.VM.reserveVar(name, closure);
 }

@@ -59,6 +59,7 @@ let pattern p = case p of
     3.14                -> "Dessert."
     (Monster says)      -> "Monster says " + says
     "string"            -> "This is not."
+    ["String",66,(\_->)] -> "That's a really weird list."
     [x,y,z]             -> "x: " + x + ", y: " + y + ", z: " + z
     (x:xs)              -> "x: " + x + ", xs: " + (show xs)
     Hydra               -> "Cut off all the heads!"
@@ -70,6 +71,7 @@ pattern n
 pattern (\y r p -> y + r + p)
 let threeD x y z = [x,y,z]
 pattern threeD
+pattern ["String",66,(\x -> x + 1)]
 
 data Coordinate = North | East | South | West
 
@@ -144,6 +146,7 @@ case 3 of
     3 > 2 -> 1
 
 
+-- REQUIRES TAIL RECURSION!
 let sums x y = if y > 0 then (sums (x + 1) (y - 1)) else if y < 0 then (sums (x - 1) (y + 1)) else x
 sums 20 100000
 
@@ -188,6 +191,8 @@ mul 3 $ mul 3 $ div 2 $ add 3 $ 1 -- returns 4.5
 map ((+) 2 . (/3) . (^) 3) [1..9] -- returns 3,5,11,29,83,245,731,2189,6563
 map ((+) 2 . (/) 3) [1..9] -- returns 5,3.5,3,2.75,2.6,2.5,2.4285714285714284,2.375,2.3333333333333335
 
+[5.0,3.5,3.0,2.75,2.6,2.5,2.4285714285714284,2.375,2.3333333333333335]
+[5.0,3.5,3.0,2.75,2.6,2.5,2.4285714285714284,2.375,2.3333333333333335]
 
 // These now work!
 foldl, foldr, zip, zipWith, filter, head, tail, init, and last

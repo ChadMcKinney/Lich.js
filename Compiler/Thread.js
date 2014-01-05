@@ -60,7 +60,11 @@ Lich.VM.thread = 'worker'; // Not the main thread
 <script type="text/javascript" src="Lich.js"></script>
 */
 
+
 var threadFunc;
+var messageBox = new Array();
+var queuedReceive = null;
+Lich.VM.currentThread = "Actor";
 
 Lich.VM.post = function(message)
 {
@@ -85,7 +89,10 @@ function compileLich() // compile default library
 		if(oRequest.status == 200)
 		{
 			var ast = Lich.parseLibrary(oRequest.responseText); // For library parsing testing
-			Lich.VM.Print(Lich.compileAST(ast));
+			Lich.compileAST(ast, function(res)
+			{
+				Lich.VM.Print(res);
+			});
 		}
 		
 		else 
@@ -135,21 +142,18 @@ this.addEventListener("message",
 				Lich.post("Actor initialized.");
 				break;
 
-			case "send":
-				Lich.VM.post("Actor: send");
-				// var arg = JSON.parse(event.data.message);
-				var arg = Lich.parseJSON(event.data.message);
-				//Lich.post("Actor message = " + event.data.message);
-				//Lich.post("Actor arg = " + Lich.VM.PrettyPrint(arg));
-				Lich.VM.Print(executeThreadFunc(arg));
-				Lich.VM.post("Actor closing.");
-				self.close();
-				break;
-
-			case "receive":
+			case "message":
+				Lich.VM.post("Actor: message");
+				messageBox.push(Lich.parseJSON(event.data.message));
+				
+				if(queuedReceive != null)
+				{
+					queuedReceive();
+				}
 				break;
 
 			case "finish":
+				Lich.VM.post("Actor closing.");
 				return self.close();
 
 			default:

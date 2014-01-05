@@ -44,6 +44,7 @@ Lich.VM.procedureStack.push(Lich.VM.main);
 Lich.VM.Nothing = new LichNothing(); // We only need one Nothing value because they're immutable and identical.
 Lich.VM.Void = new LichVoid(); // Same as Nothing, we only need one.
 Lich.VM.reserved = {}; // For variables reserved by the language
+Lich.VM.currentThread = "main";
 
 Lich.VM.pushProcedure = function(procedure)
 {

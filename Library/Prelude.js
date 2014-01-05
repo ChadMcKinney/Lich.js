@@ -42,51 +42,59 @@
 
 var lichProcesses = new Object;
 
-function netEval()
+function netEval(ret)
 {
 	var str = Lich.VM.getVar("_R");	
 
 	if(!(typeof str === "string"))
 		throw new Error("netEval can only be applied to a string!");
 
-	broadcastNetEval(str);
-	
+	broadcastNetEval(str);	
+
+	ret(Lich.VM.Void);
 }
+
 createPrimitive("netEval", ["_R"], netEval);
 
-function lichEval()
+function lichEval(ret)
 {
 	var str = Lich.VM.getVar("_R");	
 
 	if(!(typeof str === "string"))
 		throw new Error("eval can only be applied to a string!");
+	
 	try
     {
-    	var res = Lich.parse(str);
+    	var ast = Lich.parse(str);
         //Lich.VM.Print(L);
-        return Lich.compileAST(res);
-    }   
+        //return Lich.compileAST(ast);
+        Lich.compileAST(ast, function(res)
+        {
+        	ret(res);
+        });
+    }
+
     catch(e)
     {
 		Lich.post(e);
-		return Lich.VM.Void;
+		ret(Lich.VM.Nothing);
 	}
 }
 
 createPrimitive("eval", ["_R"], lichEval);
 
-function lichPrint()
+function lichPrint(ret)
 {
 	Lich.VM.Print(Lich.VM.getVar("_L"));
-	return Lich.VM.Void;
+	ret(Lich.VM.Void);
 }
 createPrimitive("print", ["_L"], lichPrint);
 
 
-function lichClientName()
+function lichClientName(ret)
 {
 	var printString = Lich.VM.getVar("_R");
-	return clientName;
+	ret(clientName);
 }
 
 createPrimitive("clientName", ["_R"], lichClientName);
@@ -94,7 +102,7 @@ createPrimitive("clientName", ["_R"], lichClientName);
 //Lich.VM.reserveVar("clientName", lichClientName);
 
 
-function stateSync()
+function stateSync(ret)
 {
 	var state = Lich.VM.getVar("_R");	
 
@@ -103,12 +111,12 @@ function stateSync()
 
 	sendStateSync(state);
 
-	return Lich.VM.Void;
+	ret(Lich.VM.Void);
 }
 
 createPrimitive("stateSync", ["_R"], stateSync);
 
-function compileLib()
+function compileLib(ret)
 {
 	var libName = Lich.VM.getVar("_R");	
 
@@ -117,12 +125,12 @@ function compileLib()
 
 	compileLibClient(libName);
 
-	return Lich.VM.Void;
+	ret(Lich.VM.Void);
 }
 
 createPrimitive("compile", ["_R"], compileLib);
 
-function load()
+function load(ret)
 {
 	var fileName = Lich.VM.getVar("_R");	
 
@@ -131,12 +139,12 @@ function load()
 
 	askForFileFromServer(fileName);
 
-	return Lich.VM.Void;
+	ret(Lich.VM.Void);
 }
 
 createPrimitive("load", ["_R"], load);
 
-function chatPrimitive()
+function chatPrimitive(ret)
 {
 	var chatString = Lich.VM.getVar("_R");
 
@@ -145,12 +153,12 @@ function chatPrimitive()
 
 	sendChat(chatString);
 
-	return Lich.VM.Void;
+	ret(Lich.VM.Void);
 }
 
 createPrimitive("chat", ["_R"], chatPrimitive);
 
-function narrate()
+function narrate(ret)
 {
 	var chatString = Lich.VM.getVar("_N");
 	var returnVal = Lich.VM.getVar("_R");
@@ -160,7 +168,7 @@ function narrate()
 
 	updateNarration(chatString);
 
-	return returnVal;
+	ret(returnVal);
 }
 
 createPrimitive("postNarration", ["_N","_R"], narrate);
@@ -181,7 +189,7 @@ function checkNumOpError(l, op, r)
 			+ Lich.VM.PrettyPrint(l) + " " + op + " " + Lich.VM.PrettyPrint(r));
 }
 
-function spawnActor()
+function spawnActor(ret)
 {
 	var closure = Lich.VM.getVar("_function");
 
@@ -213,12 +221,12 @@ function spawnActor()
 
 	worker.postMessage({type:"init", func:Lich.stringify(closure)});
 	worker.lichType = ACTOR;
-	return worker;
+	ret(worker);
 }
 
 createPrimitive("spawn", ["_function"], spawnActor);
 
-function sendActor()
+function sendActor(ret)
 {
 	var message = Lich.VM.getVar("_message");
 	var actor = Lich.VM.getVar("_actor");
@@ -226,59 +234,60 @@ function sendActor()
 	if(actor.lichType != ACTOR)
 		throw new Error("send can only be used as: send message actor. Failed with send " + Lich.VM.PrettyPrint(message) + " " + Lich.VM.PrettyPrint(actor));
 
-	actor.postMessage({type: "send", message: Lich.stringify(message)});
-	return Lich.VM.Void;
+	actor.postMessage({type: "message", message: Lich.stringify(message)});
+	ret(Lich.VM.Void);
 }
 
 createPrimitive("send", ["_message", "_actor"], sendActor);
+createPrimitive(":>>", ["_message", "_actor"], sendActor);
 
-function add()
+function add(ret)
 {
 	var l = Lich.VM.getVar("_L");
 	var r = Lich.VM.getVar("_R");
 
 	checkNumStringOpError(l, "+", r);
 
-	return  l + r;
+	ret(l + r);
 }
 
 createPrimitive("+", ["_L", "_R"], add);
 createPrimitive("add", ["_L", "_R"], add);
 
-function subtract()
+function subtract(ret)
 {
 	var l = Lich.VM.getVar("_L");
 	var r = Lich.VM.getVar("_R");
 
 	checkNumOpError(l, "-", r);
 
-	return  l - r;
+	ret(l - r);
 }
 
 createPrimitive("-", ["_L", "_R"], subtract);
 createPrimitive("subtract", ["_L", "_R"], subtract);
 
-function mul()
+function mul(ret)
 {
 	var l = Lich.VM.getVar("_L");
 	var r = Lich.VM.getVar("_R");
 
 	checkNumOpError(l, "*", r);
 
-	return  l * r;
+	ret(l * r);
 }
 
 createPrimitive("*", ["_L", "_R"], mul);
 createPrimitive("mul", ["_L", "_R"], mul);
 
-function div()
+function div(ret)
 {
 	var l = Lich.VM.getVar("_L");
 	var r = Lich.VM.getVar("_R");
 
 	checkNumOpError(l, "/", r);
 
-	return  l / r;
+	ret(l / r);
 }
 
 createPrimitive("/", ["_L", "_R"], div);
@@ -287,14 +296,14 @@ createPrimitive("div", ["_L", "_R"], div);
 // Swapped for use with (/3) type currying
 createPrimitive("/R", ["_R", "_L"], div);
 
-function pow()
+function pow(ret)
 {
 	var l = Lich.VM.getVar("_L");
 	var r = Lich.VM.getVar("_R");
 
 	checkNumOpError(l, "^", r);
 
-	return  Math.pow(l, r);
+	ret(Math.pow(l, r));
 }
 
 createPrimitive("^", ["_L", "_R"], pow);
@@ -302,89 +311,89 @@ createPrimitive("**", ["_L", "_R"], pow);
 createPrimitive("^R", ["_R", "_L"], pow);
 
 
-function mod()
+function mod(ret)
 {
 	var l = Lich.VM.getVar("_L");
 	var r = Lich.VM.getVar("_R");
 
 	checkNumOpError(l, "%", r);
 
-	return  l % r;
+	ret(l % r);
 }
 
 createPrimitive("%", ["_L", "_R"], mod);
 createPrimitive("mod", ["_L", "_R"], mod);
 
 
-function equivalent()
+function equivalent(ret)
 {
-	return Lich.VM.getVar("_L") === Lich.VM.getVar("_R");
+	ret(Lich.VM.getVar("_L") === Lich.VM.getVar("_R"));
 }
 
 createPrimitive("==", ["_L", "_R"], equivalent);
 
 
-function notequivalent()
+function notequivalent(ret)
 {
-	return Lich.VM.getVar("_L") != Lich.VM.getVar("_R");
+	ret(Lich.VM.getVar("_L") != Lich.VM.getVar("_R"));
 }
 
 createPrimitive("/=", ["_L", "_R"], notequivalent);
 
-function greater()
+function greater(ret)
 {
 	var l = Lich.VM.getVar("_L");
 	var r = Lich.VM.getVar("_R");
 
 	checkNumOpError(l, ">", r);
 
-	return  l > r;
+	ret(l > r);
 }
 
 createPrimitive(">", ["_L", "_R"], greater);
 createPrimitive(">R", ["_R", "_L"], greater);
 
 
-function lesser()
+function lesser(ret)
 {
 	var l = Lich.VM.getVar("_L");
 	var r = Lich.VM.getVar("_R");
 
 	checkNumOpError(l, "<", r);
 
-	return  l < r;
+	ret(l < r);
 }
 
 createPrimitive("<", ["_L", "_R"], lesser);
 createPrimitive("<R", ["_R", "_L"], lesser);
 
-function greaterEqual()
+function greaterEqual(ret)
 {
 	var l = Lich.VM.getVar("_L");
 	var r = Lich.VM.getVar("_R");
 
 	checkNumOpError(l, ">=", r);
 
-	return  l >= r;
+	ret(l >= r);
 }
 
 createPrimitive(">=", ["_L", "_R"], greaterEqual);
 createPrimitive(">=R", ["_R", "_L"], greaterEqual);
 
-function lesserEqual()
+function lesserEqual(ret)
 {
 	var l = Lich.VM.getVar("_L");
 	var r = Lich.VM.getVar("_R");
 
 	checkNumOpError(l, "<=", r);
 
-	return  l <= r;
+	ret(l <= r);
 }
 
 createPrimitive("<=", ["_L", "_R"], lesserEqual);
 createPrimitive("<=R", ["_R", "_L"], lesserEqual);
 
-function andand()
+function andand(ret)
 {
 	var l = Lich.VM.getVar("_L");
 	var r = Lich.VM.getVar("_R");
@@ -392,12 +401,12 @@ function andand()
 	if(typeof l !== "boolean" || typeof r !== "boolean")
 		throw new Error("Cannot use && operator with: " + Lich.VM.PrettyPrint(l) + " && " + Lich.VM.PrettyPrint(r));
 
-	return  l && r;
+	ret(l && r);
 }
 
 createPrimitive("&&", ["_R", "_L"], andand);
 
-function oror()
+function oror(ret)
 {
 	var l = Lich.VM.getVar("_L");
 	var r = Lich.VM.getVar("_R");
@@ -405,24 +414,24 @@ function oror()
 	if(typeof l !== "boolean" || typeof r !== "boolean")
 		throw new Error("Cannot use && operator with: " + Lich.VM.PrettyPrint(l) + " || " + Lich.VM.PrettyPrint(r));
 
-	return  l || r;
+	ret(l || r);
 }
 
 createPrimitive("||", ["_R", "_L"], oror);
 
-function not()
+function not(ret)
 {
 	var bool = Lich.VM.getVar("_B");
 
 	if(typeof bool !== "boolean")
 		throw new Error("The 'not' function can only be applied to booleans. Cannot use 'not' with: " + Lich.VM.PrettyPrint(bool));
 
-	return  !bool;
+	ret(!bool);
 }
 
 createPrimitive("not", ["_B"], not);
 
-function indexList()
+function indexList(ret)
 {
 	var list = Lich.VM.getVar("_L");
 	var key = Lich.VM.getVar("_R");
@@ -432,7 +441,7 @@ function indexList()
 			+ Lich.VM.PrettyPrint(key) + " " + Lich.VM.PrettyPrint(list));
 
 	var res = list[key];
-	return typeof res === "undefined" ? Lich.VM.Nothing : res;
+	ret(typeof res === "undefined" ? Lich.VM.Nothing : res);
 }
 
 createPrimitive("!!", ["_L", "_R"], indexList);
@@ -465,7 +474,7 @@ function deepCopy(obj)
 }
 
 
-function mapContainer()
+function mapContainer(ret)
 {
 	var func = Lich.VM.getVar("_L");
 	var container = Lich.VM.getVar("_R");
@@ -483,7 +492,11 @@ function mapContainer()
 		for(var i = 0; i < container.length; ++i)
 		{
 			// Iterate over each item in the container and invoke the function passing [item]. It must be as an array to work correctly.
-			res.push(func.invoke([container[i]])); 
+			// res.push(func.invoke([container[i]])); 
+			func.invoke([container[i]], function(funcRes)
+			{
+				res.push(funcRes);
+			})
 		}
 
 		if(typeof container === "string")
@@ -497,7 +510,12 @@ function mapContainer()
 		for(n in container)
 		{
 			if(n != "lichType")
-				res[n] = func.invoke([container[n]]);
+			{
+				func.invoke([container[n]], function(funcRes)
+				{
+					res[n] = funcRes;
+				});
+			}
 		}
 
 		res.lichType = DICTIONARY;
@@ -509,7 +527,7 @@ function mapContainer()
 			+ " " + Lich.VM.PrettyPrint(container));	
 	}
 
-	return res;
+	ret(res);
 }
 
 createPrimitive("map", ["_L", "_R"], mapContainer);
@@ -537,7 +555,7 @@ function mergeDictionaries(obj1, obj2)
 }
 
 
-function cons()
+function cons(ret)
 {
 	var value = Lich.VM.getVar("_L");
 	var list = Lich.VM.getVar("_R");
@@ -559,13 +577,13 @@ function cons()
 	else
 		res = [value].concat(list);
 
-	return typeof res === "undefined" ? Lich.VM.Nothing : res;
+	ret(typeof res === "undefined" ? Lich.VM.Nothing : res);
 }
 
 createPrimitive(":", ["_L", "_R"], cons);
 
 
-function insert()
+function insert(ret)
 {
 	var value = Lich.VM.getVar("_L");
 	var list = Lich.VM.getVar("_R");
@@ -574,29 +592,29 @@ function insert()
 		throw new Error("insert can only be applied to dictionaries. Failed with: insert " + Lich.VM.PrettyPrint(value) + " " + Lich.VM.PrettyPrint(list));
 
 	var res = mergeDictionaries(list, value);
-	return typeof res === "undefined" ? Lich.VM.Nothing : res;
+	ret(typeof res === "undefined" ? Lich.VM.Nothing : res);
 }
 
 createPrimitive("insert", ["_L", "_R"], insert);
 
 
-function deleteEntry()
+function deleteEntry(ret)
 {
 	var value = Lich.VM.getVar("_L");
 	var dict = Lich.VM.getVar("_R");
 
 	if(!(dict.lichType == DICTIONARY))
-		throw new Error("Cons can only be applied to lists. Failed with: delete " + Lich.VM.PrettyPrint(value) + " " + Lich.VM.PrettyPrint(dict));
+		throw new Error("delete can only be applied to lists. Failed with: delete " + Lich.VM.PrettyPrint(value) + " " + Lich.VM.PrettyPrint(dict));
 
 	var newDict = deepCopy(dict);
 	delete newDict[value];
-	return newDict;
+	ret(newDict);
 }
 
 createPrimitive("delete", ["_L", "_R"], deleteEntry); // delete "key" myMap
 
 
-function concatList()
+function concatList(ret)
 {
 	var list = Lich.VM.getVar("_L");
 	var value = Lich.VM.getVar("_R");
@@ -607,25 +625,25 @@ function concatList()
 	// list = deepCopy(list);
 	var res = list.concat(value);
 
-	return typeof res === "undefined" ? Lich.VM.Nothing : res;
+	ret(typeof res === "undefined" ? Lich.VM.Nothing : res);
 }
 
 createPrimitive("++", ["_L", "_R"], concatList);
 
-function experiential()
+function experiential(ret)
 {
 	var l = Lich.VM.getVar("_L");
 	var r = Lich.VM.getVar("_R");
 
 	if(l == Lich.VM.Nothing)
-		return r;
+		ret(r);
 	else
-		return l;
+		ret(l);
 }
 
 createPrimitive("?", ["_L", "_R"], experiential);
 
-function foldl()
+function foldl(ret)
 {
 	var func = Lich.VM.getVar("_F");
 	var initialValue = Lich.VM.getVar("_I");
@@ -643,7 +661,10 @@ function foldl()
 
 		for(var i = 0; i < container.length; ++i)
 		{
-			res = func.invoke([res, container[i]]); 
+			func.invoke([res, container[i]], function(funcRes)
+			{
+				res = funcRes;
+			}); 
 		}
 	}
 
@@ -654,7 +675,12 @@ function foldl()
 		for(n in container)
 		{
 			if(n != "lichType")
-				res = func.invoke([res, container[n]]);
+			{
+				func.invoke([res, container[n]], function(funcRes)
+				{
+					res = funcRes;
+				});
+			}
 		}
 	}
 
@@ -664,12 +690,12 @@ function foldl()
 			+ " " + Lich.VM.PrettyPrint(initialValue) + " " + Lich.VM.PrettyPrint(container));	
 	}
 
-	return res;
+	ret(res);
 }
 
 createPrimitive("foldl", ["_F", "_I", "_C"], foldl);
 
-function foldr()
+function foldr(ret)
 {
 	var func = Lich.VM.getVar("_F");
 	var initialValue = Lich.VM.getVar("_I");
@@ -687,7 +713,10 @@ function foldr()
 
 		for(var i = (container.length - 1); i >= 0; --i)
 		{
-			res = func.invoke([container[i], res]); 
+			func.invoke([res, container[i]], function(funcRes)
+			{
+				res = funcRes;
+			}); 
 		}
 	}
 
@@ -698,7 +727,12 @@ function foldr()
 		for(n in container)
 		{
 			if(n != "lichType")
-				res = func.invoke([container[n], res]);
+			{
+				func.invoke([res, container[n]], function(funcRes)
+				{
+					res = funcRes;
+				});
+			}
 		}
 	}
 
@@ -708,12 +742,12 @@ function foldr()
 			+ " " + Lich.VM.PrettyPrint(initialValue) + " " + Lich.VM.PrettyPrint(container));	
 	}
 
-	return res;
+	ret(res);
 }
 
 createPrimitive("foldr", ["_F", "_I", "_C"], foldr);
 
-function zip()
+function zip(ret)
 {
 	var lcontainer = Lich.VM.getVar("_L");
 	var rcontainer = Lich.VM.getVar("_R");
@@ -734,12 +768,12 @@ function zip()
 		throw new Error("zip can only be applied to lists. Failed with: zip " + Lich.VM.PrettyPrint(lcontainer) + " " + Lich.VM.PrettyPrint(rcontainer));	
 	}
 
-	return res;
+	ret(res);
 }
 
 createPrimitive("zip", ["_L", "_R"], zip);
 
-function zipWith()
+function zipWith(ret)
 {	
 	var func = Lich.VM.getVar("_F");
 	var lcontainer = Lich.VM.getVar("_L");
@@ -752,7 +786,10 @@ function zipWith()
 	{
 		for(var i = 0; i < lcontainer.length && i < rcontainer.length; ++i)
 		{
-			res.push(func.invoke([lcontainer[i], rcontainer[i]])); 
+			func.invoke([lcontainer[i], rcontainer[i]], function(funcRes)
+			{
+				res.push(funcRes);
+			}); 
 		}
 	}
 
@@ -762,12 +799,12 @@ function zipWith()
 			+ " " + Lich.VM.PrettyPrint(lcontainer) + " " + Lich.VM.PrettyPrint(rcontainer));	
 	}
 
-	return res;
+	ret(res);
 }
 
 createPrimitive("zipWith", ["_F", "_L", "_R"], zipWith);
 
-function filter()
+function filter(ret)
 {
 	var func = Lich.VM.getVar("_L");
 	var container = Lich.VM.getVar("_R");
@@ -785,8 +822,11 @@ function filter()
 		for(var i = 0; i < container.length; ++i)
 		{
 			// Iterate over each item in the container and invoke the function passing [item]. It must be as an array to work correctly.
-			if(func.invoke([container[i]]))
-				res.push(container[i]); 
+			func.invoke([container[i]], function(funcRes)
+			{
+				if(funcRes)
+					res.push(container[i]); 
+			});
 		}
 
 		if(typeof container === "string")
@@ -800,8 +840,13 @@ function filter()
 		for(n in container)
 		{
 			if(n != "lichType")
-				if(func.invoke([container[n]]))
-					res[n] = container[n]; 
+			{
+				func.invoke([container[n]], function(funcRes)
+				{
+					if(funcRes)
+						res[n] = container[n];
+				});
+			} 
 		}
 
 		res.lichType = DICTIONARY;
@@ -813,21 +858,21 @@ function filter()
 			+ " " + Lich.VM.PrettyPrint(container));	
 	}
 
-	return res;
+	ret(res);
 }
 
 createPrimitive("filter", ["_L", "_R"], filter);
 
-function head()
+function head(ret)
 {
 	var container = Lich.VM.getVar("_C");
 
 	if((container instanceof Array) || (typeof container === "string"))
 	{
 		if(container.length == 0)
-			return Lich.VM.Nothing;
+			ret(Lich.VM.Nothing);
 		else
-			return container[0];
+			ret(container[0]);
 	}
 
 	else
@@ -838,16 +883,16 @@ function head()
 
 createPrimitive("head", ["_C"], head);
 
-function tail()
+function tail(ret)
 {
 	var container = Lich.VM.getVar("_C");
 
 	if((container instanceof Array) || (typeof container === "string"))
 	{
 		if(container.length == 0)
-			return Lich.VM.Nothing;
+			ret(Lich.VM.Nothing);
 		else
-			return container.slice(1, container.length);
+			ret(container.slice(1, container.length));
 	}
 
 	else
@@ -858,16 +903,16 @@ function tail()
 
 createPrimitive("tail", ["_C"], tail);
 
-function init()
+function init(ret)
 {
 	var container = Lich.VM.getVar("_C");
 
 	if((container instanceof Array) || (typeof container === "string"))
 	{
 		if(container.length == 0)
-			return Lich.VM.Nothing;
+			ret(Lich.VM.Nothing);
 		else
-			return container.slice(0, container.length - 1);
+			ret(container.slice(0, container.length - 1));
 	}
 
 	else
@@ -878,16 +923,16 @@ function init()
 
 createPrimitive("init", ["_C"], init);
 
-function last()
+function last(ret)
 {
 	var container = Lich.VM.getVar("_C");
 
 	if((container instanceof Array) || (typeof container === "string"))
 	{
 		if(container.length == 0)
-			return Lich.VM.Nothing;
+			ret(Lich.VM.Nothing);
 		else
-			return container[container.length - 1];
+			ret(container[container.length - 1]);
 	}
 
 	else
@@ -899,10 +944,12 @@ function last()
 createPrimitive("last", ["_C"], last);
 
 // We don't use createPrimitive directly, this gets called at runtime with function composition like: func1 . func2
-function composeFunction(_functions)
+function composeFunction(_functions, ret)
 {
 	var functions = _functions;
-	var newFunc = function()
+	
+	/*
+	var newFunc = function(ret)
 	{
 		var arg = Lich.VM.getVar("X");
 		var res = arg;
@@ -918,34 +965,68 @@ function composeFunction(_functions)
 		}
 
 		return res;
+	}*/
+
+	var newFunc = function(newRet)
+	{
+		var arg = Lich.VM.getVar("_F");
+		var res = arg;
+
+		forEachReverseCps(
+			functions, 
+			
+			function(func,index,next)
+			{
+				if(typeof func === "undefined" || func.lichType != CLOSURE)
+					throw new Error("function composition with the (.) operator can only be used with functions. Failed with " 
+						+ Lich.VM.PrettyPrint(func));
+
+				func.invoke([res], function(res2)
+				{
+					res = res2;
+					next();
+				});
+			},
+
+			function()
+			{
+				newRet(res);
+			}
+		);
 	}
 
 	newFunc.astType = "primitive";
-	return newFunc;
+
+	ret(newFunc);
 }
 
-function sum()
+function sum(ret)
 {
 	var container = Lich.VM.getVar("_C");
 
 	if(container instanceof Array)
 	{
 		if(container.length == 0)
-			return 0;
-		
-		var res = 0;
-
-		for(var i = 0; i < container.length; ++i)
 		{
-			var item = container[i];
-
-			if(typeof item !== "number")
-				throw new Error("sum can only be applied to lists containing numbers. Failed with " + Lich.VM.PrettyPrint(item));
-
-			res += container[i];
+			ret(0);
 		}
 
-		return res;
+		else
+		{
+			var res = 0;
+
+			for(var i = 0; i < container.length; ++i)
+			{
+				var item = container[i];
+
+				if(typeof item !== "number")
+					throw new Error("sum can only be applied to lists containing numbers. Failed with " + Lich.VM.PrettyPrint(item));
+
+				res += container[i];
+			}
+
+			ret(res);
+		}
 	}
 
 	else
@@ -957,7 +1038,7 @@ function sum()
 createPrimitive("sum", ["_C"], sum);
 
 
-function take()
+function take(ret)
 {
 	var num = Lich.VM.getVar("_N");
 	var container = Lich.VM.getVar("_C");
@@ -965,9 +1046,14 @@ function take()
 	if(((container instanceof Array) || (typeof container === "string")) && (typeof num === "number"))
 	{
 		if(container.length == 0)
-			return [];
-		
-		return container.slice(0, num);
+		{
+			ret([]);
+		}
+
+		else
+		{
+			ret(container.slice(0, num));
+		}
 	}
 
 	else
@@ -978,7 +1064,7 @@ function take()
 
 createPrimitive("take", ["_N", "_C"], take);
 
-function drop()
+function drop(ret)
 {
 	var num = Lich.VM.getVar("_N");
 	var container = Lich.VM.getVar("_C");
@@ -986,9 +1072,14 @@ function drop()
 	if(((container instanceof Array) || (typeof container === "string")) && (typeof num === "number"))
 	{
 		if(container.length == 0)
-			return container;
-		
-		return container.slice(num, container.length);
+		{
+			ret(container);
+		}
+
+		else
+		{
+			ret(container.slice(num, container.length));
+		}
 	}
 
 	else
@@ -999,13 +1090,13 @@ function drop()
 
 createPrimitive("drop", ["_N", "_C"], drop);
 
-function lengthList()
+function lengthList(ret)
 {
 	var container = Lich.VM.getVar("_C");
 
 	if((container instanceof Array) || (typeof container === "string"))
 	{
-		return container.length;
+		ret(container.length);
 	}
 
 	else
@@ -1016,13 +1107,13 @@ function lengthList()
 
 createPrimitive("length", ["_C"], lengthList);
 
-function nullList()
+function nullList(ret)
 {
 	var container = Lich.VM.getVar("_C");
 
 	if((container instanceof Array) || (typeof container === "string"))
 	{
-		return container.length == 0;
+		ret(container.length == 0);
 	}
 
 	else
@@ -1034,27 +1125,32 @@ function nullList()
 createPrimitive("null", ["_C"], nullList);
 
 
-function maximum()
+function maximum(ret)
 {
 	var container = Lich.VM.getVar("_C");
 
 	if((container instanceof Array) || (typeof container === "string"))
 	{
 		if(container.length == 0)
-			return Lich.VM.Nothing;
-
-		res = container[0];
-
-		for(var i = 0; i < container.length; ++i)
 		{
-			if(typeof item !== "number")
-				throw new Error("maximum can only be used on lists containing numbers. Failed with " + Lich.VM.PrettyPrint(item));
-
-			if(item > res)
-				res = item;
+			ret(Lich.VM.Nothing);
 		}
 
-		return res;
+		else
+		{
+			res = container[0];
+
+			for(var i = 0; i < container.length; ++i)
+			{
+				if(typeof item !== "number")
+					throw new Error("maximum can only be used on lists containing numbers. Failed with " + Lich.VM.PrettyPrint(item));
+
+				if(item > res)
+					res = item;
+			}
+
+			ret(res);
+		}
 	}
 
 	else
@@ -1065,29 +1161,34 @@ function maximum()
 
 createPrimitive("maximum", ["_C"], maximum);
 
-function minimum()
+function minimum(ret)
 {
 	var container = Lich.VM.getVar("_C");
 
 	if((container instanceof Array) || (typeof container === "string"))
 	{
 		if(container.length == 0)
-			return Lich.VM.Nothing;
-
-		res = container[0];
-
-		for(var i = 0; i < container.length; ++i)
 		{
-			var item = container[i];
-
-			if(typeof item !== "number")
-				throw new Error("minimum can only be used on lists containing numbers. Failed with " + Lich.VM.PrettyPrint(item));
-
-			if(item < res)
-				res = item;
+			ret(Lich.VM.Nothing);
 		}
 
-		return res;
+		else
+		{
+			res = container[0];
+
+			for(var i = 0; i < container.length; ++i)
+			{
+				var item = container[i];
+
+				if(typeof item !== "number")
+					throw new Error("minimum can only be used on lists containing numbers. Failed with " + Lich.VM.PrettyPrint(item));
+
+				if(item < res)
+					res = item;
+			}
+
+			ret(res);
+		}
 	}
 
 	else
@@ -1098,28 +1199,33 @@ function minimum()
 
 createPrimitive("minimum", ["_C"], minimum);
 
-function product()
+function product(ret)
 {
 	var container = Lich.VM.getVar("_C");
 
 	if(container instanceof Array)
 	{
 		if(container.length == 0)
-			return 0;
-		
-		var res = 1;
-
-		for(var i = 0; i < container.length; ++i)
 		{
-			var item = container[i];
-
-			if(typeof item !== "number")
-				throw new Error("Can't use product on lists containing non-numbers. Failed with " + Lich.VM.PrettyPrint(item));
-
-			res *= item;
+			ret(0);
 		}
 
-		return res;
+		else
+		{
+			var res = 1;
+
+			for(var i = 0; i < container.length; ++i)
+			{
+				var item = container[i];
+
+				if(typeof item !== "number")
+					throw new Error("Can't use product on lists containing non-numbers. Failed with " + Lich.VM.PrettyPrint(item));
+
+				res *= item;
+			}
+
+			ret(res);
+		}
 	}
 
 	else
@@ -1130,31 +1236,39 @@ function product()
 
 createPrimitive("product", ["_C"], product);
 
-function elem()
+function elem(ret)
 {
 	var item = Lich.VM.getVar("_I");
 	var container = Lich.VM.getVar("_C");
 
 	if((container instanceof Array) || (typeof container === "string"))
 	{
+		var found = false;
 		for(var i = 0; i < container.length; ++i)
 		{
 			if(container[i] == item)
-				return true;
+			{
+				found = true;
+				break;
+			}
 		}
 
-		return false;
+		ret(found);
 	}
 
 	else if(container.lichType == DICTIONARY)
 	{
+		var found = false;
 		for(n in container)
 		{
 			if(container[n] == item)
-				return true;
+			{
+				found = true;
+				break;
+			}
 		}
 
-		return false;
+		ret(found);
 	}
 
 	else
@@ -1166,7 +1280,45 @@ function elem()
 
 createPrimitive("elem", ["_I", "_C"], elem);
 
-function replicate()
+function member(ret)
+{
+	var item = Lich.VM.getVar("_I");
+	var container = Lich.VM.getVar("_C");
+
+	if(container.lichType == DICTIONARY)
+	{
+		ret(container.hasOwnProperty(item));
+	}
+
+	else
+	{
+		throw new Error("member can only be applied to lists and dictionaries. Failed with: member " + Lich.VM.PrettyPrint(item) 
+			+ " " + Lich.VM.PrettyPrint(container));	
+	}
+}
+
+createPrimitive("member", ["_I", "_C"], member);
+
+function notMember(ret)
+{
+	var item = Lich.VM.getVar("_I");
+	var container = Lich.VM.getVar("_C");
+
+	if(container.lichType == DICTIONARY)
+	{
+		ret(!container.hasOwnProperty(item));
+	}
+
+	else
+	{
+		throw new Error("notMember can only be applied to lists and dictionaries. Failed with: notMember " + Lich.VM.PrettyPrint(item) 
+			+ " " + Lich.VM.PrettyPrint(container));	
+	}
+}
+
+createPrimitive("notMember", ["_I", "_C"], notMember);
+
+function replicate(ret)
 {
 	var number = Lich.VM.getVar("_N");
 	var item = Lich.VM.getVar("_I");
@@ -1180,7 +1332,7 @@ function replicate()
 			res.push(item);
 		}
 
-		return res;
+		ret(res);
 	}
 
 	else
@@ -1192,23 +1344,28 @@ function replicate()
 
 createPrimitive("replicate", ["_N", "_I"], replicate);
 
-function reverse()
+function reverse(ret)
 {
 	var container = Lich.VM.getVar("_C");
 
 	if((container instanceof Array) || (typeof container === "string"))
 	{
 		if(container.length == 0)
-			return [];
-
-		var res = new Array();
-
-		for(var i = container.length -1; i >= 0; --i)
 		{
-			res.push(container[i]);
+			ret([]);
 		}
 
-		return res;
+		else
+		{
+			var res = new Array();
+
+			for(var i = container.length -1; i >= 0; --i)
+			{
+				res.push(container[i]);
+			}
+
+			ret(res);
+		}
 	}
 
 	else
@@ -1219,22 +1376,22 @@ function reverse()
 
 createPrimitive("reverse", ["_C"], reverse);
 
-function sort()
+function sort(ret)
 {
 	var container = Lich.VM.getVar("_C");
 	container = deepCopy(container);
 
 	if(container instanceof Array)
 	{
-		return container.sort(function(a,b)
+		ret(container.sort(function(a,b)
 		{
 			return a - b;
-		});
+		}));
 	}
 
 	else if(typeof container === "string")
 	{
-		return container.sort();
+		ret(container.sort());
 	}
 
 	else
@@ -1245,7 +1402,7 @@ function sort()
 
 createPrimitive("sort", ["_C"], sort);
 
-function slice()
+function slice(ret)
 {
 	var lower = Lich.VM.getVar("_L");
 	var upper = Lich.VM.getVar("_U");
@@ -1253,7 +1410,7 @@ function slice()
 
 	if((container instanceof Array) || (typeof container === "string"))
 	{
-		return container.slice(lower, upper);
+		ret(container.slice(lower, upper));
 	}
 
 	else
@@ -1266,14 +1423,14 @@ function slice()
 createPrimitive("slice", ["_L", "_U", "_C"], slice);
 
 
-function randF()
+function randF(ret)
 {
 	var lower = Lich.VM.getVar("_L");
 	var upper = Lich.VM.getVar("_U");
 
 	if(typeof lower === "number" && typeof upper === "number")
 	{
-		return Math.random() * (upper - lower) + lower;
+		ret(Math.random() * (upper - lower) + lower);
 	}
 
 	else
@@ -1286,14 +1443,14 @@ createPrimitive("rand", ["_L", "_U"], randF);
 createPrimitive("random", ["_L", "_U"], randF);
 createPrimitive("randF", ["_L", "_U"], randF);
 
-function randI()
+function randI(ret)
 {
 	var lower = Lich.VM.getVar("_L");
 	var upper = Lich.VM.getVar("_U");
 
 	if(typeof lower === "number" && typeof upper === "number")
 	{
-		return Math.floor(Math.random() * (upper - lower) + lower);
+		ret(Math.floor(Math.random() * (upper - lower) + lower));
 	}
 
 	else
@@ -1306,13 +1463,13 @@ createPrimitive("randI", ["_L", "_U"], randI);
 createPrimitive("randomI", ["_L", "_U"], randI);
 
 
-function odd()
+function odd(ret)
 {
 	var num = Lich.VM.getVar("_N");
 
 	if(typeof num === "number")
 	{
-		return (num % 2) == 1;		
+		ret((num % 2) == 1);		
 	}
 
 	else
@@ -1323,13 +1480,13 @@ function odd()
 
 createPrimitive("odd", ["_N"], odd);
 
-function even()
+function even(ret)
 {
 	var num = Lich.VM.getVar("_N");
 
 	if(typeof num === "number")
 	{
-		return (num % 2) == 0;
+		ret((num % 2) == 0);
 	}
 
 	else
@@ -1340,13 +1497,13 @@ function even()
 
 createPrimitive("even", ["_N"], even);
 
-function sqrt()
+function sqrt(ret)
 {
 	var num = Lich.VM.getVar("_N");
 
 	if(typeof num === "number")
 	{
-		return Math.sqrt(num);		
+		ret(Math.sqrt(num));		
 	}
 
 	else
@@ -1357,12 +1514,19 @@ function sqrt()
 
 createPrimitive("sqrt", ["_N"], sqrt);
 
-function showLich()
+function showLich(ret)
 {
-	return Lich.VM.PrettyPrint(Lich.VM.getVar("_L"));
+	ret(Lich.VM.PrettyPrint(Lich.VM.getVar("_L")));
 }
 
 createPrimitive("show", ["_L"], showLich);
+
+function getCurrentTime(ret)
+{
+	ret(new Date().getTime());
+}
+
+createPrimitive("getCurrentTime", [], getCurrentTime);
 
 /*
 function lichType()
