@@ -235,7 +235,7 @@ function madnessIntro()
 
 	narrationArray.push("There was an ineffable majesty of the whole scene, and a queer state of my sensations at being in the lee of vast, silent pinnacles whose ranks shot up like a wall reaching the sky at the world’s rim.");
 	narrationArray.push("I stood amongst the ruins of my forward scout's base camp. They had gone missing. We are part of a small group of biologists exploring the reaches of Antartica.");
-	narrationArray.push("To the north, east, and west I could see three prominent mounds of snow. Given the scout's absence, this seemed ominous. Amongst the tattered bedrolls I see a worn diary.<br><br> What should I do?");
+	narrationArray.push("To the north, east, and west I can see three prominent mounds of snow. Given the scout's absence, this seemed ominous. Amongst the tattered bedrolls I see a worn diary.<br><br> What should I do?");
 
 
 	var time = 7000;
