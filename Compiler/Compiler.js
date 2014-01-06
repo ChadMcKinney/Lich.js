@@ -1817,3 +1817,28 @@ Lich.compileReceive = function(ast,ret)
 		}
 	);
 }
+
+
+Lich.matchFunctionWithPatterns = function(func, args, ret)
+{
+	Lich.VM.pushProcedure(new lichClosure([], null, false)); // closure for pattern scope
+	forEachCps(
+		args,
+		function(exp, i, next)
+		{
+			Lich.match(exp, func.argPatterns[i], function(match)
+			{
+				if(match)
+					next();
+				else
+					throw new Error("Non-matching pattern in function " + Lich.VM.PrettyPrint(func) 
+						+ " . Failed on: " + Lich.VM.PrettyPrint(exp));
+			});
+		},
+
+		function()
+		{
+			ret();
+		}
+	);
+}

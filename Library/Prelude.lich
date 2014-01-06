@@ -37,10 +37,19 @@
 -}
 module Prelude where
 
-myName = (clientName 0)
-
+--| Utility
 flip f a b = f b a
 id a = a
+zipFlat l r = foldl (\acc [x,y] -> acc ++ [x,y]) [] $ zip l r -- zip then flatten two lists into one
+mapSpawn f l = map (\x -> spawn f [x]) l -- Spawn an actor, given a function, passing an argument from each item in a container
+zipSpawn l r = map (\[x,y] -> spawn x [y]) $ zip l r -- Spawn an actor from a function in l and argument in r, resulting in a list of Actors
+
+--| Networking
+myName = (clientName 0)
+
+
+
+--| Madness, needs to be moved in the future
 
 -- |narrate Game => Game
 narrate game = postNarration (game::narration) (game{narration = ""})

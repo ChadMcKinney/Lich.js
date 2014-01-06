@@ -2,7 +2,7 @@
 // Dev Notes
 //////////////////////////////
 
-
+(/=Nothing) Not working in filter? At least with Filter it's not!
 
 send walkFunc madnessLoop
 
@@ -335,3 +335,32 @@ myGuard x
 Multi-line compiling with let declarations doesn't parse. For example compiling these two together:
 let one = 1
 let two = 2
+
+
+
+
+
+
+
+
+
+
+-- Test code for pattern matching with prelude functions
+let actors = mapSpawn (add 2) [1..9]
+let zipActors = zipSpawn [(add 2), (div 3), (sqrt)] [1..3]
+zip [(add 2), (div 3), (sqrt)] [1..3]
+map (\[x,y] -> show [x,y]) $ zip [(add 2), (div 3), (sqrt)] [1..3]
+(\[x,y] -> x + y) [1,2]
+filter (\y -> y > 5) $ zip [1..5] [3,7,9,5,2]
+map (\[x,y] -> show [x * 2,y]) ("Doom" => [1,2], "Satan" => [3,"Sandwich"])
+foldl (\acc [x,y] -> acc ++ [x,y]) [] $ zip [66..99] [1..9]
+foldr (\[x,y] acc -> acc : [x,y]) [] $ zip [66..99] [1..9]
+foldl (\acc x -> x : acc) [] [1..9]
+foldr (\x acc ->  acc ++ x) [] [1..9]
+zipFlat [1..99] [33,-16..-100]
+zipWith (\x [y,z] -> [x ^ y, x ^ z]) [1..9] $ zip [33,-22..-1000] [1..9]
+zipWith (add) [1..9] [3..5]
+filter (\[x,y] -> y /= Nothing) $ zip [1..9] (zipFlat [33..1] $ replicate 5 Nothing)
+filter (\[x,y] -> x < 3) ("Doom" => [1,2], "Satan" => [3,"Sandwich"])
+let addOneSwitch = (\[x,y] -> [y,x]) . (\x -> [x + 1, x])
+addOneSwitch 2

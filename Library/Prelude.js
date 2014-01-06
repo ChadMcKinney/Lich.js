@@ -509,12 +509,11 @@ function mapContainer(ret)
 		throw new Error("map can only be applied using: map function container. Failed with: map " + Lich.VM.PrettyPrint(func) 
 			+ " " + Lich.VM.PrettyPrint(container));
 
-	var res = container;
-
 	if((container instanceof Array) || (typeof container === "string"))
 	{
+		/*
 		res = new Array();
-
+		
 		for(var i = 0; i < container.length; ++i)
 		{
 			// Iterate over each item in the container and invoke the function passing [item]. It must be as an array to work correctly.
@@ -523,28 +522,73 @@ function mapContainer(ret)
 			{
 				res.push(funcRes);
 			})
-		}
+		}*/
 
-		if(typeof container === "string")
-			res = res.join("");	
+		Lich.VM.pushProcedure(new lichClosure([], null, true)); // allows reuse of pattern variables
+		mapCps(
+			container,
+			function(exp, i, callback)
+			{
+				Lich.match(exp, func.argPatterns[0], function(match)
+				{
+					if(match)
+					{
+						func.invoke([exp], function(funcRes)
+						{
+							callback(funcRes);
+						})
+					}
+					
+					else
+					{
+						throw new Error("Non-matching pattern in function " + Lich.VM.PrettyPrint(threadFunc) 
+							+ " . Failed on: " + Lich.VM.PrettyPrint(exp));
+					}
+				});
+			},
+
+			function(res)
+			{
+				if(typeof container === "string")
+					res = res.join("");	
+				
+				Lich.VM.popProcedure();
+				ret(res)
+			}
+		);
 	}
 
 	else if(container.lichType == DICTIONARY)
 	{
-		res = {};
+		Lich.VM.pushProcedure(new lichClosure([], null, true)); // allows reuse of pattern variables
+		var res = {};
 
 		for(n in container)
 		{
 			if(n != "lichType")
 			{
-				func.invoke([container[n]], function(funcRes)
+				Lich.match(container[n], func.argPatterns[0], function(match)
 				{
-					res[n] = funcRes;
+					if(match)
+					{
+						func.invoke([container[n]], function(funcRes)
+						{
+							res[n] = funcRes;
+						})
+					}
+					
+					else
+					{
+						throw new Error("Non-matching pattern in function " + Lich.VM.PrettyPrint(threadFunc) 
+							+ " . Failed on: " + Lich.VM.PrettyPrint(exp));
+					}
 				});
 			}
 		}
 
 		res.lichType = DICTIONARY;
+		Lich.VM.popProcedure();
+		ret(res);
 	}
 
 	else
@@ -552,8 +596,6 @@ function mapContainer(ret)
 		throw new Error("map can only be applied to lists and dictionaries. Failed with: map " + Lich.VM.PrettyPrint(func) 
 			+ " " + Lich.VM.PrettyPrint(container));	
 	}
-
-	ret(res);
 }
 
 createPrimitive("map", ["_L", "_R"], mapContainer);
@@ -680,16 +722,41 @@ function foldl(ret)
 			+ " " + Lich.VM.PrettyPrint(initialValue) + " " + Lich.VM.PrettyPrint(container));
 
 	var res = container;
+	Lich.VM.pushProcedure(new lichClosure([], null, true)); // allows reuse of pattern variables
 
 	if((container instanceof Array) || (typeof container === "string"))
-	{
+	{	
 		res = initialValue;
 
 		for(var i = 0; i < container.length; ++i)
 		{
-			func.invoke([res, container[i]], function(funcRes)
+			Lich.match(res, func.argPatterns[0], function(match)
 			{
-				res = funcRes;
+				if(match)
+				{
+					Lich.match(container[i], func.argPatterns[1], function(match2)
+					{
+						if(match2)
+						{
+							func.invoke([res, container[i]], function(funcRes)
+							{
+								res = funcRes;
+							});
+						}
+
+						else
+						{
+							throw new Error("Non-matching pattern in function " + Lich.VM.PrettyPrint(threadFunc) 
+									+ " . Failed on: " + Lich.VM.PrettyPrint([res, container[i]]));
+						}	
+					});
+				}
+
+				else
+				{
+					throw new Error("Non-matching pattern in function " + Lich.VM.PrettyPrint(threadFunc) 
+							+ " . Failed on: " + Lich.VM.PrettyPrint([res, container[i]]));
+				}	
 			}); 
 		}
 	}
@@ -702,10 +769,34 @@ function foldl(ret)
 		{
 			if(n != "lichType")
 			{
-				func.invoke([res, container[n]], function(funcRes)
+				Lich.match(res, func.argPatterns[0], function(match)
 				{
-					res = funcRes;
-				});
+					if(match)
+					{
+						Lich.match(container[n], func.argPatterns[1], function(match2)
+						{
+							if(match2)
+							{
+								func.invoke([res, container[n]], function(funcRes)
+								{
+									res = funcRes;
+								});
+							}
+
+							else
+							{
+								throw new Error("Non-matching pattern in function " + Lich.VM.PrettyPrint(threadFunc) 
+										+ " . Failed on: " + Lich.VM.PrettyPrint([res, container[i]]));
+							}	
+						});
+					}
+
+					else
+					{
+						throw new Error("Non-matching pattern in function " + Lich.VM.PrettyPrint(threadFunc) 
+								+ " . Failed on: " + Lich.VM.PrettyPrint([res, container[i]]));
+					}
+				});	
 			}
 		}
 	}
@@ -716,6 +807,7 @@ function foldl(ret)
 			+ " " + Lich.VM.PrettyPrint(initialValue) + " " + Lich.VM.PrettyPrint(container));	
 	}
 
+	Lich.VM.popProcedure();
 	ret(res);
 }
 
@@ -732,6 +824,7 @@ function foldr(ret)
 			+ " " + Lich.VM.PrettyPrint(initialValue) + " " + Lich.VM.PrettyPrint(container));
 
 	var res = container;
+	Lich.VM.pushProcedure(new lichClosure([], null, true)); // allows reuse of pattern variables
 
 	if((container instanceof Array) || (typeof container === "string"))
 	{
@@ -739,10 +832,34 @@ function foldr(ret)
 
 		for(var i = (container.length - 1); i >= 0; --i)
 		{
-			func.invoke([res, container[i]], function(funcRes)
+			Lich.match(container[i], func.argPatterns[0], function(match)
 			{
-				res = funcRes;
-			}); 
+				if(match)
+				{
+					Lich.match(res, func.argPatterns[1], function(match2)
+					{
+						if(match2)
+						{
+							func.invoke([container[i], res], function(funcRes)
+							{
+								res = funcRes;
+							});
+						}
+
+						else
+						{
+							throw new Error("Non-matching pattern in function " + Lich.VM.PrettyPrint(threadFunc) 
+									+ " . Failed on: " + Lich.VM.PrettyPrint([res, container[i]]));
+						}	
+					});
+				}
+
+				else
+				{
+					throw new Error("Non-matching pattern in function " + Lich.VM.PrettyPrint(threadFunc) 
+							+ " . Failed on: " + Lich.VM.PrettyPrint([res, container[i]]));
+				}	
+			});
 		}
 	}
 
@@ -754,10 +871,34 @@ function foldr(ret)
 		{
 			if(n != "lichType")
 			{
-				func.invoke([res, container[n]], function(funcRes)
+				Lich.match(container[n], func.argPatterns[0], function(match)
 				{
-					res = funcRes;
-				});
+					if(match)
+					{
+						Lich.match(res, func.argPatterns[1], function(match2)
+						{
+							if(match2)
+							{
+								func.invoke([container[n], res], function(funcRes)
+								{
+									res = funcRes;
+								});
+							}
+
+							else
+							{
+								throw new Error("Non-matching pattern in function " + Lich.VM.PrettyPrint(threadFunc) 
+										+ " . Failed on: " + Lich.VM.PrettyPrint([res, container[i]]));
+							}	
+						});
+					}
+
+					else
+					{
+						throw new Error("Non-matching pattern in function " + Lich.VM.PrettyPrint(threadFunc) 
+								+ " . Failed on: " + Lich.VM.PrettyPrint([res, container[i]]));
+					}
+				});	
 			}
 		}
 	}
@@ -768,6 +909,7 @@ function foldr(ret)
 			+ " " + Lich.VM.PrettyPrint(initialValue) + " " + Lich.VM.PrettyPrint(container));	
 	}
 
+	Lich.VM.popProcedure();
 	ret(res);
 }
 
@@ -812,9 +954,12 @@ function zipWith(ret)
 	{
 		for(var i = 0; i < lcontainer.length && i < rcontainer.length; ++i)
 		{
-			func.invoke([lcontainer[i], rcontainer[i]], function(funcRes)
+			Lich.matchFunctionWithPatterns(func, [lcontainer[i], rcontainer[i]], function(match)
 			{
-				res.push(funcRes);
+				func.invoke([lcontainer[i], rcontainer[i]], function(funcRes)
+				{
+					res.push(funcRes);
+				});
 			}); 
 		}
 	}
@@ -840,6 +985,7 @@ function filter(ret)
 			+ " " + Lich.VM.PrettyPrint(container));
 
 	var res = container;
+	Lich.VM.pushProcedure(new lichClosure([], null, true)); // allows reuse of pattern variables
 
 	if((container instanceof Array) || (typeof container === "string"))
 	{
@@ -847,11 +993,23 @@ function filter(ret)
 
 		for(var i = 0; i < container.length; ++i)
 		{
-			// Iterate over each item in the container and invoke the function passing [item]. It must be as an array to work correctly.
-			func.invoke([container[i]], function(funcRes)
+			Lich.match(container[i], func.argPatterns[0], function(match)
 			{
-				if(funcRes)
-					res.push(container[i]); 
+				if(match)
+				{
+					// Iterate over each item in the container and invoke the function passing [item]. It must be as an array to work correctly.
+					func.invoke([container[i]], function(funcRes)
+					{
+						if(funcRes)
+							res.push(container[i]); 
+					});
+				}
+
+				else
+				{
+					throw new Error("Non-matching pattern in function " + Lich.VM.PrettyPrint(func) 
+						+ " . Failed on: " + Lich.VM.PrettyPrint(exp));
+				}
 			});
 		}
 
@@ -867,10 +1025,23 @@ function filter(ret)
 		{
 			if(n != "lichType")
 			{
-				func.invoke([container[n]], function(funcRes)
+				Lich.match(container[n], func.argPatterns[0], function(match)
 				{
-					if(funcRes)
-						res[n] = container[n];
+					if(match)
+					{
+						// Iterate over each item in the container and invoke the function passing [item]. It must be as an array to work correctly.
+						func.invoke([container[n]], function(funcRes)
+						{
+							if(funcRes)
+								res[n] = container[n]; 
+						});
+					}
+
+					else
+					{
+						throw new Error("Non-matching pattern in function " + Lich.VM.PrettyPrint(func) 
+							+ " . Failed on: " + Lich.VM.PrettyPrint(exp));
+					}
 				});
 			} 
 		}
@@ -884,6 +1055,7 @@ function filter(ret)
 			+ " " + Lich.VM.PrettyPrint(container));	
 	}
 
+	Lich.VM.popProcedure();
 	ret(res);
 }
 
@@ -1007,11 +1179,26 @@ function composeFunction(_functions, ret)
 					throw new Error("function composition with the (.) operator can only be used with functions. Failed with " 
 						+ Lich.VM.PrettyPrint(func));
 
-				func.invoke([res], function(res2)
+				Lich.VM.pushProcedure(new lichClosure([], null, false)); // closure for pattern scope
+				Lich.match(res, func.argPatterns[0], function(match)
 				{
-					res = res2;
-					next();
+					if(match)
+					{
+						func.invoke([res], function(res2)
+						{
+							res = res2;
+							next();
+						});
+					}
+
+					else
+					{
+						throw new Error("Non-matching pattern in function " + Lich.VM.PrettyPrint(func) 
+							+ " . Failed on: " + Lich.VM.PrettyPrint(res));
+					}
 				});
+
+				Lich.VM.popProcedure();
 			},
 
 			function()
