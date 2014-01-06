@@ -139,6 +139,9 @@ Lich.VM.printAST = function(object)
 {
 	switch(object.astType)
 	{
+		case "at-match":
+			return object.id + "@" + Lich.VM.printAST(object.pat);
+
 		case "wildcard":
 			return "_";
 

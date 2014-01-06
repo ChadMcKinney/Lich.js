@@ -385,6 +385,12 @@ Lich.dataMatch = function(object, pat)
 
 Lich.match = function(object, pat, ret)
 {
+	if(pat.astType == "at-match")
+	{
+		Lich.VM.setVar(pat.id, object);
+		pat = pat.pat;
+	}
+
 	switch(pat.astType)
 	{
 	case "varname":
@@ -1716,9 +1722,6 @@ Lich.compileReceive = function(ast,ret)
 	// CPS
 	//////////
 
-	Lich.post("receive ast.alts[0].pat: " + ast.alts[0].pat);
-	Lich.post("receive pretty ast.alts = " + Lich.VM.PrettyPrint(ast.alts[0].pat));
-
 	if(Lich.VM.currentThread !== "Actor")
 		throw new Error("Cannot use receive from the main thread. receive can only be called by an Actor.");
 
@@ -1746,8 +1749,6 @@ Lich.compileReceive = function(ast,ret)
 		messageBox, // For each message in the messageBox
 		function(exp, i, nextMessage)
 		{
-			Lich.post("exp = " + exp);
-			Lich.post("pretty exp = " + Lich.VM.PrettyPrint(exp));
 			forEachWithBreakCps
 			(
 				ast.alts, // for each pattern
@@ -1777,7 +1778,6 @@ Lich.compileReceive = function(ast,ret)
 
 							else
 							{
-								Lich.post("nextAlt(false)");
 								nextAlt(false); // continue
 							}
 						});
@@ -1786,7 +1786,6 @@ Lich.compileReceive = function(ast,ret)
 
 				function()
 				{
-					Lich.post("nextMessage(match)");
 					nextMessage(match); // if true, then break, if false then continue
 				}
 			)
@@ -1796,11 +1795,11 @@ Lich.compileReceive = function(ast,ret)
 		{
 			if(match) // Did we find a match?
 			{
+				messageBox.splice(messageIndex, 1); // Remove the message from the message box
 				// We found a match, so compile the pattern's expression, continue with ret(res)
 				Lich.compileAST(ast.alts[altIndex].exp, function(res)
 				{
 					Lich.VM.popProcedure();
-					messageBox.splice(messageIndex, 1); // Remove the message from the message box
 					queuedReceive = null;
 					ret(res);
 				});

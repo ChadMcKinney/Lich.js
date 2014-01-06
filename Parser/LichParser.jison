@@ -729,6 +729,7 @@ apat // : object
     | conid                         {{$$ = {astType:"data-match", id: $1, members: []};}}
     | conid conlist                 {{$$ = {astType:"data-match", id: $1, members: $2};}}
     | lambda_pat                    {{$$ = $1;}}
+    | varid "@" apat                {{$$ = {astType:"at-match", id: $1, pat:$3};}}
     ;
 
 conlist
