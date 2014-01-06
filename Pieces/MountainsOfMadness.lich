@@ -72,7 +72,7 @@ data Game {
 	players		= (),
 	monsters 	= (),
 	locations 	= ("Nowhere" => Location),
-	narration 	= "You are nowhere.",
+	narration 	= "",
 	gameOver	= False
 }
 
@@ -90,10 +90,21 @@ down 	= Down
 ------------------------------------------------------------------------------------------------
 
 -- |addNarration String Game => Game
-addNarration story game = game{narration = (game::narration)+"\n"+story}
+addNarration story game = game{narration = (game::narration)+" "+story}
 
--- |narrate Game => Game
-narrate game = postNarration (game::narration) (game{narration = ""})
+addFarDescriptionToNarration item game = game{narration = (game::narration)+" "+(item::farDescription)}
+
+-- | foldOverCardinals (Location -> Game -> Game) -> Location -> (Game -> Game)
+foldOverCardinals f loc = f loc::north . f loc::south . f loc::east . f loc::west . f loc::up . f loc::down
+
+-- |addLocationNarration :: Location -> Game -> Game
+addLocationNarration location game = itemNarratedGame
+	where
+		locationNarratedGame = addNarration (location::description) game
+		itemNarratedGame = foldl (flip addFarDescriptionToNarration) locationNarratedGame (location::items)
+
+--cardinalNarratedGame = foldOverCardinals (addCardinalFarNarration) location 
+--$ itemNarratedGame
 
 -- |placeItemAtLocation Item Location => Location
 placeItemAtLocation item location = location {items = newItems}
@@ -119,6 +130,11 @@ removeItemFromPlayer item player = player{items = newItems}
 updateLocation location game = game{locations = newLocations}
 	where
 		newLocations = ((location::name) => location) : (game::locations)
+
+-- | addLocations:: Dict -> Game -> Game
+addLocations newLocations game = game{locations = combinedLocations}
+	where
+		combinedLocations = (game::locations) : newLocations
 
 -- |getLocation String     Game => Player
 getLocation locationName game = game::locations !! locationName
@@ -190,11 +206,12 @@ lookAtCardinal cardinal player game = addNarration description game
 -- |movePlayer Cardinal Player Game => Game
 movePlayer cardinal player game = 
 	if newLocation::moveable
-		then updatePlayer newPlayer game
+		then newGame
 		else addNarration "That way is blocked." game 
 	where
 		newLocation 	= locationAtCardinal cardinal player game
 		newPlayer 		= player{location=newLocation::name}
+		newGame			= addLocationNarration newLocation $ updatePlayer newPlayer game
 
 moveMonster cardinal monster game = 
 	if newLocation::moveable
@@ -204,13 +221,13 @@ moveMonster cardinal monster game =
 		newLocation 	= locationAtCardinal cardinal player game
 		newMonster 		= monster{location=newLocation::name}
 
-movePlayerOrMonster name cardinal game = newGame
+movePlayerOrMonster cardinal name game = newGame
 	where
 		something = findSomethingWithName name game
 		newGame =
 			case something of
-				Monster -> moveMonster something game
-				Player 	-> movePlayer something game
+				Monster -> moveMonster cardinal something game
+				Player 	-> movePlayer cardinal something game
 				_		-> game
 	
 -- |checkPlayerDeath Player Game => Game
@@ -377,14 +394,14 @@ revelation		= Trap name desc attack demen
 		attack 	= 0
 		demen	= 20
 
--- |dogCorpse 	=>Item
+-- |dogCorpse 	::Item
 dogCorpse 		= Item name fDesc desc
 	where
 		name 	= "DogCorpse"
-		fDesc 	= "A dessicated dog corpse."
-		desc 	= "Upon closer inspection you find that it appears to have been...dissected."
+		fDesc 	= "On the ground lays a dessicated dog corpse. It seems to have been here awhile."
+		desc 	= "Upon closer inspection I find that it appears to have been mauled. The teeth, or claw, wounds seemed to have left a star like pattern."
 
--- |corpse2 	=>Item
+-- |corpse2 	::Item
 corpse 			= Item name fDesc desc
 	where
 		name 	= "Corpse"
@@ -397,6 +414,13 @@ corpse2 		= Item name fDesc desc
 		fDesc 	= "A bloated corpse of a scientist"
 		desc 	= "Several of the scientist's limbs appear to have been amputated. This was not done by a wild animal as the wounds have been cauterized."
 
+diary			= Item name fDesc description
+	where
+		name 	= "Corpse2"
+		fDesc 	= "Amongst the tattered bedrolls I see a worn diary."
+		desc 	= "The diary contains indeoth analyses of several in-field dissection conducted."
+
+
 camp 			= Location "Camp" n s e w u d desc fDesc items mov
 	where
 		n 		= "Mound"
@@ -405,9 +429,9 @@ camp 			= Location "Camp" n s e w u d desc fDesc items mov
 		w 		= "Mound2"
 		u 		= "Nothing"
 		d 		= "Nothing"
-		desc 	= "A base camp for a previous expedition to Antartica."
+		desc 	= "I stood amongst the ruins of my forward scout's base camp. They had gone missing. We are part of a small group of biologists exploring the reaches of Antartica. To the north, east, and west I can see three prominent mounds of snow. Given the scout's absence, this seemed ominous. "
 		fDesc 	= "You see a white blasted, frigid looking camp."	
-		items 	= ()
+		items 	= ("Diary" => diary)
 		mov 	= True
 
 mound 		= Location "Mound" n s e w u d desc fDesc items mov
@@ -418,7 +442,7 @@ mound 		= Location "Mound" n s e w u d desc fDesc items mov
 		w 		= "Mound2"
 		u 		= "Nothing"
 		d 		= "Nothing"
-		desc 	= "A strange greenish mound in the snow. There appears to be something at the top of it."
+		desc 	= "Standing before me is a strange greenish mound in the snow. To the north are a series of mountains. To the south is the scout camp."
 		fDesc 	= "the vauge outline of a small hill of some kind in the snow."	
 		items 	= ("DogCorpse" => dogCorpse)
 		mov 	= True
@@ -431,7 +455,7 @@ mound2  		= Location "Mound2" n s e w u d desc fDesc items mov
 		w 		= "Nothing"
 		u 		= "Nothing"
 		d 		= "Nothing"
-		desc 	= "A strange redish mound in the snow. There appears to be something at the top of it."
+		desc 	= "I am standing above a strange redish mound in the snow. To the east is the scout camp, to the north is another of these mounds."
 		fDesc 	= "the vauge outline of a small hill of some kind in the snow."	
 		items 	= ("Corpse" => corpse)
 		mov 	= True
@@ -444,7 +468,7 @@ mound3 			= Location "Mound3" n s e w u d desc fDesc items mov
 		w 		= "Camp"
 		u 		= "Nothing"
 		d 		= "Nothing"
-		desc 	= "A strange brownish mound in the snow. There appears to be something at the top of it."
+		desc 	= "I am standing on a strange redish mound in the snow. To the west is the scout camp, to the north is another of these mounds."
 		fDesc 	= "the vauge outline of a small hill of some kind in the snow."	
 		items 	= ("Corpse2" => corpse2)
 		mov 	= True
@@ -533,38 +557,36 @@ underMurals 	= Location "UnderMurals" n s e w u d desc fDesc items mov
 		items 	= ("Mural2" => mural2)
 		mov 	= True
 
-gameLocations 	 = finalDic
-	where
-		locDic   = ("Camp"=>camp,"Mound"=>mound,"Mound2"=>mound2,"Mound3"=>mound3,"Mountains"=>mountains)
-		locDic2  = ("Ruins"=>ruins,"UnderRuins"=>underRuins,"Murals"=>murals,"UnderMurals"=>underMurals)
-		finalDic =  locDic : locDic2
-
+gameLocations 	 = ("Camp"=>camp,"Mound"=>mound,"Mound2"=>mound2,"Mound3"=>mound3,"Mountains"=>mountains,"Ruins"=>ruins,"UnderRuins"=>underRuins,"Murals"=>murals,"UnderMurals"=>underMurals)
 
 
 demoPlayer 		= Player "casiosk1" 100 "Camp"
 demoShoggoth 	= Monster "Shoggoth"
 demoGame 		= Game ("casiosk1"=>demoPlayer) ("Shoggoth"=>demoShoggoth) gameLocations
 
+moveFunc cardinal game = movePlayer cardinal (getPlayer "casiosk1") game
+
 ---------------------------------------------------------------------------------------------------------------------
 -- IO Functions
 ---------------------------------------------------------------------------------------------------------------------
 
 --Main Game loop
---madnessLoop game = 
---	receive m of
---		(\x->)		->  madnessLoop . narrate $ m game
---		"finished" 	-> print "Finished!"
+madnessLoop game = 
+	receive
+		"narration"			-> print (game::narration)
+		"finished" 			-> print "The End."
+		updateGame @(\_->)	-> self (updateGame game)
 
 --Starts the main game loop
---startMountainsOfMadness playerName = spawn "madnessLoop" madnessLoop [newGame]
---	where
---		newPlayer 	= Player playerName 100 "Camp"
---		newGame 	= Game (playerName=>newPlayer) () gameLocations
+startMountainsOfMadness playerName = spawn madnessLoop [newGame]
+	where
+		newPlayer 	= Player playerName 100 "Camp"
+		newGame 	= Game (playerName=>newPlayer) () gameLocations
 
 --Sends the game loop a message walk a direction
 --walk cardinal playerName = walkFunc :>> "madnessLoop"
 --	where
---		walkFunc game = movePlayerOrMonster playerName cardinal game
+--		walkFunc game = movePlayerOrMonster cardinal playerName game
 
 --Sends the main game loop a message to look at a direction
 --look cardinal playerName = lookFunc :>> "madnessLoop"  

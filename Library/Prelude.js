@@ -1547,17 +1547,6 @@ function getCurrentTime(ret)
 
 createPrimitive("getCurrentTime", [], getCurrentTime);
 
-
-function selfActor(ret)
-{
-	if(Lich.VM.currentThread !== "Actor")
-		throw new Error("self can only be called from an Actor thread.");
-
-	ret(threadFunc);
-}
-
-createPrimitive("self", [], selfActor);
-
 /*
 function lichType()
 {

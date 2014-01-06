@@ -38,3 +38,9 @@
 module Prelude where
 
 myName = (clientName 0)
+
+flip f a b = f b a
+id a = a
+
+-- |narrate Game => Game
+narrate game = postNarration (game::narration) (game{narration = ""})
