@@ -69,8 +69,8 @@ data Monster {
 }
 
 data Game {
-	players		= (),
-	monsters 	= (),
+	players		= ("Nobody" => Player),
+	monsters 	= ("Nobody" => Monster),
 	locations 	= ("Nowhere" => Location),
 	narration 	= "",
 	gameOver	= False
@@ -565,6 +565,8 @@ demoShoggoth 	= Monster "Shoggoth"
 demoGame 		= Game ("casiosk1"=>demoPlayer) ("Shoggoth"=>demoShoggoth) gameLocations
 
 moveFunc cardinal game = movePlayer cardinal (getPlayer "casiosk1") game
+printPlayerLocation game = printAndReturn ( (getPlayer "casiosk1" game)::location) game
+containsPlayer game = printAndReturn ( (getPlayer "casiosk1" game) == Nothing) game
 
 ---------------------------------------------------------------------------------------------------------------------
 -- IO Functions
@@ -573,9 +575,9 @@ moveFunc cardinal game = movePlayer cardinal (getPlayer "casiosk1") game
 --Main Game loop
 madnessLoop game = 
 	receive
-		"narration"			-> print (game::narration)
-		"finished" 			-> print "The End."
-		updateGame @(\_->)	-> self (updateGame game)
+		"narration"			-> print $ game::narration
+		"finished" 			-> game::locations
+		updateGame@(\_->)	-> self $ updateGame game
 
 --Starts the main game loop
 startMountainsOfMadness playerName = spawn madnessLoop [newGame]

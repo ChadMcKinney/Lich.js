@@ -103,6 +103,13 @@ function lichPrint(ret)
 }
 createPrimitive("print", ["_L"], lichPrint);
 
+function lichPrintAndReturn(ret)
+{
+	Lich.VM.Print(Lich.VM.getVar("_L"));
+	ret(Lich.VM.getVar("_R"));
+}
+createPrimitive("printAndReturn", ["_L","_R"], lichPrintAndReturn);
+
 
 function lichClientName(ret)
 {
