@@ -335,7 +335,17 @@ function parseCurrentLine()
 	
 	catch(e)
 	{
-		Lich.post(e + " : " + Lich.Lexer.yy.lexer.yylloc);
+		if(Lich.Lexer.yy.lexer.yylloc.first_line != Infinity 
+			&& Lich.Lexer.yy.lexer.yylloc.first_column != Infinity)
+		{
+			Lich.post(e + " found at [line, column]: [" + Lich.Lexer.yy.lexer.yylloc.first_line 
+			+ ", " + Lich.Lexer.yy.lexer.yylloc.first_column + "]");
+		}
+
+		else
+		{
+			Lich.post(e + " found at [line, column]: [0, 0]");
+		}
 	}
 }
 
