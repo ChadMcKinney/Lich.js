@@ -317,8 +317,8 @@ function parseCurrentLine()
 	str = line.line;
 	broadcastLichCode(str);
 
-	try
-	{
+	//try
+	//{
 		if(/\S/.test(str)) // if not just whitespace
 		{
 			var ast = Lich.parse(str); // interactive parsing
@@ -331,12 +331,12 @@ function parseCurrentLine()
 				Lich.VM.Print(res);
 			})
 		}
-	}
+	//}
 	
-	catch(e)
-	{
-		Lich.post(e + " : " + Lich.Lexer.yy.lexer.yylloc);
-	}
+	//catch(e)
+	//{
+		//Lich.post(e + " : " + Lich.Lexer.yy.lexer.yylloc);
+	//}
 }
 
 /*

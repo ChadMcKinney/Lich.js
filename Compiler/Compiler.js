@@ -1281,7 +1281,7 @@ Lich.compileDictionary = function(ast,ret)
 	forEachPairsCps(
 		ast.pairs, 
 
-		function(elem,index,next)
+		function(elem,i,next)
 		{
 			Lich.compileAST(elem,function(dictKey)
 			{
@@ -1716,11 +1716,21 @@ Lich.compileReceive = function(ast,ret)
 	// CPS
 	//////////
 
+	Lich.post("receive ast.alts[0].pat: " + ast.alts[0].pat);
+	Lich.post("receive pretty ast.alts = " + Lich.VM.PrettyPrint(ast.alts[0].pat));
+
 	if(Lich.VM.currentThread !== "Actor")
 		throw new Error("Cannot use receive from the main thread. receive can only be called by an Actor.");
 
 	if(messageBox.length == 0)
-		// createListener
+	{
+		queuedReceive = function()
+		{
+			Lich.compileReceive(ast, ret);
+		}
+
+		return;
+	}
 
 	var closure = new lichClosure([], {}, false, {}); // scope for patterns
 	var match = false;
@@ -1731,11 +1741,15 @@ Lich.compileReceive = function(ast,ret)
 	// Two dimensional iteration over each message against each defined pattern.
 	// If we find a match break from both loops and call the pattern's matching expression.
 	// Otherwise we schedule receive to be called again upon the arrival of a new message.
-	forEachWithBreakCps(
+	forEachWithBreakCps
+	(
 		messageBox, // For each message in the messageBox
 		function(exp, i, nextMessage)
 		{
-			forEachWithBreakCps(
+			Lich.post("exp = " + exp);
+			Lich.post("pretty exp = " + Lich.VM.PrettyPrint(exp));
+			forEachWithBreakCps
+			(
 				ast.alts, // for each pattern
 				function(elem, j, nextAlt)
 				{
@@ -1763,40 +1777,42 @@ Lich.compileReceive = function(ast,ret)
 
 							else
 							{
+								Lich.post("nextAlt(false)");
 								nextAlt(false); // continue
 							}
-						})
+						});
 					}
 				},
 
 				function()
 				{
+					Lich.post("nextMessage(match)");
 					nextMessage(match); // if true, then break, if false then continue
 				}
-			),
+			)
+		},
 
-			function()
+		function()
+		{
+			if(match) // Did we find a match?
 			{
-				if(match) // Did we find a match?
-				{
-					// We found a match, so compile the pattern's expression, continue with ret(res)
-					Lich.compileAST(ast.alts[altIndex].exp, function(res)
-					{
-						Lich.VM.popProcedure();
-						messageBox.splice(messageIndex, 1); // Remove the message from the message box
-						queuedReceive = null;
-						ret(res);
-					});
-				}
-
-				else // No match
+				// We found a match, so compile the pattern's expression, continue with ret(res)
+				Lich.compileAST(ast.alts[altIndex].exp, function(res)
 				{
 					Lich.VM.popProcedure();
-					// createListener for future messages
-					queuedReceive = function()
-					{
-						Lich.compileReceive(ast, ret);
-					}
+					messageBox.splice(messageIndex, 1); // Remove the message from the message box
+					queuedReceive = null;
+					ret(res);
+				});
+			}
+
+			else // No match
+			{
+				Lich.VM.popProcedure();
+				// createListener for future messages
+				queuedReceive = function()
+				{
+					Lich.compileReceive(ast, ret);
 				}
 			}
 		}

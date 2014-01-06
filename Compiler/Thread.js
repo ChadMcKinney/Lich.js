@@ -107,15 +107,46 @@ function compileLich() // compile default library
 	}
 }
 
-function executeThreadFunc(arg)
+function executeThreadFunc(args, ret)
 {
+	/*
 	Lich.VM.pushProcedure(new lichClosure([], {}, false, {})); // scope for patterns
-	if(!Lich.match(arg, threadFunc.argPatterns[0]))
-		throw new Error("Non-matching pattern in function " + Lich.VM.PrettyPrint(threadFunc) + " . Failed on: " + Lich.VM.PrettyPrint(arg))
-		
-	var res = threadFunc.invoke([arg]);
-	Lich.VM.popProcedure();
-	return res;
+	Lich.match(arg, threadFunc.argPatterns[0]), function(matchRes)
+	{
+		if(!matchRes)
+			throw new Error("Non-matching pattern in function " + Lich.VM.PrettyPrint(threadFunc) + " . Failed on: " + Lich.VM.PrettyPrint(arg))
+
+		threadFunc.invoke(args, function(res)
+		{
+			Lich.VM.popProcedure();
+			ret(res);
+		});
+	});*/
+
+	//Lich.VM.pushProcedure(new lichClosure([], {}, false, {})); // scope for patterns
+	forEachCps(
+		args,
+		function(exp, i, next)
+		{
+			Lich.match(exp, threadFunc.argPatterns[i], function(match)
+			{
+				if(match)
+					next();
+				else
+					throw new Error("Non-matching pattern in function " + Lich.VM.PrettyPrint(threadFunc) 
+						+ " . Failed on: " + Lich.VM.PrettyPrint(exp));
+			});
+		},
+
+		function()
+		{
+			threadFunc.invoke(args, function(res)
+			{
+				//Lich.VM.popProcedure();
+				ret(res);
+			}); // CPS is making by brain break.
+		}
+	);
 }
 
 this.addEventListener("message", 
@@ -139,7 +170,14 @@ this.addEventListener("message",
 			case "init":
 				//Lich.post("Actor init event.data.func = " + event.data.func);
 				threadFunc = Lich.parseJSON(event.data.func);
+				var args = Lich.parseJSON(event.data.args);
 				Lich.post("Actor initialized.");
+
+				executeThreadFunc(args, function(res)
+				{
+					Lich.VM.Print(res);
+					self.close();
+				});
 				break;
 
 			case "message":

@@ -389,7 +389,7 @@ lexp // : object
   | exp "$" exp                     {{$$ = {astType:"function-application-op", lhs: $1, rhs: $3};}}
   | '\' apats "->" exp              {{$$ = {astType:"lambda", args: $2, rhs: $4, pos: @$}; }}
   | "case" exp "of" "†" alts "‡"    {{$$ = {astType:"case", exp: $2, alts: $5, pos: @$}; }}
-  | "receive" "†" alts "‡"   {{$$ = {astType:"receive", alts:$4, pos:@$};}}
+  | "receive" "†" alts "‡"   {{$$ = {astType:"receive", alts:$3, pos:@$};}}
   | "let" decls "in" exp            {{$$ = {astType:"let", decls: $2, exp: $4, pos: @$}; }}
   | exp qop lexp                    {{$$ = {astType:"binop-exp",op:($2).id.id,lhs:$1,rhs:$3,pos:@$};}}
   ;

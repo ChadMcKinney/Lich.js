@@ -205,9 +205,15 @@ function checkNumOpError(l, op, r)
 function spawnActor(ret)
 {
 	var closure = Lich.VM.getVar("_function");
+	var arguments = Lich.VM.getVar("_arguments");
 
 	if(closure.lichType != CLOSURE && closure.lichType != THUNK)
-		throw new Error("spawn can only be used with functions. Failed with: spawn " + Lich.VM.PrettyPrint(closure));
+		throw new Error("spawn can only be used as spawn function list. Failed with: spawn " + Lich.VM.PrettyPrint(closure) 
+			+ " " + Lich.VM.PrettyPrint(arguments));
+
+	if(Lich.getType(arguments) != LIST)
+		throw new Error("spawn can only be used as spawn function list. Failed with: spawn " + Lich.VM.PrettyPrint(closure) 
+			+ " " + Lich.VM.PrettyPrint(arguments));
 
 	var worker = new Worker("../Compiler/Thread.js");
 		
@@ -232,12 +238,12 @@ function spawnActor(ret)
 		false
 	);
 
-	worker.postMessage({type:"init", func:Lich.stringify(closure)});
+	worker.postMessage({type:"init", func:Lich.stringify(closure),args:Lich.stringify(arguments)});
 	worker.lichType = ACTOR;
 	ret(worker);
 }
 
-createPrimitive("spawn", ["_function"], spawnActor);
+createPrimitive("spawn", ["_function", "_arguments"], spawnActor);
 
 function sendActor(ret)
 {

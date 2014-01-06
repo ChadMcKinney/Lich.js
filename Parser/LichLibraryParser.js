@@ -291,7 +291,7 @@ case 91:this.$ = {astType:"lambda", args: $$[$0-2], rhs: $$[$0], pos: this._$};
 break;
 case 92:this.$ = {astType:"case", exp: $$[$0-4], alts: $$[$0-1], pos: this._$}; 
 break;
-case 93:this.$ = {astType:"receive", alts:$$[$0], pos:this._$};
+case 93:this.$ = {astType:"receive", alts:$$[$0-1], pos:this._$};
 break;
 case 94:this.$ = {astType:"let", decls: $$[$0-2], exp: $$[$0], pos: this._$}; 
 break;
