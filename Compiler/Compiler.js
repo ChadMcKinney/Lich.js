@@ -1663,8 +1663,9 @@ function postProcessJSON(object)
 		    	rhs = Lich.VM.getVar(rhs.id).rhs;
 			}
 
+			var type = object.lichType;
 			object = new lichClosure(object.argPatterns, rhs, object.mutable, object.namespace, object.decls);
-			object.lichType = object.lichType;
+			object.lichType = type;
 	    }
 
         for(var n in object)

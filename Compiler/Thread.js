@@ -37,6 +37,7 @@
 
 
 importScripts("Objects.js", "VM.js", "Compiler.js", "../Library/Prelude.js");
+
 //compileLich(); // Can we just do this synchronously?
 Lich.VM.thread = 'worker'; // Not the main thread
 
