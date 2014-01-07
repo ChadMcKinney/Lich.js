@@ -361,7 +361,7 @@ createPrimitive("==", ["_L", "_R"], equivalent);
 
 function notequivalent(ret)
 {
-	ret(Lich.VM.getVar("_L") != Lich.VM.getVar("_R"));
+	ret(Lich.VM.getVar("_L") !== Lich.VM.getVar("_R"));
 }
 
 createPrimitive("/=", ["_L", "_R"], notequivalent);
@@ -511,20 +511,42 @@ function mapContainer(ret)
 
 	if((container instanceof Array) || (typeof container === "string"))
 	{
+		Lich.VM.pushProcedure(new lichClosure([], null, true)); // allows reuse of pattern variables
 		/*
 		res = new Array();
 		
 		for(var i = 0; i < container.length; ++i)
 		{
+			Lich.match(container[i], func.argPatterns[0], function(match)
+			{
+				if(match)
+				{
+					func.invoke([container[i]], function(funcRes)
+					{
+						res.push(funcRes);
+					})
+				}
+				
+				else
+				{
+					throw new Error("Non-matching pattern in function " + Lich.VM.PrettyPrint(threadFunc) 
+						+ " . Failed on: " + Lich.VM.PrettyPrint(exp));
+				}
+			});
+
+			
 			// Iterate over each item in the container and invoke the function passing [item]. It must be as an array to work correctly.
 			// res.push(func.invoke([container[i]])); 
-			func.invoke([container[i]], function(funcRes)
-			{
-				res.push(funcRes);
-			})
-		}*/
+			//func.invoke([container[i]], function(funcRes)
+			//{
+			//	res.push(funcRes);
+			//})
+		}
 
-		Lich.VM.pushProcedure(new lichClosure([], null, true)); // allows reuse of pattern variables
+		Lich.VM.popProcedure();
+		ret(res);
+		*/
+		
 		mapCps(
 			container,
 			function(exp, i, callback)
@@ -563,6 +585,7 @@ function mapContainer(ret)
 		Lich.VM.pushProcedure(new lichClosure([], null, true)); // allows reuse of pattern variables
 		var res = {};
 
+		/*
 		for(n in container)
 		{
 			if(n != "lichType")
@@ -584,11 +607,38 @@ function mapContainer(ret)
 					}
 				});
 			}
-		}
+		}*/
 
-		res.lichType = DICTIONARY;
-		Lich.VM.popProcedure();
-		ret(res);
+		mapDictCps(
+			container,
+			function(n, i, callback)
+			{
+				var exp = container[n];
+				Lich.match(exp, func.argPatterns[0], function(match)
+				{
+					if(match)
+					{
+						func.invoke([exp], function(funcRes)
+						{
+							callback(funcRes);
+						})
+					}
+					
+					else
+					{
+						throw new Error("Non-matching pattern in function " + Lich.VM.PrettyPrint(threadFunc) 
+							+ " . Failed on: " + Lich.VM.PrettyPrint(exp));
+					}
+				});
+			},
+
+			function(res)
+			{
+				res.lichType = DICTIONARY;
+				Lich.VM.popProcedure();
+				ret(res)
+			}
+		);
 	}
 
 	else
@@ -721,65 +771,72 @@ function foldl(ret)
 		throw new Error("foldl can only be applied using: foldl function container. Failed with: foldr " + Lich.VM.PrettyPrint(func) 
 			+ " " + Lich.VM.PrettyPrint(initialValue) + " " + Lich.VM.PrettyPrint(container));
 
-	var res = container;
+	var res = initialValue;
 	Lich.VM.pushProcedure(new lichClosure([], null, true)); // allows reuse of pattern variables
 
 	if((container instanceof Array) || (typeof container === "string"))
-	{	
-		res = initialValue;
-
-		for(var i = 0; i < container.length; ++i)
-		{
-			Lich.match(res, func.argPatterns[0], function(match)
-			{
-				if(match)
-				{
-					Lich.match(container[i], func.argPatterns[1], function(match2)
-					{
-						if(match2)
-						{
-							func.invoke([res, container[i]], function(funcRes)
-							{
-								res = funcRes;
-							});
-						}
-
-						else
-						{
-							throw new Error("Non-matching pattern in function " + Lich.VM.PrettyPrint(threadFunc) 
-									+ " . Failed on: " + Lich.VM.PrettyPrint([res, container[i]]));
-						}	
-					});
-				}
-
-				else
-				{
-					throw new Error("Non-matching pattern in function " + Lich.VM.PrettyPrint(threadFunc) 
-							+ " . Failed on: " + Lich.VM.PrettyPrint([res, container[i]]));
-				}	
-			}); 
-		}
-	}
-
-	else if(container.lichType == DICTIONARY)
 	{
-		res = initialValue;
-
-		for(n in container)
-		{
-			if(n != "lichType")
+		forEachCps(
+			container,
+			function(exp, i, next)
 			{
 				Lich.match(res, func.argPatterns[0], function(match)
 				{
 					if(match)
 					{
-						Lich.match(container[n], func.argPatterns[1], function(match2)
+						Lich.match(exp, func.argPatterns[1], function(match2)
 						{
 							if(match2)
 							{
-								func.invoke([res, container[n]], function(funcRes)
+								func.invoke([res, exp], function(funcRes)
 								{
 									res = funcRes;
+									next();
+								});
+							}
+
+							else
+							{
+								throw new Error("Non-matching pattern in function " + Lich.VM.PrettyPrint(threadFunc) 
+										+ " . Failed on: " + Lich.VM.PrettyPrint([res, container[i]]));
+							}	
+						});
+					}
+
+					else
+					{
+						throw new Error("Non-matching pattern in function " + Lich.VM.PrettyPrint(threadFunc) 
+								+ " . Failed on: " + Lich.VM.PrettyPrint([res, container[i]]));
+					}	
+				});
+			},
+			function()
+			{
+				Lich.VM.popProcedure();
+				ret(res);
+			}
+		);
+	}
+
+	else if(container.lichType == DICTIONARY)
+	{
+		forEachDictCps(
+			container,
+			function(n, i, next)
+			{
+				var exp = container[n];
+				Lich.match(res, func.argPatterns[0], function(match)
+				{
+					if(match)
+					{
+						Lich.match(exp, func.argPatterns[1], function(match2)
+						{
+							if(match2)
+							{
+								func.invoke([res, exp], function(funcRes)
+								{
+									res = funcRes;
+									next();
 								});
 							}
 
@@ -796,9 +853,16 @@ function foldl(ret)
 						throw new Error("Non-matching pattern in function " + Lich.VM.PrettyPrint(threadFunc) 
 								+ " . Failed on: " + Lich.VM.PrettyPrint([res, container[i]]));
 					}
-				});	
+				});
+			},
+
+			function()
+			{
+				res.lichType = DICTIONARY;
+				Lich.VM.popProcedure();
+				ret(res)
 			}
-		}
+		);
 	}
 
 	else
@@ -806,9 +870,6 @@ function foldl(ret)
 		throw new Error("foldl can only be applied to lists and dictionaries. Failed with: foldl " + Lich.VM.PrettyPrint(func) 
 			+ " " + Lich.VM.PrettyPrint(initialValue) + " " + Lich.VM.PrettyPrint(container));	
 	}
-
-	Lich.VM.popProcedure();
-	ret(res);
 }
 
 createPrimitive("foldl", ["_F", "_I", "_C"], foldl);
@@ -823,55 +884,16 @@ function foldr(ret)
 		throw new Error("foldr can only be applied using: foldr function container. Failed with: foldr " + Lich.VM.PrettyPrint(func) 
 			+ " " + Lich.VM.PrettyPrint(initialValue) + " " + Lich.VM.PrettyPrint(container));
 
-	var res = container;
+	var res = initialValue;
 	Lich.VM.pushProcedure(new lichClosure([], null, true)); // allows reuse of pattern variables
 
 	if((container instanceof Array) || (typeof container === "string"))
-	{
-		res = initialValue;
-
-		for(var i = (container.length - 1); i >= 0; --i)
-		{
-			Lich.match(container[i], func.argPatterns[0], function(match)
+	{		
+		forEachReverseCps(
+			container,
+			function(exp, i, next)
 			{
-				if(match)
-				{
-					Lich.match(res, func.argPatterns[1], function(match2)
-					{
-						if(match2)
-						{
-							func.invoke([container[i], res], function(funcRes)
-							{
-								res = funcRes;
-							});
-						}
-
-						else
-						{
-							throw new Error("Non-matching pattern in function " + Lich.VM.PrettyPrint(threadFunc) 
-									+ " . Failed on: " + Lich.VM.PrettyPrint([res, container[i]]));
-						}	
-					});
-				}
-
-				else
-				{
-					throw new Error("Non-matching pattern in function " + Lich.VM.PrettyPrint(threadFunc) 
-							+ " . Failed on: " + Lich.VM.PrettyPrint([res, container[i]]));
-				}	
-			});
-		}
-	}
-
-	else if(container.lichType == DICTIONARY)
-	{
-		res = initialValue;
-
-		for(n in container)
-		{
-			if(n != "lichType")
-			{
-				Lich.match(container[n], func.argPatterns[0], function(match)
+				Lich.match(exp, func.argPatterns[0], function(match)
 				{
 					if(match)
 					{
@@ -879,9 +901,55 @@ function foldr(ret)
 						{
 							if(match2)
 							{
-								func.invoke([container[n], res], function(funcRes)
+								func.invoke([exp, res], function(funcRes)
 								{
 									res = funcRes;
+									next();
+								});
+							}
+
+							else
+							{
+								throw new Error("Non-matching pattern in function " + Lich.VM.PrettyPrint(threadFunc) 
+										+ " . Failed on: " + Lich.VM.PrettyPrint([res, container[i]]));
+							}	
+						});
+					}
+
+					else
+					{
+						throw new Error("Non-matching pattern in function " + Lich.VM.PrettyPrint(threadFunc) 
+								+ " . Failed on: " + Lich.VM.PrettyPrint([res, container[i]]));
+					}	
+				});
+			},
+			function()
+			{
+				Lich.VM.popProcedure();
+				ret(res);
+			}
+		);
+	}
+
+	else if(container.lichType == DICTIONARY)
+	{
+		forEachDictReverseCps(
+			container,
+			function(n, i, next)
+			{
+				var exp = container[n];
+				Lich.match(exp, func.argPatterns[0], function(match)
+				{
+					if(match)
+					{
+						Lich.match(res, func.argPatterns[1], function(match2)
+						{
+							if(match2)
+							{
+								func.invoke([exp, res], function(funcRes)
+								{
+									res = funcRes;
+									next();
 								});
 							}
 
@@ -898,9 +966,16 @@ function foldr(ret)
 						throw new Error("Non-matching pattern in function " + Lich.VM.PrettyPrint(threadFunc) 
 								+ " . Failed on: " + Lich.VM.PrettyPrint([res, container[i]]));
 					}
-				});	
+				});
+			},
+
+			function()
+			{
+				res.lichType = DICTIONARY;
+				Lich.VM.popProcedure();
+				ret(res)
 			}
-		}
+		);
 	}
 
 	else
@@ -908,9 +983,6 @@ function foldr(ret)
 		throw new Error("foldr can only be applied to lists and dictionaries. Failed with: foldr " + Lich.VM.PrettyPrint(func) 
 			+ " " + Lich.VM.PrettyPrint(initialValue) + " " + Lich.VM.PrettyPrint(container));	
 	}
-
-	Lich.VM.popProcedure();
-	ret(res);
 }
 
 createPrimitive("foldr", ["_F", "_I", "_C"], foldr);
@@ -952,6 +1024,7 @@ function zipWith(ret)
 	if((lcontainer instanceof Array) || (typeof lcontainer === "string")
 		&& (rcontainer instanceof Array) || (typeof rcontainer === "string"))
 	{
+		/*
 		for(var i = 0; i < lcontainer.length && i < rcontainer.length; ++i)
 		{
 			Lich.matchFunctionWithPatterns(func, [lcontainer[i], rcontainer[i]], function(match)
@@ -961,7 +1034,31 @@ function zipWith(ret)
 					res.push(funcRes);
 				});
 			}); 
-		}
+		}*/
+
+		var container;
+		if(rcontainer.length < lcontainer.length)
+			container = rcontainer;
+		else
+			container = lcontainer;
+
+		forEachCps(
+			container,
+			function(elem, i, next)
+			{
+				Lich.matchFunctionWithPatterns(func, [lcontainer[i], rcontainer[i]], function(match)
+				{
+					func.invoke([lcontainer[i], rcontainer[i]], function(funcRes)
+					{
+						res.push(funcRes);
+						next();
+					});
+				}); 
+			},
+			function()
+			{
+				ret(res);
+			})
 	}
 
 	else
@@ -969,8 +1066,6 @@ function zipWith(ret)
 		throw new Error("zipWith can only be applied to lists. Failed with: zipWith " + Lich.VM.PrettyPrint(func) 
 			+ " " + Lich.VM.PrettyPrint(lcontainer) + " " + Lich.VM.PrettyPrint(rcontainer));	
 	}
-
-	ret(res);
 }
 
 createPrimitive("zipWith", ["_F", "_L", "_R"], zipWith);
@@ -984,13 +1079,13 @@ function filter(ret)
 		throw new Error("filter can only be applied using: filter function container. Failed with: filter " + Lich.VM.PrettyPrint(func) 
 			+ " " + Lich.VM.PrettyPrint(container));
 
-	var res = container;
 	Lich.VM.pushProcedure(new lichClosure([], null, true)); // allows reuse of pattern variables
 
 	if((container instanceof Array) || (typeof container === "string"))
 	{
-		res = new Array();
+		var res = new Array();
 
+		/*
 		for(var i = 0; i < container.length; ++i)
 		{
 			Lich.match(container[i], func.argPatterns[0], function(match)
@@ -1011,16 +1106,50 @@ function filter(ret)
 						+ " . Failed on: " + Lich.VM.PrettyPrint(exp));
 				}
 			});
-		}
+		}*/
 
-		if(typeof container === "string")
-			res = res.join("");	
+		forEachCps(
+			container,
+			function(elem, i, next)
+			{
+				Lich.match(elem, func.argPatterns[0], function(match)
+				{
+					if(match)
+					{
+						// Iterate over each item in the container and invoke the function passing [item]. It must be as an array to work correctly.
+						func.invoke([elem], function(funcRes)
+						{
+							if(funcRes)
+							{
+								res.push(elem); 
+							}
+
+							next();
+						});
+					}
+
+					else
+					{
+						throw new Error("Non-matching pattern in function " + Lich.VM.PrettyPrint(func) 
+							+ " . Failed on: " + Lich.VM.PrettyPrint(exp));
+					}
+				});
+			},
+			function()
+			{
+				if(typeof container === "string")
+					res = res.join("");
+
+				Lich.VM.popProcedure();
+				ret(res);	
+			}
+		);
 	}
 
 	else if(container.lichType == DICTIONARY)
 	{
-		res = {};
-
+		var res = {};
+		/*
 		for(n in container)
 		{
 			if(n != "lichType")
@@ -1046,7 +1175,42 @@ function filter(ret)
 			} 
 		}
 
-		res.lichType = DICTIONARY;
+		res.lichType = DICTIONARY;*/
+
+		forEachDictCps(
+			container,
+			function(n, i, next)
+			{
+				Lich.match(container[n], func.argPatterns[0], function(match)
+				{
+					if(match)
+					{
+						// Iterate over each item in the container and invoke the function passing [item]. It must be as an array to work correctly.
+						func.invoke([container[n]], function(funcRes)
+						{
+							if(funcRes)
+							{
+								res[n] = container[n]; 
+							}
+
+							next();
+						});
+					}
+
+					else
+					{
+						throw new Error("Non-matching pattern in function " + Lich.VM.PrettyPrint(func) 
+							+ " . Failed on: " + Lich.VM.PrettyPrint(exp));
+					}
+				});
+			},
+			function()
+			{
+				Lich.VM.popProcedure();
+				res.lichType = DICTIONARY;
+				ret(res);	
+			}
+		);
 	}
 
 	else
@@ -1054,9 +1218,6 @@ function filter(ret)
 		throw new Error("map can only be applied to lists and dictionaries. Failed with: filter " + Lich.VM.PrettyPrint(func) 
 			+ " " + Lich.VM.PrettyPrint(container));	
 	}
-
-	Lich.VM.popProcedure();
-	ret(res);
 }
 
 createPrimitive("filter", ["_L", "_R"], filter);

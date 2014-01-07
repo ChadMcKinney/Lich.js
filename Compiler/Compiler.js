@@ -59,6 +59,50 @@ function forEachCpsRec(index, arr, visitor, done)
     }
 }
 
+function forEachDictCps(arr, visitor, done) // cps style array iteration via recursion
+{ 
+	var keys = Object.keys(arr).filter(function(element) { return element != "lichType"});
+    forEachDictCpsRec(0, keys, visitor, done)
+}
+
+function forEachDictCpsRec(index, arr, visitor, done) 
+{
+    if (index < arr.length) 
+    {
+        visitor(arr[index], index, function () 
+        {
+            forEachDictCpsRec(index+1, arr, visitor, done);
+        });
+    } 
+
+    else 
+    {
+        done();
+    }
+}
+
+function forEachDictReverseCps(arr, visitor, done) // cps style array iteration via recursion
+{ 
+	var keys = Object.keys(arr).filter(function(element) { return element != "lichType"});
+    forEachDictReverseCpsRec(keys.length - 1, keys, visitor, done)
+}
+
+function forEachDictReverseCpsRec(index, arr, visitor, done) 
+{
+    if (index >= 0) 
+    {
+        visitor(arr[index], index, function () 
+        {
+            forEachDictReverseCpsRec(index-1, arr, visitor, done);
+        });
+    } 
+
+    else 
+    {
+        done();
+    }
+}
+
 function forEachReverseCps(arr, visitor, done) // cps style array iteration via recursion
 { 
     forEachReverseCpsRec(arr.length - 1, arr, visitor, done)
@@ -138,6 +182,28 @@ function mapCpsRec(index, outArr, inArr, func, done)
         {
             mapCpsRec(index+1, outArr.concat(result),
                       inArr, func, done);
+        });
+    } 
+
+    else {
+        done(outArr);
+    }
+}
+
+function mapDictCps(arr, func, done) 
+{
+	var keys = Object.keys(arr).filter(function(element) { return element != "lichType"});
+    mapDictCpsRec(0, {}, keys, func, done)
+}
+
+function mapDictCpsRec(index, outArr, inArr, func, done) 
+{
+    if (index < inArr.length) 
+    {
+        func(inArr[index], index, function (result) 
+        {
+        	outArr[inArr[index]] = result;
+            mapDictCpsRec(index+1, outArr, inArr, func, done);
         });
     } 
 
