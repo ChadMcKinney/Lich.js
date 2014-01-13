@@ -328,7 +328,9 @@ function parseCurrentLine()
 			//Lich.VM.Print(Lich.compileAST(ast));
 			Lich.compileAST(ast, function(res)
 			{
-				Lich.VM.Print(res);
+				//Lich.VM.Print(res);
+				Lich.post(res);
+				eval(res);
 			})
 		}
 	}

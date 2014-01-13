@@ -36,7 +36,146 @@
 */
 
 
-// CPS Helper functions
+// Lambda Calculus and CPS Helper functions
+
+// Trampoline return 
+// setTimeout(function () { continuation(result) }, 0); // This method is waaaayyyy too slow. 
+var returnLambda = "(function(res){_ret(res)})";
+/*
+var returnLambda = "(function(res){_NUM_CONTINUATIONS_=_NUM_CONTINUATIONS_+1;"
+	+"if(_NUM_CONTINUATIONS_>50){_NUM_CONTINUATIONS_=0;"
+	+"setTimeout(function(){_ret(res)},0);}else{_ret(res)}})";
+//var returnNextTickLambda = "(function(res){setTimeout(function(){_ret(res)},0)})";
+var _NUM_CONTINUATIONS_ = 0;*/
+//var returnLambda = "(function(res){tco(_ret(res))})";
+
+/*
+function _curry(fn, args) 
+{
+  // no need to var these, they are scoped via argument list - we overwrite them
+  // convert the arguments to a real array:
+  args = [].slice.apply(arguments);
+  // first argument is a function:
+  fn = args.shift();
+  return function() {
+    // get internal args
+    var iArgs = [].slice.apply(arguments);
+    // apply curried arguments, then our arguments:
+    return fn.apply(this, args.concat(iArgs));
+  }
+}
+
+Function.prototype.curry = function(args...) {
+    var fn = this;
+    var args = Array.slice(arguments, 0);
+    return function() {
+        return fn.apply(this, args.concat(Array.slice(arguments, 0)));
+    };
+}
+*/
+
+Function.prototype.collapse = function(_collapseRet)
+{
+	Lich.post("this.length: " + this.length + "; arguments.length: " + arguments.length);
+	if(arguments.length == 1)
+	{
+		Lich.post("COLLAPSE!");
+			this(_collapseRet);
+	}
+	
+	else
+	{
+		Lich.post("No collapse.");
+		_collapseRet(this);
+	}
+}
+
+Lich.collapse = function(object)
+{
+	var res = object;
+	if(typeof object === "function")
+		object.collapse(function(res) { res = object; })
+	
+	return res;
+}
+	
+
+function __curry(func) {
+	if(typeof func !== "function")
+		return func;
+
+    var initial_args = [].slice.apply(arguments, [1]);
+    var func_args_length = func.length;
+
+    function __curry(args) {
+        if (args.length >= func_args_length) {
+            return func.apply(null, args);
+        }
+
+        return function () {
+            return __curry(args.concat([].slice.apply(arguments)));
+        };
+    }
+
+    return __curry(initial_args);
+}
+
+// Thanks to: https://gist.github.com/Gozala/1697037
+function tco(f) {
+  /**
+  Takes `f` function and returns wrapper in return, that may be
+  used for tail recursive algorithms. Note that returned funciton
+  is not side effect free and should not be called from anywhere
+  else during tail recursion. In other words if
+  `var f = tco(function foo() { ... bar() ... })`, then `bar`
+  should never call `f`. It is ok though for `bar` to call `tco(foo)`
+  instead.
+
+  ## Examples
+  var sum = tco(function(x, y) {
+    return y > 0 ? sum(x + 1, y - 1) :
+           y < 0 ? sum(x - 1, y + 1) :
+           x
+  })
+  sum(20, 100000) // => 100020
+  **/
+
+  var value, active = false, accumulated = []
+  return function accumulator() {
+    // Every time accumulator is called, given set of parameters
+    // are accumulated.
+    accumulated.push(arguments)
+    // If accumulator is inactive (is not in the process of
+    // tail recursion) activate and start accumulating parameters.
+    if (!active) {
+      active = true
+      // If wrapped `f` performs tail call, then new set of parameters will
+      // be accumulated causing new iteration in the loop. If `f` does not
+      // performs tail call then accumulation is finished and `value` will
+      // be returned. 
+      while (accumulated.length) value = f.apply(this, accumulated.shift())
+      active = false
+      return value
+    }
+  }
+}
+
+Lich.apply = function(object, _ret)
+{
+	if(typeof object === "function")
+		object(_ret);
+	else
+		_ret(object);
+}
+
+/*
+Function.prototype.curry = function curry() {
+    var fn = this, args = Array.prototype.slice.call(arguments);
+    return function curryed() {
+        return fn.apply(this, args.concat(Array.prototype.slice.call(arguments)));
+    };
+};*/
+
 
 function forEachCps(arr, visitor, done) // cps style array iteration via recursion
 { 
@@ -61,7 +200,7 @@ function forEachCpsRec(index, arr, visitor, done)
 
 function forEachDictCps(arr, visitor, done) // cps style array iteration via recursion
 { 
-	var keys = Object.keys(arr).filter(function(element) { return element != "lichType"});
+	var keys = Object.keys(arr).filter(function(element) { return element != "_lichType"});
     forEachDictCpsRec(0, keys, visitor, done)
 }
 
@@ -83,7 +222,7 @@ function forEachDictCpsRec(index, arr, visitor, done)
 
 function forEachDictReverseCps(arr, visitor, done) // cps style array iteration via recursion
 { 
-	var keys = Object.keys(arr).filter(function(element) { return element != "lichType"});
+	var keys = Object.keys(arr).filter(function(element) { return element != "_lichType"});
     forEachDictReverseCpsRec(keys.length - 1, keys, visitor, done)
 }
 
@@ -192,7 +331,7 @@ function mapCpsRec(index, outArr, inArr, func, done)
 
 function mapDictCps(arr, func, done) 
 {
-	var keys = Object.keys(arr).filter(function(element) { return element != "lichType"});
+	var keys = Object.keys(arr).filter(function(element) { return element != "_lichType"});
     mapDictCpsRec(0, {}, keys, func, done)
 }
 
@@ -212,7 +351,7 @@ function mapDictCpsRec(index, outArr, inArr, func, done)
     }
 }
 
-/*
+
 function trampoline(result) 
 {
     while(Array.isArray(result)) 
@@ -223,6 +362,7 @@ function trampoline(result)
     }
 }
 
+/*
 function forEachCps(arr, visitor, done)
 {
 	trampoline(forEachCpsProto(arr, visitor, done));
@@ -273,6 +413,9 @@ Lich.compileAST = function(ast, ret)
 
 				case "decl-fun":
 					return Lich.compileDeclFun(ast,ret);
+
+				case "local-decl-fun":
+					return Lich.compileLocalDeclFun(ast,ret);
 					
 				case "fun-where":
 					return Lich.compileFunWhere(ast,ret);
@@ -319,6 +462,7 @@ Lich.compileAST = function(ast, ret)
 				case "float-lit":
 				case "boolean-lit":
 				case "string-lit":
+					//ret("function(_ret){_ret("+ast.value+")}");
 					ret(ast.value);
 					break;
 					
@@ -344,7 +488,7 @@ Lich.compileAST = function(ast, ret)
 					return Lich.compileCase(ast,ret);
 					
 				case "Nothing":
-					ret(Lich.VM.Nothing);
+					ret(null);
 					break;
 					
 				case "list-comprehension":
@@ -386,6 +530,9 @@ Lich.compileAST = function(ast, ret)
 				case "class-binop":
 					return Lich.compileClassBinOp(ast,ret);
 
+				case "top-exp":
+					return Lich.compileTopExp(ast, ret);
+
 				default:
 					return Lich.unsupportedSemantics(ast,ret);
 			}
@@ -426,8 +573,10 @@ Lich.getType = function(object)
 		return NUMBER;
 	else if(type === "string")
 		return STRING;
-	else if(typeof object.lichType !== "undefined")
-		return object.lichType;
+	else if(type === "function")
+		return CLOSURE;
+	else if(typeof object._lichType !== "undefined")
+		return object._lichType;
 	else
 		throw new Error("uknown object: " + object);
 	
@@ -465,7 +614,7 @@ Lich.match = function(object, pat, ret)
 		break;
 
 	case "Nothing":
-		if(object.lichType == NOTHING)
+		if(object._lichType == NOTHING)
 			ret(true);
 		else
 			ret(false);
@@ -632,7 +781,7 @@ Lich.compileModule = function(ast,ret)
 	Lich.compileAST(ast.body, function(res)
 	{
 		Lich.post("Done compiling module: " + ast.modid);
-		ret(Lich.VM.Void)
+		ret(res);
 	});
 }
 
@@ -644,22 +793,25 @@ Lich.compileBody = function(ast,ret)
 		Lich.compileAST(ast.topdecls[i]);
 	}*/
 
+	var body = "";
+
 	forEachCps(
 		ast.topdecls, 
 		function(elem,index,next)
 		{
 			Lich.compileAST(elem, function(res)
 			{
+				body = body + res;
 				next();
 			});
 		},
-		ret
+		function(){ret(res);}
 	);
 }
 
 Lich.compileTopdeclDecl = function(ast,ret)
 {
-	return Lich.compileAST(ast.decl, ret);
+	Lich.compileAST(ast.decl, ret);
 }
 
 Lich.compileTopdeclData = function(ast,ret)
@@ -667,14 +819,19 @@ Lich.compileTopdeclData = function(ast,ret)
 	Lich.unsupportedSemantics(ast, ret);
 }
 
+Lich.compileLocalDeclFun = function(ast,ret)
+{
+	Lich.compileAST(ast.rhs, function(res)
+	{
+		ret("var "+ast.ident.id+"="+res+";");
+	});
+}
+
 Lich.compileDeclFun = function(ast,ret)
 {
+	/*
 	if(ast.args.length == 0)
 	{
-		/*
-		var res = Lich.compileAST(ast.rhs);
-		Lich.VM.setVar(ast.ident, res);
-		ret(res);*/
 		Lich.compileAST(ast.rhs, function(res)
 		{
 			Lich.VM.setVar(ast.ident, res);
@@ -687,16 +844,34 @@ Lich.compileDeclFun = function(ast,ret)
 		var closure = new lichClosure(ast.args, ast.rhs);
 		Lich.VM.setVar(ast.ident, closure);
 		ret(closure);
+	}*/
+
+	if(ast.args.length == 0)
+	{
+		Lich.compileAST(ast.rhs, function(rhs)
+		{
+			ret(ast.ident.id + "=Lich.collapse(" + rhs+")");
+		});
+	}
+
+	else
+	{
+		Lich.compileAST(ast.rhs, function(rhs)
+		{
+			var args = new Array();
+			ret(ast.ident.id + "=function (" + ast.args.map(function(e){return e.id}).concat("_ret").join(",") + "){return ("+rhs+")"+returnLambda + "};");
+		});
 	}
 }
 
 Lich.compileDeclThunk = function(ast,ret)
 {
+	/*
 	if(ast.args.length == 0)
 	{
 		var thunk = new lichClosure([], ast.rhs);
 		Lich.VM.setVar(ast.ident, thunk);
-		thunk.lichType = THUNK;
+		thunk._lichType = THUNK;
 		ret(thunk);
 	}
 
@@ -705,11 +880,17 @@ Lich.compileDeclThunk = function(ast,ret)
 		var closure = new lichClosure(ast.args, ast.rhs);
 		Lich.VM.setVar(ast.ident, closure);
 		ret(closure);
-	}
+	}*/
+
+	Lich.compileAST(ast.rhs, function(rhs)
+	{
+		ret("(function(" + ast.args.map(function(e){return e.id}).concat("_ret").join(",") + "){return " + rhs + returnLambda + "})");
+	});
 }
 
 Lich.compileFunWhere = function(ast,ret)
 {
+	/*
 	// CHECK WHERE VARS AGAINST FUNC VARS!!!!!!!!!!??????????
 	// Currently the parser doesn't allow for this.
 	for(var i = 0; i < ast.decls.length; ++i)
@@ -719,7 +900,29 @@ Lich.compileFunWhere = function(ast,ret)
 
 	//return new lichClosure([], ast.exp, false, {}, ast.decls).invoke([]);
 	var closure = new lichClosure([], ast.exp, false, {}, ast.decls);
-	closure.invoke([], function(res){ ret(res); });
+	closure.invoke([], function(res){ ret(res); });*/
+
+	//var func = "function "+ast.ident+"(" + ast.args.map(function(e){return e.id}).concat("_ret").join(",") + "){ ";
+	var func = "(function(_ret){";
+
+	mapCps(
+		ast.decls,
+		function(elem,i,callback)
+		{
+			elem.astType = "local-decl-fun";
+			Lich.compileAST(elem,function(decl)
+			{
+				callback(decl);
+			});
+		},
+		function(decls)
+		{
+			Lich.compileAST(ast.exp, function(exp)
+			{
+				ret(func + decls.join("") + " return (" +exp +")"+ returnLambda + "})");
+			});
+		}
+	);
 }
 
 Lich.compileConstr = function(ast,ret)
@@ -750,6 +953,7 @@ Lich.compileIte = function(ast,ret)
 		return Lich.compileAST(ast.e3);
 	*/
 
+	/*
 	Lich.compileAST(ast.e1, function(expRes)
 	{
 		var returnFunc = function(res) { ret(res); };
@@ -758,7 +962,20 @@ Lich.compileIte = function(ast,ret)
 			Lich.compileAST(ast.e2, returnFunc);
 		else
 			Lich.compileAST(ast.e3, returnFunc);
-	})
+	});*/
+
+	Lich.compileAST(ast.e1, function(expRes1)
+	{
+		Lich.compileAST(ast.e2, function(expRes2)
+		{
+			Lich.compileAST(ast.e3, function(expRes3)
+			{
+				var func = "(function(_ret){Lich.apply(("+expRes1+"),(function(cond){if(cond){";
+				func = func + "Lich.apply(("+expRes2+")," + returnLambda + ")}else{Lich.apply(("+ expRes3 +"),"+ returnLambda + ")}}))})";
+				ret(func);
+			});
+		});
+	});
 }
 
 	/*
@@ -767,7 +984,7 @@ Lich.compileIte = function(ast,ret)
 	if(typeof closure === "undefined")
 		throw new Error("Cannot invoke an undefined object");
 
-	if(closure.lichType != CLOSURE)
+	if(closure._lichType != CLOSURE)
 	{
 		throw new Error("Unable to use application on " + closure.astType);
 	}
@@ -792,12 +1009,13 @@ Lich.compileIte = function(ast,ret)
 
 Lich.compileApplication = function(ast,ret)
 {
+	/*
 	Lich.compileAST(ast.exps[0], function(closure)
 	{
 		if(typeof closure === "undefined")
 			throw new Error("Cannot invoke an undefined object");
 
-		if(closure.lichType != CLOSURE)
+		if(closure._lichType != CLOSURE)
 		{
 			throw new Error("Unable to use application on " + closure.astType);
 		}
@@ -833,7 +1051,34 @@ Lich.compileApplication = function(ast,ret)
 				}
 			);
 		}	
-	})
+	})*/
+
+	mapCps(
+		ast.exps,
+		function(elem, i, callback)
+		{
+			Lich.compileAST(elem, function(exp)
+			{
+				/*
+				Lich.match(exp, closure.argPatterns[i], function(match)
+				{
+					if(match)
+						callback([exp]);
+					else
+						throw new Error("Non-matching pattern in function " + Lich.VM.PrettyPrint(closure) 
+							+ " . Failed on: " + Lich.VM.PrettyPrint(exp));
+				});*/
+				callback(exp);
+			});
+		},
+		function(exps)
+		{
+			//Lich.post(exps);
+			// Trampoline
+			var func = "__curry("+exps[0]+")("+exps.slice(1, exps.length).join(",") + ")";
+			ret(func);	
+		}
+	);
 }
 
 Lich.compileFunctionApplicationOp = function(ast,ret)
@@ -841,16 +1086,17 @@ Lich.compileFunctionApplicationOp = function(ast,ret)
 	/*
 	var exp1 = Lich.compileAST(ast.lhs);
 
-	if(exp1.lichType != CLOSURE)
+	if(exp1._lichType != CLOSURE)
 		throw new Error("$ can only be applied using: function $ expression");
 
 	var exp2 = Lich.compileAST(ast.rhs);
 
 	return exp1.invoke([exp2]);*/
 
+	/*
 	Lich.compileAST(ast.lhs, function(exp1)
 	{
-		if(exp1.lichType != CLOSURE)
+		if(exp1._lichType != CLOSURE)
 			throw new Error("$ can only be applied using: function $ expression");
 
 		Lich.compileAST(ast.rhs, function(exp2)
@@ -860,7 +1106,48 @@ Lich.compileFunctionApplicationOp = function(ast,ret)
 				ret(res);
 			})
 		});
-	})
+	});*/
+
+	Lich.compileAST(ast.lhs, function(exp1)
+	{
+		//if(exp1._lichType != CLOSURE)
+		//	throw new Error("$ can only be applied using: function $ expression");
+
+		Lich.compileAST(ast.rhs, function(exp2)
+		{
+			/*
+			exp1.invoke([exp2], function(res)
+			{
+				ret(res);
+			})*/
+
+			ret("__curry(" + exp1 + ")("+ exp2 + ")");
+		});
+	});	
+}
+
+Lich.functionCompositionWrapper = function(funcs)
+{
+	return function(arg,_fcompRet)
+	{
+		var compRes = arg;
+		forEachReverseCps(
+			funcs,
+			function(func, i, next)
+			{
+				func(compRes,function(newRes)
+				{
+					compRes = function(_ret) { _ret(newRes) };
+					next();
+				})
+
+			},
+			function()
+			{
+				compRes(function(res) { _fcompRet(res); });
+			}
+		)
+	};
 }
 
 Lich.compileFunctionComposition = function(ast,ret)
@@ -872,7 +1159,7 @@ Lich.compileFunctionComposition = function(ast,ret)
 	{
 		var func = Lich.compileAST(ast.exps[i]);
 
-		if(func.lichType != CLOSURE)
+		if(func._lichType != CLOSURE)
 			throw new Error("function composition can only be applied using: function . function. Failed with " + Lich.VM.PrettyPrint(func));
 
 		funcs.push(func);
@@ -887,38 +1174,49 @@ Lich.compileFunctionComposition = function(ast,ret)
 		{
 			Lich.compileAST(elem, function(func)
 			{
-				if(func.lichType != CLOSURE)
-					throw new Error("function composition can only be applied using: function . function. Failed with " + Lich.VM.PrettyPrint(func));
+				//if(func._lichType != CLOSURE)
+				//	throw new Error("function composition can only be applied using: function . function. Failed with " + Lich.VM.PrettyPrint(func));
 				callback(func);
 			})
 		},
 		function(funcs)
 		{
-			composeFunction(funcs, function(composed)
-			{
-				ret(new lichClosure([{astType:"varname", id: "_F"}], composed));
-			});
+			Lich.post(funcs);
+			ret("Lich.functionCompositionWrapper(["+funcs.join(",")+"])");
 		}
 	);
 }
 
 Lich.compileLambda = function(ast,ret)
 {
-	ret(new lichClosure(ast.args, ast.rhs));
+	Lich.compileAST(ast.rhs, function(rhs)
+	{
+		ret("(function(" + ast.args.map(function(e){return e.id}).concat("_ret").join(",") + "){ return " + rhs + returnLambda + "})");
+	});
 }
 
 Lich.compileLet = function(ast,ret)
 {
-	for(var i = 0; i < ast.decls.length; ++i)
-	{
-		ast.decls[i].astType = "thunk";
-	}
+	var func = "(function(_ret){";
 
-	//return new lichClosure([], ast.exp, false, {}, ast.decls).invoke([]);
-	new lichClosure([], ast.exp, false, {}, ast.decls).invoke([], function(res)
-	{
-		ret(res);
-	});
+	mapCps(
+		ast.decls,
+		function(elem,i,callback)
+		{
+			elem.astType = "local-decl-fun";
+			Lich.compileAST(elem,function(decl)
+			{
+				callback(decl);
+			});
+		},
+		function(decls)
+		{
+			Lich.compileAST(ast.exp, function(exp)
+			{
+				ret(func + decls.join("") + " return (" +exp +")"+ returnLambda + "})");
+			});
+		}
+	);
 }
 
 Lich.compileLetOne = function(ast,ret)
@@ -953,7 +1251,7 @@ Lich.compileListExp = function(ast,ret)
 		},
 		function(res)
 		{
-			ret(res);
+			ret("function(_ret){_ret(["+res.join(",")+"])}");
 		}
 	);
 }
@@ -975,13 +1273,15 @@ Lich.compileWildCard = function(ast,ret)
 
 Lich.compileVarName = function(ast,ret)
 {
-	ret(Lich.VM.getVar(ast.id));
+	//ret(Lich.VM.getVar(ast.id));
+	//ret("function(_ret){_ret("+ast.id+")}");
+	ret("__curry("+ast.id+")");
 }
 
 Lich.compileDacon = function(ast,ret)
 {
 	if(ast == "Nothing")
-		ret(Lich.VM.Nothing);
+		ret("function(_ret){_ret(null)}");
 	else
 		Lich.unsupportedSemantics({astType:ast});
 }
@@ -1000,6 +1300,7 @@ Lich.compileDataDecl = function(ast,ret)
 	Lich.VM.setVar(ast.id, data);
 	return data;*/
 
+	/*
 	var data = lichData(ast.id);
 
 	mapCps(
@@ -1018,7 +1319,53 @@ Lich.compileDataDecl = function(ast,ret)
 			Lich.VM.setVar(ast.id, data);
 			ret(data);
 		}
+	);*/
+
+	// Native
+
+	var argNames = [];
+	mapCps(
+		ast.members,
+		function(elem,i,callback)
+		{
+			Lich.compileAST(elem.exp, function(elemRes)
+			{
+				argNames.push("\""+elem.id+"\"");
+				callback(elem.id+":"+elemRes);
+			});
+		},
+		function(dataPairs)
+		{
+			dataPairs.push("_lichType:\"DATA\"");
+			dataPairs.push("_argNames:["+argNames.join(",")+"]");
+			ret(ast.id+"={"+dataPairs.join(",")+"}");
+		}
 	);
+}
+
+Lich.newData = function(constructor,members, _dataRet)
+{
+	if(constructor == null) throw new Error("Unable to find data constructor for " + constructor);
+	var data = deepCopy(constructor);
+	forEachCps(
+		members, 
+		function(elem,i,next)
+		{
+			Lich.post("constructor._argNames[i] = " + constructor._argNames[i]);
+			data[constructor._argNames[i]] = elem;
+			next();
+		},
+		function()
+		{
+			_dataRet(data);
+		}
+	);
+
+	/*
+	return data;function(_dataRet)
+	{
+		_dataRet(data);
+	}*/
 }
 
 Lich.compileDataInst = function(ast,ret)
@@ -1041,6 +1388,7 @@ Lich.compileDataInst = function(ast,ret)
 
 	return data;*/
 
+	/*
 	var dataCon = Lich.VM.getVar(ast.id);
 
 	if(dataCon == Lich.VM.Nothing)
@@ -1065,6 +1413,24 @@ Lich.compileDataInst = function(ast,ret)
 		{
 			ret(data);
 		}
+	);*/
+
+
+	// Native
+
+	mapCps(
+		ast.members, 
+		function(elem,i,callback)
+		{
+			Lich.compileAST(elem, function(res)
+			{
+				callback(res);
+			})			
+		},
+		function(members)
+		{
+			ret("(function(_ret){Lich.newData("+ast.id+",["+members.join(",")+"],_ret)})");
+		}
 	);
 }
 
@@ -1073,7 +1439,7 @@ Lich.compileDataLookup = function(ast,ret)
 	/*
 	var data = Lich.compileAST(ast.data);
 
-	if(data.lichType != DATA)
+	if(data._lichType != DATA)
 		throw new Error("Unable to find data constructor. Failed with: " + ast.data + " :: " + ast.member);
 
 	var res = data[ast.member];
@@ -1083,9 +1449,10 @@ Lich.compileDataLookup = function(ast,ret)
 
 	return res;	*/
 
+	/*
 	Lich.compileAST(ast.data, function(data)
 	{
-		if(data.lichType != DATA)
+		if(data._lichType != DATA)
 			throw new Error("Unable to find data constructor. Failed with: " + ast.data + " :: " + ast.member);
 
 		var res = data[ast.member];
@@ -1094,7 +1461,40 @@ Lich.compileDataLookup = function(ast,ret)
 			throw new Error("Data constructor " + data._datatype + " does not contain member " + ast.member);
 
 		ret(res);
+	});*/
+
+	// Native
+	Lich.compileAST(ast.data, function(res)
+	{
+		//ret(res+"[\""+ast.member+"\"]");
+		
+		ret("(function(_lookRet){Lich.apply("+res+",function(_lookRes){_lookRet(_lookRes[\""+ast.member+"\"])})})");
 	});
+}
+
+Lich.dataUpdate = function(data,members, _dataRet)
+{
+	var newData = deepCopy(data);
+	var res;
+	forEachCps(
+		members, 
+		function(elem,i,next)
+		{
+			Lich.post(members[i].id + " = " + elem.exp);
+			newData[members[i].id] = elem.exp;
+			next();
+		},
+		function()
+		{
+			_dataRet(newData);
+		}
+	);
+
+	//return newData;function(_dataRet)
+	/*{
+		Lich.post("typeof newData = " + typeof newData);
+		_dataRet(newData);
+	};*/
 }
 
 Lich.compileDataUpdate = function(ast,ret)
@@ -1114,6 +1514,8 @@ Lich.compileDataUpdate = function(ast,ret)
 
 	return data;*/
 
+
+	/*
 	Lich.compileAST(ast.data, function(dataCon)
 	{
 		if(dataCon == Lich.VM.Nothing)
@@ -1139,6 +1541,35 @@ Lich.compileDataUpdate = function(ast,ret)
 				ret(data);
 			}
 		);
+	});*/
+
+	// Native
+	Lich.compileAST(ast.data, function(dataCon)
+	{
+		/*
+		if(dataCon == Lich.VM.Nothing)
+			throw new Error("Unable to find data constructor for " + ast.id);
+
+		var data = deepCopy(dataCon);
+
+		if(dataCon._argNames.length < ast.members.length)
+			throw new Error("Too many arguments for data constructor " + ast.id);*/
+
+		mapCps(
+			ast.members, 
+			function(elem,i,callback)
+			{
+				Lich.compileAST(elem.exp, function(elemRes)
+				{
+					var newMember = "{id:\""+ast.members[i].id+"\", exp:"+elemRes+"}";
+					callback(newMember);
+				});
+			},
+			function(members)
+			{
+				ret("(function(_ret){Lich.dataUpdate("+dataCon+",["+members.join(",")+"],_ret)})");
+			}
+		);
 	});
 }
 
@@ -1157,6 +1588,7 @@ Lich.compileDataEnum = function(ast,ret)
 	Lich.VM.setVar(ast.id, data);
 	return data;*/
 
+	/*
 	var data = lichData(ast.id);
 
 	mapCps(
@@ -1173,25 +1605,61 @@ Lich.compileDataEnum = function(ast,ret)
 			Lich.VM.setVar(ast.id, data);
 			ret(data);
 		}
+	);*/
+
+	// Native
+
+	//var argNames = [];
+	mapCps(
+		ast.members,
+		function(elem,i,callback)
+		{
+			callback(elem);
+			//argNames.push("\""+elem.id+"\"");
+			//callback(elem.id+":{_lichType:\"DATA\",_argNames:[]}");
+		},
+		function(argNames)
+		{
+			dataPairs = new Array();
+			var res = "";
+
+			for(var i = 0; i < argNames.length; ++i)
+			{
+				res = res + argNames[i] + "={_lichType:\"DATA\",_argNames:[]};"
+				dataPairs.push(argNames[i] + ":" + argNames[i]);
+			}
+
+			dataPairs.push("_lichType:\"DATA\"");
+			dataPairs.push("_argNames:["+argNames.join(",")+"]");
+			ret(res+ast.id+"={"+dataPairs.join(",")+"};");
+		}
 	);
 }
 
 Lich.compileBinOpExp = function(ast,ret)
 {
-	var op = Lich.VM.getVar(ast.op); // Lookup function for operator
+	//var op = Lich.VM.getVar(ast.op); // Lookup function for operator
 
-	if(op == Lich.VM.Nothing)
-		throw new Error("Binary Operator not found: " + ast.op);
+	//if(op == Lich.VM.Nothing)
+	//	throw new Error("Binary Operator not found: " + ast.op);
 
 	//return op.invoke([Lich.compileAST(ast.lhs), Lich.compileAST(ast.rhs)]);
 	Lich.compileAST(ast.lhs, function(lhs)
 	{
 		Lich.compileAST(ast.rhs, function(rhs)
 		{
+			/*
 			op.invoke([lhs,rhs], function(res)
 			{
 				ret(res);
-			});
+			});*/
+
+			if(Lich.VM.reserved.hasOwnProperty(ast.op))
+				ret("__curry("+Lich.VM.reserved[ast.op]+")("+lhs+","+rhs+")");
+			else if((ast.lhs.astType == "float-lit" || ast.lhs.astType == "string-lit") && (ast.rhs.astType == "float-lit" || ast.rhs.astType == "string-lit"))
+				ret("(function(_opRet){_opRet("+lhs+""+ast.op+""+rhs+")})");
+			else
+				ret("function(_opRet){Lich.apply("+lhs+",(function(resL){Lich.apply("+rhs+",(function(resR){_opRet(resL"+ast.op+"resR)}))}))}");
 		});
 	});
 }
@@ -1199,15 +1667,74 @@ Lich.compileBinOpExp = function(ast,ret)
 Lich.compileNegate = function(ast,ret)
 { 
 	// return Lich.VM.getVar("subtract").invoke([0, Lich.compileAST(ast.rhs)]);
-	var op = Lich.VM.getVar("subtract");
+	//var op = Lich.VM.getVar("subtract");
 
 	Lich.compileAST(ast.rhs, function(rhs)
 	{
+		/*
 		op.invoke([0, rhs], function(res)
 		{
 			ret(res);
-		});
+		});*/
+
+		ret("function(_ret){_ret(-"+rhs+")}");
 	});
+}
+
+Lich.listRange = function(lower,upper,next,_rangeRet)
+{
+	var next;
+	var skip = 0;
+
+	if(typeof next === "undefined")
+	{
+		if(lower < upper)
+			skip = 1;
+		else
+			skip = -1;
+	}
+	
+	else
+	{
+		skip = next - lower;
+	}
+
+	if(typeof lower !== "number" || typeof skip !== "number" || typeof upper !== "number")
+	{
+		if(typeof ast.skip === "undefined")
+		{
+			throw new Error("List range syntax can only be used with numbers. failed with: " 
+				+ Lich.VM.PrettyPrint(lower) + ".." + Lich.VM.PrettyPrint(upper));
+		}
+
+		else
+		{
+			throw new Error("List range syntax can only be used with numbers. failed with: " 
+				+ Lich.VM.PrettyPrint(lower) + "," + Lich.VM.PrettyPrint(next) + ".." + Lich.VM.PrettyPrint(upper));
+		}
+	}
+
+	var array = new Array();
+
+	if(skip <= 0)
+	{
+		for(var i = lower; i >= upper; i += skip)
+		{
+			array.push(i);
+		}
+
+		_rangeRet(array);
+	}
+
+	else
+	{
+		for(var i = lower; i <= upper; i += skip)
+		{
+			array.push(i);
+		}
+
+		_rangeRet(array);
+	}
 }
 
 Lich.compileListRange = function(ast,ret)
@@ -1275,62 +1802,16 @@ Lich.compileListRange = function(ast,ret)
 	{
 		Lich.compileAST(ast.upper, function(upper)
 		{
-			var next;
-			var skip = 0;
-
-			if(typeof ast.skip === "undefined")
+			if(typeof ast.skip !== "undefined")
 			{
-				if(lower < upper)
-					skip = 1;
-				else
-					skip = -1;
-			}
-			
-			else
-			{
-				Lich.compileAST(ast.skip, function(nextRes)
+				Lich.compileAST(ast.skip, function(skipRes)
 				{
-					next = nextRes;
+					ret("(function(_rangeRet){Lich.listRange("+lower+","+upper+","+skipRes+",_rangeRet)})");
 				});
-
-				skip = next - lower;
 			}
-
-			if(typeof lower !== "number" || typeof skip !== "number" || typeof upper !== "number")
-			{
-				if(typeof ast.skip === "undefined")
-				{
-					throw new Error("List range syntax can only be used with numbers. failed with: " 
-						+ Lich.VM.PrettyPrint(lower) + ".." + Lich.VM.PrettyPrint(upper));
-				}
-
-				else
-				{
-					throw new Error("List range syntax can only be used with numbers. failed with: " 
-						+ Lich.VM.PrettyPrint(lower) + "," + Lich.VM.PrettyPrint(next) + ".." + Lich.VM.PrettyPrint(upper));
-				}
-			}
-
-			var array = new Array();
-
-			if(skip <= 0)
-			{
-				for(var i = lower; i >= upper; i += skip)
-				{
-					array.push(i);
-				}
-
-				ret(array);
-			}
-
 			else
 			{
-				for(var i = lower; i <= upper; i += skip)
-				{
-					array.push(i);
-				}
-
-				ret(array);
+				ret("(function(_rangeRet){Lich.listRange("+lower+","+upper+","+ast.skip+",_rangeRet)})");
 			}
 		});
 	});
@@ -1348,6 +1829,7 @@ Lich.compileDictionary = function(ast,ret)
 
 	return dict;*/
 
+	/*
 	var dict = {lichType: DICTIONARY};
 
 	forEachPairsCps(
@@ -1369,6 +1851,32 @@ Lich.compileDictionary = function(ast,ret)
 		{
 			ret(dict);
 		}
+	);*/
+
+	// Native
+	var pairs = new Array();
+	pairs.push("_lichType:DICTIONARY")
+
+	forEachPairsCps(
+		ast.pairs, 
+
+		function(elem,i,next)
+		{
+			Lich.compileAST(elem,function(dictKey)
+			{
+				Lich.compileAST(ast.pairs[i + 1], function(dictRes)
+				{
+					//dict[dictKey] = dictRes;
+					pairs.push(dictKey+":"+dictRes);
+					next();
+				});
+			});
+		},
+
+		function()
+		{
+			ret("{"+pairs.join(",")+"}");
+		}
 	);
 }
 
@@ -1382,7 +1890,7 @@ Lich.compileCase = function(ast,ret)
 	for(var i = 0; i < ast.alts.length; ++i)
 	{
 		var pat = ast.alts[i].pat;
-		if(pat.lichType == WILDCARD || Lich.match(exp, pat))
+		if(pat._lichType == WILDCARD || Lich.match(exp, pat))
 		{
 			var res = Lich.compileAST(ast.alts[i].exp);
 			Lich.VM.popProcedure();
@@ -1404,7 +1912,7 @@ Lich.compileCase = function(ast,ret)
 			function(elem,index,next)
 			{
 				var pat = elem.pat;
-				if(pat.lichType == WILDCARD)
+				if(pat._lichType == WILDCARD)
 				{
 					Lich.compileAST(ast.alts[index].exp, function(expRes)
 					{
@@ -1447,6 +1955,65 @@ Lich.compileCase = function(ast,ret)
 			}
 		);
 	});
+}
+
+Lich.listComprehension = function(exp,generatorScope,generatorLoop,filters,_listRet)
+{
+	//var closure = new lichClosure([], ast.exp);
+	var res = new Array();
+
+	// Then iterate over the lists, creating all the combinations of the lists and applying the filters to each item.
+	var nestLoop = function(nI) // recusrive nested looping over each list from the generators
+	{
+		var loopID = generatorLoop[nI];
+		var currentList = generatorScope[loopID];
+		//var scope = typeof nScope !== "undefined" ? nScope : {};
+
+		/*
+		if(!(list instanceof Array))
+				throw new Error("List comprehensions can only be created with list generators and boolean expressions such as: [x | x <- [1..9], x /= 3]"
+					+ ". Failed when compiling a generator from: " + Lich.VM.PrettyPrint(list));
+		*/
+
+		for(var j = 0; j < currentList.length; ++j)
+		{
+			//scope[loopID] = currentList[j];
+
+			if(nI < generatorLoop.length - 1)
+			{
+				nestLoop(nI + 1);
+			}
+
+			else
+			{
+				//closure = new lichClosure([], ast.exp, false, scope);
+				exp(function(temp)
+				{
+					var collect = true;
+
+					for(var k = 0; k < filters.length; ++k)
+					{
+						filters[k](temp, function(unfiltered)
+						{
+							if(!unfiltered) // !unfiltered == filtered meaning, don't collect
+							{
+								collect = false;
+							}
+						});
+
+						if(!collect)
+							break;
+					}
+
+					if(collect)
+						res.push(temp);
+				});
+			}	
+		}
+	}
+	
+	nestLoop(0);
+	_listRet(res);
 }
 
 Lich.compileListComprehension = function(ast,ret)
@@ -1525,6 +2092,7 @@ Lich.compileListComprehension = function(ast,ret)
 	nestLoop(0);
 	return res;*/
 
+	/*
 	var closure = new lichClosure([], ast.exp);
 	var generatorScope = {}
 	var generatorLoop = new Array();
@@ -1604,7 +2172,44 @@ Lich.compileListComprehension = function(ast,ret)
 	}
 	
 	nestLoop(0);
-	ret(res);
+	ret(res);*/
+
+	// Native
+	var filters = new Array();
+	var generatorScope = new Array();
+	var generatorLoop = new Array();
+
+	// First we collect all the filter functions
+	for(var i = 0; i < ast.generators.length; ++i)
+	{
+		if(ast.generators[i].astType != "decl-fun")
+		{
+			Lich.compileAST(ast.generators[i], function(filterRes)
+			{
+				filters.push(filterRes);
+			});
+		}	
+	}
+
+	// Collect all the lists from the generators
+	for(var i = 0; i < ast.generators.length; ++i)
+	{
+		if(ast.generators[i].astType == "decl-fun")
+		{
+			Lich.compileAST(ast.generators[i].rhs, function(list)
+			{
+				generatorScope.push(ast.generators[i].ident+":" + list);
+				generatorLoop.push(ast.generators[i].ident);
+			});
+		}
+	}
+
+	Lich.compileAST(ast.exp, function(expRes)
+	{
+		var func = "(function(_listCompRet){Lich.listComprehension(";
+		func = func + expRes+",{"+generatorScope.join(",")+"},["+generatorLoop.join(",")+"],["+filters.join(",")+ "],_listCompRet)})";
+		ret(func);
+	});
 }
 
 // {astType: "class-exp", id:$2, var:$3,members:$6}
@@ -1621,18 +2226,6 @@ Lich.compileClassExpr = function(ast,ret)
 	Lich.VM.setVar(ast.id, classObject);
 	return data;*/
 
-	Lich.unsupportedSemantics(ast, ret);
-}
-
-// {astType:"class-decl", decl:$1}
-Lich.compileClassDecl = function(ast,ret)
-{
-	Lich.unsupportedSemantics(ast, ret);
-}
-						
-// {astType:"class-binop", left:$1, binop:$2, right:$3}
-Lich.compileClassBinOp = function(ast,ret)
-{
 	Lich.unsupportedSemantics(ast, ret);
 }
 
@@ -1654,18 +2247,18 @@ function postProcessJSON(object)
     	if(object == null || typeof object === "undefined")
     		return object;
 
-    	if(object.lichType == CLOSURE || object.lichType == THUNK)
+    	if(object._lichType == CLOSURE || object._lichType == THUNK)
 	    {
 	    	var rhs = object.rhs;
 
-	    	if(rhs.lichType == PRIMITIVE)
+	    	if(rhs._lichType == PRIMITIVE)
 	    	{
 		    	rhs = Lich.VM.getVar(rhs.id).rhs;
 			}
 
-			var type = object.lichType;
+			var type = object._lichType;
 			object = new lichClosure(object.argPatterns, rhs, object.mutable, object.namespace, object.decls);
-			object.lichType = type;
+			object._lichType = type;
 	    }
 
         for(var n in object)
@@ -1704,7 +2297,7 @@ function matchMessage(message, alts, ret)
 	for(var i = 0; i < ast.alts.length; ++i)
 	{
 		var pat = ast.alts[i].pat;
-		if(pat.lichType == WILDCARD || Lich.match(exp, pat))
+		if(pat._lichType == WILDCARD || Lich.match(exp, pat))
 		{
 			res = Lich.compileAST(ast.alts[i].exp);
 			return true;
@@ -1719,7 +2312,7 @@ function matchMessage(message, alts, ret)
 		function(elem, index, next)
 		{
 			var pat = elem.pat;
-			if(pat.lichType == WILDCARD)
+			if(pat._lichType == WILDCARD)
 			{
 				match = true;
 				next(true);
@@ -1759,7 +2352,7 @@ Lich.compileReceive = function(ast,ret)
 		for(var j = 0; j < ast.alts.length; ++j)
 		{
 			var pat = ast.alts[j].pat;
-			if(pat.lichType == WILDCARD || Lich.match(exp, pat))
+			if(pat._lichType == WILDCARD || Lich.match(exp, pat))
 			{
 				res = Lich.compileAST(ast.alts[j].exp);
 				match = true;
@@ -1822,7 +2415,7 @@ Lich.compileReceive = function(ast,ret)
 				function(elem, j, nextAlt)
 				{
 					var pat = elem.pat;
-					if(pat.lichType == WILDCARD) // Wild Cards always match
+					if(pat._lichType == WILDCARD) // Wild Cards always match
 					{
 						match = true;
 						messageIndex = i;
@@ -1908,4 +2501,20 @@ Lich.matchFunctionWithPatterns = function(func, args, ret)
 			ret();
 		}
 	);
+}
+
+Lich.compileTopExp = function(ast, ret)
+{
+	Lich.compileAST(ast.exp, function(exp)
+	{
+		ret("function _lich(_ret){Lich.apply("+exp+",_ret)};_lich(function(res) { Lich.VM.Print(res); });");
+	});
+}
+
+Lich.test = function(_ret)
+{
+	return function(_ret2)
+	{
+		_ret(ret2)
+	}();
 }

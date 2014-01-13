@@ -52,13 +52,13 @@ var PRIMITIVE = 12;
 
 function LichVoid() // Non-return value for the VM. 
 {
-	this.lichType = VOID;
+	this._lichType = VOID;
 }
 
 // Haskell-like Nothing object
 function LichNothing()
 {
-	this.lichType = NOTHING;
+	this._lichType = NOTHING;
 	this.value = null;
 }
 
@@ -106,7 +106,7 @@ function lichClosure(argPatterns, rhs, mutable, namespace, decls)
 			var res = _namespace[name];
 			res = typeof res !== "undefined" ? res : Lich.VM.Nothing;
 
-			if(res.lichType == THUNK)
+			if(res._lichType == THUNK)
 			{
 				res.invoke([], function(thunkRes)
 				{
@@ -195,6 +195,7 @@ function lichClosure(argPatterns, rhs, mutable, namespace, decls)
 	}
 }
 
+/*
 function createPrimitive(name, argNames, primitiveFunc)
 {
 	primitiveFunc.astType = "primitive";
@@ -210,7 +211,12 @@ function createPrimitive(name, argNames, primitiveFunc)
 	var closure = new lichClosure(varNames, primitiveFunc);
 
 	if(argNames.length == 0)
-		closure.lichType = THUNK; // this will let it actually get invoked on being called
+		closure._lichType = THUNK; // this will let it actually get invoked on being called
 
 	Lich.VM.reserveVar(name, closure);
+}*/
+
+function _createPrimitive(name, primitive)
+{
+	Lich.VM.reserved[name] = primitive;
 }

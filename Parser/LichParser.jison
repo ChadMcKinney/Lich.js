@@ -332,8 +332,9 @@ exps // : [exp]
 
 topexp
   : "let" decl          {{$$ = {astType:"let-one", decl: $2, pos: @$}; }}
-  | exp                 {{$$ = $1;}}
+  | exp                 {{$$ = {astType:"top-exp", exp:$1};}}
   | topexp ";" topexps  {{$$ = [$1].concat($3);}}
+  | dataexp             {{$$ = $1;}}
   ;
 
 topexps
@@ -347,7 +348,6 @@ exp // : object
   | exp binop exp       {$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
   | funccomp            {{$$ = $1;}}
   | datalookup          {{$$ = $1;}}
-  | dataexp             {{$$ = $1;}}
   | datainst            {{$$ = $1;}}
   | dataupdate          {{$$ = $1;}}
   | classexp            {{$$ = $1;}}
@@ -681,7 +681,8 @@ list_1_comma // : integer
 
 // non-qualified variable id (or symbol in parentheses) name
 var // : Lich.VarName
-    : varid           {{$$ = new Lich.VarName($1, @$, false);}}
+    //: varid           {{$$ = new Lich.VarName($1, @$, false);}}
+    : varid           {{$$ = {astType:"varname", id:$1};}}
     | '(' varsym ')'  {{$$ = new Lich.VarName($2, @$, true);}}
     ;
 
@@ -769,8 +770,8 @@ lambda_args
 // Literals
 
 literal  // : object
-    : integer {{$$ = {astType: "integer-lit", value: Number($1), pos: @$};}}
-    | string-lit {{$$ = {astType: "string-lit", value: ($1).replace(/\"/g,""), pos: @$};}}
+    : integer {{$$ = {astType: "float-lit", value: Number($1), pos: @$};}}
+    | string-lit {{$$ = {astType: "string-lit", value: ($1), pos: @$};}}
     | char {{$$ = {astType: "char-lit", value: $1, pos: @$};}}
     | float {{$$ = {astType: "float-lit", value: Number($1), pos: @$};}}
     | True {{$$ = {astType: "boolean-lit", value: true, pos: @$};}}

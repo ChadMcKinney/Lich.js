@@ -108,7 +108,7 @@ Lich.VM.printDictionary = function(object)
 
     for(n in object)
     {
-    	if(n != "lichType")
+    	if(n != "_lichType")
     	{
     		string = string + "\"" + n + "\" => " + Lich.VM.PrettyPrint(object[n]) + ", ";
     	}
@@ -122,15 +122,19 @@ Lich.VM.printDictionary = function(object)
 
 Lich.VM.printClosure = function(closure)
 {
-	var string = "(\\";
+	var string = "(\\"+closure;
 
-	for(var i = 0; i < closure.argPatterns.length; ++i)
+		/*
+	for(var i = 0; i < closure.arguments.length; ++i)
 	{
-		if(closure.argPatterns[i].astType == "wildcard")
-			string = string + "_ ";
-		else
-			string = string.concat(Lich.VM.PrettyPrint(closure.argPatterns[i]) + " ");
-	}
+		//if(closure.argPatterns[i].astType == "wildcard")
+		//	string = string + "_ ";
+		//else
+			//string = string.concat(Lich.VM.PrettyPrint(closure.argPatterns[i]) + " ");
+			string = string.concat(closure.arguments[i] + " ");
+	}*/
+
+
 
 	return string.concat("->)");
 }
@@ -207,20 +211,22 @@ Lich.VM.PrettyPrint = function(object)
 		return object;
 	else if(object instanceof Array)
 		return Lich.VM.printArray(object);
-	else if(object.lichType == CLOSURE || object.lichType == THUNK)
+	else if(typeof object === "function")
 		return Lich.VM.printClosure(object);
-	else if(object.lichType == DATA)
+	else if(object._lichType == CLOSURE || object._lichType == THUNK)
+		return Lich.VM.printClosure(object);
+	else if(object._lichType == DATA)
 		return object._datatype;
-	else if(object.lichType == DICTIONARY)
+	else if(object._lichType == DICTIONARY)
 		return Lich.VM.printDictionary(object);
-	else if (object.lichType == ACTOR)
+	else if (object._lichType == ACTOR)
 		return "Actor";
 	else if(object == Lich.VM.Nothing)
 		return "Nothing";
 	else if(typeof (object.astType) === "undefined")
 		return object;
-	else
-		return Lich.VM.printAST(object);
+	//else
+	//	return Lich.VM.printAST(object);
 }
 
 Lich.VM.Print = function(object)
