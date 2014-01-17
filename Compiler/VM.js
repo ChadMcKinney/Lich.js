@@ -83,8 +83,8 @@ Lich.VM.setVar = function(varName, value)
 
 Lich.VM.reserveVar = function(varName, value)
 {
-	Lich.VM.setVar(varName, value);
-	Lich.VM.reserved[varName] = true;
+	//Lich.VM.setVar(varName, value);
+	Lich.VM.reserved[varName] = value;
 }
 
 Lich.VM.printArray = function(object)
@@ -108,7 +108,7 @@ Lich.VM.printDictionary = function(object)
 
     for(n in object)
     {
-    	if(n != "_lichType")
+    	if(n != "_lichType" && n != "curry")
     	{
     		string = string + "\"" + n + "\" => " + Lich.VM.PrettyPrint(object[n]) + ", ";
     	}
@@ -120,23 +120,48 @@ Lich.VM.printDictionary = function(object)
 		return string + ")";
 }
 
+Lich.VM.printData = function(object)
+{
+	Lich.post("printData");
+	var string = object._datatype + " { ";
+
+	for(var i = 0; i < object._argNames.length; ++i)
+	{
+		string = string + object._argNames[i] + " = " + (Lich.VM.PrettyPrint(object[object._argNames[i]]));
+		if(i < object._argNames.length - 1)
+			string = string.concat(", ");
+	}
+
+	return string + " }";
+}
+
 Lich.VM.printClosure = function(closure)
 {
-	var string = "(\\"+closure;
+	var curried = false;
+	var initClosure = closure;
 
-		/*
-	for(var i = 0; i < closure.arguments.length; ++i)
+	if(typeof closure.curriedFunc !== "undefined")
 	{
-		//if(closure.argPatterns[i].astType == "wildcard")
-		//	string = string + "_ ";
-		//else
-			//string = string.concat(Lich.VM.PrettyPrint(closure.argPatterns[i]) + " ");
-			string = string.concat(closure.arguments[i] + " ");
-	}*/
+		closure = closure.curriedFunc;
+		curried = true;
+	}
 
 
+	var string = "(\\";
+	var reg = /\(([\s\S]*?)\)/;
 
-	return string.concat("->)");
+	var params = reg.exec(closure);
+	if (params)
+	{
+		params = params[1].split(",").map(function(elem){return elem.replace(/ /g,"")});
+		if(curried)
+			string = string + params.slice(initClosure.curriedArgs.length,params.length-1).join(" ");
+		else	
+			string = string + params.slice(0,params.length-1).join(" ");
+	} 
+
+	//Lich.post("PRINT CLOSURE!");
+	return string.concat(" ->)");
 }
 
 Lich.VM.printAST = function(object)
@@ -203,8 +228,11 @@ Lich.post = function(text)
 
 Lich.VM.PrettyPrint = function(object)
 {
-	if(typeof object === "undefined")
+	//Lich.post(Lich.VM.printData(object));
+	if(object == null || typeof object === "undefined")
 		return "Nothing"; // undefined == Nothing
+	else if(object._lichType == DATA)
+		return Lich.VM.printData(object);
 	else if(typeof object === "string")
 		return "\"" + object + "\"";
 	else if(typeof object === "number")
@@ -215,8 +243,6 @@ Lich.VM.PrettyPrint = function(object)
 		return Lich.VM.printClosure(object);
 	else if(object._lichType == CLOSURE || object._lichType == THUNK)
 		return Lich.VM.printClosure(object);
-	else if(object._lichType == DATA)
-		return object._datatype;
 	else if(object._lichType == DICTIONARY)
 		return Lich.VM.printDictionary(object);
 	else if (object._lichType == ACTOR)
@@ -225,12 +251,13 @@ Lich.VM.PrettyPrint = function(object)
 		return "Nothing";
 	else if(typeof (object.astType) === "undefined")
 		return object;
-	//else
-	//	return Lich.VM.printAST(object);
+	else
+		return Lich.VM.printAST(object);
 }
 
 Lich.VM.Print = function(object)
 {
+	//Lich.post("PRINT OBJECT: " + object);
 	if(object != Lich.VM.Void)
 		Lich.post(Lich.VM.PrettyPrint(object));
 		// Lich.post(Lich.VM.PrettyPrint(JSON.parse(JSON.stringify(object)))); // Message passing translation		

@@ -49,6 +49,7 @@ var STRING = 9;
 var LIST = 10;
 var ACTOR = 11;
 var PRIMITIVE = 12;
+var BOOLEAN = 13;
 
 function LichVoid() // Non-return value for the VM. 
 {
@@ -67,15 +68,7 @@ function lichData(name)
 	return {
 		_argNames: new Array(),
 		_datatype: name,
-		lichType: DATA
-	}
-}
-
-function lichClass(name)
-{
-	return {
-		_classtype: name,
-		lichType: CLASS
+		_lichType: DATA
 	}
 }
 
@@ -89,7 +82,7 @@ function lichClosure(argPatterns, rhs, mutable, namespace, decls)
 
 	return { // Resolves circular dependencies with Lich.compileAST
 		astType: "closure",
-		lichType: CLOSURE,
+		_lichType: CLOSURE,
 		argPatterns: _argPatterns,
 		rhs: _rhs,
 		mutable: _mutable,
@@ -155,7 +148,7 @@ function lichClosure(argPatterns, rhs, mutable, namespace, decls)
 
 			if(i < _argPatterns.length) // Partial application
 			{
-				ret(new lichClosure(_argPatterns.slice(i, _argPatterns.length), _rhs, _mutable, deepCopy(_namespace), _decls));
+				ret(new lichClosure(_argPatterns.slice(i, _argPatterns.length), _rhs, _mutable, _deepCopy(_namespace), _decls));
 			}
 
 			else

@@ -329,7 +329,7 @@ function parseCurrentLine()
 			Lich.compileAST(ast, function(res)
 			{
 				//Lich.VM.Print(res);
-				Lich.post(res);
+				Lich.post("JS Source> " + res);
 				eval(res);
 			})
 		}
@@ -340,14 +340,16 @@ function parseCurrentLine()
 		if(Lich.Lexer.yy.lexer.yylloc.first_line != Infinity 
 			&& Lich.Lexer.yy.lexer.yylloc.first_column != Infinity)
 		{
-			Lich.post(e + " found at [line, column]: [" + Lich.Lexer.yy.lexer.yylloc.first_line 
+			Lich.post("Lich> "+e + " found at [line, column]: [" + Lich.Lexer.yy.lexer.yylloc.first_line 
 			+ ", " + Lich.Lexer.yy.lexer.yylloc.first_column + "]");
 		}
 
 		else
 		{
-			Lich.post(e + " found at [line, column]: [0, 0]");
+			Lich.post("Lich> "+e + " found at [line, column]: [0, 0]");
 		}
+
+		//throw e;
 	}
 }
 
@@ -6901,6 +6903,7 @@ function compileLich()
 			Lich.compileAST(ast, function(res)
 			{
 				Lich.VM.Print(res);
+				eval(res);
 			});
 		}
 		
@@ -6913,5 +6916,6 @@ function compileLich()
 	catch(e)
 	{
 		Lich.post(e);
+		throw e;
 	}
 }
