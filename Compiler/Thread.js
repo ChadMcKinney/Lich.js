@@ -36,31 +36,7 @@
 */
 
 
-importScripts("Objects.js", "VM.js", "Compiler.js", "../Library/Prelude.js", "../third-party/functional.min.js");
-
-//compileLich(); // Can we just do this synchronously?
-Lich.VM.thread = 'worker'; // Not the main thread
-
-/*
-<script type="text/javascript" src="Compiler/Objects.js"></script>
-<script type="text/javascript" src="Compiler/VM.js"></script>
-<script type="text/javascript" src="Compiler/Compiler.js"></script>
-<script type="text/javascript" src="Soliton.js/Soliton.js"></script>
-<script type="text/javascript" src="CloudChamber.js/CloudChamber.js"></script>
-<script type="text/javascript" src="CloudChamber.js/MarchingCubes.js"></script>
-<script type="text/javascript" src="third-party/CodeMirror.js"></script>
-<script type="text/javascript" src="Parser/ParseUtility.js"></script>
-<script type="text/javascript" src="Parser/Types.js"></script>	
-<script type="text/javascript" src="Parser/Lexeme.js"></script>
-<script type="text/javascript" src="Parser/preL.js"></script>
-<script type="text/javascript" src="Parser/iterL.js"></script>
-<script type="text/javascript" src="Parser/parse.js"></script>
-<script type="text/javascript" src="Parser/LichParser.js"></script>
-<script type="text/javascript" src="Parser/LichLibraryParser.js"></script>
-<script type="text/javascript" src="Library/Prelude.js"></script>
-<script type="text/javascript" src="Lich.js"></script>
-*/
-
+importScripts("Objects.js", "VM.js", "Compiler.js", "../Library/Prelude.js", "../third-party/cycle.js");
 
 var threadFunc;
 var messageBox = new Array();
@@ -92,7 +68,8 @@ function compileLich() // compile default library
 			var ast = Lich.parseLibrary(oRequest.responseText); // For library parsing testing
 			Lich.compileAST(ast, function(res)
 			{
-				Lich.VM.Print(res);
+				//Lich.VM.Print(res);
+				eval(res);
 			});
 		}
 		
@@ -110,21 +87,6 @@ function compileLich() // compile default library
 
 function executeThreadFunc(args, ret)
 {
-	/*
-	Lich.VM.pushProcedure(new lichClosure([], {}, false, {})); // scope for patterns
-	Lich.match(arg, threadFunc.argPatterns[0]), function(matchRes)
-	{
-		if(!matchRes)
-			throw new Error("Non-matching pattern in function " + Lich.VM.PrettyPrint(threadFunc) + " . Failed on: " + Lich.VM.PrettyPrint(arg))
-
-		threadFunc.invoke(args, function(res)
-		{
-			Lich.VM.popProcedure();
-			ret(res);
-		});
-	});*/
-
-	//Lich.VM.pushProcedure(new lichClosure([], {}, false, {})); // scope for patterns
 	forEachCps(
 		args,
 		function(exp, i, next)
@@ -143,7 +105,6 @@ function executeThreadFunc(args, ret)
 		{
 			threadFunc.invoke(args, function(res)
 			{
-				//Lich.VM.popProcedure();
 				ret(res);
 			}); // CPS is making by brain break.
 		}
@@ -153,19 +114,6 @@ function executeThreadFunc(args, ret)
 this.addEventListener("message", 
 	function(event)
 	{
-		/*
-		var threadFunc = deserializeLichObject(event.data.function);
-		LichVM.push(threadFunc);
-		LichVM.push(LichVM.get("call"));
-		LichVM.interpretStack();
-		LichVM.printState();*/
-		
-
-		//Lich.compileAST(JSON.parse(event));
-		//Lich.VM.Print();
-		//self.close();
-
-
 		switch(event.data.type)
 		{
 			case "init":

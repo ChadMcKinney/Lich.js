@@ -78,8 +78,18 @@ function evalLich(s,ret)
 	        //return Lich.compileAST(ast);
 	        Lich.compileAST(ast, function(res)
 	        {	
-	        	ret(eval(res));
-	        	//ret(res);
+	        	if(res instanceof Array)
+				{
+					for(var i = 0; i < res.length; ++i)
+					{
+						eval(res[i]);
+					}
+				}
+
+				else
+				{
+					eval(res);
+				}
 	        });
 	    }
 
@@ -1639,6 +1649,32 @@ function selfActor(ret)
 	
 	ret(threadFunc);
 }
+
+function _streamRight(l,r,ret)
+{
+	Lich.collapse(r, function(exp2)
+	{
+		Lich.collapse(l, function(exp1)
+		{
+			Lich.collapse(exp2.curry(exp1), ret);
+		});
+	});	
+}
+
+_createPrimitive(">>", _streamRight);
+
+function _streamLeft(l,r,ret)
+{
+	Lich.collapse(l, function(exp1)
+	{
+		Lich.collapse(r, function(exp2)
+		{
+			Lich.collapse(exp1.curry(exp2), ret);
+		});
+	});	
+}
+
+_createPrimitive("<<", _streamLeft);
 
 // Constants
 pi = 3.141592653589793;

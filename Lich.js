@@ -330,7 +330,19 @@ function parseCurrentLine()
 			{
 				//Lich.VM.Print(res);
 				Lich.post("JS Source> " + res);
-				eval(res);
+				
+				if(res instanceof Array)
+				{
+					for(var i = 0; i < res.length; ++i)
+					{
+						eval(res[i]);
+					}
+				}
+
+				else
+				{
+					eval(res);
+				}
 			})
 		}
 	}
@@ -6902,7 +6914,7 @@ function compileLich()
 			var ast = Lich.parseLibrary(oRequest.responseText); // For library parsing testing
 			Lich.compileAST(ast, function(res)
 			{
-				Lich.VM.Print(res);
+				//Lich.VM.Print(res);
 				eval(res);
 			});
 		}

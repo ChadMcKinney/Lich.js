@@ -2,7 +2,7 @@
 cd Parser
 jison LichParser.jison
 cp LichParser.jison LichLibraryParser.jison
-sed 's/    \: \"†\" topexp \"‡\" EOF      { return $2; }/    \/\/\: \"†\" topexp \"‡\" EOF      { return $2; }/' <LichLibraryParser.jison >LichLibraryParserNew.jison
+sed 's/    \: topexps EOF      { return $1; }/    \/\/\: topexps EOF      { return $1; }/' <LichLibraryParser.jison >LichLibraryParserNew.jison
 mv LichLibraryParserNew.jison LichLibraryParser.jison
 sed 's/    \/\/ \: module_ EOF          { return $1; }/    \: module_ EOF          { return $1; }/' <LichLibraryParser.jison >LichLibraryParserNew.jison
 mv LichLibraryParserNew.jison LichLibraryParser.jison

@@ -34,8 +34,22 @@ function receivedLichCode(code)
 	console.log("Received Code:" + code);	
 	try
     {
-    	var res = Lich.parse(code);
-        Lich.VM.Print(Lich.compileAST(res));
+    	var ast = Lich.parse(code);
+        Lich.compileAST(ast, function(res)
+		{			
+			if(res instanceof Array)
+			{
+				for(var i = 0; i < res.length; ++i)
+				{
+					eval(res[i]);
+				}
+			}
+
+			else
+			{
+				eval(res);
+			}
+		})
     }   
     catch(e)
     {

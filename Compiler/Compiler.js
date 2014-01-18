@@ -390,16 +390,16 @@ Lich.compileAST = function(ast, ret)
 	{
 		if(ast instanceof Array)
 		{
-			var res = null;
+			var res = new Array();
 			for(var i = 0; i < ast.length; ++i)
 			{	
 				Lich.compileAST(ast[i], function(tempRes)
 				{
-					res = tempRes;
+					res.push(tempRes);
 				});
 
-				if(i < ast.length - 1)
-					Lich.VM.Print(res);
+				//if(i < ast.length - 1)
+				//	Lich.VM.Print(res);
 			}
 
 			//return res;
@@ -446,6 +446,10 @@ Lich.compileAST = function(ast, ret)
 					
 				case "function-composition":
 					return Lich.compileFunctionComposition(ast,ret);
+
+				case "function-stream":
+					return Lich.compileFunctionStream(ast,ret);
+
 				case "lambda":
 					return Lich.compileLambda(ast,ret);
 					
@@ -1281,6 +1285,55 @@ Lich.compileFunctionComposition = function(ast,ret)
 	);
 }
 
+Lich.functionStreamWrapper = function(funcs)
+{
+	return function(_fcompRet)
+	{
+		Lich.collapse(funcs[0], function(compRes)
+		{
+			forEachCps(
+				funcs.slice(1, funcs.length),
+				function(func, i, next)
+				{
+					Lich.collapse(func,function(funcRes)
+					{
+						//compRes = function(_ret) { _ret(newRes) };
+						funcRes(compRes, function(res)
+						{
+							compRes = res;
+							next();
+						});
+					});
+
+				},
+				function()
+				{
+					Lich.collapse(compRes, _fcompRet);
+				}
+			);
+		});	
+	};
+}
+
+Lich.compileFunctionStream = function(ast,ret)
+{
+	mapCps(
+		ast.exps,
+		function(elem,i,callback)
+		{
+			Lich.compileAST(elem, function(func)
+			{
+				callback(func);
+			})
+		},
+		function(funcs)
+		{
+			Lich.post(funcs);
+			ret("Lich.functionStreamWrapper(["+funcs.join(",")+"])");
+		}
+	);
+}
+
 Lich.compileLambda = function(ast,ret)
 {
 	Lich.compileAST(ast.rhs, function(rhs)
@@ -1709,7 +1762,7 @@ Lich.compileCase = function(ast,ret)
 	{
 		caseCode += exp+",function(_object){";
 		matchCode = "";
-		forEachWithBreakCps(
+		forEachCps(
 			ast.alts, 
 
 			function(elem,i,next)
@@ -1878,126 +1931,9 @@ Lich.stringify = function(object)
 }
 
 /*
-function matchMessage(message, alts, ret)
-{
-	for(var i = 0; i < ast.alts.length; ++i)
-	{
-		var pat = ast.alts[i].pat;
-		if(pat._lichType == WILDCARD || Lich.match(exp, pat))
-		{
-			res = Lich.compileAST(ast.alts[i].exp);
-			return true;
-		}
-	}
-
-	return false;
-
-	var match = false;
-	forEachWithBreakCps(
-		ast.alts, 
-		function(elem, index, next)
-		{
-			var pat = elem.pat;
-			if(pat._lichType == WILDCARD)
-			{
-				match = true;
-				next(true);
-			}
-
-			else
-			{
-				Lich.match()
-			}
-		}, 
-		function()
-		{
-
-		}
-	);
-}*/
-
-Lich.compileReceive = function(ast,ret)
-{
-	/*
-	if(Lich.VM.currentThread !== "Actor")
-		throw new Error("Cannot use receive from the main thread. receive can only be called by an Actor.");
-
-	if(messageBox.length == 0)
-		// createListener
-
-	var closure = new lichClosure([], {}, false, {});
-	var match = false;
-	var messageIndex = 0;
-	var res = Nothing;
-	Lich.VM.pushProcedure(closure);
-
-	for(var i = 0; i < messageBox.length; ++i)
-	{
-		var exp = messageBox[i];
-
-		for(var j = 0; j < ast.alts.length; ++j)
-		{
-			var pat = ast.alts[j].pat;
-			if(pat._lichType == WILDCARD || Lich.match(exp, pat))
-			{
-				res = Lich.compileAST(ast.alts[j].exp);
-				match = true;
-				messageIndex = i;
-				break
-			}
-		}
-
-		if(match)
-			break;
-	}
-
-	Lich.VM.popProcedure();
-	
-	if(match)
-	{
-		messageBox.slice(messageIndex, 1);
-		return res;
-	}
-
-	else
-	{
-		// createListener
-	}*/
-
-	//////////
-	// CPS
-	//////////
-
-	if(Lich.VM.currentThread !== "Actor")
-		throw new Error("Cannot use receive from the main thread. receive can only be called by an Actor.");
-
-	if(messageBox.length == 0)
-	{
-		queuedReceive = function()
-		{
-			Lich.compileReceive(ast, ret);
-		}
-
-		return;
-	}
-
-	var closure = new lichClosure([], {}, false, {}); // scope for patterns
-	var match = false;
-	var messageIndex = 0;
-	var altIndex = 0;
-	Lich.VM.pushProcedure(closure);
-
-	// Two dimensional iteration over each message against each defined pattern.
-	// If we find a match break from both loops and call the pattern's matching expression.
-	// Otherwise we schedule receive to be called again upon the arrival of a new message.
-	forEachWithBreakCps
-	(
-		messageBox, // For each message in the messageBox
-		function(exp, i, nextMessage)
-		{
-			forEachWithBreakCps
+forEachWithBreakCps
 			(
-				ast.alts, // for each pattern
+				pattern,
 				function(elem, j, nextAlt)
 				{
 					var pat = elem.pat;
@@ -2034,6 +1970,58 @@ Lich.compileReceive = function(ast,ret)
 				{
 					nextMessage(match); // if true, then break, if false then continue
 				}
+			)*/
+/*
+Lich.receive = function(patternFuncs, ret)
+{
+	if(Lich.VM.currentThread !== "Actor")
+		throw new Error("Cannot use receive from the main thread. receive can only be called by an Actor.");
+
+	if(messageBox.length == 0)
+	{
+		queuedReceive = this;
+		return;
+	}
+
+	var match = false;
+	var messageIndex = 0;
+	var altFunc;
+
+	// Two dimensional iteration over each message against each defined pattern.
+	// If we find a match break from both loops and call the pattern's matching expression.
+	// Otherwise we schedule receive to be called again upon the arrival of a new message.
+	forEachWithBreakCps
+	(
+		messageBox, // For each message in the messageBox
+		function(exp, i, nextMessage)
+		{
+			forEachWithBreakCps(
+				patternFuncs,
+				function(pattern, j, nextPattern)
+				{
+					patternFunc(exp, function(_bool, func)
+					{
+						if(_bool)
+						{
+							match = true;
+							messageIndex = i;
+							altFunc = func;
+							nextPattern(true); // break
+						}
+
+						else
+						{
+							nextPattern(false); // continue
+						}
+					})
+				},
+				function()
+				{ 
+					if(messageIndex)
+						nextMessage(true); // found message, break
+					else
+						nextMessage(false); // keep looking
+				}
 			)
 		},
 
@@ -2043,7 +2031,7 @@ Lich.compileReceive = function(ast,ret)
 			{
 				messageBox.splice(messageIndex, 1); // Remove the message from the message box
 				// We found a match, so compile the pattern's expression, continue with ret(res)
-				Lich.compileAST(ast.alts[altIndex].exp, function(res)
+				Lich.collapse(altFuncs function(res)
 				{
 					Lich.VM.popProcedure();
 					queuedReceive = null;
@@ -2053,40 +2041,54 @@ Lich.compileReceive = function(ast,ret)
 
 			else // No match
 			{
-				Lich.VM.popProcedure();
 				// createListener for future messages
-				queuedReceive = function()
-				{
-					Lich.compileReceive(ast, ret);
-				}
+				queuedReceive = this;
 			}
 		}
 	);
 }
-
-
-Lich.matchFunctionWithPatterns = function(func, args, ret)
+*/
+Lich.compileReceive = function(ret)
 {
-	Lich.VM.pushProcedure(new lichClosure([], null, false)); // closure for pattern scope
-	forEachCps(
-		args,
-		function(exp, i, next)
-		{
-			Lich.match(exp, func.argPatterns[i], function(match)
-			{
-				if(match)
-					next();
-				else
-					throw new Error("Non-matching pattern in function " + Lich.VM.PrettyPrint(func) 
-						+ " . Failed on: " + Lich.VM.PrettyPrint(exp));
-			});
-		},
+	var caseCode = "function(_ret){Lich.collapse(";
+	Lich.compileAST(ast.exp, function(exp)
+	{
+		caseCode += exp+",function(_object){";
 
-		function()
-		{
-			ret();
-		}
-	);
+		caseCode += "if(Lich.VM.currentThread !== \"Actor\")\
+				\throw new Error(\"Cannot use receive from the main thread. receive can only be called by an Actor.\");\
+				if(messageBox.length == 0){queuedReceive = this;return;}";
+
+		matchCode = "";
+		forEachCps(
+			ast.alts, 
+			function(elem,i,next)
+			{
+				var pat = elem.pat;
+				Lich.generateOneArgNameAndMatchVars(pat, i, function(argName, matchVars)
+				{
+					if(pat.astType == "at-match")
+						caseCode += "var "+argName+"=_object;";
+
+					caseCode += matchVars;
+					Lich.generateMatchFunc("_object", pat, i, false, function(tempMatchCode)
+					{
+						Lich.compileAST(ast.alts[i].exp, function(altExp)
+						{
+							matchCode += "var _bool = (function(){" + tempMatchCode + "})();if(_bool){return Lich.collapse("+ altExp + ", _ret)};";
+							next();
+						});
+					})
+				});
+			},
+
+			function()
+			{
+				caseCode += matchCode + "queuedReceive = this;return;})}";
+				ret(caseCode);
+			}
+		);
+	});
 }
 
 Lich.compileTopExp = function(ast, ret)

@@ -117,14 +117,14 @@ qconsym = qs:(conid ".")+ ref:((!"." consym) !".") {qs = flatten(qs).join(""); r
 
 /* operator associations and precedence */
 
-%right '$'
+%right '$' '<<'
 // %nonassoc '='
 %left '='
 %left 'let'
 %left '==' '>' '<' '/=' '>=' '<='
 %left '+' '-' '%'
 %left '*' '/'
-%left '^'
+%right '^'
 %left '++'
 %left '::'
 //%left UMINUS
@@ -132,7 +132,7 @@ qconsym = qs:(conid ".")+ ref:((!"." consym) !".") {qs = flatten(qs).join(""); r
 %left '.'
 //%right ".."
 //%right ","
-
+//%right '>>'
 
 
 %start start_
@@ -141,7 +141,7 @@ qconsym = qs:(conid ".")+ ref:((!"." consym) !".") {qs = flatten(qs).join(""); r
 %% /* language grammar */
 
 start_
-    //: "†" topexp "‡" EOF      { return $2; }
+    //: topexps EOF      { return $1; }
     : module_ EOF          { return $1; }
     ;
 
@@ -331,15 +331,34 @@ exps // : [exp]
   ;
 
 topexp
-  : "let" decl          {{$$ = {astType:"let-one", decl: $2, pos: @$}; }}
-  | exp                 {{$$ = {astType:"top-exp", exp:$1};}}
-  | topexp ";" topexps  {{$$ = [$1].concat($3);}}
+  //: "let" decl          {{$$ = {astType:"let-one", decl: $2, pos: @$}; }}
+  : exp                 {{$$ = {astType:"top-exp", exp:$1};}}
   | dataexp             {{$$ = $1;}}
+  | letdecl             {{$$ = $1;}}
   ;
 
 topexps
-  : topexps ";" topexp  {{$$ = $1.push($3);}}
-  | topexp              {{$$ = [$1];}}
+  : "†" topexpsA "‡"       {{$$ = $2;}}
+  //| letdecls               {{$$ = $1;}}    
+  ;
+
+topexpsA
+  : topexpsA ";" topexp   {{($1).push($3); $$ = $1;}}
+  | topexp                {{$$ = [$1];}}
+  ;
+
+letdecls // : [decl]
+  : "‡" "†"                               {{ $$ = []; }}
+  |  list_letdecl_comma_1 "‡" "†"         {{ $$ = $2; }}
+  ;
+
+list_letdecl_comma_1 // : [decl]
+  : list_letdecl_comma_1 ";" letdecl      {{ ($1).push($3); $$ = $1; }}
+  | letdecl                               {{ $$ = [$1]; }}
+  ;
+
+letdecl
+  : "let" decl          {{$$ = {astType:"let-one", decl: $2, pos: @$}; }}
   ;
 
 exp // : object
@@ -347,6 +366,7 @@ exp // : object
   : lexp                {{$$ = $1}}
   | exp binop exp       {$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
   | funccomp            {{$$ = $1;}}
+  | funcstream          {{$$ = $1;}}
   | datalookup          {{$$ = $1;}}
   | datainst            {{$$ = $1;}}
   | dataupdate          {{$$ = $1;}}
@@ -371,9 +391,9 @@ binop
   | "++"        {{$$ = $1;}}
   | "&&"        {{$$ = $1;}}
   | "||"        {{$$ = $1;}}
-  | ">>="       {{$$ = $1;}}
-  | ">>"        {{$$ = $1;}}
-  | "=<<"       {{$$ = $1;}}
+  //| ">>="       {{$$ = $1;}}
+  //| ">>"        {{$$ = $1;}}
+  //| "=<<"       {{$$ = $1;}}
   | "<<"        {{$$ = $1;}}
   | "?"         {{$$ = $1;}}
   | ":>>"       {{$$ = $1;}}
@@ -475,8 +495,11 @@ aexp // : object
   | dictexp                 {{$$ = $1;}}
   | listexp                 {{$$ = $1;}}
   | "(" binop ")"           {{ $$ = {astType:"curried-binop-exp",op:$2,pos:@$};}}
-  | "(" exp binop ")"      {{ $$ = {astType:"left-curried-binop-exp",op:$3,lhs:$2, pos:@$};}}
-  | "(" binop exp ")"      {{ $$ = {astType:"right-curried-binop-exp",op:$2,rhs:$3,pos:@$};}}
+  | "(" exp binop ")"       {{ $$ = {astType:"left-curried-binop-exp",op:$3,lhs:$2, pos:@$};}}
+  | "(" binop exp ")"       {{ $$ = {astType:"right-curried-binop-exp",op:$2,rhs:$3,pos:@$};}}
+  | "(" ">>" exp ")"        {{ $$ = {astType:"right-curried-binop-exp",op:$2,rhs:$3,pos:@$};}}
+  | "(" exp ">>" ")"        {{ $$ = {astType:"left-curried-binop-exp",op:$3,lhs:$2, pos:@$};}}
+  | "(" ">>" ")"            {{ $$ = {astType:"curried-binop-exp",op:$2,pos:@$};}}
   | nothing                 {{$$ = $1;}}
   ;
 
@@ -588,6 +611,11 @@ list_qual_1_comma
 qual
   : varid "<-" exp            {{$$ = {astType:"decl-fun", ident: $1, args: [], rhs: $3, pos: @$};}}
   | exp                       {{$$ = $1;}}
+  ;
+
+funcstream
+  : exp ">>" exp           {{$$ = {astType:"function-stream", exps:[$1,$3]};}}
+  | exp ">>" funcstream    {{($3.exps = [$1].concat($3.exps)); $$ = $3;}}
   ;
 
 funccomp
