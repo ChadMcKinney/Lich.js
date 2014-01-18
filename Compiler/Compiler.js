@@ -35,74 +35,36 @@
 	either expressed or implied, of the FreeBSD Project.
 */
 
-
-// Lambda Calculus and CPS Helper functions
-var returnLambda = "(function(res){_ret(res)})";
-
-//Function.prototype.initLength = 0;
 Function.prototype.curriedArgs = [];
 
 Function.prototype.collapse = function(_collapseRet)
 {
-	//Lich.post("//// collapse");
-	//Lich.post("this.length: " + this.length + "; arguments.length: " + arguments.length);
-	//Lich.post("initLength? " + this.initLength);
-	//Lich.post("Function.collapse func = " + this);
-	//Lich.post("Function.collapse curriedFunc = " + this.curriedFunc);
-
 	if(typeof this.curriedFunc === "undefined")
 	{
 		if(this.length <= arguments.length)
 		{
-			//Lich.post("No curried this.apply");
 			return this.apply(this, arguments);
 		}
 			
 		else
 		{
-			//Lich.post("No curried _collapseRet(this)");
 			return _collapseRet(this);
 		}
 	}
 
 	else
 	{
-		//Lich.post("this.curriedFunc.length = " + this.curriedFunc.length);
-		//var numArgs = (this.curriedArgs.length + arguments.length);
-		//Lich.post("this.curriedArgs.length " + this.curriedArgs.length); 
-		//Lich.post("arguments.length " + arguments.length);
-		//Lich.post("this.curriedArgs.length + arguments.length = " + numArgs);
-		//return this.curriedFunc.curry.apply(this.curriedFunc, this.curriedArgs.concat(Array.prototype.slice.call(arguments)));
-		//return this.apply(this, arguments);
 		if(this.curriedFunc.length <= (this.curriedArgs.length + arguments.length))
 		{
-			//Lich.post("Curried this.apply");
 			this.apply(this, arguments);
 		}
 
 		else
 		{
-			//Lich.post("Curried _collapseRet(this)");
 			_collapseRet(this);
 		}
 	}
 }
-
-/*
-Function.prototype.collapse = function(_collapseRet)
-{
-	if(this.length <= arguments.length)
-	{
-		Lich.post("Collapse: this.apply(this, arguments);");
-		this.apply(this, arguments);
-	}
-
-	else
-	{
-		Lich.post("_collapseRet(this);");
-		_collapseRet(this);
-	}
-}*/
 
 Lich.collapse = function(object, _ret)
 {
@@ -121,41 +83,17 @@ Object.prototype.curry = function()
 	throw new Error("Expression "+this+" cannot be used as a function for function application.");
 }
 
-/*
-// Overwrites error call with correct curry functionality
-Function.prototype.curry = function curry() {
-    var fn = this;
-    var args = Array.prototype.slice.call(arguments);
-    var newFunc = function() {
-    	Lich.post("CURRIED CALL ARGS = " + Lich.VM.PrettyPrint(Array.prototype.slice.call(arguments)));
-        return fn.apply(this, args.concat(Array.prototype.slice.call(arguments)));
-    };
-
-    newFunc.curriedFunc = fn;
-	newFunc.curriedArgs = args;
-	return newFunc;
-};
-*/
-
 Function.prototype.curry = function curry() 
 {
-	//Lich.post("#### curry");
-	//Lich.post("curry length? = " + this.length);
-	//Lich.post("curry arguments length? = " + arguments.length);
-
 	if(typeof this.curriedFunc !== "undefined")
 	{
-		//Lich.post("#### Curry this.curriedFunc !== undefined");
 		if(this.curriedFunc.length <= (this.curriedArgs.length + arguments.length))
 	    {
-	    	//Lich.post("Curry call.");
 	    	return this.curriedFunc.apply(this.curriedFunc, this.curriedArgs.concat(Array.prototype.slice.call(arguments)));
 	    }
 
 	    else
 	    {
-	    	//Lich.post("Curry continue.");
-	    	//this.curriedArgs = this.curriedArgs.concat(Array.prototype.slice.call(arguments));
 	    	return this.curriedFunc.curry.apply(this.curriedFunc, this.curriedArgs.concat(Array.prototype.slice.call(arguments)));
 	    }
 	}
@@ -164,27 +102,20 @@ Function.prototype.curry = function curry()
 	{
 		if(this.length <= arguments.length)
 		{
-			//Lich.post("#! Curry apply");
 			return this.apply(this, arguments);
 		}
 
-		//Lich.post("#### Curry this.curriedFunc === undefined");
-		//Lich.VM.Print(this);
-		//Lich.VM.Print(Array.prototype.slice.call(arguments));
-		//Lich.post(this.caller);
 		var fn = this;
 	    var args = Array.prototype.slice.call(arguments);
 	    var newFunc = function() {
 
 	    	if(fn.length <= (args.length + arguments.length))
 	    	{
-	    		//Lich.post("Curry call.");
 	    		return fn.apply(fn, args.concat(Array.prototype.slice.call(arguments)));
 	    	}
 
 	    	else
 	    	{
-	    		//Lich.post("Curry continue.");
 	    		return fn.curry.apply(fn, args.concat(Array.prototype.slice.call(arguments)));
 	    	}
 	    };
@@ -241,6 +172,30 @@ function tco(f) {
       return value
     }
   }
+}
+
+function forEachCpsTco(arr, visitor, done) // cps style array iteration via recursion
+{ 
+    trampoline(forEachCpsRecTco(0, arr, visitor, done));
+}
+
+function forEachCpsRecTco(index, arr, visitor, done) 
+{
+    if (index < arr.length) 
+    {
+    	var retArr;
+        visitor(arr[index], index, function () 
+        {
+            retArr = [forEachCpsRecTco,[index+1, arr, visitor, done]];
+        });
+
+        return retArr;
+    } 
+
+    else 
+    {
+        return [done];
+    }
 }
 
 function forEachCps(arr, visitor, done) // cps style array iteration via recursion
@@ -878,7 +833,6 @@ Lich.generateOneArgNameAndMatchVars = function(pat, i, ret)
 	if(pat.astType == "at-match")
 	{
 		argName = pat.id;
-		//matchVars = "var "+pa;t.id+";";
 		Lich.generateOneArgNameAndMatchVars(pat.pat, i, function(tempName, tempVars)
 		{
 			matchVars = matchVars + tempVars;
@@ -1026,12 +980,6 @@ Lich.compileModule = function(ast,ret)
 
 Lich.compileBody = function(ast,ret)
 {
-	/*
-	for(var i = 0; i < ast.topdecls.length; ++i)
-	{
-		Lich.compileAST(ast.topdecls[i]);
-	}*/
-
 	var body = "";
 
 	forEachCps(
@@ -1799,7 +1747,7 @@ Lich.generateListComprehensionCode = function(exp,generators,filters,_listRet)
 
 	for(var i = 0; i < generators.length; ++i)
 	{
-		code += "Lich.collapse("+generators[i][1]+",function(_list"+i+"){forEachCps(_list"+i+",function("+generators[i][0]+",_,_next"+i+"){";
+		code += "Lich.collapse("+generators[i][1]+",function(_list"+i+"){forEachCpsTco(_list"+i+",function("+generators[i][0]+",_,_next"+i+"){";
 	}
 
 	for(var i = 0; i < filters.length; ++i)
@@ -1863,8 +1811,6 @@ Lich.compileListComprehension = function(ast,ret)
 
 	Lich.compileAST(ast.exp, function(expRes)
 	{
-		//var func = "(function(_listCompRet){Lich.listComprehension(";
-		//func = func + expRes+",["+generators.join(",")+"],["+filters.join(",")+ "],_listCompRet)})";
 		Lich.generateListComprehensionCode(expRes,generators,filters,ret);
 	});
 }

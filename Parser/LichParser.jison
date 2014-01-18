@@ -18,7 +18,7 @@
 <comment>\n                 yylineno++;
 "--".*                      {/* skip whitespace and comments */}
 \s+                         return {val:yytext};
-("-")?[0-9]+("."[0-9]+)?    return {val:yytext,typ:"float"};
+[0-9]+("."[0-9]+)?          return {val:yytext,typ:"float"};
 "::"                        return {val:"::",typ:"::"};
 "[]"                        return {val:"[]",typ:"[]"};
 "["                         return {val:"[",typ:"["};
@@ -477,17 +477,6 @@ aexp // : object
   | "(" binop ")"           {{ $$ = {astType:"curried-binop-exp",op:$2,pos:@$};}}
   | "(" exp binop ")"      {{ $$ = {astType:"left-curried-binop-exp",op:$3,lhs:$2, pos:@$};}}
   | "(" binop exp ")"      {{ $$ = {astType:"right-curried-binop-exp",op:$2,rhs:$3,pos:@$};}}
-  /*
-  | "(" "+" aexp ")"        {{ $$ = {astType:"application", exps:[new Lich.VarName($2, @$, true, yy.lexer.previous.qual),$3],pos:@$};}}
-  | "(" "*" aexp ")"        {{ $$ = {astType:"application", exps:[new Lich.VarName($2, @$, true, yy.lexer.previous.qual),$3],pos:@$};}}
-  | "(" "/" aexp ")"        {{ $$ = {astType:"application", exps:[new Lich.VarName("/R", @$, true, yy.lexer.previous.qual),$3],pos:@$};}}
-  | "(" "^" aexp ")"        {{ $$ = {astType:"application", exps:[new Lich.VarName("^R", @$, true, yy.lexer.previous.qual),$3],pos:@$};}}
-  | "(" "==" aexp ")"       {{ $$ = {astType:"application", exps:[new Lich.VarName("==", @$, true, yy.lexer.previous.qual),$3],pos:@$};}}
-  | "(" "/=" aexp ")"       {{ $$ = {astType:"application", exps:[new Lich.VarName("/=", @$, true, yy.lexer.previous.qual),$3],pos:@$};}}
-  | "(" ">" aexp ")"        {{ $$ = {astType:"application", exps:[new Lich.VarName(">R", @$, true, yy.lexer.previous.qual),$3],pos:@$};}}
-  | "(" ">=" aexp ")"       {{ $$ = {astType:"application", exps:[new Lich.VarName(">=R", @$, true, yy.lexer.previous.qual),$3],pos:@$};}}
-  | "(" "<" aexp ")"        {{ $$ = {astType:"application", exps:[new Lich.VarName("<R", @$, true, yy.lexer.previous.qual),$3],pos:@$};}}
-  | "(" "<=" aexp ")"       {{ $$ = {astType:"application", exps:[new Lich.VarName("<=R", @$, true, yy.lexer.previous.qual),$3],pos:@$};}}*/
   | nothing                 {{$$ = $1;}}
   ;
 

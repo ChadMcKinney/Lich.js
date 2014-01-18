@@ -52,8 +52,6 @@ function madnessIntro(_ret)
 	ret(Lich.VM.Void);
 }
 
-_createPrimitive("madnessIntro", madnessIntro);
-
 function netEval(s,ret)
 {
 	Lich.collapse(s, function(str)
@@ -65,8 +63,6 @@ function netEval(s,ret)
 		ret(Lich.VM.Void);
 	});
 }
-
-_createPrimitive("netEval", netEval);
 
 function evalLich(s,ret)
 {
@@ -95,8 +91,6 @@ function evalLich(s,ret)
 	});
 }
 
-_createPrimitive("evalLich", evalLich);
-
 function print(o, ret)
 {
 	Lich.collapse(o, function(object)
@@ -104,8 +98,6 @@ function print(o, ret)
 		Lich.VM.Print(object);
 	});
 }
-
-_createPrimitive("print", print);
 
 function printAndReturn(l, r, ret)
 {
@@ -119,18 +111,11 @@ function printAndReturn(l, r, ret)
 	});
 }
 
-_createPrimitive("printAndReturn", printAndReturn);
-
-
 function lichClientName(ret)
 {
 	//var printString = Lich.VM.getVar("_R");
 	ret(clientName);
 }
-
-_createPrimitive("lichClientName", lichClientName);
-//_createPrimitive("clientName", lichClientName);
-
 
 function stateSync(s,ret)
 {
@@ -140,8 +125,6 @@ function stateSync(s,ret)
 		ret(Lich.VM.Void);
 	});
 }
-
-_createPrimitive("stateSync", stateSync);
 
 function compile(l,ret)
 {
@@ -156,8 +139,6 @@ function compile(l,ret)
 	});
 }
 
-_createPrimitive("compile", compile);
-
 function load(f, ret)
 {
 	Lich.collapse(f, function(fileName)
@@ -170,8 +151,6 @@ function load(f, ret)
 	});
 }
 
-_createPrimitive("load", load);
-
 function chat(c,ret)
 {
 	Lich.collapse(c, function(chatString)
@@ -183,8 +162,6 @@ function chat(c,ret)
 		ret(Lich.VM.Void);
 	});
 }
-
-_createPrimitive("chat", madnessIntro);
 
 function postNarration(c, r, ret)
 {
@@ -200,8 +177,6 @@ function postNarration(c, r, ret)
 		});
 	});
 }
-
-_createPrimitive("postNarration", postNarration);
 
 function _checkNumStringOpError(l, op, r)
 {
@@ -263,8 +238,6 @@ function spawn(c, a, ret)
 	});
 }
 
-_createPrimitive("spawn", spawn);
-
 function send(m, a, ret)
 {
 	Lich.collapse(m, function(message)
@@ -279,8 +252,6 @@ function send(m, a, ret)
 		});
 	});
 }
-
-_createPrimitive("send", send);
 _createPrimitive(":>>", send);
 
 function numArgs(f,ret)
@@ -293,8 +264,6 @@ function numArgs(f,ret)
 		ret(func.length);
 	});
 }
-
-_createPrimitive("numArgs", numArgs);
 
 function add(l, r, ret)
 {
@@ -309,9 +278,8 @@ function add(l, r, ret)
 }
 
 _createPrimitive("+", add);
-_createPrimitive("add", add);
 
-function subtract(l, r, ret)
+function minus(l, r, ret)
 {
 	Lich.collapse(l, function(resL)
 	{
@@ -323,8 +291,19 @@ function subtract(l, r, ret)
 	});
 }
 
-_createPrimitive("-", subtract);
-_createPrimitive("-", subtract);
+_createPrimitive("-", minus);
+
+function subtract(r, l, ret)
+{
+	Lich.collapse(l, function(resL)
+	{
+		Lich.collapse(r, function(resR)
+		{
+			_checkNumOpError(resL, "-", resR);
+			ret(resL - resR);
+		});
+	});
+}
 
 function mul(l, r, ret)
 {
@@ -339,7 +318,6 @@ function mul(l, r, ret)
 }
 
 _createPrimitive("*", mul);
-_createPrimitive("*", mul);
 
 function div(l, r, ret)
 {	
@@ -353,24 +331,7 @@ function div(l, r, ret)
 	});
 }
 
-_createPrimitive("div", div);
 _createPrimitive("/", div);
-
-
-function _rdiv(r, l, ret)
-{	
-	Lich.collapse(l, function(resL)
-	{
-		Lich.collapse(r, function(resR)
-		{
-			_checkNumOpError(resL, "/", resR);
-			ret(resL / resR);
-		});
-	});
-}
-
-// Swapped for use with (/3) type currying
-_createPrimitive("/R", _rdiv);
 
 function pow(l, r, ret)
 {
@@ -388,20 +349,6 @@ _createPrimitive("^", pow);
 _createPrimitive("**", pow);
 _createPrimitive("pow", pow);
 
-function _rpow(r, l, ret)
-{
-	Lich.collapse(l, function(resL)
-	{
-		Lich.collapse(r, function(resR)
-		{
-			_checkNumOpError(resL, "^", resR);
-			ret(Math.pow(resL,resR));
-		});
-	});
-}
-
-_createPrimitive("^R", _rpow);
-
 function mod(l, r, ret)
 {
 	Lich.collapse(l, function(resL)
@@ -415,8 +362,6 @@ function mod(l, r, ret)
 }
 
 _createPrimitive("%", mod);
-_createPrimitive("mod", mod);
-
 
 function _equivalent(l, r, ret)
 {
@@ -465,21 +410,6 @@ function _greater(l, r, ret)
 
 _createPrimitive(">", _greater);
 
-function _rgreater(r, l, ret)
-{
-	Lich.collapse(l, function(resL)
-	{
-		Lich.collapse(r, function(resR)
-		{
-			_checkNumOpError(resL, ">", resR);
-			ret(resL > resR);
-		});
-	});
-}
-
-_createPrimitive(">R", _rgreater);
-
-
 function _lesser(l, r, ret)
 {
 	Lich.collapse(l, function(resL)
@@ -493,20 +423,6 @@ function _lesser(l, r, ret)
 }
 
 _createPrimitive("<", _lesser);
-
-function _rlesser(r, l, ret)
-{
-	Lich.collapse(l, function(resL)
-	{
-		Lich.collapse(r, function(resR)
-		{
-			_checkNumOpError(resL, "<", resR);
-			ret(resL < resR);
-		});
-	});
-}
-
-_createPrimitive("<R", _rlesser);
 
 function _greaterEqual(l, r, ret)
 {
@@ -522,20 +438,6 @@ function _greaterEqual(l, r, ret)
 
 _createPrimitive(">=", _greaterEqual);
 
-function _rgreaterEqual(r, l, ret)
-{
-	Lich.collapse(l, function(resL)
-	{
-		Lich.collapse(r, function(resR)
-		{
-			_checkNumOpError(resL, ">=", resR);
-			ret(resL >= resR);
-		});
-	});
-}
-
-_createPrimitive(">=R", _rgreaterEqual);
-
 function _lesserEqual(l, r, ret)
 {
 	Lich.collapse(l, function(resL)
@@ -549,21 +451,6 @@ function _lesserEqual(l, r, ret)
 }
 
 _createPrimitive("<=", _lesserEqual);
-
-
-function _rlesserEqual(r, l, ret)
-{
-	Lich.collapse(l, function(resL)
-	{
-		Lich.collapse(r, function(resR)
-		{
-			_checkNumOpError(resL, "<=", resR);
-			ret(resL <= resR);
-		});
-	});
-}
-
-_createPrimitive("<=R", _rlesserEqual);
 
 function _andand(l, r, ret)
 {
@@ -1705,7 +1592,7 @@ function even(n,ret)
 		{
 			if(num < 0)
 				num = -num;
-			
+
 			ret((num % 2) == 0);
 		}
 
