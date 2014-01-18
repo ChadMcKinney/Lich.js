@@ -1158,7 +1158,7 @@ Lich.compileDeclFun = function(ast,ret)
 		Lich.compileAST(ast.rhs, function(rhs)
 		{
 			//ret(ast.ident.id + "=" + rhs + ";");
-			ret(ast.ident.id + "="+rhs+";Lich.collapse("+ast.ident.id+",function(_res){"+ast.ident.id+"=_res;})");
+			ret(ast.ident.id + "="+rhs+";Lich.collapse("+ast.ident.id+",function(_res){"+ast.ident.id+"=_res;});");
 		});
 	}
 
@@ -1793,227 +1793,49 @@ Lich.compileCase = function(ast,ret)
 	});
 }
 
-Lich.listComprehension = function(exp,generatorScope,generatorLoop,filters,_listRet)
+Lich.generateListComprehensionCode = function(exp,generators,filters,_listRet)
 {
-	//var closure = new lichClosure([], ast.exp);
-	var res = new Array();
+	var code = "(function(_listRet){var _listRes = new Array();";
 
-	// Then iterate over the lists, creating all the combinations of the lists and applying the filters to each item.
-	var nestLoop = function(nI) // recusrive nested looping over each list from the generators
+	for(var i = 0; i < generators.length; ++i)
 	{
-		var loopID = generatorLoop[nI];
-		var currentList = generatorScope[loopID];
-		//var scope = typeof nScope !== "undefined" ? nScope : {};
-
-		/*
-		if(!(list instanceof Array))
-				throw new Error("List comprehensions can only be created with list generators and boolean expressions such as: [x | x <- [1..9], x /= 3]"
-					+ ". Failed when compiling a generator from: " + Lich.VM.PrettyPrint(list));
-		*/
-
-		for(var j = 0; j < currentList.length; ++j)
-		{
-			//scope[loopID] = currentList[j];
-
-			if(nI < generatorLoop.length - 1)
-			{
-				nestLoop(nI + 1);
-			}
-
-			else
-			{
-				//closure = new lichClosure([], ast.exp, false, scope);
-				exp(function(temp)
-				{
-					var collect = true;
-
-					for(var k = 0; k < filters.length; ++k)
-					{
-						filters[k](temp, function(unfiltered)
-						{
-							if(!unfiltered) // !unfiltered == filtered meaning, don't collect
-							{
-								collect = false;
-							}
-						});
-
-						if(!collect)
-							break;
-					}
-
-					if(collect)
-						res.push(temp);
-				});
-			}	
-		}
+		code += "Lich.collapse("+generators[i][1]+",function(_list"+i+"){forEachCps(_list"+i+",function("+generators[i][0]+",_,_next"+i+"){";
 	}
-	
-	nestLoop(0);
-	_listRet(res);
+
+	for(var i = 0; i < filters.length; ++i)
+	{
+		code += "Lich.collapse("+filters[i]+",function(_bool"+i+"){";
+	}
+
+	code += "if(true";
+
+	for(var i = 0; i < filters.length; ++i)
+	{
+		code += "&&_bool"+i;
+	}
+
+	code += "){Lich.collapse("+exp+",function(_expRes){_listRes.push(_expRes)})};_next"+(generators.length-1)+"();";
+
+	for(var i = 0; i < filters.length; ++i)
+	{
+		code += "})";
+	}
+
+	for(var i = generators.length-1; i >= 0; --i)
+	{
+		if(i > 0)
+			code += "},function(){_next"+(i-1)+"();})})";
+		else
+			code += "},function(){_listRet(_listRes)})})})";
+	}
+
+	_listRet(code);
 }
 
 Lich.compileListComprehension = function(ast,ret)
 {
-	/*
-	var closure = new lichClosure([], ast.exp);
-	var generatorScope = {}
-	var generatorLoop = new Array();
-	var res = new Array();
 	var filters = new Array();
-
-	// First we collect all the filter functions
-	for(var i = 0; i < ast.generators.length; ++i)
-	{
-		if(ast.generators[i].astType != "decl-fun")
-			filters.push(ast.generators[i]);
-	}
-
-	// Collect all the lists from the generators
-	for(var i = 0; i < ast.generators.length; ++i)
-	{
-		if(ast.generators[i].astType == "decl-fun")
-		{
-			var list = Lich.compileAST(ast.generators[i].rhs);
-
-			if(!(list instanceof Array))
-				throw new Error("List comprehensions can only be created with list generators and boolean expressions such as: [x | x <- [1..9], x /= 3]"
-					+ ". Failed when compiling a generator from: " + Lich.VM.PrettyPrint(list));
-
-			generatorScope[ast.generators[i].ident] = list;
-			generatorLoop.push(ast.generators[i].ident);
-		}
-	}
-
-	res = new Array();
-
-	// Then iterate over the lists, creating all the combinations of the lists and applying the filters to each item.
-	var nestLoop = function(nI, nScope) // recusrive nested looping over each list from the generators
-	{
-		var loopID = generatorLoop[nI];
-		var currentList = generatorScope[loopID];
-		var scope = typeof nScope !== "undefined" ? nScope : {};
-
-		for(var j = 0; j < currentList.length; ++j)
-		{
-			scope[loopID] = currentList[j];
-
-			if(nI < generatorLoop.length - 1)
-			{
-				nestLoop(nI + 1, scope);
-			}
-
-			else
-			{
-				closure = new lichClosure([], ast.exp, false, scope);
-				var temp = closure.invoke([]);
-				var collect = true;
-
-				for(var k = 0; k < filters.length; ++k)
-				{
-					var filterClosure = new lichClosure([], filters[k], false, scope);
-					
-					if(!filterClosure.invoke([]))
-					{
-						collect = false;
-						break;
-					}
-				}
-
-				if(collect)
-					res.push(temp);
-			}	
-		}
-	}
-	
-	nestLoop(0);
-	return res;*/
-
-	/*
-	var closure = new lichClosure([], ast.exp);
-	var generatorScope = {}
-	var generatorLoop = new Array();
-	var res = new Array();
-	var filters = new Array();
-
-	// First we collect all the filter functions
-	for(var i = 0; i < ast.generators.length; ++i)
-	{
-		if(ast.generators[i].astType != "decl-fun")
-			filters.push(ast.generators[i]);
-	}
-
-	// Collect all the lists from the generators
-	for(var i = 0; i < ast.generators.length; ++i)
-	{
-		if(ast.generators[i].astType == "decl-fun")
-		{
-			Lich.compileAST(ast.generators[i].rhs, function(list)
-			{
-				if(!(list instanceof Array))
-					throw new Error("List comprehensions can only be created with list generators and boolean expressions such as: [x | x <- [1..9], x /= 3]"
-						+ ". Failed when compiling a generator from: " + Lich.VM.PrettyPrint(list));
-
-				generatorScope[ast.generators[i].ident] = list;
-				generatorLoop.push(ast.generators[i].ident);
-			});
-		}
-	}
-
-	res = new Array();
-
-	// Then iterate over the lists, creating all the combinations of the lists and applying the filters to each item.
-	var nestLoop = function(nI, nScope) // recusrive nested looping over each list from the generators
-	{
-		var loopID = generatorLoop[nI];
-		var currentList = generatorScope[loopID];
-		var scope = typeof nScope !== "undefined" ? nScope : {};
-
-		for(var j = 0; j < currentList.length; ++j)
-		{
-			scope[loopID] = currentList[j];
-
-			if(nI < generatorLoop.length - 1)
-			{
-				nestLoop(nI + 1, scope);
-			}
-
-			else
-			{
-				closure = new lichClosure([], ast.exp, false, scope);
-
-				closure.invoke([], function(temp)
-				{
-					var collect = true;
-
-					for(var k = 0; k < filters.length; ++k)
-					{
-						var filterClosure = new lichClosure([], filters[k], false, scope);
-						filterClosure.invoke([], function(unfiltered)
-						{
-							if(!unfiltered) // !unfiltered == filtered meaning, don't collect
-							{
-								collect = false;
-							}
-						});
-
-						if(!collect)
-							break;
-					}
-
-					if(collect)
-						res.push(temp);
-				});
-			}	
-		}
-	}
-	
-	nestLoop(0);
-	ret(res);*/
-
-	// Native
-	var filters = new Array();
-	var generatorScope = new Array();
-	var generatorLoop = new Array();
+	var generators = new Array();
 
 	// First we collect all the filter functions
 	for(var i = 0; i < ast.generators.length; ++i)
@@ -2034,17 +1856,16 @@ Lich.compileListComprehension = function(ast,ret)
 		{
 			Lich.compileAST(ast.generators[i].rhs, function(list)
 			{
-				generatorScope.push(ast.generators[i].ident+":" + list);
-				generatorLoop.push(ast.generators[i].ident);
+				generators.push([ast.generators[i].ident,list]);
 			});
 		}
 	}
 
 	Lich.compileAST(ast.exp, function(expRes)
 	{
-		var func = "(function(_listCompRet){Lich.listComprehension(";
-		func = func + expRes+",{"+generatorScope.join(",")+"},["+generatorLoop.join(",")+"],["+filters.join(",")+ "],_listCompRet)})";
-		ret(func);
+		//var func = "(function(_listCompRet){Lich.listComprehension(";
+		//func = func + expRes+",["+generators.join(",")+"],["+filters.join(",")+ "],_listCompRet)})";
+		Lich.generateListComprehensionCode(expRes,generators,filters,ret);
 	});
 }
 

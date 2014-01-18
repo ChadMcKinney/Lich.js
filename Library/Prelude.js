@@ -1684,6 +1684,9 @@ function odd(n, ret)
 	{
 		if(typeof num === "number")
 		{
+			if(num < 0)
+				num = -num;
+
 			ret((num % 2) == 1);		
 		}
 
@@ -1700,6 +1703,9 @@ function even(n,ret)
 	{
 		if(typeof num === "number")
 		{
+			if(num < 0)
+				num = -num;
+			
 			ret((num % 2) == 0);
 		}
 
