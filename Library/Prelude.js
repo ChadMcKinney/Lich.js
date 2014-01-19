@@ -106,6 +106,7 @@ function print(o, ret)
 	Lich.collapse(o, function(object)
 	{
 		Lich.VM.Print(object);
+		ret(Lich.VM.Void);
 	});
 }
 
@@ -144,7 +145,7 @@ function compile(l,ret)
 			throw new Error("compile can only be applied to a string!");
 
 		compileLibClient(libName);
-
+		//Lich.VM.modules.push(libName);
 		ret(Lich.VM.Void);
 	});
 }
@@ -204,6 +205,14 @@ function _checkNumOpError(l, op, r)
 			+ Lich.VM.PrettyPrint(l) + " " + op + " " + Lich.VM.PrettyPrint(r));
 }
 
+function _extractFunctionAndArgs(func)
+{
+	if(typeof func.curriedFunc === "undefined")
+		return [func, []];
+	else
+		return [func.curriedFunc, func.curriedArgs];
+}
+
 function spawn(c, a, ret)
 {
 	Lich.collapse(c, function(closure)
@@ -241,7 +250,24 @@ function spawn(c, a, ret)
 				false
 			);
 
-			worker.postMessage({type:"init", func:Lich.stringify(closure),args:Lich.stringify(arguments)});
+			var funcAndArgs = _extractFunctionAndArgs(closure); // Uncurry the function and collect the curried arguments.
+			var funcString = funcAndArgs[0].toString(); // Translate the function to a string representation.
+			/*
+			var func = funcString.match(/function ([^\(]+)/);
+
+			if(func == null || typeof func === "undefined")
+				func = funcString;
+			else
+				func = func[1];*/
+
+			worker.postMessage(
+			{
+				type:"init", 
+				func:Lich.stringify({_lichType:CLOSURE, value: "((function(){return "+funcString+"})())"}), // allows for assignment in the actor thread
+				args:Lich.stringify(funcAndArgs[1].concat(arguments)), // Combine curried arguments with arguments passed in
+				modules:Lich.VM.modules.join(";")
+			});
+
 			worker._lichType = ACTOR;
 			ret(worker);
 		});
@@ -255,7 +281,8 @@ function send(m, a, ret)
 		Lich.collapse(a, function(actor)
 		{
 			if(actor._lichType != ACTOR)
-				throw new Error("send can only be used as: send message actor. Failed with send " + Lich.VM.PrettyPrint(message) + " " + Lich.VM.PrettyPrint(actor));
+				throw new Error("send can only be used as: send message actor. Failed with send " + Lich.VM.PrettyPrint(message) 
+					+ " " + Lich.VM.PrettyPrint(actor));
 
 			actor.postMessage({type: "message", message: Lich.stringify(message)});
 			ret(Lich.VM.Void);
@@ -514,8 +541,8 @@ function lookup(k,l, ret)
 		Lich.collapse(l, function(list)
 		{
 			if(!((list instanceof Array) || (list._lichType == DICTIONARY)))
-				throw new Error("indexing via !! or lookup can only be applied to lists and dictionaries as: lookup key container or: container !! key. Failed with: lookup " 
-					+ Lich.VM.PrettyPrint(key) + " " + Lich.VM.PrettyPrint(list));
+				throw new Error("indexing via !! or lookup can only be applied to lists and dictionaries as: lookup key container or: container !! "
+					+"key. Failed with: lookup " + Lich.VM.PrettyPrint(key) + " " + Lich.VM.PrettyPrint(list));
 
 			//var res = list[key];
 			Lich.collapse(list[key], function(res)
@@ -677,7 +704,8 @@ function insert(v, c, ret)
 		Lich.collapse(c, function(list)
 		{
 			if(!((list._lichType == DICTIONARY) && (value._lichType == DICTIONARY)))
-				throw new Error("insert can only be applied to dictionaries. Failed with: insert " + Lich.VM.PrettyPrint(value) + " " + Lich.VM.PrettyPrint(list));
+				throw new Error("insert can only be applied to dictionaries. Failed with: insert " + Lich.VM.PrettyPrint(value) 
+					+ " " + Lich.VM.PrettyPrint(list));
 
 			var res = _mergeDictionaries(list, value);
 			ret(typeof res === "undefined" ? Lich.VM.Nothing : res);
@@ -702,6 +730,7 @@ function deleteEntry(v, d, ret)
 }
 
 del = deleteEntry;
+remove = deleteEntry;
 
 function concatList(l,v,ret)
 {
@@ -899,7 +928,8 @@ function zip(l,r,ret)
 
 			else
 			{
-				throw new Error("zip can only be applied to lists. Failed with: zip " + Lich.VM.PrettyPrint(lcontainer) + " " + Lich.VM.PrettyPrint(rcontainer));	
+				throw new Error("zip can only be applied to lists. Failed with: zip " + Lich.VM.PrettyPrint(lcontainer) 
+					+ " " + Lich.VM.PrettyPrint(rcontainer));	
 			}
 
 			ret(res);
@@ -1642,10 +1672,10 @@ function getCurrentTime(ret)
 	ret(new Date().getTime());
 }
 
-function selfActor(ret)
+function recur(ret)
 {
 	if(Lich.VM.currentThread !== "Actor")
-		throw new Error("self can only be called from an Actor thread.");
+		throw new Error("recur can only be called from an Actor thread.");
 	
 	ret(threadFunc);
 }
@@ -1675,6 +1705,35 @@ function _streamLeft(l,r,ret)
 }
 
 _createPrimitive("<<", _streamLeft);
+
+function typeOf(obj, ret)
+{
+	Lich.collapse(obj, function(object)
+	{
+		if(object == null || typeof object === "undefined")
+			ret(NothingT); // undefined == Nothing
+		else if(object._lichType == DATA)
+			ret(object._datatype);
+		else if(typeof object === "string")
+			ret(StringT);
+		else if(typeof object === "number")
+			ret(NumberT);
+		else if(object instanceof Array)
+			ret(ListT);
+		else if(typeof object === "function")
+			ret(FunctionT);
+		else if(object._lichType == DICTIONARY)
+			ret(DictionaryT);
+		else if (object._lichType == ACTOR)
+			ret(ActorT);
+		else if(object == Lich.VM.Nothing)
+			ret(NothingT);
+		else if(object._lichType == Lich.VM.Nothing)
+			ret(NothingT);
+		else
+			ret(UnknownT);		
+	})
+}
 
 // Constants
 pi = 3.141592653589793;

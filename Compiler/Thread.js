@@ -85,66 +85,54 @@ function compileLich() // compile default library
 	}
 }
 
-function executeThreadFunc(args, ret)
-{
-	forEachCps(
-		args,
-		function(exp, i, next)
-		{
-			Lich.match(exp, threadFunc.argPatterns[i], function(match)
-			{
-				if(match)
-					next();
-				else
-					throw new Error("Non-matching pattern in function " + Lich.VM.PrettyPrint(threadFunc) 
-						+ " . Failed on: " + Lich.VM.PrettyPrint(exp));
-			});
-		},
-
-		function()
-		{
-			threadFunc.invoke(args, function(res)
-			{
-				ret(res);
-			}); // CPS is making by brain break.
-		}
-	);
-}
-
 this.addEventListener("message", 
 	function(event)
 	{
 		switch(event.data.type)
 		{
 			case "init":
+				Lich.post("Actor initializing...");
+				//var modules = Lich.parseJSON(event.data.modules);
+				//modules.map(function(lib){compile(lib)});
+				eval(event.data.modules);
 				//Lich.post("Actor init event.data.func = " + event.data.func);
 				threadFunc = Lich.parseJSON(event.data.func);
+				//Lich.post("Actor compiled func = " + threadFunc);
+				//Lich.post("Actor init even.data.args = " + event.data.args);
 				var args = Lich.parseJSON(event.data.args);
+				//Lich.post("Actor compiled args = " + args);
 				Lich.post("Actor initialized.");
 
-				executeThreadFunc(args, function(res)
+				Lich.collapse(threadFunc.curry.apply(threadFunc, args), function(res)
 				{
-					Lich.VM.Print(res);
-					self.close();
+					Lich.collapse(res, function(collapsedRes)
+					{
+						Lich.post("Actor result: " + Lich.VM.PrettyPrint(res));
+						Lich.post("Actor closing.");
+						self.close();
+					});
 				});
 				break;
 
 			case "message":
-				Lich.VM.post("Actor: message");
-				messageBox.push(Lich.parseJSON(event.data.message));
+				var message = Lich.parseJSON(event.data.message);
+				Lich.VM.post("Actor message: " + Lich.VM.PrettyPrint(message));
+				messageBox.push(message);
 				
 				if(queuedReceive != null)
 				{
-					queuedReceive();
+					//Lich.post("queuedReceive = " + queuedReceive);
+					queuedReceive[0].apply(null, queuedReceive[1]);
+						//queuedReceive[0](queuedReceive[1], queuedReceive[2]);
 				}
 				break;
 
-			case "finish":
+			/*case "finish":
 				Lich.VM.post("Actor closing.");
-				return self.close();
+				return self.close();*/
 
 			default:
-				Lich.post("Actor default event.data.type: " + event.data.type);
+				Lich.post("Actor DEFAULT? event.data.type: " + event.data.type);
 				break;
 		}
 	},

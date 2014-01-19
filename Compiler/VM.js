@@ -45,6 +45,7 @@ Lich.VM.Nothing = new LichNothing(); // We only need one Nothing value because t
 Lich.VM.Void = new LichVoid(); // Same as Nothing, we only need one.
 Lich.VM.reserved = {}; // For variables reserved by the language
 Lich.VM.currentThread = "main";
+Lich.VM.modules = [];
 
 Lich.VM.pushProcedure = function(procedure)
 {
@@ -122,7 +123,6 @@ Lich.VM.printDictionary = function(object)
 
 Lich.VM.printData = function(object)
 {
-	Lich.post("printData");
 	var string = object._datatype + " { ";
 
 	for(var i = 0; i < object._argNames.length; ++i)
@@ -249,16 +249,16 @@ Lich.VM.PrettyPrint = function(object)
 		return "Actor";
 	else if(object == Lich.VM.Nothing)
 		return "Nothing";
-	else if(typeof (object.astType) === "undefined")
-		return object;
+	else if(object._lichType == VOID)
+		return "";
 	else
-		return Lich.VM.printAST(object);
+		return object;
 }
 
 Lich.VM.Print = function(object)
 {
 	//Lich.post("PRINT OBJECT: " + object);
-	if(object != Lich.VM.Void)
+	if(object._lichType != VOID)
 		Lich.post(Lich.VM.PrettyPrint(object));
 		// Lich.post(Lich.VM.PrettyPrint(JSON.parse(JSON.stringify(object)))); // Message passing translation		
 }

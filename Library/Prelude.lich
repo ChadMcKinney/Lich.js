@@ -37,6 +37,9 @@
 -}
 module Prelude where
 
+-- Primtive enum for type matching
+data Primitive = StringT | NumberT | ListT | DictionaryT | ActorT | FunctionT | NothingT | UnknownT
+
 --| Utility
 flip f a b = f b a
 id a = a

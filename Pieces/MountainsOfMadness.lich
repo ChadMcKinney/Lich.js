@@ -100,8 +100,8 @@ foldOverCardinals f loc = f loc::north . f loc::south . f loc::east . f loc::wes
 -- |addLocationNarration :: Location -> Game -> Game
 addLocationNarration location game = itemNarratedGame
 	where
-		locationNarratedGame = addNarration (location::description) game
-		itemNarratedGame = foldl (flip addFarDescriptionToNarration) locationNarratedGame (location::items)
+		locationNarratedGame 	= addNarration (location::description) game
+		itemNarratedGame 		= foldr (addFarDescriptionToNarration) locationNarratedGame (location::items)
 
 --cardinalNarratedGame = foldOverCardinals (addCardinalFarNarration) location 
 --$ itemNarratedGame
@@ -114,7 +114,7 @@ placeItemAtLocation item location = location {items = newItems}
 -- |removeItemFromLocation Item Location => Location
 removeItemFromLocation item location = location{items = newItems}
 	where
-		newItems = delete (item::name) (location::items)
+		newItems = remove (item::name) (location::items)
 
 -- |giveItemToPlayer Item Player => Player
 giveItemToPlayer item player = player{items = newItems}
@@ -124,7 +124,7 @@ giveItemToPlayer item player = player{items = newItems}
 -- |removeItemFromPlayer Item Player => Player
 removeItemFromPlayer item player = player{items = newItems}
 	where
-		newItems = delete (item::name) (player::items)
+		newItems = remove (item::name) (player::items)
 
 -- |updateLocation Location Game => Game
 updateLocation location game = game{locations = newLocations}
@@ -178,9 +178,9 @@ pickupCarryableItemFromLocation item location player game = updatePlayer newPlay
 
 -- |pickupItemFromLocation Item Location Player Game => Game
 pickupItemFromLocation item location player game = 
-	if ((player::location) == (location::name)) && item :: carryable
-		then pickupCarryableItemFromLocation item location player game
-		else addNarration game "I can't carray that!"
+	case ((player::location) == (location::name)) && item :: carryable of
+		True	-> pickupCarryableItemFromLocation item location player game
+		False	-> addNarration game "I can't carray that!"
 
 -- |playerLocation Player Game => Location
 playerLocation player game = (game::locations) !! (player::location)
@@ -205,36 +205,37 @@ lookAtCardinal cardinal player game = addNarration description game
 
 -- |movePlayer Cardinal Player Game => Game
 movePlayer cardinal player game = 
-	if newLocation::moveable
-		then newGame
-		else addNarration "That way is blocked." game 
+	case newLocation::moveable of
+		True	-> newGame
+		False	-> addNarration "That way is blocked." game 
 	where
 		newLocation 	= locationAtCardinal cardinal player game
-		newPlayer 		= player{location=newLocation::name}
+		newLocationName = newLocation::name
+		newPlayer 		= player{location=newLocationName}
 		newGame			= addLocationNarration newLocation $ updatePlayer newPlayer game
 
 moveMonster cardinal monster game = 
-	if newLocation::moveable
-		then updateMonster newMonster game
-		else addNarration "That way is blocked." game 
+	case newLocation::moveable of
+		True	-> updateMonster newMonster game
+		False	-> addNarration "That way is blocked." game 
 	where
 		newLocation 	= locationAtCardinal cardinal player game
 		newMonster 		= monster{location=newLocation::name}
 
 movePlayerOrMonster cardinal name game = newGame
 	where
-		something = findSomethingWithName name game
+		playerOrMonster = findSomethingWithName name game
 		newGame =
-			case something of
-				Monster -> moveMonster cardinal something game
-				Player 	-> movePlayer cardinal something game
-				_		-> game
+			case playerOrMonster of
+				Monster 	-> moveMonster cardinal playerOrMonster game
+				Player 		-> movePlayer cardinal playerOrMonster game
+				Location	-> game
 	
 -- |checkPlayerDeath Player Game => Game
 checkPlayerDeath player game = 
-	if player::health < 1
-		then (addNarration "You died." game){gameOver = True}
-		else game
+	case player::health < 1 of
+		True	-> (addNarration "You died." game){gameOver = True}
+		False	-> game
 
 -- |damagePlayer Int Player Game => Game
 damagePlayer damage player game = checkPlayerDeath damagedPlayer newGame
@@ -254,17 +255,17 @@ updateItemInHolder item itemName holder game = newGame
 				Monster 	-> updateMonster newHolder game
 				Player	 	-> updatePlayer newHolder game
 				Location 	-> updateLocation newHolder game
-				_ 			-> game
+				--_ 			-> game
 
 eraseItemInHolder item holder game = newGame
 	where
-		newHolder = holder{items = delete (item::name) (holder::items)}
+		newHolder = holder{items = remove (item::name) (holder::items)}
 		newGame =
 			case newHolder::dataType of
 				Monster 	-> updateMonster newHolder game
 				Player	 	-> updatePlayer newHolder game
 				Location 	-> updateLocation newHolder game
-				_ 			-> gam
+				--_ 			-> game
 				
 curseItem item aCurse location game = updateItemInHolder newItem (item::name) location game
 	where
@@ -307,9 +308,9 @@ openDoorWithKey key player door location game = newGame
 		newPlayer 	= removeItemFromPlayer key player
 		newLocation = placeItemAtLocation newDoor
 		newGame 	= 
-			if member (door::name) (location::items)
-				then updatePlayer newPlayer $ updateLocation newLocation game
-				else game
+			case member (door::name) (location::items) of
+				True	-> updatePlayer newPlayer $ updateLocation newLocation game
+				False	-> game
 
 --closeDoor :: String -> Location -> Game -> Game
 closeDoor doorName location game = newGame
@@ -317,9 +318,9 @@ closeDoor doorName location game = newGame
 		newDoor 	= closedMetalDoor "ClosedMetalDoor"
 		newLocation = placeItemAtLocation newDoor
 		newGame 	=
-			if member (doorName) (location::items)
-				then updateLocation newLocation game
-				else game
+			case member (doorName) (location::items) of
+				True	-> updateLocation newLocation game
+				False	-> game
 
 --key :: Item
 key = Item name farDescription description carryable action curse
@@ -414,9 +415,9 @@ corpse2 		= Item name fDesc desc
 		fDesc 	= "A bloated corpse of a scientist"
 		desc 	= "Several of the scientist's limbs appear to have been amputated. This was not done by a wild animal as the wounds have been cauterized."
 
-diary			= Item name fDesc description
+diary			= Item name fDesc desc
 	where
-		name 	= "Corpse2"
+		name 	= "Diary"
 		fDesc 	= "Amongst the tattered bedrolls I see a worn diary."
 		desc 	= "The diary contains indeoth analyses of several in-field dissection conducted."
 
@@ -499,10 +500,10 @@ ruins 	 		= Location "Ruins" n s e w u d desc fDesc items mov
 		items 	= ()
 		mov 	= True
 
-carvings 		= Item name fDesc description
+carvings 		= Item name fDesc desc
 	where
 		name 	= "Carvings"
-		fdesc 	= "Ornate carvings."
+		fDesc 	= "Ornate carvings."
 		desc 	= "Otherworldly carvings which depict, minimally yet beautifully, a large underground city. On closer inspection strange creatures can be seen inhabiting the structures. They appear to be dissecting...or dining...on something."
 
 underRuins 		= Location "UnderRuins" n s e w u d desc fDesc items mov
@@ -519,10 +520,10 @@ underRuins 		= Location "UnderRuins" n s e w u d desc fDesc items mov
 		mov 	= True
 
 
-mural 	 		= Item name fDesc description
+mural 	 		= Item name fDesc desc
 	where
 		name 	= "Mural"
-		fdesc 	= "Some kind of mural."
+		fDesc 	= "Some kind of mural."
 		desc 	= "An intricately constructed mural, made of some kind of crystalline materia. Seems almost religious or iconic in nature. Depicts a vaugely orb shaped creature with a multitude of appendages and sub-orb like structures. It appears to be swallowing something...or perhaps talking to it?"
 
 murals 	 		= Location "Murals" n s e w u d desc fDesc items mov
@@ -538,10 +539,10 @@ murals 	 		= Location "Murals" n s e w u d desc fDesc items mov
 		items 	= ("Mural" => mural)
 		mov 	= True
 
-mural2  		= Item name fDesc description
+mural2  		= Item name fDesc desc
 	where
 		name 	= "Mural2"
-		fdesc 	= "Some kind of mural."
+		fDesc 	= "Some kind of mural."
 		desc 	= ""
 
 underMurals 	= Location "UnderMurals" n s e w u d desc fDesc items mov
@@ -565,25 +566,35 @@ demoShoggoth 	= Monster "Shoggoth"
 demoGame 		= Game ("casiosk1"=>demoPlayer) ("Shoggoth"=>demoShoggoth) gameLocations
 
 moveFunc cardinal game = movePlayer cardinal (getPlayer "casiosk1") game
-printPlayerLocation game = printAndReturn ( (getPlayer "casiosk1" game)::location) game
-containsPlayer game = printAndReturn ( (getPlayer "casiosk1" game) == Nothing) game
 
 ---------------------------------------------------------------------------------------------------------------------
 -- IO Functions
 ---------------------------------------------------------------------------------------------------------------------
 
+--manually add in functions in case statements?
+
 --Main Game loop
 madnessLoop game = 
 	receive
-		"narration"			-> print $ game::narration
-		"finished" 			-> game::locations
-		updateGame@(\_->)	-> self $ updateGame game
+		"walk"				-> madnessLoop $ movePlayer north (getPlayer "casiosk1" game) game
+		"finished" 			-> game
+		--updateGame@(\_->)	-> madnessLoop $ updateGame game
+		--arr@["walk",_,_]	-> madnessLoop $ movePlayer north (getPlayer (arr!!2) game) game
+		--"finished" 			-> (getPlayer "casiosk1" game)::location
+		
+		
 
 --Starts the main game loop
 startMountainsOfMadness playerName = spawn madnessLoop [newGame]
 	where
 		newPlayer 	= Player playerName 100 "Camp"
 		newGame 	= Game (playerName=>newPlayer) () gameLocations
+
+
+walk cardinal playerName game = movePlayer cardinal (getPlayer playerName game) game
+--walk cardinal playerName game = movePlayerOrMonster cardinal playerName game
+look cardinal playerName game = lookAtCardinal cardinal (findSomethingWithName playerName game) game
+
 
 --Sends the game loop a message walk a direction
 --walk cardinal playerName = walkFunc :>> "madnessLoop"

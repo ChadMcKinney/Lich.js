@@ -1124,9 +1124,50 @@ mul 6 << add 2 << div 3 << 5
 5 >> (div 3) >> (add 2) >> mul 6 >> (/3) >> (*2) >> (3/)
 add 2 . div 3 $ 5
 map (5 >>) $ map (div) [1..9]
-map (5 >>) $ map (3/) [1..9]
+map (5 >>) $ map (/) [1..9]
 
 add 2 << (div 3 << 5)
 5 >> div 3 >> add 2
 (5 >>) (div 3)
 5 >> div 3
+
+spawn add [2,3]
+spawn (add 2) [3]
+spawn (\x y -> x / y * 666) [1,2]
+
+data MyType{d = 4}
+let makeData x = MyType x
+makeData 1
+let m = MyType
+let n = m { d = m::d + 1 }
+n
+let myLoop m =
+   receive
+       "test"        -> myLoop $ m{d = m::d + 1}
+       "finished"     -> m::d
+
+let newLoop = spawn myLoop [MyType 5]
+
+"test" :>> newLoop
+"finished" :>> newLoop
+
+data Monster { size = 6 }
+let makeMonster x = Monster x
+let monsterFactory maker =
+    receive
+        [x] -> maker x
+
+let monsterActor = spawn (monsterFactory) [makeMonster]
+[666] :>> monsterActor
+
+
+-- Mountains of Madness testing
+compile "MountainsOfMadness"
+let actor = spawn madnessLoop [demoGame]
+
+(findSomethingWithName "casiosk1") :>> actor
+(walk north "casiosk1") :>> actor
+(look north "casiosk1") :>> actor
+"finished" :>> actor
+
+(findSomethingWithName "casiosk1") demoGame
