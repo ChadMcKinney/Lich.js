@@ -578,7 +578,7 @@ madnessLoop game =
 	receive
 		"walk"				-> madnessLoop $ movePlayer north (getPlayer "casiosk1" game) game
 		"finished" 			-> game
-		--updateGame@(\_->)	-> madnessLoop $ updateGame game
+		updateGame@(\_ _ _ ->)	-> print "updateGame!!!!!!!" --madnessLoop $ updateGame game
 		--arr@["walk",_,_]	-> madnessLoop $ movePlayer north (getPlayer (arr!!2) game) game
 		--"finished" 			-> (getPlayer "casiosk1" game)::location
 		

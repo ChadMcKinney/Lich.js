@@ -1931,9 +1931,22 @@ function postProcessJSON(object)
 
     	if(object._lichType == CLOSURE)
 	    {
+	    	Lich.post("PARSE CLOSURE!");
 	    	var res = eval(object.value);
+	    	Lich.post("res = " + res);
+	    	//Lich.post("Pretty res = " + Lich.VM.PrettyPrint(res));
 	    	return res;
 	    }
+
+	    else
+	    {
+	    	for(n in object)
+	    	{
+	    		object[n] = postProcessJSON(object[n]);
+	    	}
+	    }
+
+	    return object;
     }
 
     return object;
@@ -1941,17 +1954,20 @@ function postProcessJSON(object)
 
 Lich.parseJSON = function(json)
 {
-	return postProcessJSON(JSON.parse(json));
+	// return postProcessJSON(JSON.parse(json));
+	return JSON.retrocycle(postProcessJSON(JSON.parse(json)));
 }
 
 Lich.stringify = function(object)
 {
-	return JSON.stringify(object, function (key, value) 
+	// return JSON.stringify(object, function (key, val) 
+	return JSON.stringify(JSON.decycle(object), function (key, val) 
 	{
-		if(typeof value == "function")
+		if(typeof val == "function")
 		{
-			var funcAndArgs = _extractFunctionAndArgs(value);
+			var funcAndArgs = _extractFunctionAndArgs(val);
 			var funcString = funcAndArgs[0].toString();
+			var args = Lich.stringify(funcAndArgs[1]);
 			var func = funcString.match(/function ([^\(]+)/);
 
 			if(func == null || typeof func === "undefined")
@@ -1959,10 +1975,14 @@ Lich.stringify = function(object)
 			else
 				func = func[1];
 
-			return "((function(){return "+func+"})())";
+			return Lich.stringify({_lichType:CLOSURE, value: "((function(){return "+func+"})())"});
+			//return Lich.stringify({_lichType:CLOSURE, value: "((function(){return "+value+"})())"});
+			//Lich.post("Lich.Stringify = " + val);
+			//return Lich.stringify({_lichType:CLOSURE, value: "((function(){return "+func+"})())"});
+			//return "((function(){return "+func+"})())";
 		}
 
-	    return value;
+	    return val;
 
 	});
 }

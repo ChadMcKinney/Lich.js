@@ -276,15 +276,18 @@ function spawn(c, a, ret)
 
 function send(m, a, ret)
 {
-	Lich.collapse(m, function(message)
+	Lich.collapse(m, function(msg)
 	{
+		if(typeof msg === "function")
+			throw new Error("Can't send a function as a message to an actor.");
+
 		Lich.collapse(a, function(actor)
 		{
 			if(actor._lichType != ACTOR)
-				throw new Error("send can only be used as: send message actor. Failed with send " + Lich.VM.PrettyPrint(message) 
+				throw new Error("send can only be used as: send message actor. Failed with send " + Lich.VM.PrettyPrint(msg) 
 					+ " " + Lich.VM.PrettyPrint(actor));
 
-			actor.postMessage({type: "message", message: Lich.stringify(message)});
+			actor.postMessage({type: "msg", message: Lich.stringify(msg)});
 			ret(Lich.VM.Void);
 		});
 	});

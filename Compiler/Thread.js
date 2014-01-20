@@ -96,6 +96,7 @@ this.addEventListener("message",
 				//modules.map(function(lib){compile(lib)});
 				eval(event.data.modules);
 				//Lich.post("Actor init event.data.func = " + event.data.func);
+				Lich.post("THREAD FUNC = " + event.data.func);
 				threadFunc = Lich.parseJSON(event.data.func);
 				//Lich.post("Actor compiled func = " + threadFunc);
 				//Lich.post("Actor init even.data.args = " + event.data.args);
@@ -114,9 +115,11 @@ this.addEventListener("message",
 				});
 				break;
 
-			case "message":
+			case "msg":
 				var message = Lich.parseJSON(event.data.message);
-				Lich.VM.post("Actor message: " + Lich.VM.PrettyPrint(message));
+				Lich.VM.Print(message);
+				Lich.post("Actor message un parsed = " + event.data.message);
+				Lich.post("Actor message: " + Lich.VM.PrettyPrint(message));
 				messageBox.push(message);
 				
 				if(queuedReceive != null)

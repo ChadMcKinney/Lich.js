@@ -59,7 +59,6 @@
 "%"                         return {val:"%",typ:"%"};  
 "!!"                        return {val:"!!",typ:"!!"};
 "!"                         return {val:"!",typ:"!"};
-"#"                         return {val:"#",typ:"#"};
 "$"                         return {val:"$",typ:"$"};
 "&"                         return {val:"&",typ:"&"};
 ","                         return {val:",",typ:","};
@@ -98,6 +97,7 @@
 [a-z][A-Za-z0-9_]*          return {val:yytext,typ:"varid"};
 [A-Z][A-Za-z0-9_]*          return {val:yytext,typ:"conid"};
 \"([^\"])*\"                return {val:yytext,typ:"string-lit"};
+"#"([^"#"\s+])*             return {val:"\""+yytext.slice(1,yytext.length)+"\"", typ:"string-lit"};
 \'(!\')?\'                  return {val:yytext,typ:"char"};
 ["!""#""$""&"".""<"">""=""?""@""\\""|""~"]+        return {val:yytext,typ:"varsym"};
 ":"["!""#""$""&"".""<"">""=""?""@""\\""|""~"]*  return {val:yytext,typ:"consym"};
@@ -117,22 +117,38 @@ qconsym = qs:(conid ".")+ ref:((!"." consym) !".") {qs = flatten(qs).join(""); r
 
 /* operator associations and precedence */
 
+// 0
+%right '='
 %right '$' '<<'
-// %nonassoc '='
-%left '='
-%left 'let'
-%left '==' '>' '<' '/=' '>=' '<='
-%left '+' '-' '%'
-%left '*' '/'
-%right '^'
-%left '++'
-%left '::'
-//%left UMINUS
-%right ':'
-%left '.'
-//%right ".."
-//%right ","
-//%right '>>'
+%left ',' '..'
+
+// 1
+%left '>>'
+
+// 2
+%right '||'
+
+// 3
+%right '&&'
+
+// 4
+%left '==' '/=' '<' '<=' '>' '>='
+
+// 5
+%right ':' '++'
+
+// 6
+%left '+' '-'
+
+// 7
+%left '*' '/' '%'
+
+// 8
+%left '^'
+
+// 9
+%right '.'
+%left '::' '!!'
 
 
 %start start_
@@ -364,13 +380,33 @@ letdecl
 exp // : object
   // : infixexp %prec NOSIGNATURE  {{$$ = $1;}}
   : lexp                {{$$ = $1}}
-  | exp binop exp       {$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
+  //| exp binop exp       {$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
   | funccomp            {{$$ = $1;}}
   | funcstream          {{$$ = $1;}}
   | datalookup          {{$$ = $1;}}
   | datainst            {{$$ = $1;}}
   | dataupdate          {{$$ = $1;}}
   | classexp            {{$$ = $1;}}
+  | exp "+" exp         {$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
+  | exp "-" exp         {$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
+  | exp "*" exp         {$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
+  | exp "/" exp         {$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
+  | exp "^" exp         {$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
+  | exp "%" exp         {$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
+  | exp "==" exp        {$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
+  | exp "/=" exp        {$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
+  | exp ">"  exp        {$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
+  | exp "<"  exp        {$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
+  | exp ">=" exp        {$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
+  | exp "<=" exp        {$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
+  | exp "!!" exp        {$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
+  | exp ":"  exp        {$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
+  | exp "++" exp        {$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
+  | exp "&&" exp        {$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
+  | exp "||" exp        {$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
+  | exp "<<" exp        {$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
+  | exp "?"  exp        {$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
+  | exp ":>>" exp       {$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
   ;
 
 binop
