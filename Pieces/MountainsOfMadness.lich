@@ -581,8 +581,6 @@ moveFunc cardinal game = movePlayer cardinal (getPlayer "casiosk1" game) game
 -- IO Functions
 ---------------------------------------------------------------------------------------------------------------------
 
---manually add in functions in case statements?
-
 --Main Game loop
 madnessLoop game = 
 	receive
@@ -590,26 +588,9 @@ madnessLoop game =
 		[Look,itemName,playerName]	-> madnessLoop $ lookAtItem itemName (getPlayer playerName game) game
 		Finish						-> game::narration
 		_							-> madnessLoop game
-		--Finish						-> game::narration
 
---Starts the main game loop
---startMountainsOfMadness playerName = spawn madnessLoop [newGame]
---	where
---		newPlayer 	= Player playerName 100 "Camp"
---		newGame 	= Game (playerName=>newPlayer) () gameLocations
 
---gameActor = spawn madnessLoop [demoGame]
+--Why doesn't this work???
+gameActor = spawn madnessLoop [demoGame]
 
---walk cardinal playerName = [Walk,cardinal,playerName] :>> gameActor
-
---walk cardinal playerName game = movePlayer cardinal (getPlayer playerName game) game
---walk cardinal playerName game = movePlayerOrMonster cardinal playerName game
---look cardinal playerName game = lookAtCardinal cardinal (findSomethingWithName playerName game) game
---Sends the game loop a message walk a direction
---walk cardinal playerName = walkFunc :>> "madnessLoop"
---	where
---		walkFunc game = movePlayerOrMonster cardinal playerName game
---Sends the main game loop a message to look at a direction
---look cardinal playerName = lookFunc :>> "madnessLoop"  
---	where
---		lookFunc game = lookAtCardinal cardinal (findSomethingWithName playerName game) game
+walk cardinal playerName = [Walk,cardinal,playerName] :>> gameActor
