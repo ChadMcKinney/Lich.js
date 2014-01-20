@@ -589,8 +589,7 @@ madnessLoop game =
 		Finish						-> game::narration
 		_							-> madnessLoop game
 
-
 --Why doesn't this work???
-gameActor = spawn madnessLoop [demoGame]
+--gameActor game = spawn madnessLoop [game]
 
-walk cardinal playerName = [Walk,cardinal,playerName] :>> gameActor
+--walk cardinal playerName = [Walk,cardinal,playerName] :>> #madness
