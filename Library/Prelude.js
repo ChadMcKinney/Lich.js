@@ -252,17 +252,17 @@ function spawn(c, a, ret)
 
 			var funcAndArgs = _extractFunctionAndArgs(closure); // Uncurry the function and collect the curried arguments.
 			var funcString = funcAndArgs[0].toString(); // Translate the function to a string representation.
-			var func = funcString.match(/function ([^\(]+)/);
+			/*var func = funcString.match(/function ([^\(]+)/);
 
 			if(func == null || typeof func === "undefined")
 				func = funcString;
 			else
-				func = func[1];
+				func = func[1];*/
 
 			worker.postMessage(
 			{
 				type:"init", 
-				func:Lich.stringify({_lichType:CLOSURE, value: "((function(){return "+func+"})())"}), // allows for assignment in the actor thread
+				func:Lich.stringify({_lichType:CLOSURE, value: "((function(){return "+funcString+"})())"}), // allows for assignment in the actor thread
 				args:Lich.stringify(funcAndArgs[1].concat(arguments)), // Combine curried arguments with arguments passed in
 				modules:Lich.VM.modules.join(";")
 			});

@@ -591,6 +591,8 @@ madnessLoop game =
 		Finish						-> game
 		--Finish						-> game::narration
 
+gameActor = spawn madnessLoop [demoGame]
+
 --Starts the main game loop
 --startMountainsOfMadness playerName = spawn madnessLoop [newGame]
 --	where
