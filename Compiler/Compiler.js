@@ -1180,6 +1180,10 @@ Lich.application = function(func, args, _ret)
 {
 	//Lich.post("Applicaion func = " + func);
 	//Lich.post("Lich.application args = " + Lich.VM.PrettyPrint(args));
+
+	if(typeof func !=="function")
+		throw new Error("Expression " + Lich.VM.PrettyPrint(func) + " cannot be used as a function for function application.");
+
 	var collapsedArgs = new Array();
 	forEachCps(
 		args,
