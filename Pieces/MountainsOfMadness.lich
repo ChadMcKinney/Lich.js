@@ -97,7 +97,7 @@ addNarration story game = game{narration = (game::narration)+" "+story}
 addFarDescriptionToNarration item game = game{narration = (game::narration)+" "+(item::farDescription)}
 
 -- | foldOverCardinals (Location -> Game -> Game) -> Location -> (Game -> Game)
-foldOverCardinals f loc = f loc::north . f loc::south . f loc::east . f loc::west . f loc::up . f loc::down
+--foldOverCardinals f loc = f loc::north . f loc::south . f loc::east . f loc::west . f loc::up $ f loc::down
 
 -- |addLocationNarration :: Location -> Game -> Game
 addLocationNarration location game = itemNarratedGame
@@ -588,7 +588,8 @@ madnessLoop game =
 	receive
 		[Walk,cardinal,playerName]	-> madnessLoop $ movePlayer cardinal (getPlayer playerName game) game
 		[Look,itemName,playerName]	-> madnessLoop $ lookAtItem itemName (getPlayer playerName game) game
-		Finish						-> game
+		Finish						-> game::narration
+		_							-> madnessLoop game
 		--Finish						-> game::narration
 
 --Starts the main game loop
