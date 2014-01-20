@@ -119,34 +119,36 @@ qconsym = qs:(conid ".")+ ref:((!"." consym) !".") {qs = flatten(qs).join(""); r
 
 // 0
 %right '='
+
+// 1
 %right '$' '<<'
 %left ',' '..'
 
-// 1
+// 2
 %left '>>'
 
-// 2
+// 3
 %right '||'
 
-// 3
+// 4
 %right '&&'
 
-// 4
+// 5
 %left '==' '/=' '<' '<=' '>' '>='
 
-// 5
+// 6
 %right ':' '++'
 
-// 6
+// 7
 %left '+' '-'
 
-// 7
+// 8
 %left '*' '/' '%'
 
-// 8
+// 9
 %left '^'
 
-// 9
+// 10
 %right '.'
 %left '::' '!!'
 
@@ -380,7 +382,6 @@ letdecl
 exp // : object
   // : infixexp %prec NOSIGNATURE  {{$$ = $1;}}
   : lexp                {{$$ = $1}}
-  //| exp binop exp       {$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
   | funccomp            {{$$ = $1;}}
   | funcstream          {{$$ = $1;}}
   | datalookup          {{$$ = $1;}}
@@ -656,7 +657,7 @@ funcstream
 
 funccomp
   : exp "." exp         {{$$ = {astType:"function-composition", exps:[$1,$3]};}}
-  | funccomp "." exp    {{$1.exps.push($3); $$ = $1;}}
+  | exp "." funccomp    {{$3.exps=[$1].concat($3.exps); $$ = $3;}}
   ;
 
 modid // : object # {conid .} conid

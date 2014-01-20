@@ -657,7 +657,7 @@ funcstream
 
 funccomp
   : exp "." exp         {{$$ = {astType:"function-composition", exps:[$1,$3]};}}
-  | funccomp "." exp    {{$1.exps.push($3); $$ = $1;}}
+  | exp "." funccomp    {{$3.exps=[$1].concat($3.exps); $$ = $3;}}
   ;
 
 modid // : object # {conid .} conid
