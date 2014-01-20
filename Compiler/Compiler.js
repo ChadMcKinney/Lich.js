@@ -78,10 +78,10 @@ Lich.collapse = function(object, _ret)
 }
 
 // Error if curry is called on non-function objects
-Object.prototype.curry = function()
+/*Object.prototype.curry = function()
 {
 	throw new Error("Expression "+this+" cannot be used as a function for function application.");
-}
+}*/
 
 Function.prototype.curry = function curry() 
 {
@@ -1971,17 +1971,21 @@ Lich.stringify = function(object)
 		{
 			if(typeof val === "function")
 			{
+				/*
 				var funcAndArgs = _extractFunctionAndArgs(val);
 				var funcString = funcAndArgs[0].toString();
-				var args = Lich.stringify(funcAndArgs[1]);
+				/*var args = Lich.stringify(funcAndArgs[1]);
 				var func = funcString.match(/function ([^\(]+)/);
 
 				if(func == null || typeof func === "undefined")
 					func = funcString;
 				else
-					func = func[1];
+					func = func[1];*/
 
-				return Lich.stringify({_lichType:CLOSURE, value: "((function(){return "+func+"})())"});
+				return Lich.stringify({_lichType:CLOSURE, value: "((function(){return "+val+"})())"});
+
+
+
 				//return Lich.stringify({_lichType:CLOSURE, value: "((function(){return "+value+"})())"});
 				//Lich.post("Lich.Stringify = " + val);
 				//return Lich.stringify({_lichType:CLOSURE, value: "((function(){return "+func+"})())"});

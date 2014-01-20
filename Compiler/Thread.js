@@ -102,10 +102,10 @@ this.addEventListener("message",
 					//modules.map(function(lib){compile(lib)});
 					eval(event.data.modules);
 					//Lich.post("Actor init event.data.func = " + event.data.func);
-					//Lich.post("THREAD FUNC = " + event.data.func);
+					Lich.post("THREAD FUNC = " + event.data.func);
 					threadFunc = Lich.parseJSON(event.data.func);
 					//Lich.post("Actor compiled func = " + threadFunc);
-					//Lich.post("Actor init even.data.args = " + event.data.args);
+					Lich.post("Actor init even.data.args = " + event.data.args);
 					var args = Lich.parseJSON(event.data.args);
 					//Lich.post("Actor compiled args = " + args);
 					Lich.post("Actor initialized.");

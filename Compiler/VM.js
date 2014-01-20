@@ -249,6 +249,8 @@ Lich.VM.PrettyPrint = function(object)
 		return "Actor";
 	else if(object == Lich.VM.Nothing)
 		return "Nothing";
+	else if(object._lichType == NOTHING)
+		return "Nothing";
 	else if(object._lichType == VOID)
 		return "";
 	else
