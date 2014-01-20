@@ -130,21 +130,20 @@ this.addEventListener("message",
 				break;
 
 			case "msg":
-
 				try
 				{
-					var message = Lich.parseJSON(event.data.message);
-					//Lich.VM.Print(message);
-					//Lich.post("Actor message un parsed = " + event.data.message);
-					Lich.post("Actor message: " + Lich.VM.PrettyPrint(message));
-					messageBox.push(message);
-					
-					if(queuedReceive != null)
+					Lich.collapse(Lich.parseJSON(event.data.message), function(message)
 					{
-						//Lich.post("queuedReceive = " + queuedReceive);
-						queuedReceive[0].apply(null, queuedReceive[1]);
-							//queuedReceive[0](queuedReceive[1], queuedReceive[2]);
-					}
+						//Lich.VM.Print(message);
+						//Lich.post("Actor message un parsed = " + event.data.message);
+						Lich.post("Actor message: " + Lich.VM.PrettyPrint(message));
+						messageBox.push(message);
+						
+						if(queuedReceive != null)
+						{
+							queuedReceive[0].apply( queuedReceive[1], queuedReceive[2]);
+						}
+					});
 				}
 
 				catch(e)
