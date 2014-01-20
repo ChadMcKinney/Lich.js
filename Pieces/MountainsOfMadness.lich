@@ -97,7 +97,7 @@ addNarration story game = game{narration = (game::narration)+" "+story}
 addFarDescriptionToNarration item game = game{narration = (game::narration)+" "+(item::farDescription)}
 
 -- | foldOverCardinals (Location -> Game -> Game) -> Location -> (Game -> Game)
-foldOverCardinals f loc = f loc::north . f loc::south . f loc::east . f loc::west . f loc::up . f loc::down
+--foldOverCardinals f loc = f loc::north . f loc::south . f loc::east . f loc::west . f loc::up $ f loc::down
 
 -- |addLocationNarration :: Location -> Game -> Game
 addLocationNarration location game = itemNarratedGame
@@ -581,34 +581,16 @@ moveFunc cardinal game = movePlayer cardinal (getPlayer "casiosk1" game) game
 -- IO Functions
 ---------------------------------------------------------------------------------------------------------------------
 
---manually add in functions in case statements?
-
 --Main Game loop
 madnessLoop game = 
 	receive
 		[Walk,cardinal,playerName]	-> madnessLoop $ movePlayer cardinal (getPlayer playerName game) game
 		[Look,itemName,playerName]	-> madnessLoop $ lookAtItem itemName (getPlayer playerName game) game
-		Finish						-> game
-		--Finish						-> game::narration
+		Finish						-> game::narration
+		_							-> madnessLoop game
 
---Starts the main game loop
---startMountainsOfMadness playerName = spawn madnessLoop [newGame]
---	where
---		newPlayer 	= Player playerName 100 "Camp"
---		newGame 	= Game (playerName=>newPlayer) () gameLocations
 
---gameActor = spawn madnessLoop [demoGame]
+--Why doesn't this work???
+gameActor = spawn madnessLoop [demoGame]
 
---walk cardinal playerName = [Walk,cardinal,playerName] :>> gameActor
-
---walk cardinal playerName game = movePlayer cardinal (getPlayer playerName game) game
---walk cardinal playerName game = movePlayerOrMonster cardinal playerName game
---look cardinal playerName game = lookAtCardinal cardinal (findSomethingWithName playerName game) game
---Sends the game loop a message walk a direction
---walk cardinal playerName = walkFunc :>> "madnessLoop"
---	where
---		walkFunc game = movePlayerOrMonster cardinal playerName game
---Sends the main game loop a message to look at a direction
---look cardinal playerName = lookFunc :>> "madnessLoop"  
---	where
---		lookFunc game = lookAtCardinal cardinal (findSomethingWithName playerName game) game
+walk cardinal playerName = [Walk,cardinal,playerName] :>> gameActor
