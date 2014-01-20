@@ -1931,11 +1931,7 @@ function postProcessJSON(object)
 
     	if(object._lichType == CLOSURE)
 	    {
-	    	Lich.post("PARSE CLOSURE!");
-	    	var res = eval(object.value);
-	    	Lich.post("res = " + res);
-	    	//Lich.post("Pretty res = " + Lich.VM.PrettyPrint(res));
-	    	return res;
+	    	return eval(object.value);
 	    }
 
 	    else
