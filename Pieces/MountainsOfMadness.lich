@@ -591,6 +591,6 @@ madnessLoop game =
 
 
 --Why doesn't this work???
-gameActor = spawn madnessLoop [demoGame]
+--gameActor = spawn madnessLoop [demoGame]
 
 walk cardinal playerName = [Walk,cardinal,playerName] :>> gameActor
