@@ -252,8 +252,7 @@ function spawn(c, a, ret)
 
 			var funcAndArgs = _extractFunctionAndArgs(closure); // Uncurry the function and collect the curried arguments.
 			var funcString = funcAndArgs[0].toString(); // Translate the function to a string representation.
-			/*
-			var func = funcString.match(/function ([^\(]+)/);
+			/*var func = funcString.match(/function ([^\(]+)/);
 
 			if(func == null || typeof func === "undefined")
 				func = funcString;

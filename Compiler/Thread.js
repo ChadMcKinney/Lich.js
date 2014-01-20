@@ -45,7 +45,10 @@ Lich.VM.currentThread = "Actor";
 
 Lich.VM.post = function(message)
 {
-	self.postMessage({ print: message });
+	if(message instanceof Error)
+		self.postMessage({ print: "Actor error: " + message.message });
+	else
+		self.postMessage({ print: ""+message });
 }
 
 Lich.post = Lich.VM.post;
@@ -91,42 +94,64 @@ this.addEventListener("message",
 		switch(event.data.type)
 		{
 			case "init":
-				Lich.post("Actor initializing...");
-				//var modules = Lich.parseJSON(event.data.modules);
-				//modules.map(function(lib){compile(lib)});
-				eval(event.data.modules);
-				//Lich.post("Actor init event.data.func = " + event.data.func);
-				//Lich.post("THREAD FUNC = " + event.data.func);
-				threadFunc = Lich.parseJSON(event.data.func);
-				//Lich.post("Actor compiled func = " + threadFunc);
-				//Lich.post("Actor init even.data.args = " + event.data.args);
-				var args = Lich.parseJSON(event.data.args);
-				//Lich.post("Actor compiled args = " + args);
-				Lich.post("Actor initialized.");
 
-				Lich.collapse(threadFunc.curry.apply(threadFunc, args), function(res)
+				try
 				{
-					Lich.collapse(res, function(collapsedRes)
+					Lich.post("Actor initializing...");
+					//var modules = Lich.parseJSON(event.data.modules);
+					//modules.map(function(lib){compile(lib)});
+					eval(event.data.modules);
+					//Lich.post("Actor init event.data.func = " + event.data.func);
+					//Lich.post("THREAD FUNC = " + event.data.func);
+					threadFunc = Lich.parseJSON(event.data.func);
+					//Lich.post("Actor compiled func = " + threadFunc);
+					//Lich.post("Actor init even.data.args = " + event.data.args);
+					var args = Lich.parseJSON(event.data.args);
+					//Lich.post("Actor compiled args = " + args);
+					Lich.post("Actor initialized.");
+
+					Lich.collapse(threadFunc.curry.apply(threadFunc, args), function(res)
 					{
-						Lich.post("Actor result: " + Lich.VM.PrettyPrint(res));
-						Lich.post("Actor closing.");
-						self.close();
+						Lich.collapse(res, function(collapsedRes)
+						{
+							Lich.post("Actor result: " + Lich.VM.PrettyPrint(res));
+							Lich.post("Actor closing.");
+							self.close();
+						});
 					});
-				});
+				}
+
+				catch(e)
+				{
+					Lich.post(e);
+					Lich.post("Actor closing.");
+					self.close();
+				}
 				break;
 
 			case "msg":
-				var message = Lich.parseJSON(event.data.message);
-				Lich.VM.Print(message);
-				Lich.post("Actor message un parsed = " + event.data.message);
-				Lich.post("Actor message: " + Lich.VM.PrettyPrint(message));
-				messageBox.push(message);
-				
-				if(queuedReceive != null)
+
+				try
 				{
-					//Lich.post("queuedReceive = " + queuedReceive);
-					queuedReceive[0].apply(null, queuedReceive[1]);
-						//queuedReceive[0](queuedReceive[1], queuedReceive[2]);
+					var message = Lich.parseJSON(event.data.message);
+					//Lich.VM.Print(message);
+					//Lich.post("Actor message un parsed = " + event.data.message);
+					Lich.post("Actor message: " + Lich.VM.PrettyPrint(message));
+					messageBox.push(message);
+					
+					if(queuedReceive != null)
+					{
+						//Lich.post("queuedReceive = " + queuedReceive);
+						queuedReceive[0].apply(null, queuedReceive[1]);
+							//queuedReceive[0](queuedReceive[1], queuedReceive[2]);
+					}
+				}
+
+				catch(e)
+				{
+					Lich.post(e);
+					Lich.post("Actor closing.");
+					self.close();
 				}
 				break;
 
