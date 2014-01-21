@@ -19,6 +19,8 @@
 
 --
 
+importjs "Pieces/MountainsOfMadnessPanel.js"
+
 data Item {
 	name  			= "Not an item.",
 	farDescription  = "Not an item",

@@ -85,6 +85,7 @@
 "do"                        return {val:"do",typ:"do"};
 "foreign"                   return {val:"foreign",typ:"foreign"};
 "import"                    return {val:"import",typ:"import"};
+"importjs"                    return {val:"importjs",typ:"importjs"};
 "infixl"                    return {val:"infixl",typ:"infixl"};
 "instance"                  return {val:"instance",typ:"instance"};
 "in"                        return {val:"in",typ:"in"};
@@ -312,6 +313,7 @@ impdecl // : object
         {{$$ = {astType: "impdecl", modid: $2, hiding: false, imports: $4, pos: @$};}}
     | "import" modid "hiding" '(' imports ')'
         {{$$ = {astType: "impdecl", modid: $2, hiding: true, imports: $5, pos: @$};}}
+    | "importjs" string-lit {{$$ = {astType: "impjs", modid: $2, hiding: false, imports: $2, pos: @$};}}
     ; //TODO: qualified and renamed imports
 /*
 impspec // : object
@@ -353,6 +355,7 @@ topexp
   : exp                 {{$$ = {astType:"top-exp", exp:$1};}}
   | dataexp             {{$$ = $1;}}
   | letdecl             {{$$ = $1;}}
+  | impdecl             {{$$ = $1;}}
   ;
 
 topexps
