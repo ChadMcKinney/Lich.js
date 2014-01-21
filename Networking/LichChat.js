@@ -1,31 +1,31 @@
 //Chat
 
-var chat;
+var _chat;
 
 function initChat()
 {
 	var div = document.getElementById("textdiv");	
 
-	chat = document.createElement("textarea");
-	chat.className = "terminal";
-	chat.id = "chat";
-	chat.name = "chat";
-	chat.spellcheck = false;
-	chat.readOnly = true;
+	_chat = document.createElement("textarea");
+	_chat.className = "terminal";
+	_chat.id = "_chat";
+	_chat.name = "_chat";
+	_chat.spellcheck = false;
+	_chat.readOnly = true;
 
-	chat.style.zIndex = 1;
+	_chat.style.zIndex = 1;
 
-	div.appendChild(chat);
+	div.appendChild(_chat);
 
-	chat.rows = 1;	
-	chat.style.width = "53%";
-	chat.style.top = "0px";
-	chat.style.opacity = "0.0";
-	chat.style.left = "45%";
-	chat.style.fontSize = "250%";
-	chat.style.height = (document.documentElement.clientHeight * 1.0) + "px";
-	chat.style.textAlign = "right";
-	chat.style.overflow = "hidden";
+	_chat.rows = 1;	
+	_chat.style.width = "53%";
+	_chat.style.top = "0px";
+	_chat.style.opacity = "0.0";
+	_chat.style.left = "45%";
+	_chat.style.fontSize = "250%";
+	_chat.style.height = (document.documentElement.clientHeight * 1.0) + "px";
+	_chat.style.textAlign = "right";
+	_chat.style.overflow = "hidden";
 	hideChat();
 }
 
@@ -36,7 +36,7 @@ function sendChat(chatString)
 
 function newChat(chatString)
 {
-	chat.value = chat.value + "\n" + chatString;
+	_chat.value = _chat.value + "\n" + chatString;
 	showChat();
 }
 
@@ -51,9 +51,9 @@ var fadeOut;
 
 function showChat2()
 {
-	chat.style.opacity = "1.0";
-	chat.style.zIndex = 40;
-	chat.style.overFlow = "hidden";
+	_chat.style.opacity = "1.0";
+	_chat.style.zIndex = 40;
+	_chat.style.overFlow = "hidden";
 	chatScroll();
 
 	if(fadeOut!=null)
@@ -64,16 +64,16 @@ function showChat2()
 
 function chatScroll()
 {
-	chat.scrollTop = chat.scrollTop + 3;
+	_chat.scrollTop = _chat.scrollTop + 3;
 
-	if(chat.scrollTop < (chat.scrollHeight - chat.clientHeight))
+	if(_chat.scrollTop < (_chat.scrollHeight - _chat.clientHeight))
 		setTimeout(chatScroll,1);
 }
 
 function hideChat()
 {
-	chat.style.opacity = "0.0";
-	chat.style.zIndex = 1;
+	_chat.style.opacity = "0.0";
+	_chat.style.zIndex = 1;
 	fadeOut = null;
 }
 

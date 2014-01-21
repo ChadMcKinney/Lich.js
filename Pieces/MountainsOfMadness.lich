@@ -19,7 +19,7 @@
 
 --
 
-importjs "../Pieces/MountainsOfMadnessPanel.js"
+importjs "Pieces/MountainsOfMadnessPanel.js"
 
 data Item {
 	name  			= "Not an item.",

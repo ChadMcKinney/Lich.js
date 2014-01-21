@@ -119,6 +119,8 @@ function ActorSupervisor()
 						Lich.post(event.data.print);
 					else if(event.data.supervisor)
 						thisSupervisor.parseMessage(event.data);
+					else if(event.data.evaluate)
+						_evalMessage(event.data);
 				},
 				false
 			);

@@ -265,6 +265,56 @@ function _extractFunctionAndArgs(func)
 		return [func.curriedFunc, func.curriedArgs];
 }
 
+function _evalMessage(message)
+{
+	var func = eval(message.func);
+	var args = Lich.parseJSON(message.args);
+
+	func.apply(null, args);
+}
+
+function _evalInMainThread(func, args)
+{
+	var funcAndArgs = _extractFunctionAndArgs(func); // Uncurry the function and collect the curried arguments.
+	var funcString = funcAndArgs[0].toString(); // Translate the function to a string representation.
+
+	self.postMessage({
+		evaluate:true,
+		func: "((function(){return " + funcString + "})())",
+		args: Lich.stringify(args.concat(funcAndArgs[1]))
+	});
+}
+
+function evalInMainThread(f, a, ret)
+{
+	Lich.collapse(f, function(func)
+	{
+		Lich.collapse(a, function(args)
+		{
+			var funcAndArgs = _extractFunctionAndArgs(func); // Uncurry the function and collect the curried arguments.
+			var funcString = funcAndArgs[0].toString(); // Translate the function to a string representation.
+
+			self.postMessage({
+				evaluate:true,
+				func: "((function(){return " + funcString + "})())",
+				args: Lich.stringify(args.concat(funcAndArgs[1]))
+			});
+		});
+	});
+}
+
+function actorChat(c,ret)
+{
+	Lich.collapse(c, function(chatString)
+	{
+		if(!(typeof chatString === "string"))
+			throw new Error("chat can only be applied to strings!");
+
+		_evalInMainThread("sendChat", [chatString]);
+		ret(Lich.VM.Void);
+	});
+}
+
 function spawn(n, c, a, ret)
 {
 	Lich.collapse(n, function(name)
