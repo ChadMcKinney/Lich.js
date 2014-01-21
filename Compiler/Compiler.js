@@ -1988,7 +1988,7 @@ Lich.stringify = function(object)
 				else
 					func = func[1];*/
 
-				return Lich.stringify({_lichType:CLOSURE, value: "((function(){return "+val+"})())"});
+				return {_lichType:CLOSURE, value: "((function(){return "+val+"})())"};
 
 
 

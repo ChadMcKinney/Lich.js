@@ -91,22 +91,21 @@ function compileLich() // compile default library
 
 function _exitThread()
 {
-	Lich.post("Actor closing.");
+	Lich.post("Actor " + Lich.VM.currentThread + " closing.");
 	Lich.VM.actorSupervisor.unregisterActor(Lich.VM.currentThread);
 	self.close();
 }
 
-this.addEventListener("message", 
+this.addEventListener("message",
 	function(event)
 	{
 		switch(event.data.type)
 		{
 			case "init":
-
 				try
 				{
-					Lich.post("Actor initializing...");
 					Lich.VM.currentThread = event.data.name;
+					Lich.post("Actor " + Lich.VM.currentThread + " initializing...");
 					//var modules = Lich.parseJSON(event.data.modules);
 					//modules.map(function(lib){compile(lib)});
 					eval(event.data.modules);
@@ -117,13 +116,13 @@ this.addEventListener("message",
 					//Lich.post("Actor init even.data.args = " + event.data.args);
 					var args = Lich.parseJSON(event.data.args);
 					//Lich.post("Actor compiled args = " + args);
-					Lich.post("Actor initialized.");
+					Lich.post("Actor " + Lich.VM.currentThread + " initialized.");
 
 					Lich.collapse(threadFunc.curry.apply(threadFunc, args), function(res)
 					{
 						Lich.collapse(res, function(collapsedRes)
 						{
-							Lich.post("Actor result: " + Lich.VM.PrettyPrint(res));
+							Lich.post("Actor " + Lich.VM.currentThread + " result: " + Lich.VM.PrettyPrint(res));
 							_exitThread();
 						});
 					});
@@ -143,7 +142,7 @@ this.addEventListener("message",
 					{
 						//Lich.VM.Print(message);
 						//Lich.post("Actor message un parsed = " + event.data.message);
-						Lich.post("Actor message: " + Lich.VM.PrettyPrint(message));
+						Lich.post("Actor " + Lich.VM.currentThread + " message: " + Lich.VM.PrettyPrint(message));
 						messageBox.push(message);
 						
 						if(queuedReceive != null)
@@ -162,7 +161,12 @@ this.addEventListener("message",
 
 			case "supervisor-register-response":
 			case "supervistor-has-response":
-				Lich.VM.actorSupervisor.parseMessage(event);
+				Lich.VM.actorSupervisor.parseMessage(event.data);
+				break;
+
+			case "error":
+				Lich.post(event.data.message);
+				_exitThread();
 				break;
 
 			/*case "finish":

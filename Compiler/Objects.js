@@ -78,36 +78,38 @@ function _createPrimitive(name, primitive)
 
 function ActorSupervisor()
 {
+	var thisSupervisor = this;
 	var actors = {main: Lich.VM.currentThread};
 
 	this.parseMessage = function(event)
 	{
+		//Lich.post("PARSE MESSAGE.type " + event.type);
 		switch(event.type)
 		{
 			case "registerActor":
-				this.registerActor(event.name, Lich.parseJSON(event.func), Lich.parseJSON(event.args), event.source);
+				thisSupervisor.registerActor(event.name, event.func, event.args, event.source);
 				break;
 
 			case "unregisterActor":
-				this.unregisterActor(event.name);
+				thisSupervisor.unregisterActor(event.name);
 				break;
 
 			case "hasActor":
-				this.hasActor(event.name, event.source);
+				thisSupervisor.hasActor(event.name, event.source);
 				break;
 
 			case "sendActor":
-				this.sendActor(event.name, event.message,event.source);
+				thisSupervisor.sendActor(event.name, event.message,event.source);
 				break;
 		}
 	}
 
 	this.registerActor = function(name, func, args, source, ret)
 	{
-		var thisSupervisor = this;
 		if(!actors.hasOwnProperty(name))
 		{
 			var worker = new Worker("../Compiler/Thread.js");
+			actors[name] = worker;
 					
 			worker.addEventListener(
 				"message",
@@ -145,8 +147,6 @@ function ActorSupervisor()
 				modules:Lich.VM.modules.join(";")
 			});
 
-			actors[name] = worker;
-
 			if(source === "main")
 			{
 				ret(name);
@@ -167,7 +167,7 @@ function ActorSupervisor()
 
 			else if(actors.hasOwnProperty(source))
 			{
-				source.postMessage({type:"error",message:"Unable to register actor. Actor " + name + " is already registered."});
+				actors[source].postMessage({type:"error",message:"Unable to register actor. Actor " + name + " is already registered."});
 			}
 
 			else
@@ -227,7 +227,7 @@ function ActorSupervisor()
 
 			else if(actors.hasOwnProperty(source))
 			{
-				source.postMessage({type:"error",message:"Unable to send actor message. Actor " + name + " does not exist"});
+				actors[source].postMessage({type:"error",message:"Unable to send actor message. Actor " + name + " does not exist"});
 			}
 
 			else
@@ -264,7 +264,7 @@ function ThreadedActorSupervisor()
 
 	this.registerActor = function(name, func, args, source, ret)
 	{
-		queuedSupervisorReturn = function(){ ret(name); };
+		queuedSupervisorReturn = function(){ ret(name); }; // wait for response to continue
 		self.postMessage(
 		{
 			supervisor:true,
@@ -274,6 +274,8 @@ function ThreadedActorSupervisor()
 			args:args,
 			source:source
 		});
+
+		//ret(name);
 	}
 
 	this.unregisterActor = function(name)
@@ -288,7 +290,7 @@ function ThreadedActorSupervisor()
 
 	this.hasActor = function(name, source, ret)
 	{
-		queuedSupervisorReturn = function(has){ ret(has); };
+		queuedSupervisorReturn = function(has){ ret(has); }; // wait for response to continue
 		self.postMessage(
 		{
 			supervisor:true,

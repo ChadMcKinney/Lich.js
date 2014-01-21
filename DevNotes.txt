@@ -1165,7 +1165,7 @@ let monsterFactory maker =
     receive
         [x] -> maker x
 
-let monsterActor = spawn (monsterFactory) [makeMonster]
+let monsterActor = spawn #Monster (monsterFactory) [makeMonster]
 [666] :>> monsterActor
 
 
@@ -1182,3 +1182,18 @@ Finish :>> actor
 Finish :>> #Madness
 
 (findSomethingWithName "casiosk1") demoGame
+
+
+chat ";lkwedlkwwf;lwkewe;ldkwd;lwkfwf;lkwef;lwkf"
+
+clientName
+1 + 1
+random 1 7
+
+spawn #ChatActor (chat) ["Hello, world."]
+spawn #ChatActor (actorChat) ["Hello, world." + (random 0 1)]
+
+importjs "../Pieces/MountainsOfMadnessPanel.js"
+updateNarration "Yo!"
+spawn #ChatActor (updateNarration) ["Hello, world."]
+updateNarration
