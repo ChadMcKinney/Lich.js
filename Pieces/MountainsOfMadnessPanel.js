@@ -103,7 +103,7 @@ function initPanel()
 	hideTextAreas();
 }
 
-function updateNarration(narrationString)
+function _prUpdateNarration(narrationString)
 {
 	if(madnessPanel == null)
 		initPanel();
@@ -129,6 +129,19 @@ function updateNarration(narrationString)
 		setTimeout(function(){madnessPanel2.style.opacity = "1.0";},2500);
 		madnessPanel.style.opacity = "0.0";
 	}
+}
+
+function updateNarration(narrationString, ret)
+{
+	Lich.collapse(narrationString, function(nString)
+	{
+		if(Lich.VM.currentThread !== "main")
+			_evalInMainThread("_prUpdateNarration", [nString]);
+		else
+			_prUpdateNarration(nString);
+
+		ret(nString);
+	});
 }
 
 
@@ -239,15 +252,15 @@ function madnessIntro()
 
 
 	var time = 7000;
-	setTimeout(function(){updateNarration(narrationArray[0]);},(0*time)+1);
-	setTimeout(function(){updateNarration(narrationArray[1]);},(1*time)+1);
-	setTimeout(function(){updateNarration(narrationArray[2]);},(2*time)+1);
-	setTimeout(function(){updateNarration(narrationArray[3]);},(3*time)+1);
-	setTimeout(function(){updateNarration(narrationArray[4]);},(5*time)+1);
+	setTimeout(function(){_prUpdateNarration(narrationArray[0]);},(0*time)+1);
+	setTimeout(function(){_prUpdateNarration(narrationArray[1]);},(1*time)+1);
+	setTimeout(function(){_prUpdateNarration(narrationArray[2]);},(2*time)+1);
+	setTimeout(function(){_prUpdateNarration(narrationArray[3]);},(3*time)+1);
+	setTimeout(function(){_prUpdateNarration(narrationArray[4]);},(5*time)+1);
 	
-	setTimeout(function(){updateNarration(narrationArray[5]);},(7*time)+1);
+	setTimeout(function(){_prUpdateNarration(narrationArray[5]);},(7*time)+1);
 	
-	setTimeout(function(){updateNarration(narrationArray[6]);},(8*time)+1);
-	setTimeout(function(){updateNarration(narrationArray[7]);},(10*time)+1);
-	setTimeout(function(){updateNarration(narrationArray[8]);},(12*time)+1);
+	setTimeout(function(){_prUpdateNarration(narrationArray[6]);},(8*time)+1);
+	setTimeout(function(){_prUpdateNarration(narrationArray[7]);},(10*time)+1);
+	setTimeout(function(){_prUpdateNarration(narrationArray[8]);},(12*time)+1);
 }
