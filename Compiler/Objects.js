@@ -78,7 +78,7 @@ function _createPrimitive(name, primitive)
 
 function ActorSupervisor()
 {
-	var actors = {};
+	var actors = {main: Lich.VM.currentThread};
 
 	this.parseMessage = function(event)
 	{
@@ -177,6 +177,9 @@ function ActorSupervisor()
 
 	this.unregisterActor = function(name)
 	{
+		if(name === "main")
+			throw new Error("Can't unregister the main thread.");
+
 		delete actors[name];
 	}
 

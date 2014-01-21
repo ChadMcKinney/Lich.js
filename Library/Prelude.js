@@ -210,7 +210,7 @@ function importjs(fileName)
 		else
 		{
 			try{
-				importScripts("../"+_fileName, function(){});
+				importScripts(_fileName);/*
 				var oRequest = new XMLHttpRequest();
 				var sURL = "http://"
 				         + self.location.hostname
@@ -229,7 +229,7 @@ function importjs(fileName)
 				else 
 				{
 					Lich.post("Unable to load js file " + _fileName);
-				}
+				}*/
 			}
 
 			catch(e)
