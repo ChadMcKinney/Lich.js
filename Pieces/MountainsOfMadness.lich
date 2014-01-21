@@ -590,10 +590,14 @@ moveFunc cardinal game = movePlayer cardinal (getPlayer "casiosk1" game) game
 --Main Game loop
 madnessLoop game = 
 	receive
-		[Walk,cardinal,playerName]	-> madnessLoop . narrateGame $ movePlayer cardinal (getPlayer playerName game) game
-		[Look,itemName,playerName]	-> madnessLoop . narrateGame $ lookAtItem itemName (getPlayer playerName game) game
+		[Walk,cardinal,playerName]	-> madnessLoop $ movePlayer cardinal (getPlayer playerName game) game
+		[Look,itemName,playerName]	-> madnessLoop $ lookAtItem itemName (getPlayer playerName game) game
 		Finish						-> game
 		_							-> madnessLoop game
+
+
+--gameActor game = spawn "madnessLoop" madnessLoop [game]
+walk cardinal playerName = [Walk,cardinal,playerName] :>> "madnessLoop"
 
 --Why doesn't this work???
 --gameActor game = spawn madnessLoop [game]
