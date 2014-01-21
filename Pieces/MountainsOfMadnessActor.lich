@@ -1,0 +1,4 @@
+
+gameActor = spawn madnessLoop [demoGame]
+
+walk cardinal playerName = [Walk,cardinal,playerName] :>> gameActor

@@ -96,6 +96,8 @@ addNarration story game = game{narration = (game::narration)+" "+story}
 
 addFarDescriptionToNarration item game = game{narration = (game::narration)+" "+(item::farDescription)}
 
+narrateGame game = postNarration (game::narration) game
+
 -- | foldOverCardinals (Location -> Game -> Game) -> Location -> (Game -> Game)
 --foldOverCardinals f loc = f loc::north . f loc::south . f loc::east . f loc::west . f loc::up $ f loc::down
 
@@ -567,6 +569,8 @@ underMurals 	= Location "UnderMurals" n s e w u d desc fDesc items mov
 		fDesc 	= "It appears to be a portal leading deep underground."	
 		items 	= ("Mural2" => mural2)
 		mov 	= True
+		--THIS SHOULD PROBABLY BE FIXED
+		--mov 	= False
 
 gameLocations 	= ("Camp"=>camp,"Mound"=>mound,"Mound2"=>mound2,"Mound3"=>mound3,"Mountains"=>mountains,"Ruins"=>ruins,"UnderRuins"=>underRuins,"Murals"=>murals,"UnderMurals"=>underMurals,"Nowhere"=>Location)
 
@@ -584,9 +588,9 @@ moveFunc cardinal game = movePlayer cardinal (getPlayer "casiosk1" game) game
 --Main Game loop
 madnessLoop game = 
 	receive
-		[Walk,cardinal,playerName]	-> madnessLoop $ movePlayer cardinal (getPlayer playerName game) game
-		[Look,itemName,playerName]	-> madnessLoop $ lookAtItem itemName (getPlayer playerName game) game
-		Finish						-> game::narration
+		[Walk,cardinal,playerName]	-> madnessLoop . narrateGame $ movePlayer cardinal (getPlayer playerName game) game
+		[Look,itemName,playerName]	-> madnessLoop . narrateGame $ lookAtItem itemName (getPlayer playerName game) game
+		Finish						-> game
 		_							-> madnessLoop game
 
 --Why doesn't this work???
