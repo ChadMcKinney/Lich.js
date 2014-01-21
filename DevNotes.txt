@@ -1136,20 +1136,28 @@ spawn (add 2) [3]
 spawn (\x y -> x / y * 666) [1,2]
 
 data MyType{d = 4}
-let makeData x = MyType x
-makeData 1
-let m = MyType
-let n = m { d = m::d + 1 }
-n
+
 let myLoop m =
    receive
        "test"        -> myLoop $ m{d = m::d + 1}
        "finished"     -> m::d
 
-let newLoop = spawn myLoop [MyType 5]
+let newLoop = spawn #Test2 myLoop [MyType 5]
 
 "test" :>> newLoop
 "finished" :>> newLoop
+
+let newLoop = spawn #Test myLoop [MyType 5]
+
+"test" :>> #Test
+"finished" :>> #Test
+
+let makeData x = MyType x
+makeData 1
+let m = MyType
+let n = m { d = m::d + 1 }
+m
+n
 
 data Monster { size = 6 }
 let makeMonster x = Monster x
@@ -1163,11 +1171,14 @@ let monsterActor = spawn (monsterFactory) [makeMonster]
 
 -- Mountains of Madness testing
 compile "MountainsOfMadness"
-let actor = spawn madnessLoop [demoGame]
+let actor = spawn #Madness madnessLoop [demoGame]
 
-(findSomethingWithName "casiosk1") :>> actor
-(walk north "casiosk1") :>> actor
-(look north "casiosk1") :>> actor
-"finished" :>> actor
+(Walk north "casiosk1") :>> actor
+(Look north "casiosk1") :>> actor
+Finish :>> actor
+
+(Walk north "casiosk1") :>> #Madness
+(Look north "casiosk1") :>> #Madness
+Finish :>> #Madness
 
 (findSomethingWithName "casiosk1") demoGame

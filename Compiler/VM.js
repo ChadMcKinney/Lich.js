@@ -39,10 +39,10 @@ var Lich = new Object();
 
 Lich.VM = new Object();
 Lich.VM.procedureStack = new Array();
-Lich.VM.main = lichClosure([], null, true); // We allow mutability at the global scope in interactive mode.
 Lich.VM.procedureStack.push(Lich.VM.main);
 Lich.VM.Nothing = new LichNothing(); // We only need one Nothing value because they're immutable and identical.
 Lich.VM.Void = new LichVoid(); // Same as Nothing, we only need one.
+Lich.VM.actorSupervisor = new ActorSupervisor();
 Lich.VM.reserved = {}; // For variables reserved by the language
 Lich.VM.currentThread = "main";
 Lich.VM.modules = [];
