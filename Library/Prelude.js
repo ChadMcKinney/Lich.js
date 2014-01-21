@@ -679,17 +679,22 @@ function map(f, c, ret)
 
 	if((container instanceof Array) || (typeof container === "string"))
 	{	
-		mapCps(
+		var res = new Array();
+		forEachCps(
 			container,
-			function(exp, i, callback)
+			function(exp, i, next)
 			{
 				Lich.collapse(exp, function(collapsedExp)
 				{
-					Lich.collapse(func.curry(collapsedExp), callback);
+					Lich.collapse(func.curry(collapsedExp), function(collapsedValue)
+					{
+						res.push(collapsedValue);
+						next();
+					});
 				});
 			},
 
-			function(res)
+			function()
 			{
 				if(typeof container === "string")
 					res = res.join("");
@@ -701,17 +706,22 @@ function map(f, c, ret)
 
 	else if(container._lichType == DICTIONARY)
 	{
-		mapDictCps(
+		var res = {};
+		forEachDictCps(
 			container,
-			function(n, i, callback)
+			function(n, i, next)
 			{
 				Lich.collapse(container[n], function(collapsedExp)
 				{
-					Lich.collapse(func.curry(collapsedExp), callback);
+					Lich.collapse(func.curry(collapsedExp), function(collapsedValue)
+					{
+						res[n] = collapsedValue;
+						next();
+					});
 				});
 			},
 
-			function(res)
+			function()
 			{
 				res._lichType = DICTIONARY;
 				ret(res);
@@ -1816,6 +1826,14 @@ function typeOf(obj, ret)
 			ret(NothingT);
 		else
 			ret(UnknownT);		
+	})
+}
+
+function sleep(seconds, value, ret)
+{
+	Lich.collapse(seconds, function(s)
+	{
+		setTimeout(function(){Lich.collapse(value,ret)}, seconds * 1000.0);
 	})
 }
 
