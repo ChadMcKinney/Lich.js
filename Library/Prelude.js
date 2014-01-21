@@ -189,6 +189,57 @@ function postNarration(c, r, ret)
 	});
 }
 
+function importjs(fileName)
+{
+	Lich.collapse(fileName,function(_fileName)
+	{
+		if(Lich.VM.currentThread === "main")
+		{
+			var script = document.createElement("script")
+		    script.type = "text/javascript";
+
+		    script.onload = function()
+		    {
+		        Lich.post("Done importing " + _fileName);
+		    };
+
+		    script.src = "http://"+ self.location.hostname + "/" + _fileName;
+		    document.getElementsByTagName("head")[0].appendChild(script);	
+		}
+			
+		else
+		{
+			try{
+				importScripts("../"+_fileName, function(){});
+				var oRequest = new XMLHttpRequest();
+				var sURL = "http://"
+				         + self.location.hostname
+				         + _fileName;
+
+				oRequest.open("GET",sURL,false);
+				//oRequest.setRequestHeader("User-Agent",navigator.userAgent);
+				oRequest.send(null)
+
+				if(oRequest.status == 200)
+				{
+					eval(oRequest.responseText);
+					Lich.post("Done importing " + _fileName);
+				}
+				
+				else 
+				{
+					Lich.post("Unable to load js file " + _fileName);
+				}
+			}
+
+			catch(e)
+			{
+				Lich.post(e);
+			}
+		}
+	});
+}
+
 function _checkNumStringOpError(l, op, r)
 {
 	if((typeof l !== "number" && typeof l !== "string")

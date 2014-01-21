@@ -557,6 +557,9 @@ Lich.compileAST = function(ast, ret)
 				case "top-exp":
 					return Lich.compileTopExp(ast, ret);
 
+				case "impjs":
+					return Lich.compileImportJS(ast,ret);
+
 				default:
 					return Lich.unsupportedSemantics(ast,ret);
 			}
@@ -2120,4 +2123,9 @@ Lich.compileTopExp = function(ast, ret)
 	{
 		ret("function _lich(_ret){Lich.collapse("+exp+",_ret)};_lich(function(res) { Lich.post(\"Lich> \"+Lich.VM.PrettyPrint(res)); });");
 	});
+}
+
+Lich.compileImportJS = function(ast,ret)
+{
+	ret("importjs("+ast.imports+")");
 }
