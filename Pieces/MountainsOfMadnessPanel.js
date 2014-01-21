@@ -131,12 +131,17 @@ function _prUpdateNarration(narrationString)
 	}
 }
 
-function updateNarration(narrationString)
+function updateNarration(narrationString, ret)
 {
-	Lich.collapse(narrationString)
+	Lich.collapse(narrationString, function(nString)
 	{
-		_evalInMainThread("_prUpdateNarration", [narrationString]);
-	}
+		if(Lich.VM.currentThread !== "main")
+			_evalInMainThread("_prUpdateNarration", [nString]);
+		else
+			_prUpdateNarration(nString);
+
+		ret(nString);
+	});
 }
 
 
