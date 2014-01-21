@@ -210,7 +210,8 @@ function importjs(fileName)
 		else
 		{
 			try{
-				importScripts(_fileName);/*
+				importScripts("../"+_fileName);
+				/*
 				var oRequest = new XMLHttpRequest();
 				var sURL = "http://"
 				         + self.location.hostname
