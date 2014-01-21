@@ -264,64 +264,40 @@ function _extractFunctionAndArgs(func)
 		return [func.curriedFunc, func.curriedArgs];
 }
 
-function spawn(c, a, ret)
+function spawn(n, c, a, ret)
 {
-	Lich.collapse(c, function(closure)
+	Lich.collapse(n, function(name)
 	{
-		Lich.collapse(a, function(arguments)
+		Lich.collapse(c, function(closure)
 		{
-			if(typeof closure !== "function")
-				throw new Error("spawn can only be used as spawn function list. Failed with: spawn " + Lich.VM.PrettyPrint(closure) 
-					+ " " + Lich.VM.PrettyPrint(arguments));
-
-			if(Lich.getType(arguments) != LIST)
-				throw new Error("spawn can only be used as spawn function list. Failed with: spawn " + Lich.VM.PrettyPrint(closure) 
-					+ " " + Lich.VM.PrettyPrint(arguments));
-
-			var worker = new Worker("../Compiler/Thread.js");
-				
-			worker.addEventListener(
-				"message",
-				function(event)
-				{
-					if(event.data.message != undefined)
-						Lich.post(event.data.message);
-					else if(event.data.print != undefined)
-						Lich.post(event.data.print);
-				},
-				false
-			);
-
-			worker.addEventListener(
-				"error",
-				function(event)
-				{
-					Lich.post("Actor error: " + event.message);
-				},
-				false
-			);
-
-			var funcAndArgs = _extractFunctionAndArgs(closure); // Uncurry the function and collect the curried arguments.
-			var funcString = funcAndArgs[0].toString(); // Translate the function to a string representation.
-			var func = funcString.match(/function ([^\(]+)/);
-
-			if(func == null || typeof func === "undefined")
-				func = funcString;
-			else
-				func = func[1];
-
-			worker.postMessage(
+			Lich.collapse(a, function(args)
 			{
-				type:"init", 
-				func:Lich.stringify({_lichType:CLOSURE, value: "((function(){return "+func+"})())"}), // allows for assignment in the actor thread
-				args:Lich.stringify(funcAndArgs[1].concat(arguments)), // Combine curried arguments with arguments passed in
-				modules:Lich.VM.modules.join(";")
-			});
+				if(typeof closure !== "function")
+					throw new Error("spawn can only be used as spawn function list. Failed with: spawn " + Lich.VM.PrettyPrint(closure) 
+						+ " " + Lich.VM.PrettyPrint(args));
 
-			worker._lichType = ACTOR;
-			ret(worker);
-		});
-	});
+				if(Lich.getType(args) != LIST)
+					throw new Error("spawn can only be used as spawn function list. Failed with: spawn " + Lich.VM.PrettyPrint(closure) 
+						+ " " + Lich.VM.PrettyPrint(args));
+
+				var funcAndArgs = _extractFunctionAndArgs(closure); // Uncurry the function and collect the curried arguments.
+				var funcString = funcAndArgs[0].toString(); // Translate the function to a string representation.
+				/*var func = funcString.match(/function ([^\(]+)/);
+
+				if(func == null || typeof func === "undefined")
+					func = funcString;
+				else
+					func = func[1];*/
+
+				// allows for assignment in the actor thread
+				func = Lich.stringify({_lichType:CLOSURE, value: "((function(){return "+funcString+"})())"});
+				// Combine curried arguments with arguments passed in
+				args = Lich.stringify(funcAndArgs[1].concat(args));
+
+				Lich.VM.actorSupervisor.registerActor(name, func, args, Lich.VM.currentThread, ret);
+			}); // args
+		}); // closure
+	}); // name
 }
 
 function send(m, a, ret)
@@ -333,12 +309,16 @@ function send(m, a, ret)
 
 		Lich.collapse(a, function(actor)
 		{
-			if(actor._lichType != ACTOR)
+			if(actor._lichType != ACTOR && typeof actor !== "string")
 				throw new Error("send can only be used as: send message actor. Failed with send " + Lich.VM.PrettyPrint(msg) 
 					+ " " + Lich.VM.PrettyPrint(actor));
 
-			actor.postMessage({type: "msg", message: Lich.stringify(msg)});
-			ret(Lich.VM.Void);
+			if(actor._lichType == ACTOR)
+				actor.postMessage({type: "msg", message: Lich.stringify(msg)});
+			else
+				Lich.VM.actorSupervisor.sendActor(actor, {type: "msg", message: Lich.stringify(msg)}, Lich.VM.currentThread);
+			
+			ret(actor);
 		});
 	});
 }

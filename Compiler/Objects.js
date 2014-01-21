@@ -43,13 +43,12 @@ var DICTIONARY = 3;
 var THUNK = 4;
 var WILDCARD = 5;
 var DATA = 6;
-var CLASS = 7;
-var NUMBER = 8;
-var STRING = 9;
-var LIST = 10;
-var ACTOR = 11;
-var PRIMITIVE = 12;
-var BOOLEAN = 13;
+var NUMBER = 7;
+var STRING = 8;
+var LIST = 9;
+var ACTOR = 10;
+var PRIMITIVE = 11;
+var BOOLEAN = 12;
 
 function LichVoid() // Non-return value for the VM. 
 {
@@ -72,144 +71,236 @@ function lichData(name)
 	}
 }
 
-function lichClosure(argPatterns, rhs, mutable, namespace, decls)
+function _createPrimitive(name, primitive)
 {
-	var _argPatterns = argPatterns;
-	var _rhs = rhs;
-	var _mutable = typeof mutable !== "undefined" ? mutable : false;
-	var _namespace = typeof namespace !== "undefined" ? namespace : {};
-	var _decls = typeof decls !== "undefined" ? decls : [];
+	Lich.VM.reserved[name] = primitive;
+}
 
-	return { // Resolves circular dependencies with Lich.compileAST
-		astType: "closure",
-		_lichType: CLOSURE,
-		argPatterns: _argPatterns,
-		rhs: _rhs,
-		mutable: _mutable,
-		namespace: _namespace,
-		decls: _decls,
+function ActorSupervisor()
+{
+	var actors = {};
 
-		hasVar: function(name)
+	this.parseMessage = function(event)
+	{
+		switch(event.type)
 		{
-			return typeof _namespace[name] !== "undefined";
-		},
+			case "registerActor":
+				this.registerActor(event.name, Lich.parseJSON(event.func), Lich.parseJSON(event.args), event.source);
+				break;
 
-		getVar: function(name)
+			case "unregisterActor":
+				this.unregisterActor(event.name);
+				break;
+
+			case "hasActor":
+				this.hasActor(event.name, event.source);
+				break;
+
+			case "sendActor":
+				this.sendActor(event.name, event.message,event.source);
+				break;
+		}
+	}
+
+	this.registerActor = function(name, func, args, source, ret)
+	{
+		var thisSupervisor = this;
+		if(!actors.hasOwnProperty(name))
 		{
-			var res = _namespace[name];
-			res = typeof res !== "undefined" ? res : Lich.VM.Nothing;
-
-			if(res._lichType == THUNK)
-			{
-				res.invoke([], function(thunkRes)
+			var worker = new Worker("../Compiler/Thread.js");
+					
+			worker.addEventListener(
+				"message",
+				function(event)
 				{
-					res = thunkRes; // DO WE NEED TO MEMOIZE THIS RESULT?
-				}); 
+					if(event.data.message != undefined)
+						Lich.post(event.data.message);
+					else if(event.data.print != undefined)
+						Lich.post(event.data.print);
+					else if(event.data.supervisor)
+						thisSupervisor.parseMessage(event.data);
+				},
+				false
+			);
 
-				return res;
-			}
-
-			else
-			{
-				return res;
-			}
-		},
-
-		setVar: function(name, value)
-		{
-			if(Lich.VM.reserved.hasOwnProperty(name))
-				throw new Error("Cannot set variable " + name + " because it is reserved by the language.");
-
-
-			if(_namespace.hasOwnProperty(name))
-			{
-				if(_mutable)
-					_namespace[name] = value;
-				else
-					throw new Error("Unable to change immutable variable: " + name);
-			}
-
-			else
-			{
-				_namespace[name] = value;
-			}
-		},
-
-		invoke: function(args, ret)
-		{
-			var i;
-			for(i = 0; i < args.length && i < _argPatterns.length; ++i)
-			{
-				if(typeof _argPatterns[i] === "string")
-					_namespace[_argPatterns[i]] = args[i]; // otherwise the variables have already been declared during pattern matching
-				else if(_argPatterns[i].astType == "varname")
-					_namespace[_argPatterns[i].id] = args[i];
-			}
-
-			if(i < _argPatterns.length) // Partial application
-			{
-				ret(new lichClosure(_argPatterns.slice(i, _argPatterns.length), _rhs, _mutable, _deepCopy(_namespace), _decls));
-			}
-
-			else
-			{
-				Lich.VM.pushProcedure(this);
-
-				/*
-				for(var i = 0; i < _decls.length; ++i) // Evaluate all the declarations in the where statement
+			worker.addEventListener(
+				"error",
+				function(event)
 				{
-					Lich.compileAST(_decls[i]);
-				}
+					Lich.post("Actor error: " + event.message);
+				},
+				false
+			);	
 
-				var res = Lich.compileAST(_rhs);
-				Lich.VM.popProcedure();
-				ret(res);*/
+			worker._lichType = ACTOR;
 
-				forEachCps(
-					_decls, 
-					function(elem,index,next)
-					{
-						Lich.compileAST(elem, function(declRes)
-						{
-							next();
-						});
-					},
-					function()
-					{
-						Lich.compileAST(_rhs, function(res)
-						{
-							Lich.VM.popProcedure();
-							ret(res);
-						})
-					}
-				);
+			worker.postMessage(
+			{
+				type:"init", 
+				name:name,
+				func:func,
+				args:args, 
+				modules:Lich.VM.modules.join(";")
+			});
+
+			actors[name] = worker;
+
+			if(source === "main")
+			{
+				ret(name);
+			}
+
+			else
+			{
+				actors[source].postMessage({type:"supervisor-register-response"});
+			}
+		}
+
+		else
+		{
+			if(source === "main")
+			{
+				throw new Error("Unable to register actor. Actor " + name + " is already registered.");
+			}
+
+			else if(actors.hasOwnProperty(source))
+			{
+				source.postMessage({type:"error",message:"Unable to register actor. Actor " + name + " is already registered."});
+			}
+
+			else
+			{
+				Lich.post("registerActor failed. registerActor was requested by a non-registered actor: " + source);
+			}
+		}
+	}
+
+	this.unregisterActor = function(name)
+	{
+		delete actors[name];
+	}
+
+	this.hasActor = function(name, source, ret)
+	{
+		if(source === "main")
+		{
+			return true;
+		}
+
+		else if(actors.hasOwnProperty(source))
+		{
+			if(source === "main")
+			{
+				ret(name);
+			}
+
+			else
+			{
+				actors[source].postMessage({type:"supervisor-has-response", value: actors.hasOwnProperty(name)});
+			}
+		}
+
+		else
+		{
+			Lich.post("hasActor failed. hasActor was requested by a non-registered actor: " + source);
+		}
+	}
+
+	this.sendActor = function(name, message, source)
+	{
+		if(actors.hasOwnProperty(name))
+		{
+			actors[name].postMessage(message);
+		}
+
+		else
+		{
+			if(source === "main")
+			{
+				throw new Error("Unable to send actor message. Actor " + name + " does not exist");
+			}
+
+			else if(actors.hasOwnProperty(source))
+			{
+				source.postMessage({type:"error",message:"Unable to send actor message. Actor " + name + " does not exist"});
+			}
+
+			else
+			{
+				Lich.post("Send failed. Send was requested by a non-registered actor: " + source);
 			}
 		}
 	}
 }
 
-/*
-function createPrimitive(name, argNames, primitiveFunc)
+function ThreadedActorSupervisor()
 {
-	primitiveFunc.astType = "primitive";
-	primitiveFunc.primitiveName = name;
+	var queuedSupervisorReturn = null;
 
-	var varNames = new Array();
-
-	for(var i = 0; i < argNames.length; ++i)
+	this.parseMessage = function(event)
 	{
-		varNames.push({astType:"varname", id: argNames[i]});
+		switch(event.type)
+		{
+			case "supervisor-register-response":
+				if(queuedSupervisorReturn != null)
+				{
+					var func = queuedSupervisorReturn;
+					queuedSupervisorReturn = null;
+					func();
+				}
+				break;
+			case "supervistor-has-response":
+				var func = queuedSupervisorReturn;
+					queuedSupervisorReturn = null;
+					func(event.value);
+				break;
+		}
 	}
 
-	var closure = new lichClosure(varNames, primitiveFunc);
+	this.registerActor = function(name, func, args, source, ret)
+	{
+		queuedSupervisorReturn = function(){ ret(name); };
+		self.postMessage(
+		{
+			supervisor:true,
+			type:"registerActor",
+			name:name,
+			func:func,
+			args:args,
+			source:source
+		});
+	}
 
-	if(argNames.length == 0)
-		closure._lichType = THUNK; // this will let it actually get invoked on being called
+	this.unregisterActor = function(name)
+	{
+		self.postMessage(
+		{
+			supervisor:true,
+			type:"unregisterActor",
+			name:name
+		});
+	}
 
-	Lich.VM.reserveVar(name, closure);
-}*/
+	this.hasActor = function(name, source, ret)
+	{
+		queuedSupervisorReturn = function(has){ ret(has); };
+		self.postMessage(
+		{
+			supervisor:true,
+			type:"hasActor",
+			source:source
+		});
+	}
 
-function _createPrimitive(name, primitive)
-{
-	Lich.VM.reserved[name] = primitive;
+	this.sendActor = function(name, message, source)
+	{
+		self.postMessage(
+		{
+			supervisor:true,
+			type:"sendActor",
+			name:name,
+			message:message,
+			source:source
+		});
+	}
 }

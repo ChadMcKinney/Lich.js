@@ -36,12 +36,13 @@
 */
 
 
-importScripts("Objects.js", "VM.js", "Compiler.js", "../Library/Prelude.js", "../third-party/cycle.js");
+importScripts("../Compiler/Objects.js", "../Compiler/VM.js", "../Compiler/Compiler.js", "../Library/Prelude.js", "../third-party/cycle.js");
 
 var threadFunc;
 var messageBox = new Array();
 var queuedReceive = null;
 Lich.VM.currentThread = "Actor";
+Lich.VM.actorSupervisor = new ThreadedActorSupervisor();
 
 Lich.VM.post = function(message)
 {
@@ -88,6 +89,13 @@ function compileLich() // compile default library
 	}
 }
 
+function _exitThread()
+{
+	Lich.post("Actor closing.");
+	Lich.VM.actorSupervisor.unregisterActor(Lich.VM.currentThread);
+	self.close();
+}
+
 this.addEventListener("message", 
 	function(event)
 	{
@@ -98,6 +106,7 @@ this.addEventListener("message",
 				try
 				{
 					Lich.post("Actor initializing...");
+					Lich.VM.currentThread = event.data.name;
 					//var modules = Lich.parseJSON(event.data.modules);
 					//modules.map(function(lib){compile(lib)});
 					eval(event.data.modules);
@@ -115,8 +124,7 @@ this.addEventListener("message",
 						Lich.collapse(res, function(collapsedRes)
 						{
 							Lich.post("Actor result: " + Lich.VM.PrettyPrint(res));
-							Lich.post("Actor closing.");
-							self.close();
+							_exitThread();
 						});
 					});
 				}
@@ -124,8 +132,7 @@ this.addEventListener("message",
 				catch(e)
 				{
 					Lich.post(e);
-					Lich.post("Actor closing.");
-					self.close();
+					_exitThread();
 				}
 				break;
 
@@ -149,9 +156,13 @@ this.addEventListener("message",
 				catch(e)
 				{
 					Lich.post(e);
-					Lich.post("Actor closing.");
-					self.close();
+					_exitThread();
 				}
+				break;
+
+			case "supervisor-register-response":
+			case "supervistor-has-response":
+				Lich.VM.actorSupervisor.parseMessage(event);
 				break;
 
 			/*case "finish":

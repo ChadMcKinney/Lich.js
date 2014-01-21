@@ -2013,7 +2013,7 @@ Lich.stringify = function(object)
 
 Lich.receive = function(patternFunc, ret)
 {
-	if(Lich.VM.currentThread !== "Actor")
+	if(Lich.VM.currentThread === "main")
 		throw new Error("Cannot use receive from the main thread. receive can only be called by an Actor.");
 
 	if(messageBox.length == 0)
