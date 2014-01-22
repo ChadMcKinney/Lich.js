@@ -439,7 +439,8 @@ camp 			= Location "Camp" n s e w u d desc fDesc items mov
 		w 		= "Mound2"
 		u 		= "Nowhere"
 		d 		= "Nowhere"
-		desc 	= "I stood amongst the ruins of my forward scout's base camp. They had gone missing. We are part of a small group of biologists exploring the reaches of Antartica. To the north, east, and west I can see three prominent mounds of snow. Given the scout's absence, this seemed ominous. "
+		--desc 	= "I stood amongst the ruins of my forward scout's base camp. They had gone missing. We are part of a small group of biologists exploring the reaches of Antartica. To the north, east, and west I can see three prominent mounds of snow. Given the scout's absence, this seemed ominous. "
+		desc 	= "I stand amongst the ruins of my forward scout's base camp. To the north, east, and west I can see three prominent mounds of snow. Given the scout's absence, this seems ominous. "
 		fDesc 	= "You see a white blasted, frigid looking camp."	
 		items 	= ("Diary" => diary)
 		mov 	= True

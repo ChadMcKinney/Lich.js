@@ -206,8 +206,8 @@ textarea::selection {
 }
 
 .fadeElement{
-	-webkit-transition: height 2s,top 2s, opacity 4s;
-			transition: height 2s,top 2s, opacity 4s;
+	-webkit-transition: height 2s,top 2s, opacity 1s;
+			transition: height 2s,top 2s, opacity 1s;
 }
 
 #post {
