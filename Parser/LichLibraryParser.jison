@@ -96,6 +96,7 @@
 "type"                      return {val:"type",typ:"type"};
 "Nothing"                   return {val:"Nothing",typ:"Nothing"};
 "receive"                   return {val:"receive",typ:"receive"};
+"otherwise"                 return {val:"otherwise",typ:"otherwise"};
 [a-z][A-Za-z0-9_]*          return {val:yytext,typ:"varid"};
 [A-Z][A-Za-z0-9_]*          return {val:yytext,typ:"conid"};
 \"([^\"])*\"                return {val:yytext,typ:"string-lit"};
@@ -258,7 +259,7 @@ decl // : object
   | pat varop pat rhs {{$$ = {astType:"decl-fun", ident: $2, args: [$1,$3], rhs: $4, pos: @$, orig: "infix"};}}
   | '(' pat varop pat ')' apats rhs
     {{$$ = {astType:"decl-fun", ident: $3, args: [$2,$4].concat($6), rhs: $7, pos: @$, orig: "infix"};}}
-  //| guardexp                        {{$$ = $1;}}
+  | guardexp                        {{$$ = $1;}}
   ;
 
 //funlhs // : object
@@ -496,25 +497,24 @@ myGuard x
     | otherwise = 100
 */
 
-/*
 guardexp
-  : var apats "†" grhs-list "‡"    {{$$ = {astType:"guard-fun", ident: $1, args: $2, rhs: $4, pos: @$};}}
-  | pat varop pat "†" grhs-list "‡"{{$$ = {astType:"guard-fun", ident: $2, args: [$1,$3], rhs: $5, pos: @$, orig: "infix"};}}
-  | '(' pat varop pat ')' apats "†" grhs-list "‡"
-    {{$$ = {astType:"guard-fun", ident: $3, args: [$2,$4].concat($6), rhs: $8, pos: @$, orig: "infix"};}}
+  : var apats grhs-list    {{$$ = {astType:"guard-fun", ident: $1, args: $2, guards: $3, pos: @$};}}
+  //| pat varop pat "†" grhs-list "‡"{{$$ = {astType:"guard-fun", ident: $2, args: [$1,$3], rhs: $5, pos: @$, orig: "infix"};}}
+  //| '(' pat varop pat ')' apats "†" grhs-list "‡"
+  //  {{$$ = {astType:"guard-fun", ident: $3, args: [$2,$4].concat($6), rhs: $8, pos: @$, orig: "infix"};}}
   ;
 
 grhs-list
-  : grhs-list ";" "|" grhs          {{$1.push($4); $$ = $1;}}
-  | "|" grhs                        {{$$ = [$2];}}
+  : grhs-list grhs              {{$1.push($2); $$ = $1;}}
+  | grhs                        {{$$ = [$1];}}
   ;
 
 grhs
-  : exp "=" exp           {{$$ = {astType:"grhs",e1: $2, e2:$4};}}
-  | wildcard "=" exp      {{$$ = {astType:"grhs",e1: $2, e2:$4};}}  
-  | "otherwise" "=" exp   {{$$ = {astType:"grhs",e1: {astType:"wildcard", pos: @$}, e2:$4};}}
+  : "|" exp "=" exp           {{$$ = {astType:"grhs",e1: $2, e2:$4};}}
+  | "|" wildcard "=" exp      {{$$ = {astType:"grhs",e1: {astType:"boolean-lit", value:true, pos: @$}, e2:$4};}}
+  | "|" "otherwise" "=" exp   {{$$ = {astType:"grhs",e1: {astType:"boolean-lit", value:true, pos: @$}, e2:$4};}}
   ;
-*/
+
 ////////////////////////////////////////////////////////////////////////////////
 // 3.2 Variables, Constructors, Operators, and Literals
 

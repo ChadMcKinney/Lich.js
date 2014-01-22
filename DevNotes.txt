@@ -1220,3 +1220,31 @@ importjs "../Pieces/MountainsOfMadnessPanel.js"
 updateNarration "Yo!"
 spawn #ChatActor (updateNarration) ["Hello, world."]
 updateNarration
+
+
+-- Guards are in
+let myGuard (x:xs) 
+    | x > 4 = 99
+    | _ = 100
+
+myGuard [1..9]
+
+
+
+let whereGuard (x:xs) = y x
+    where
+        y z
+            | z > 10 = "> 10 > 10 > 10"
+            | otherwise = " < 10 < 10 < 10"
+
+whereGuard [1..99]
+whereGuard [11..99]
+
+let whereGuard2 = y
+    where
+        y z
+            | z > 10 = "> 10 > 10 > 10"
+            | otherwise = " < 10 < 10 < 10"
+
+whereGuard2 1
+whereGuard2 11

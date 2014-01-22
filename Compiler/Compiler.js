@@ -560,6 +560,9 @@ Lich.compileAST = function(ast, ret)
 				case "do-exp":
 					return Lich.compileDoExp(ast, ret);
 
+				case "guard-fun":
+					return Lich.compileGuardExp(ast, ret);
+
 				case "impjs":
 					return Lich.compileImportJS(ast,ret);
 
@@ -1091,7 +1094,7 @@ Lich.compileLocalDeclFun = function(ast,ret)
 				Lich.checkFunctionArgMatches(argNames, ast.args, function(matchCode)
 				{
 					var collapseCode = Lich.generateCollapseArguments(argNames);
-					ret(ast.ident.id + "=function (" + [].concat(argNames).concat("_ret").join(",") + "){"+collapseCode+"(function(){"+matchVars
+					ret("var " + ast.ident.id + "=function (" + [].concat(argNames).concat("_ret").join(",") + "){"+collapseCode+"(function(){"+matchVars
 						+matchCode+";Lich.collapse("+rhs+",_ret)})};");
 					//ret("var "+ast.ident.id + "=function (" + [].concat(argNames).concat("_ret").join(",") + "){"+collapseCode+"(function(){"+matchVars
 					//	+matchCode+";Lich.collapse("+rhs+",_ret)})};");
@@ -1145,7 +1148,11 @@ Lich.compileFunWhere = function(ast,ret)
 		ast.decls,
 		function(elem,i,callback)
 		{
-			elem.astType = "local-decl-fun";
+			if(elem.astType == "decl-fun")
+				elem.astType = "local-decl-fun";
+			else if(elem.astType == "guard-fun")
+				elem.local = true;
+
 			Lich.compileAST(elem,function(decl)
 			{
 				callback(decl);
@@ -2171,4 +2178,83 @@ Lich.compileDoExp = function(ast, ret)
 			ret("Lich.doExp.curry(["+res+"])");
 		}
 	);
+}
+
+Lich.guard = function(guards,ret)
+{
+	var match = false;
+	var exp;
+
+	forEachWithBreakCps(
+		guards,
+		function(guard, i, next)
+		{
+			Lich.collapse(guard[0], function(guardRes)
+			{
+				if(guardRes)
+				{
+					match = true;
+					exp = guard[1];
+					next(true); // break
+				}
+
+				else
+				{
+					next(false); // continue
+				}
+			})
+		},
+		function()
+		{
+			if(match)
+			{
+				Lich.collapse(exp, function(expRes)
+				{
+					ret(expRes);
+				});
+			}
+
+			else
+			{
+				throw new Error("Non-exhaustive patterns in guard function.");
+			}
+		}
+	);
+}
+
+Lich.compileGuardExp = function(ast, ret)
+{
+	Lich.generateArgNamesAndMatchVars(ast.args, function(argNames, matchVars)
+	{
+		Lich.checkFunctionArgMatches(argNames, ast.args, function(matchCode)
+		{
+			var guards = new Array();
+			forEachCps(
+				ast.guards,
+				function(guard, i, next)
+				{
+					Lich.compileAST(guard.e1, function(exp1)
+					{
+						Lich.compileAST(guard.e2, function(exp2)
+						{
+							guards.push("["+exp1+","+exp2+"]");
+							next();
+						});
+					});
+				},
+				function()
+				{
+					var guardCode = "Lich.guard(["+guards.join(",")+"],_ret)";
+					var collapseCode = Lich.generateCollapseArguments(argNames);
+					var prefix = ast.ident.id+"=function "+ast.ident.id;
+					
+					if(ast.local)
+						prefix = "var " + ast.ident.id + "=function";			
+
+					ret(prefix+"(" + [].concat(argNames).concat("_ret").join(",") + "){"+collapseCode+"(function(){"+matchVars
+						+matchCode+";"+guardCode+"})};");
+				}
+			);
+		});
+	});
 }

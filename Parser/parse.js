@@ -49,7 +49,7 @@ Lich.parse = function(input) {
     x.pop(); // Remove trailing EOF
 
     var y = Lich.Parser.preL(x);
-    // Lich.post("Lich.Parser.preL(x) = " + y);
+    //Lich.post("Lich.Parser.preL(x) = " + y);
     
     try
     {
