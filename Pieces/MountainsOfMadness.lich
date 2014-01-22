@@ -80,7 +80,7 @@ data Game {
 
 data Cardinal = North | South | East | West | Up | Down
 
-data GameMessage = Walk | Use | Look | Finish
+data GameMessage = Walk | Use | Look | Start | Finish | Intro
 
 north 	= North
 south 	= South
@@ -98,8 +98,9 @@ addNarration story game = game{narration = (game::narration)+" "+story}
 
 addFarDescriptionToNarration item game = game{narration = (game::narration)+" "+(item::farDescription)}
 
--- | foldOverCardinals (Location -> Game -> Game) -> Location -> (Game -> Game)
---foldOverCardinals f loc = f loc::north . f loc::south . f loc::east . f loc::west . f loc::up $ f loc::down
+narrateGame game = postNarration (game::narration) newGame
+	where
+		newGame = game{narration = ""}
 
 -- |addLocationNarration :: Location -> Game -> Game
 addLocationNarration location game = itemNarratedGame
@@ -569,13 +570,12 @@ underMurals 	= Location "UnderMurals" n s e w u d desc fDesc items mov
 		fDesc 	= "It appears to be a portal leading deep underground."	
 		items 	= ("Mural2" => mural2)
 		mov 	= True
+		--THIS SHOULD PROBABLY BE FIXED
+		--mov 	= False
 
 gameLocations 	= ("Camp"=>camp,"Mound"=>mound,"Mound2"=>mound2,"Mound3"=>mound3,"Mountains"=>mountains,"Ruins"=>ruins,"UnderRuins"=>underRuins,"Murals"=>murals,"UnderMurals"=>underMurals,"Nowhere"=>Location)
 
-
-demoPlayer 		= Player "casiosk1" 100 "Camp"
-demoShoggoth 	= Monster "Shoggoth"
-demoGame 		= Game ("casiosk1"=>demoPlayer) ("Shoggoth"=>demoShoggoth) gameLocations
+initGame 		= Game () () gameLocations
 
 moveFunc cardinal game = movePlayer cardinal (getPlayer "casiosk1" game) game
 
@@ -586,12 +586,21 @@ moveFunc cardinal game = movePlayer cardinal (getPlayer "casiosk1" game) game
 --Main Game loop
 madnessLoop game = 
 	receive
-		[Walk,cardinal,playerName]	-> madnessLoop $ movePlayer cardinal (getPlayer playerName game) game
-		[Look,itemName,playerName]	-> madnessLoop $ lookAtItem itemName (getPlayer playerName game) game
-		Finish						-> game::narration
-		_							-> madnessLoop game
+		[Intro,name]				-> madnessLoop . narrateGame $ addLocationNarration (getLocation ((findSomethingWithName name game)::location) game) game
+		[Start,name] 				-> madnessLoop . narrateGame $ addLocationNarration (getLocation ((findSomethingWithName name game)::location) game) game
+		[Walk,cardinal,playerName]	-> madnessLoop . narrateGame $ movePlayer cardinal (getPlayer playerName game) game
+		[Look,itemName,playerName]	-> madnessLoop . narrateGame $ lookAtItem itemName (getPlayer playerName game) game
+		Finish						-> game
+		--_							-> postNarration "Something is up" 0
 
---Why doesn't this work???
---gameActor game = spawn madnessLoop [game]
-
---walk cardinal playerName = [Walk,cardinal,playerName] :>> #madness
+startGame message = send
+	where
+		player = Player clientName 100 "Camp"
+		game =  updatePlayer player initGame
+		actor = spawn "madnessLoop" madnessLoop [game]
+		send =
+			case message of
+				Intro 	-> [message,clientName] :>> actor
+				Start 	-> [message,clientName] :>> actor
+				
+walk cardinal playerName = [Walk,cardinal,playerName] :>> "madnessLoop"

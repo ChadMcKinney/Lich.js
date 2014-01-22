@@ -135,6 +135,8 @@ function updateNarration(narrationString, ret)
 {
 	Lich.collapse(narrationString, function(nString)
 	{
+		console.log("updateNarration: \n"+nString);
+
 		if(Lich.VM.currentThread !== "main")
 			_evalInMainThread("_prUpdateNarration", [nString]);
 		else
@@ -179,15 +181,29 @@ function compileFromPlayerInput()
 		console.log("Player input: " + str);
 		broadcastLichCode(str);
 
-		try
-	    {
-	    	var res = Lich.parse(str);
-	        Lich.VM.Print(Lich.compileAST(res));
-	    }   
-	    catch(e)
-	    {
-			Lich.post(e);
-		}
+		var ast = Lich.parse(str); // interactive parsing
+			// var ast = Lich.parseLibrary(str); // For library parsing testing
+			//Lich.post(Lich.showAST(ast));
+			
+			//Lich.VM.Print(Lich.compileAST(ast));
+			Lich.compileAST(ast, function(res)
+			{
+				//Lich.VM.Print(res);
+				//Lich.post("JS Source> " + res);
+				
+				if(res instanceof Array)
+				{
+					for(var i = 0; i < res.length; ++i)
+					{
+						eval(res[i]);
+					}
+				}
+
+				else
+				{
+					eval(res);
+				}
+			})
 
 		playerInput.value = "";
 	}

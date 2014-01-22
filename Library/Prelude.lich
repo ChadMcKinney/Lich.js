@@ -57,8 +57,3 @@ deepMap f list@(x:xs) = map (deepFunc) list
 
 --| Networking
 myName = clientName
-
---| Madness, needs to be moved in the future
-
--- |narrate Game => Game
-narrate game = postNarration (game::narration) (game{narration = ""})
