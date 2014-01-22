@@ -142,7 +142,7 @@ function updateNarration(narrationString, ret)
 		else
 			_prUpdateNarration(nString);
 
-		ret(nString);
+		//ret(nString);
 	});
 }
 

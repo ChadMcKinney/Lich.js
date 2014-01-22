@@ -1813,7 +1813,7 @@ Lich.compileCase = function(ast,ret)
 	Lich.compileAST(ast.exp, function(exp)
 	{
 		caseCode += exp+",function(_object){ var _bool=false;";
-		matchCode = "";
+		var matchCode = "";
 		forEachCps(
 			ast.alts, 
 
@@ -1828,7 +1828,7 @@ Lich.compileCase = function(ast,ret)
 					caseCode += matchVars;
 					Lich.generateMatchFunc("_object", pat, i, false, function(tempMatchCode)
 					{
-						Lich.compileAST(ast.alts[i].exp, function(altExp)
+						Lich.compileAST(elem.exp, function(altExp)
 						{
 							matchCode += "_bool = (function(){" + tempMatchCode + "})();if(_bool){return Lich.collapse("+ altExp + ", _ret)};";
 							next();

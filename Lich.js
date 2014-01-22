@@ -361,7 +361,7 @@ function parseCurrentLine()
 			Lich.post("Lich> "+e + " found at [line, column]: [0, 0]");
 		}
 
-		//throw e;
+		// throw e;
 	}
 }
 

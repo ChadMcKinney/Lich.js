@@ -184,7 +184,7 @@ function postNarration(c, ret)
 			throw new Error("postNarration can only be applied to strings!");
 
 		updateNarration(chatString);
-		ret(returnVal);
+		ret(Lich.VM.Void);
 		//});
 	});
 }
