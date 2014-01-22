@@ -6914,7 +6914,7 @@ function compileLich()
 			var ast = Lich.parseLibrary(oRequest.responseText); // For library parsing testing
 			Lich.compileAST(ast, function(res)
 			{
-				//Lich.VM.Print(res);
+				Lich.VM.Print(res);
 				eval(res);
 			});
 		}

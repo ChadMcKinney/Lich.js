@@ -557,6 +557,9 @@ Lich.compileAST = function(ast, ret)
 				case "top-exp":
 					return Lich.compileTopExp(ast, ret);
 
+				case "do-exp":
+					return Lich.compileDoExp(ast, ret);
+
 				case "impjs":
 					return Lich.compileImportJS(ast,ret);
 
@@ -1809,7 +1812,7 @@ Lich.compileCase = function(ast,ret)
 	var caseCode = "function(_ret){Lich.collapse(";
 	Lich.compileAST(ast.exp, function(exp)
 	{
-		caseCode += exp+",function(_object){ _bool=false;";
+		caseCode += exp+",function(_object){ var _bool=false;";
 		matchCode = "";
 		forEachCps(
 			ast.alts, 
@@ -1820,7 +1823,7 @@ Lich.compileCase = function(ast,ret)
 				Lich.generateOneArgNameAndMatchVars(pat, i, function(argName, matchVars)
 				{
 					if(pat.astType == "at-match")
-						caseCode += "var "+argName+"=_object";
+						caseCode += "var "+argName+"=_object;";
 
 					caseCode += matchVars;
 					Lich.generateMatchFunc("_object", pat, i, false, function(tempMatchCode)
@@ -2128,4 +2131,44 @@ Lich.compileTopExp = function(ast, ret)
 Lich.compileImportJS = function(ast,ret)
 {
 	ret("importjs("+ast.imports+")");
+}
+
+Lich.doExp = function(exps, ret)
+{
+	var res = exps[0];
+	forEachCps(
+		exps,
+		function(exp, i, next)
+		{
+			Lich.collapse(exp, function(expRes)
+			{
+				res = expRes;
+				next();
+			})
+		},
+		function()
+		{
+			ret(res);
+		}
+	);
+}
+
+Lich.compileDoExp = function(ast, ret)
+{
+	var res = "";
+	forEachCps(
+		ast.exps,
+		function(exp, i, next)
+		{
+			Lich.compileAST(exp, function(expRes)
+			{
+				res += expRes + ",";
+				next();
+			});
+		},
+		function()
+		{
+			ret("Lich.doExp.curry(["+res+"])");
+		}
+	);
 }

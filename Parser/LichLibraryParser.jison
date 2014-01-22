@@ -69,7 +69,8 @@
 "~"                         return {val:"~",typ:"~"};
 ":"                         return {val:":",typ:":"};
 "`"                         return {val:"`",typ:"`"};
-"?"                         return {val:"?",typ:"?"}; 
+"?"                         return {val:"?",typ:"?"};
+";"                         return {val:";",typ:";"}; 
 <<EOF>>                     return {val:"EOF",typ:"EOF"};
 "where"                     return {val:"where",typ:"where"};
 "if"                        return {val:"if",typ:"if"};
@@ -452,6 +453,12 @@ lexp // : object
   | "receive" "†" alts "‡"          {{$$ = {astType:"receive", alts:$3, pos:@$};}}
   | "let" decls "in" exp            {{$$ = {astType:"let", decls: $2, exp: $4, pos: @$}; }}
   | exp qop lexp                    {{$$ = {astType:"binop-exp",op:($2).id.id,lhs:$1,rhs:$3,pos:@$};}}
+  | "do" "†" doList "‡"             {{$$ = {astType:"do-exp", exps: $3, pos: @$}; }}
+  ;
+
+doList
+  : exp               {{$$ = [$1];}}
+  | doList ";" exp    {{$1.push($3); $$ = $1;}}
   ;
 
 // list of 1 or more 'aexp' without separator
