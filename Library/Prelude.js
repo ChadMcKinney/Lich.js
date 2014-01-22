@@ -1829,11 +1829,11 @@ function typeOf(obj, ret)
 	})
 }
 
-function sleep(seconds, value, ret)
+function sleep(seconds, ret)
 {
 	Lich.collapse(seconds, function(s)
 	{
-		setTimeout(function(){Lich.collapse(value,ret)}, seconds * 1000.0);
+		setTimeout((function(){ret(Lich.VM.Void)}), s * 1000.0);
 	})
 }
 
