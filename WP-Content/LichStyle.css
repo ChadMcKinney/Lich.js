@@ -206,8 +206,8 @@ textarea::selection {
 }
 
 .fadeElement{
-	-webkit-transition: height 2s,top 2s, opacity 4s;
-			transition: height 2s,top 2s, opacity 4s;
+	-webkit-transition: height 2s,top 2s, opacity 1s;
+			transition: height 2s,top 2s, opacity 1s;
 }
 
 #post {
@@ -253,6 +253,12 @@ textarea::selection {
 .playerInputText {
 	color: #8A0808;
 	font-size: 75%;
+}
+
+.itemText {
+	background-color: rgba(255,255,255,25);
+	color: rgb(0,0,0);
+	font-size: 100%;
 }
 
 .nameTag {

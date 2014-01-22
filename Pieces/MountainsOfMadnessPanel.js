@@ -110,28 +110,27 @@ function _prUpdateNarration(narrationString)
 
 	var newNarrationString = narrationString;
 	if(lastPlayerInput!=null)
-		newNarrationString =  "<p Class=playerInputText><br>&gt; " + lastPlayerInput + "</p><br>" + newNarrationString;
+		newNarrationString =  "<p Class=playerInputText>&gt; " + lastPlayerInput + "</p><br>" + newNarrationString;
 
-	//madnessPanel.value = chat.value + "\n" + chatString;
 	if(whichPanel == 1)
 	{
 		whichPanel = 2;
 		
 
 		madnessPanel.innerHTML = newNarrationString;
-		setTimeout(function(){madnessPanel.style.opacity = "1.0";},2500);
+		setTimeout(function(){madnessPanel.style.opacity = "1.0";},500);
 		madnessPanel2.style.opacity = "0.0";
 	}
 	else
 	{
 		whichPanel = 1;
 		madnessPanel2.innerHTML = newNarrationString;
-		setTimeout(function(){madnessPanel2.style.opacity = "1.0";},2500);
+		setTimeout(function(){madnessPanel2.style.opacity = "1.0";},500);
 		madnessPanel.style.opacity = "0.0";
 	}
 }
 
-function updateNarration(narrationString, ret)
+function updateNarration(narrationString)
 {
 	Lich.collapse(narrationString, function(nString)
 	{
@@ -141,25 +140,8 @@ function updateNarration(narrationString, ret)
 			_evalInMainThread("_prUpdateNarration", [nString]);
 		else
 			_prUpdateNarration(nString);
-
-		//ret(nString);
 	});
 }
-
-
-/*
-function addNarration(narrationString)
-{
-	if(madnessPanel == null)
-		initPanel();
-
-	//madnessPanel.value = chat.value + "\n" + chatString;
-	madnessPanel.value = madnessPanel.value + narrationString;
-	madnessPanel.style.overFlow = "hidden";
-
-	madnessPanelScroll();
-}
-*/
 
 function madnessPanelScroll(panel)
 {
@@ -181,38 +163,34 @@ function compileFromPlayerInput()
 		console.log("Player input: " + str);
 		broadcastLichCode(str);
 
-		var ast = Lich.parse(str); // interactive parsing
-			// var ast = Lich.parseLibrary(str); // For library parsing testing
-			//Lich.post(Lich.showAST(ast));
-			
-			//Lich.VM.Print(Lich.compileAST(ast));
-			Lich.compileAST(ast, function(res)
-			{
-				//Lich.VM.Print(res);
-				//Lich.post("JS Source> " + res);
+		var ast = Lich.parse(str);
+		Lich.compileAST(ast, function(res)
+		{	
+			//Lich.VM.Print(res);
+			//Lich.post("JS Source> " + res);
 				
-				try
+			try
+			{
+				if(res instanceof Array)
 				{
-					if(res instanceof Array)
+					for(var i = 0; i < res.length; ++i)
 					{
-						for(var i = 0; i < res.length; ++i)
-						{
-							eval(res[i]);
-						}
-					}
-
-					else
-					{
-						eval(res);
+						eval(res[i]);
 					}
 				}
 
-				catch(e)
+				else
 				{
-					console.log(e);
-					throw e;
+					eval(res);
 				}
-			})
+			}
+
+			catch(e)
+			{
+				console.log(e);
+				throw e;
+			}
+		})
 
 		playerInput.value = "";
 	}

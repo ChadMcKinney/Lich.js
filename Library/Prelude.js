@@ -178,14 +178,11 @@ function postNarration(c, ret)
 {
 	Lich.collapse(c, function(chatString)
 	{
-		//Lich.collapse(r, function(returnVal)
-		//{
 		if(!(typeof chatString === "string"))
 			throw new Error("postNarration can only be applied to strings!");
 
 		updateNarration(chatString);
 		ret(Lich.VM.Void);
-		//});
 	});
 }
 
