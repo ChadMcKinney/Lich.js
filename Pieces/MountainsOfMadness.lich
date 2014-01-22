@@ -98,10 +98,6 @@ addNarration story game = game{narration = (game::narration)+" "+story}
 
 addFarDescriptionToNarration item game = game{narration = (game::narration)+" "+(item::farDescription)}
 
-narrateGame game = postNarration (game::narration) newGame
-	where
-		newGame = game{narration = ""}
-
 -- |addLocationNarration :: Location -> Game -> Game
 addLocationNarration location game = itemNarratedGame
 	where
@@ -583,6 +579,10 @@ moveFunc cardinal game = movePlayer cardinal (getPlayer "casiosk1" game) game
 -- IO Functions
 ---------------------------------------------------------------------------------------------------------------------
 
+narrateGame game = do
+	postNarration (game::narration) 
+	game{narration = ""}
+
 --Main Game loop
 madnessLoop game = 
 	receive
@@ -595,10 +595,10 @@ madnessLoop game =
 
 startGame message = send
 	where
-		player = Player clientName 100 "Camp"
-		game =  updatePlayer player initGame
-		actor = spawn "madnessLoop" madnessLoop [game]
-		send =
+		player 	= Player clientName 100 "Camp"
+		game 	= updatePlayer player initGame
+		actor 	= spawn "madnessLoop" madnessLoop [game]
+		send 	=
 			case message of
 				Intro 	-> [message,clientName] :>> actor
 				Start 	-> [message,clientName] :>> actor
