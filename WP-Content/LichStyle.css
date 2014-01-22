@@ -255,6 +255,12 @@ textarea::selection {
 	font-size: 75%;
 }
 
+.itemText {
+	background-color: rgba(255,255,255,25);
+	color: rgb(0,0,0);
+	font-size: 100%;
+}
+
 .nameTag {
 	background-color: transparent;
 	position: absolute;

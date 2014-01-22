@@ -110,7 +110,7 @@ function _prUpdateNarration(narrationString)
 
 	var newNarrationString = narrationString;
 	if(lastPlayerInput!=null)
-		newNarrationString =  "<p Class=playerInputText><br>&gt; " + lastPlayerInput + "</p><br>" + newNarrationString;
+		newNarrationString =  "<p Class=playerInputText>&gt; " + lastPlayerInput + "</p><br>" + newNarrationString;
 
 	if(whichPanel == 1)
 	{

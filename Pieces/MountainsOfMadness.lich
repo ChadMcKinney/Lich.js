@@ -80,7 +80,7 @@ data Game {
 
 data Cardinal = North | South | East | West | Up | Down
 
-data GameMessage = Walk | Use | Look | Start | Finish | Intro
+data GameMessage = Walk | Use | Look | Start | Finish | Intro | View
 
 north 	= North
 south 	= South
@@ -342,6 +342,8 @@ key = Item name farDescription description carryable action curse
 		action 			= openDoorWithKey
 		curse 			= Nothing
 
+hilightText text = "<span Class=itemText>" + text + "</span>"
+
 
 ------------------------------------------------------------------------------------------------
 --Items and Locations
@@ -408,27 +410,27 @@ revelation		= Trap name desc attack demen
 -- |dogCorpse 	::Item
 dogCorpse 		= Item name fDesc desc
 	where
-		name 	= "DogCorpse"
-		fDesc 	= "On the ground lays a dessicated dog corpse. It seems to have been here awhile."
+		name 	= "dog corpse"
+		fDesc 	= "On the ground lays a dessicated " + (hilightText "dog corpse")+ ". It seems to have been here awhile."
 		desc 	= "Upon closer inspection I find that it appears to have been mauled. The teeth, or claw, wounds seemed to have left a star like pattern."
 
 -- |corpse2 	::Item
 corpse 			= Item name fDesc desc
 	where
-		name 	= "Corpse"
-		fDesc 	= "The dessicated corpse of an antarctic researcher."
+		name 	= "corpse"
+		fDesc 	= "The dessicated " + (hilightText "corpse")+ " of an antarctic researcher."
 		desc 	= "It appears to have been...dissected. The brain is removed, as are several organs. The incisions appear to have been done with surgical precision."
 
 corpse2 		= Item name fDesc desc
 	where
-		name 	= "Corpse2"
-		fDesc 	= "A bloated corpse of a scientist"
+		name 	= "bloated corpse"
+		fDesc 	= "The " + (hilightText "bloated corpse")+ " of a scientist"
 		desc 	= "Several of the scientist's limbs appear to have been amputated. This was not done by a wild animal as the wounds have been cauterized."
 
 diary			= Item name fDesc desc
 	where
-		name 	= "Diary"
-		fDesc 	= "Amongst the tattered bedrolls I see a worn diary."
+		name 	= "diary"
+		fDesc 	= "Amongst the tattered bedrolls I see a worn " + (hilightText "diary") + "."
 		desc 	= "The diary contains indepth analyses of several in-field dissections conducted."
 
 camp 			= Location "Camp" n s e w u d desc fDesc items mov
@@ -442,7 +444,7 @@ camp 			= Location "Camp" n s e w u d desc fDesc items mov
 		--desc 	= "I stood amongst the ruins of my forward scout's base camp. They had gone missing. We are part of a small group of biologists exploring the reaches of Antartica. To the north, east, and west I can see three prominent mounds of snow. Given the scout's absence, this seemed ominous. "
 		desc 	= "I stand amongst the ruins of my forward scout's base camp. To the north, east, and west I can see three prominent mounds of snow. Given the scout's absence, this seems ominous. "
 		fDesc 	= "You see a white blasted, frigid looking camp."	
-		items 	= ("Diary" => diary)
+		items 	= ("diary" => diary)
 		mov 	= True
 
 mound 		= Location "Mound" n s e w u d desc fDesc items mov
@@ -455,7 +457,7 @@ mound 		= Location "Mound" n s e w u d desc fDesc items mov
 		d 		= "Nowhere"
 		desc 	= "Standing before me is a strange greenish mound in the snow. To the north are a series of mountains. To the south is the scout camp."
 		fDesc 	= "the vauge outline of a small hill of some kind in the snow."	
-		items 	= ("DogCorpse" => dogCorpse)
+		items 	= ("dog corpse" => dogCorpse)
 		mov 	= True
 
 mound2  		= Location "Mound2" n s e w u d desc fDesc items mov
@@ -468,7 +470,7 @@ mound2  		= Location "Mound2" n s e w u d desc fDesc items mov
 		d 		= "Nowhere"
 		desc 	= "I am standing above a strange redish mound in the snow. To the east is the scout camp, to the north is another of these mounds."
 		fDesc 	= "the vauge outline of a small hill of some kind in the snow."	
-		items 	= ("Corpse" => corpse)
+		items 	= ("corpse" => corpse)
 		mov 	= True
 
 mound3 			= Location "Mound3" n s e w u d desc fDesc items mov
@@ -481,14 +483,14 @@ mound3 			= Location "Mound3" n s e w u d desc fDesc items mov
 		d 		= "Nowhere"
 		desc 	= "I am standing on a strange redish mound in the snow. To the west is the scout camp, to the north is another of these mounds."
 		fDesc 	= "the vauge outline of a small hill of some kind in the snow."	
-		items 	= ("Corpse2" => corpse2)
+		items 	= ("bloated corpse" => corpse2)
 		mov 	= True
 
 mountains 	 	= Location "Mountains" n s e w u d desc fDesc items mov
 	where
 		n 		= "Nowhere"
 		s 		= "Mound"
-		e 		= "MuralsTop"
+		e 		= "Murals"
 		w 		= "Ruins"
 		u 		= "Nowhere"
 		d 		= "Nowhere"
@@ -532,9 +534,9 @@ underRuins 		= Location "UnderRuins" n s e w u d desc fDesc items mov
 
 mural 	 		= Item name fDesc desc
 	where
-		name 	= "Mural"
-		fDesc 	= "Some kind of mural."
-		desc 	= "An intricately constructed mural, made of some kind of crystalline materia. Seems almost religious or iconic in nature. Depicts a vaugely orb shaped creature with a multitude of appendages and sub-orb like structures. It appears to be swallowing something...or perhaps talking to it?"
+		name 	= "mural"
+		fDesc 	= "Some kind of " + (hilightText "mural")+ "."
+		desc 	= "An intricately constructed mural, made of some kind of crystalline material. Seems almost religious or iconic in nature. Depicts a vaugely orb shaped creature with a multitude of appendages and sub-orb like structures. It appears to be swallowing something...or perhaps talking to it?"
 
 murals 	 		= Location "Murals" n s e w u d desc fDesc items mov
 	where
@@ -546,13 +548,13 @@ murals 	 		= Location "Murals" n s e w u d desc fDesc items mov
 		d 		= "UnderMurals"
 		desc 	= "A strange room-like structure, made of an unknown metallic material, and containing several crystalline murals. A portal seems to lead deeper down."
 		fDesc 	= "There appears to be ruins of somekind, with glints of glass gleaming from them."	
-		items 	= ("Mural" => mural)
+		items 	= ("mural" => mural)
 		mov 	= True
 
 mural2  		= Item name fDesc desc
 	where
-		name 	= "Mural2"
-		fDesc 	= "Some kind of mural."
+		name 	= "mural"
+		fDesc 	= "Some kind of " + (hilightText "mural")+ "."
 		desc 	= ""
 
 underMurals 	= Location "UnderMurals" n s e w u d desc fDesc items mov
@@ -565,7 +567,7 @@ underMurals 	= Location "UnderMurals" n s e w u d desc fDesc items mov
 		d 		= "Nowhere"
 		desc 	= "The portal leads deeper into the structure. There are more murals, and though you have clearly descended several hundred feet below the surface, an impossible light still radiates from behind them."
 		fDesc 	= "It appears to be a portal leading deep underground."	
-		items 	= ("Mural2" => mural2)
+		items 	= ("mural" => mural2)
 		mov 	= True
 		--THIS SHOULD PROBABLY BE FIXED
 		--mov 	= False
@@ -587,8 +589,9 @@ narrateGame game = do
 --Main Game loop
 madnessLoop game = 
 	receive
-		[Intro,name]				-> madnessLoop . narrateGame $ addLocationNarration (getLocation ((findSomethingWithName name game)::location) game) game
-		[Start,name] 				-> madnessLoop . narrateGame $ addLocationNarration (getLocation ((findSomethingWithName name game)::location) game) game
+		[Intro,playerName]			-> madnessLoop . narrateGame $ addLocationNarration (getLocation ((findSomethingWithName playerName game)::location) game) game
+		[Start,playerName] 			-> madnessLoop . narrateGame $ addLocationNarration (getLocation ((findSomethingWithName playerName game)::location) game) game
+		[View,playerName] 			-> madnessLoop . narrateGame $ addLocationNarration (getLocation ((findSomethingWithName playerName game)::location) game) game
 		[Walk,cardinal,playerName]	-> madnessLoop . narrateGame $ movePlayer cardinal (getPlayer playerName game) game
 		[Look,itemName,playerName]	-> madnessLoop . narrateGame $ lookAtItem itemName (getPlayer playerName game) game
 		Finish						-> game
@@ -604,4 +607,12 @@ startGame message = send
 				Intro 	-> [message,clientName] :>> actor
 				Start 	-> [message,clientName] :>> actor
 				
+
 walk cardinal playerName = [Walk,cardinal,playerName] :>> "madnessLoop"
+
+at = Nothing
+look atMeansNothing itemName playerName = [Look,itemName,playerName] :>> "madnessLoop"
+
+view playerName = [View,playerName] :>> "madnessLoop"
+
+
