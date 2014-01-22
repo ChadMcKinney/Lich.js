@@ -191,17 +191,26 @@ function compileFromPlayerInput()
 				//Lich.VM.Print(res);
 				//Lich.post("JS Source> " + res);
 				
-				if(res instanceof Array)
+				try
 				{
-					for(var i = 0; i < res.length; ++i)
+					if(res instanceof Array)
 					{
-						eval(res[i]);
+						for(var i = 0; i < res.length; ++i)
+						{
+							eval(res[i]);
+						}
+					}
+
+					else
+					{
+						eval(res);
 					}
 				}
 
-				else
+				catch(e)
 				{
-					eval(res);
+					console.log(e);
+					throw e;
 				}
 			})
 
