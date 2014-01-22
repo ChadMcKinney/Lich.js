@@ -49,8 +49,3 @@ zipSpawn l r = map (\[x,y] -> spawn x [y]) $ zip l r -- Spawn an actor from a fu
 
 --| Networking
 myName = clientName
-
---| Madness, needs to be moved in the future
-
--- |narrate Game => Game
-narrate game = postNarration (game::narration) (game{narration = ""})
