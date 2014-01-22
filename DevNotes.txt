@@ -1248,3 +1248,10 @@ let whereGuard2 = y
 
 whereGuard2 1
 whereGuard2 11
+
+let fib n
+    | n == 0 = 0
+    | n == 1 = 1
+    | otherwise = fib (n - 1) + fib (n - 2)
+
+fib 8
