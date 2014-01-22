@@ -46,6 +46,14 @@ id a = a
 zipFlat l r = foldl (\acc [x,y] -> acc ++ [x,y]) [] $ zip l r -- zip then flatten two lists into one
 mapSpawn f l = map (\x -> spawn f [x]) l -- Spawn an actor, given a function, passing an argument from each item in a container
 zipSpawn l r = map (\[x,y] -> spawn x [y]) $ zip l r -- Spawn an actor from a function in l and argument in r, resulting in a list of Actors
+replicateN dimensions@(x:xs) value = foldl (\acc x -> replicate x acc) value $ reverse dimensions
+
+-- Recursive map over multidimensional list
+deepMap f list@(x:xs) = map (deepFunc) list
+	where
+		deepFunc y = case y of
+			subList@(z:zs)	-> deepMap f subList
+			_ 				-> f y 
 
 --| Networking
 myName = clientName
