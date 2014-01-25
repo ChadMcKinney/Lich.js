@@ -80,7 +80,7 @@ data Game {
 
 data Cardinal = North | South | East | West | Up | Down
 
-data GameMessage = Walk | Use | Look | Start | Finish | Intro | View
+data GameMessage = Walk | Use | Look | Start | Finish | Intro | View | Pickup | Putdown | Inventory | Talk | Status
 
 north 	= North
 south 	= South
@@ -93,38 +93,65 @@ down 	= Down
 --Game Actions
 ------------------------------------------------------------------------------------------------
 
--- |addNarration String Game => Game
+-- |addNarration String -> Game -> Game
 addNarration story game = game{narration = (game::narration)+" "+story}
 
+-- |addNarration Item -> Game -> Game
 addFarDescriptionToNarration item game = game{narration = (game::narration)+" "+(item::farDescription)}
 
--- |addLocationNarration :: Location -> Game -> Game
+-- |addLocationNarration Location -> Game -> Game
 addLocationNarration location game = itemNarratedGame
 	where
 		locationNarratedGame 	= addNarration (location::description) game
 		itemNarratedGame 		= foldr (addFarDescriptionToNarration) locationNarratedGame (location::items)
 
--- |placeItemAtLocation Item Location => Location
+addPlayerLocationNarration playerName game = addLocationNarration (getLocation ((getSomething playerName game)::location) game) game
+
+narrateStatus player game = 
+	case player of
+		Player 	-> sanityGame $ healthGame game
+		Monster -> monsterGame game
+	where
+		healthGame game
+			| (player::health) <25 	= narrateGame "I'm severely wounded and losing blood," game
+			| (player::health) <50 	= narrateGame "I'm moderately wounded," game
+			| (player::health) <75 	= narrateGame "I'm lightly wounded," game
+			| (player::health) <100 = narrateGame "I'm a bit scuffed up, but it's nothing too serious," game
+			| otherwise				= narrateGame "I'm fighting fit," game
+		sanityGame game
+			| (player::sanity) <25  = narrateGame "and HAHAHA! IA! IA! CTHULHU FHTAGN!" game
+			| (player::sanity) <50  = narrateGame "and I'm certain this must.....must be a dream. It must be...." game
+			| (player::sanity) <75  = narrateGame "and I'm questioning the things that I'm seeing." game
+			| (player::sanity) <100 = narrateGame "and I feel a little unsettled." game
+			| otherwise				= narrateGame "and feel right as rain." game
+		monsterGame game
+			| (player::health) <25 	= narrateGame "I'm severely wounded and losing blood." game
+			| (player::health) <50 	= narrateGame "I'm moderately wounded." game
+			| (player::health) <75 	= narrateGame "I'm lightly wounded." game
+			| (player::health) <100 = narrateGame "I'm a bit scuffed up, but it's nothing too serious." game
+			| otherwise				= narrateGame "I'm fighting fit." game	
+
+-- |placeItemAtLocation Item -> Location -> Location
 placeItemAtLocation item location = location {items = newItems}
 	where
 		newItems = ((item :: name) => item) : (location :: items)
 
--- |removeItemFromLocation Item Location => Location
+-- |removeItemFromLocation Item -> Location -> Location
 removeItemFromLocation item location = location{items = newItems}
 	where
 		newItems = remove (item::name) (location::items)
 
--- |giveItemToPlayer Item Player => Player
+-- |giveItemToPlayer Item -> Player -> Player
 giveItemToPlayer item player = player{items = newItems}
 	where
 		newItems = ((item::name) => item) : (player::items)
 
--- |removeItemFromPlayer Item Player => Player
+-- |removeItemFromPlayer Item -> Player -> Player
 removeItemFromPlayer item player = player{items = newItems}
 	where
 		newItems = remove (item::name) (player::items)
 
--- |updateLocation Location Game => Game
+-- |updateLocation Location -> Game -> Game
 updateLocation location game = game{locations = newLocations}
 	where
 		newLocations = ((location::name) => location) : (game::locations)
@@ -134,59 +161,79 @@ addLocations newLocations game = game{locations = combinedLocations}
 	where
 		combinedLocations = (game::locations) : newLocations
 
--- |playerLocation Player Game => Location
+-- |playerLocation Player -> Game -> Location
 playerLocation player game = (game::locations) !! (player::location)
 
--- |getLocation String     Game => Player
+-- |getLocation String -> Game -> Player
 getLocation locationName game = game::locations !! locationName
 
--- |getPlayer String     Game => Player
+-- |getPlayer String -> Game -> Player
 getPlayer playerName game = game::players !! playerName
 
--- |getMonster String     Game => Player
+-- |getMonster String -> Game -> Player
 getMonster monsterName game = game::monsters !! monsterName
 
--- |getItem ::  String -> Player -> Game -> Item
+-- |getItem  String -> Player -> Game -> Item
 getItem itemName player game = (playerLocation player game)::items !! itemName
 
---findSomethingWithName String -> Game -> Game
-findSomethingWithName name game = player ? monster ? location
+getPlayerItem itemName player game = (player)::items !! itemName
+
+--getsomething String -> Game -> (Player | Monster | Location)
+getSomething name game = player ? monster ? location
 	where
 		player 		= getPlayer name game
 		monster 	= getMonster name game
 		location 	= getLocation name game
 
--- |updatePlayer Player Game => Game
+-- |updatePlayer Player -> Game -> Game
 updatePlayer player game = game{players = newPlayers}
 	where
 		newPlayers = ((player::name) => player) : (game::players)
 
--- |updateMonster Monster Game => Game
+-- |updateMonster Monster -> Game -> Game
 updateMonster monster game = game{monsters = newMonsters}
 	where
 		newMonsters = (monster::name => monster) : (game::monsters)
 
--- |moveItemFromPlayerToLocation Item Location Player Game => Game
-moveItemFromPlayerToLocation item location player game = updatePlayer newPlayer newGame
+-- |moveItemFromPlayerToLocation Item -> Location -> Player -> Game -> Game
+moveItemFromPlayerToLocation item player game = updatePlayer newPlayer newGame
 	where
+		location 	= getLocation (player::location) game
 		newLocation = placeItemAtLocation 	item location
 		newPlayer 	= removeItemFromPlayer 	item player
 		newGame		= updateLocation newLocation game
 
--- |pickupCarryableItemFromLocation Item Location Player Game => Game
-pickupCarryableItemFromLocation item location player game = updatePlayer newPlayer newGame
+-- | pickupCarryableItemFromLocation Item -> Player -> Game -> Game
+pickupCarryableItemFromLocation item player game = updatePlayer newPlayer newGame
 	where
+		location 	= getLocation (player::location) game
 		newLocation = removeItemFromLocation item location
 		newPlayer 	= giveItemToPlayer 		 item player
 		newGame		= updateLocation newLocation game
 
--- |pickupItemFromLocation Item Location Player Game => Game
-pickupItemFromLocation item location player game = 
-	case ((player::location) == (location::name)) && item :: carryable of
-		True	-> pickupCarryableItemFromLocation item location player game
-		False	-> addNarration "I can't carray that!" game 
+-- | pickupItemFromLocation String -> Player -> Game -> Game
+pickupItemFromLocation itemName player game = newGame $ getItem itemName player game
+	where
+		newGame item
+			| item == Nothing  	= addNarration "I don't see anything to pick up with that name." game
+			| item::carryable 	= addNarration ("Ok, I now have a " + itemName) $ pickupCarryableItemFromLocation item player game  
+			| otherwise 		= addNarration "I can't carry that!" game
 
--- |locationAtCardinal Cardinal Player Game => Location
+-- | putdownItem String -> Player -> Game -> Game
+putdownItem itemName player game = newGame $ getPlayerItem itemName player game
+	where
+		newGame item
+			| item == Nothing 	= addNarration "I don't have anything with that name to put down." game
+			| otherwise			= addNarration ("Ok, I put the "+itemName+" down.") $ moveItemFromPlayerToLocation item player game
+
+-- | narrateInventory Player -> Game -> Game
+narrateInventory player game = itemNarratedGame
+	where
+		addNameToNarration item g 	= addNarration ((item::name)+"<br>") g
+		newGame						= addNarration "This is what I have: <br>" game
+		itemNarratedGame 			= foldr (addNameToNarration) newGame (player::items)
+
+-- | locationAtCardinal Cardinal -> Player -> Game -> Location
 locationAtCardinal cardinal player game = newLocation
 	where
 		oldLocation = playerLocation player game
@@ -205,13 +252,12 @@ lookAtCardinal cardinal player game = addNarration description game
 		description = (locationAtCardinal cardinal player game) :: farDescription
 
 -- |lookAtItem :: String -> Player -> Game -> Game
-lookAtItem itemName player game = newGame
+lookAtItem itemName player game = newGame (getItem itemName player game) (getPlayerItem itemName player game)
 	where
-		item = (getItem itemName player game)
-		newGame =
-			case item of
-				Item 	-> addNarration (item::description) game
-				Nothing -> addNarration "I don't see anything by that name." game
+		newGame item1 item2
+			| item1 /= Nothing 	= addNarration (item1::description) game
+			| item2 /= Nothing 	= addNarration (item2::description) game
+			| otherwise			= addNarration "I don't see anything by that name." game
 
 -- |movePlayer :: Cardinal -> Player -> Game -> Game
 movePlayer cardinal player game = 
@@ -234,14 +280,14 @@ moveMonster cardinal monster game =
 
 movePlayerOrMonster cardinal name game = newGame
 	where
-		playerOrMonster = findSomethingWithName name game
+		playerOrMonster = getSomething name game
 		newGame =
 			case playerOrMonster of
 				Monster 	-> moveMonster cardinal playerOrMonster game
 				Player 		-> movePlayer cardinal playerOrMonster game
 				Location	-> game
 	
--- |checkPlayerDeath Player Game => Game
+-- |checkPlayerDeath Player Game -> Game
 checkPlayerDeath player game = 
 	case player::health < 1 of
 		True	-> (addNarration "You died." game){gameOver = True}
@@ -265,7 +311,6 @@ updateItemInHolder item itemName holder game = newGame
 				Monster 	-> updateMonster newHolder game
 				Player	 	-> updatePlayer newHolder game
 				Location 	-> updateLocation newHolder game
-				--_ 			-> game
 
 eraseItemInHolder item holder game = newGame
 	where
@@ -275,7 +320,6 @@ eraseItemInHolder item holder game = newGame
 				Monster 	-> updateMonster newHolder game
 				Player	 	-> updatePlayer newHolder game
 				Location 	-> updateLocation newHolder game
-				--_ 			-> game
 				
 curseItem item aCurse location game = updateItemInHolder newItem (item::name) location game
 	where
@@ -288,7 +332,7 @@ useItemOnSomething playerName itemName receiverName game = (item::action) item p
 	where
 		player 		= getPlayer playerName game
 		item 		= play::items !! itemName
-		something 	= findSomethingWithName
+		something 	= getSomething
 
 --nullAction:: Item -> a -> b -> Game -> Game
 nullAction item holder receiver game = addNarration game "That has no effect."
@@ -573,46 +617,64 @@ underMurals 	= Location "UnderMurals" n s e w u d desc fDesc items mov
 		--mov 	= False
 
 gameLocations 	= ("Camp"=>camp,"Mound"=>mound,"Mound2"=>mound2,"Mound3"=>mound3,"Mountains"=>mountains,"Ruins"=>ruins,"UnderRuins"=>underRuins,"Murals"=>murals,"UnderMurals"=>underMurals,"Nowhere"=>Location)
-
 initGame 		= Game () () gameLocations
-
-moveFunc cardinal game = movePlayer cardinal (getPlayer "casiosk1" game) game
 
 ---------------------------------------------------------------------------------------------------------------------
 -- IO Functions
 ---------------------------------------------------------------------------------------------------------------------
 
-narrateGame game = do
-	postNarration (game::narration) 
-	game{narration = ""}
-
---Main Game loop
-madnessLoop game = 
-	receive
-		[Intro,playerName]			-> madnessLoop . narrateGame $ addLocationNarration (getLocation ((findSomethingWithName playerName game)::location) game) game
-		[Start,playerName] 			-> madnessLoop . narrateGame $ addLocationNarration (getLocation ((findSomethingWithName playerName game)::location) game) game
-		[View,playerName] 			-> madnessLoop . narrateGame $ addLocationNarration (getLocation ((findSomethingWithName playerName game)::location) game) game
-		[Walk,cardinal,playerName]	-> madnessLoop . narrateGame $ movePlayer cardinal (getPlayer playerName game) game
-		[Look,itemName,playerName]	-> madnessLoop . narrateGame $ lookAtItem itemName (getPlayer playerName game) game
-		Finish						-> game
-		--_							-> postNarration "Something is up" 0
-
-startGame message = send
+--
+-- Start the game
+--
+startGame message playerName = send
 	where
-		player 	= Player clientName 100 "Camp"
+		player 	= Player playerName 100 "Camp"
 		game 	= updatePlayer player initGame
 		actor 	= spawn "madnessLoop" madnessLoop [game]
 		send 	=
 			case message of
-				Intro 	-> [message,clientName] :>> actor
-				Start 	-> [message,clientName] :>> actor
-				
+				Intro 	-> [message,playerName,clientName] :>> actor
+				Start 	-> [message,playerName,clientName] :>> actor
 
-walk cardinal playerName = [Walk,cardinal,playerName] :>> "madnessLoop"
+--
+-- Controls
+--
+at 						= Nothing
+walk cardinal pName 	= [Walk,cardinal,pName,clientName] 		:>> "madnessLoop"
+look at itemName pName  = [Look,itemName,pName,clientName] 		:>> "madnessLoop"
+view pName 				= [View,pName,clientName] 				:>> "madnessLoop"
+pickup itemName pName 	= [Pickup,itemName,pName,clientName] 	:>> "madnessLoop"
+putdown itemName pName 	= [Putdown,itemName,pName,clientName] 	:>> "madnessLoop"
+inventory pName 		= [Inventory,pName,clientName] 			:>> "madnessLoop"
+talk text pName 		= [Talk,text,pName,clientName] 			:>> "madnessLoop"
+status pName 			= [Status,pName,clientName]				:>> "madnessLoop"
 
-at = Nothing
-look atMeansNothing itemName playerName = [Look,itemName,playerName] :>> "madnessLoop"
 
-view playerName = [View,playerName] :>> "madnessLoop"
+--
+-- Narration
+--
+narrateGame game = do
+	postNarration (game::narration) 
+	game{narration = ""}
 
+loop playerName myName game
+	| playerName == myName 	= madnessLoop $ narrateGame game
+	| otherwise				= madnessLoop game{narration=""}
+
+--
+-- Main Game loop
+--
+madnessLoop game = 
+	receive
+		[Intro,pName,myName]			-> loop pName myName $ addPlayerLocationNarration pName game
+		[Start,pName,myName] 			-> loop pName myName $ addPlayerLocationNarration pName game
+		[View,pName,myName] 			-> loop pName myName $ addPlayerLocationNarration pName game
+		[Walk,cardinal,pName,myName]	-> loop pName myName $ movePlayer cardinal (getPlayer pName game) game
+		[Look,itemName,pName,myName]	-> loop pName myName $ lookAtItem itemName (getPlayer pName game) game
+		[Pickup,itemName,pName,myName]	-> loop pName myName $ pickupItemFromLocation itemName (getSomething pName game) game
+		[Putdown,itemName,pName,myName]	-> loop pName myName $ putdownItem itemName (getSomething pName game) game
+		[Inventory,pName,myName]		-> loop pName myName $ narrateInventory (getSomething pName game) game
+		[Status,pName,myName]			-> loop pName myName $ narrateStatus (getSomething pName game) game
+		[Talk,text,pName,myName]		-> madnessLoop . narrateGame $ narrateStatus (getSomething pName game) game
+		Finish							-> game
 
