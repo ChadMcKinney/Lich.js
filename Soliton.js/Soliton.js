@@ -37,10 +37,15 @@ function init()
 {
 	try
 	{
+		 // NOTE: THIS RELIES ON THE MONKEYPATCH LIBRARY BEING LOADED FROM
+    	// Http://cwilso.github.io/AudioContext-MonkeyPatch/AudioContextMonkeyPatch.js
+    	// TO WORK ON CURRENT CHROME!! But this means our code can be properly
+    	// spec-compliant, and work on Chrome, Safari and Firefox.
+
 		Soliton.context = new AudioContext(); // create the webkit audio context!
-		Soliton.masterGain = Soliton.context.createGain();
-		Soliton.masterGain.connect(Soliton.context.destination);
-		Soliton.masterGain.gain.value = 0.25;
+		//Soliton.masterGain = Soliton.context.createGain();
+		//Soliton.masterGain.connect(Soliton.context.destination);
+		//Soliton.masterGain.gain.value = 0.25;
 	}
 
 	catch(e)

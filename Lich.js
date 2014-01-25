@@ -216,6 +216,42 @@ function currentLine(name)
 	};
 }
 
+function currentLineCodeMirror(cm)
+{
+	var cursor, terminal, lineLength, lineNum, start, end, textArea;
+	//terminal = document.getElementById(name);
+	//lineLength = 62;
+	//cursor = getInputSelection(terminal).end;
+	cursor = cm.getCursor();
+	textArea = cm.getValue();
+	Lich.post("Cursor = " + cursor);
+	if(!cm.somethingSelected())
+	{
+		// If the cursor is at the end of the line, push it back so we can find the entire line
+		if(textArea[cursor] == '\n' && textArea[cursor - 1] != '\n') 
+			cursor -= 1;
+			
+		for(start = cursor; start >= 0 && textArea[start] != '\n'; --start);
+		for(end = cursor; end < textArea.length && textArea[end] != '\n'; ++end);
+		
+		start += 1; // Remove the initial line break
+
+		return  {
+			line: cm.getRange({line:start,ch:0}, {line:end,ch:0}), // Return the subtring of the text area, which is the currently selected line
+			end: end
+		};
+	}
+	
+	else
+	{
+		return {
+			line: cm.getSelection()
+		}
+	}
+	
+	
+}
+
 function keyDown(thisEvent)
 {	
 	switch(thisEvent.keyCode)
@@ -310,10 +346,10 @@ function keyUp(thisEvent)
 	broadcastTyping(document.getElementById("terminal"+clientName).value);
 }
 
-function parseCurrentLine()
+function parseCurrentLine(cm)
 {
 	var tokens, objects, line,str;
-	line = currentLine("terminal"+clientName);
+	line = currentLineCodeMirror(cm);
 	str = line.line;
 	broadcastLichCode(str);
 
