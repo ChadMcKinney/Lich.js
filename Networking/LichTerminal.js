@@ -82,7 +82,9 @@ function createTextArea(name,num,total)
 
 	var mirror = CodeMirror(input, {
 		extraKeys: {
-			"Shift-Enter": parseCurrentLine
+			"Shift-Enter": parseCurrentLine,
+			"Ctrl-Enter": parseCurrentLine,
+			"Cmd-Enter": parseCurrentLine
 		}
 	});
 	mirror.mode = "haskell";
