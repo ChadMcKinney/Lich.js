@@ -1328,6 +1328,17 @@ function length(c, ret)
 			ret(container.length);
 		}
 
+		if(Lich.getType(container) == DICTIONARY)
+		{
+			var size = 0, key;
+			    
+			for (key in container) {
+			    if(container.hasOwnProperty(key) && key !== "_lichType") size++;
+			}
+
+			ret(size);
+		}
+
 		else
 		{
 			throw new Error("length can only be applied to lists. Failed with: length " + Lich.VM.PrettyPrint(container));	
