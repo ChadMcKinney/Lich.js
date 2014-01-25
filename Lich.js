@@ -227,6 +227,7 @@ function currentLineCodeMirror(cm)
 	Lich.post("Cursor = " + cursor);
 	if(!cm.somethingSelected())
 	{
+		/*
 		// If the cursor is at the end of the line, push it back so we can find the entire line
 		if(textArea[cursor] == '\n' && textArea[cursor - 1] != '\n') 
 			cursor -= 1;
@@ -234,10 +235,10 @@ function currentLineCodeMirror(cm)
 		for(start = cursor; start >= 0 && textArea[start] != '\n'; --start);
 		for(end = cursor; end < textArea.length && textArea[end] != '\n'; ++end);
 		
-		start += 1; // Remove the initial line break
+		start += 1; // Remove the initial line break*/
 
 		return  {
-			line: cm.getRange({line:start,ch:0}, {line:end,ch:0}), // Return the subtring of the text area, which is the currently selected line
+			line: cm.getLine(cursor.line),
 			end: end
 		};
 	}

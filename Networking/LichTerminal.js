@@ -87,6 +87,17 @@ function createTextArea(name,num,total)
 	});
 	mirror.mode = "haskell";
 	mirror.setSize(null, (document.documentElement.clientHeight * 0.78 * (1/total)) + "px");
+
+
+	if(name == clientName)
+	{
+		mirror.focus();
+	}
+
+	else
+	{
+		mirror.readOnly = true;
+	}
 }
 
 function removeTextArea(id)

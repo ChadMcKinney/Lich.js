@@ -132,7 +132,9 @@ function lichUsers(ret)
 	if(!(users instanceof Array))
 		throw new Error("Users isn't an array!");
 
-	ret(users);
+	console.log(users);
+	Lich.VM.PrettyPrint(users.map(function(elem){return elem.name}));
+	ret(users.map(function(elem){return elem.name}));
 }
 
 function stateSync(s,ret)

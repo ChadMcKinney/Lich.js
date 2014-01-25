@@ -73,7 +73,7 @@ function login()
   	}
 }
 
-var users = [];
+var users = new Array();
 
 function currentUsers(newUsers)
 {
@@ -101,7 +101,7 @@ function printUserString(user)
 
 function reorderUserArray(oldUsers)
 {
-	var newUsers = [];
+	var newUsers = new Array();
 	var us;
 
 	for(i=0;i<oldUsers.length;i++)

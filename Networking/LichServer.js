@@ -51,7 +51,7 @@ var User = function(name, address)
     this.address = address;
 }
 
-var users = [];
+var users = new Array();
 
 //Setup websocket code
 io.sockets.on('connection', function (socket) {
