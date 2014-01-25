@@ -124,8 +124,15 @@ function printAndReturn(l, r, ret)
 
 function lichClientName(ret)
 {
-	//var printString = Lich.VM.getVar("_R");
 	ret(clientName);
+}
+
+function lichUsers(ret)
+{
+	if(!(users instanceof Array))
+		throw new Error("Users isn't an array!");
+
+	ret(users);
 }
 
 function stateSync(s,ret)
