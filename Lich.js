@@ -347,11 +347,25 @@ function keyUp(thisEvent)
 	broadcastTyping(document.getElementById("terminal"+clientName).value);
 }
 
-function parseCurrentLine(cm)
+function parseCurrentLine(editor)
 {
 	var tokens, objects, line,str;
-	line = currentLineCodeMirror(cm);
-	str = line.line;
+	//line = currentLineCodeMirror(cm);
+	var selectionRange = editor.getSelectionRange();
+	var str = "";
+
+	if(selectionRange.isEmpty())
+	{
+		str = editor.session.getLine(editor.selection.getCursor().row);
+	}
+
+	else
+	{
+		str = editor.session.getTextRange(selectionRange);
+	}
+	
+	Lich.post("Str = " + str);
+	//str = line.line;
 	broadcastLichCode(str);
 
 	try

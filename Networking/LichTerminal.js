@@ -2,15 +2,20 @@
 // Dynamic Webpage
 ////////////////////////////////////////////////////////////////////////
 
+editors = {};
 
 function writeTextToTerminal(id,text)
 {
-	if(id!=clientName)
-		document.getElementById("terminal"+id).value = text;
+	if(id != clientName)
+	{
+		//document.getElementById("terminal"+id).value = text;
+		editors[id].setValue(text);
+	}
 }
 
 function createTextAreas()
 {
+	users = users.sort(function(a,b){return a.name != clientName});
 	for (var i=0;i<users.length;i++)
 	{ 
 		//console.log(users[i]);
@@ -27,12 +32,23 @@ function createTextArea(name,num,total)
 
 	if( input == null)
 	{
+		
 		input = document.createElement("div");
 		input.id = "terminal"+name;
 		input.style.zIndex = 10;
+		input.style.overflow = "hidden";
+		input.style.opacity = getShowingOpacity();
+		input.position = "relative";
 
 		/*
+		var subDiv = document.createElement("div");
+		subDiv.id = "terminalEditor"+name;
+		subDiv.style.opacity = getShowingOpacity();
+		input.appendChild(subDiv);*/
+
 		//Terminal text area
+
+		/*
 		input = document.createElement("textarea");
 
 		input.className = "terminal";
@@ -48,10 +64,35 @@ function createTextArea(name,num,total)
 		input.rows = 1;	
 		input.style.width = "100%";
 		
-		input.style.opacity = getShowingOpacity();
-		*/
-		div.appendChild(input);
-		
+		input.style.opacity = getShowingOpacity();*/
+		document.body.appendChild(input);
+
+		var editor = ace.edit("terminal"+name);
+		editor.setTheme("ace/theme/lich");
+		editor.getSession().setMode("ace/mode/haskell");
+		editor.renderer.setShowGutter(false);
+		editor.renderer.setShowPrintMargin(false);
+		editor.getSession().setUseWrapMode(true);
+		editor.commands.addCommand({
+		    name: 'evaluateCode',
+		    bindKey: {win: 'Ctrl-Enter', mac: 'Command-Enter'},
+		    exec: parseCurrentLine,
+		    readOnly: false // false if this command should not apply in readOnly mode
+		});
+
+		editor.commands.addCommand({
+		    name: 'evaluateCode2',
+		    bindKey: {win: 'Shift-Enter', mac: 'Shift-Enter'},
+		    exec: parseCurrentLine,
+		    readOnly: false // false if this command should not apply in readOnly mode
+		});
+
+		input = document.getElementById('terminal'+name);
+		input.style.fontSize = '1.1em';
+		input.style.overflow = "hidden";
+		//input.style.fontSize = '14px';
+		input.position = "relative";
+		editors[name] = editor;
 
 		//Terminal nameTag
 		nameTag = document.createElement("textarea");
@@ -62,44 +103,58 @@ function createTextArea(name,num,total)
 		nameTag.readOnly = true;
 		nameTag.rows = 1;	
 		nameTag.style.opacity = getShowingOpacity();
-		nameTag.style.zIndex = 0;
+		nameTag.style.zIndex = 20;
+		nameTag.style.height = "3%";
 		div.appendChild(nameTag);
 
-		if(name == clientName)
-			input.focus();
+		if(name != clientName)
+		{
+			nameTag.style.color = "#902550";
+			editor.setReadOnly(true);
+			editor.setHighlightActiveLine(false);
+		}
+
 		else
-			nameTag.style.color = "rgb(166,48,48)";
-	}
+		{
+			editor.focus();
+		}
 		
+	}
 	
 	input.style.opacity = getShowingOpacity();
-	input.style.top = (document.documentElement.clientHeight * 0.78 * (num/total)) + "px";
+	//input.style.top = (document.documentElement.clientHeight * 0.78 * (num/total)) + "px";
 	input.style.height = (document.documentElement.clientHeight * 0.78 * (1/total)) + "px";
 
-	nameTag.style.opacity = getShowingOpacity();
-	nameTag.style.top = (document.documentElement.clientHeight * 0.8 * (num/total)) + "px";
-	nameTag.style.height = (document.documentElement.clientHeight * 0.8 * (1/total)) + "px";
+	/*
+	var editor = document.getElementById('terminalEditor'+name);
+	editor.style.opacity = getShowingOpacity();
+	editor.style.top = (document.documentElement.clientHeight * 0.78 * (num/total)) + "px";
+	editor.style.height = (document.documentElement.clientHeight * 0.78 * (1/total)) + "px";*/
+	setTimeout(function(){editors[name].resize(true)}, 2100); // waits till animation is done to resize
 
-	var mirror = CodeMirror(input, {
+	/*
+	var mirror = CodeMirror.fromTextArea(input, {
 		extraKeys: {
 			"Shift-Enter": parseCurrentLine,
 			"Ctrl-Enter": parseCurrentLine,
 			"Cmd-Enter": parseCurrentLine
-		}
+		},
+		readOnly: name != clientName,
+		lineNumbers: false,
+		showCursorWhenSelecting: true,
+		autofocus: name == clientName,
+		mode: "haskell"
 	});
-	mirror.mode = "haskell";
-	mirror.setSize(null, (document.documentElement.clientHeight * 0.78 * (1/total)) + "px");
 
+	mirrors[name] = mirror;*/
 
-	if(name == clientName)
-	{
-		mirror.focus();
-	}
+	//mirrors[name].getDoc().style.top = (document.documentElement.clientHeight * 0.78 * (num/total));
+	//mirrors[name].setSize(null, (document.documentElement.clientHeight * 0.78 * (1/total)));
+	//mirrors[name].refresh();
 
-	else
-	{
-		mirror.readOnly = true;
-	}
+	nameTag.style.opacity = getShowingOpacity();
+	nameTag.style.top = (document.documentElement.clientHeight * 0.8 * (num/total)) + "px";
+	//nameTag.style.height = (document.documentElement.clientHeight * 0.8 * (1/total)) + "px";
 }
 
 function removeTextArea(id)
