@@ -5,21 +5,34 @@
 	http://chadmckinneyaudio.com/
 	seppukuzombie@gmail.com
 
-	All rights reserved.
-	
-	This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
+	LICENSE
+	=======
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	Licensed under the Simplified BSD License:
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
+	Redistribution and use in source and binary forms, with or without
+	modification, are permitted provided that the following conditions are met: 
+
+	1. Redistributions of source code must retain the above copyright notice, this
+	   list of conditions and the following disclaimer. 
+	2. Redistributions in binary form must reproduce the above copyright notice,
+	   this list of conditions and the following disclaimer in the documentation
+	   and/or other materials provided with the distribution. 
+
+	THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+	ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+	WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+	DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+	ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+	(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+	LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+	ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+	(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+	The views and conclusions contained in the software and documentation are those
+	of the authors and should not be interpreted as representing official policies, 
+	either expressed or implied, of the FreeBSD Project.
 */
 
 var Soliton = {}; // Soliton namespace
@@ -31,9 +44,9 @@ Soliton.spliceFuncBlockRatio = Soliton.blockSize / Soliton.spliceFuncBlockSize; 
 Soliton.buffers = {}; // Soliton.buffers namespace
 Soliton.nodes = new Array();
 
-window.addEventListener('load', init, false);
+//window.addEventListener('load', Soliton.init, false);
 
-function init()
+Soliton.init = function()
 {
 	try
 	{
@@ -43,9 +56,9 @@ function init()
     	// spec-compliant, and work on Chrome, Safari and Firefox.
 
 		Soliton.context = new AudioContext(); // create the webkit audio context!
-		//Soliton.masterGain = Soliton.context.createGain();
-		//Soliton.masterGain.connect(Soliton.context.destination);
-		//Soliton.masterGain.gain.value = 0.25;
+		Soliton.masterGain = Soliton.context.createGain();
+		Soliton.masterGain.connect(Soliton.context.destination);
+		Soliton.masterGain.gain.value = 0.25;
 	}
 
 	catch(e)
@@ -115,26 +128,6 @@ Soliton.printError = function(text) // You should probably redefine Soliton.prin
 Soliton.roundUp = function(inval, quant)
 {
 	return quant == 0.0 ? inval : Math.ceil(inval / quant) * quant;
-}
-
-// Play a buffer into the destination
-Soliton.playBuffer = function(buffer, destination, offset, duration)
-{
-	var source = Soliton.context.createBufferSource();
-	source.buffer = buffer;
-	source.buffer.duration = 1.0;
-	var fadeGain = Soliton.context.createGain();
-
-	if(destination == undefined)
-		destination = Soliton.masterGain;
-
-	source.connect(fadeGain);
-	fadeGain.connect(destination);
-	fadeGain.gain.value = 0.0;
-	source.start(0, offset, duration);
-	fadeGain.gain.linearRampToValueAtTime(1.0, Soliton.context.currentTime + 0.01);
-	fadeGain.gain.linearRampToValueAtTime(0.0, Soliton.context.currentTime + duration);
-	return fadeGain;
 }
 
 Soliton.createEnvelope = function(type, duration)
@@ -372,6 +365,62 @@ Soliton.oscillator = function(freq, env, type, table)
 	osc.connect(Soliton.nodes[env]);
 	osc.start(0);
 	return env;
+}
+
+Soliton.createOscillator = function(target, type, freq, table)
+{
+	var osc = Soliton.context.createOscillator();
+	osc.frequency.value = freq;
+
+	if(type == "custom")
+	{
+		osc.setPeriodicWave(Soliton.context.createPeriodicWave(table, table));
+	}
+
+	else
+	{
+		osc.type = type;
+	}
+
+	//osc.connect(Soliton.nodes[env]);
+	osc.gainNode = Soliton.context.createGain();
+	osc.gainNode.connect(target);
+	osc.gainNode.gain.value = 0;
+	osc.connect(osc.gainNode);
+	return osc;
+}
+
+Soliton.createOscillatorNode = function(type, freq, table)
+{
+	var input = null;
+	var osc = Soliton.context.createOscillator();
+
+	if(freq._lichType == AUDIO)
+	{
+		osc.frequency.value = 0;
+		input = freq;
+		freq.connect(osc.frequency)
+	}
+	
+	else
+	{
+		osc.frequency.value = freq;
+	}
+
+	if(type == "custom")
+	{
+		osc.setPeriodicWave(Soliton.context.createPeriodicWave(table, table));
+	}
+
+	else
+	{
+		osc.type = type;
+	}
+
+	osc._lichType = AUDIO;
+	osc.stopAll = function(time){ if(input != null){ input.stopAll(time); }; osc.stop(time); }
+	osc.startAll = function(time){ if(input != null){ input.startAll(time); }; osc.start(time); }
+	return osc;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -6026,4 +6075,542 @@ Soliton.spliceFX = function(lang, divider, nodeID)
 	fadeGain.gain.linearRampToValueAtTime(1.0, Soliton.context.currentTime + 0.1);
 	fadeGain.gain.linearRampToValueAtTime(0.0, Soliton.context.currentTime + 1);
 	return Soliton.addNode(oscNode);
+}
+
+Soliton.testMetrognome = function()
+{
+	return new Soliton.AudioEvent(
+		function(){ return Soliton.createOscillator(Soliton.masterGain, "triangle", 440) }, 
+		Soliton.context.currentTime, 
+		Soliton.context.currentTime + 0.1, 
+		function(currentTime)
+		{
+			//Lich.post("Metrognome nextTime = " + (Lich.scheduler.tempoSeconds));
+			return [currentTime + Lich.scheduler.tempoSeconds, currentTime + Lich.scheduler.tempoSeconds + 0.1];
+		}
+	);
+}
+
+Soliton.PercStream = function(_events, _modifiers)
+{
+	var events = _events;
+	var modifiers = _modifiers;
+
+	Lich.post("events = " + Lich.VM.PrettyPrint(events));
+	Lich.VM.Print(modifiers);
+}
+
+Soliton.SoloStream = function(_events, _modifiers)
+{
+	var events = _events;
+	var modifiers = _modifiers;
+
+	Lich.post("events = " + Lich.VM.PrettyPrint(events));
+	Lich.VM.Print(modifiers);
+}
+
+function sinOsc(freq, ret)
+{
+	ret(Soliton.createOscillatorNode("sine",freq));
+}
+
+function tri(freq, ret)
+{
+	ret(Soliton.createOscillatorNode("triangle",freq));
+}
+
+function pulse(freq, ret)
+{
+	ret(Soliton.createOscillatorNode("square",freq));
+}
+
+function saw(freq, ret)
+{
+	ret(Soliton.createOscillatorNode("sawtooth",freq));
+}
+
+function waveTable(freq, table, ret)
+{
+	ret(Soliton.createOscillatorNode("custom",freq, new Float32Array(table)));
+}
+
+function waveShape(shape, input, ret)
+{
+	var shaper = Soliton.context.createWaveShaper();
+	input.connect(shaper);
+	// Create and specify parameters for the low-pass filter.
+	shaper.curve = new Float32Array(shape);
+	shaper.startAll = input.startAll;
+	shaper.stopAll = input.stopAll;
+	shaper._lichType = AUDIO;
+	ret(shaper);
+}
+
+function gain(input1, input2, ret)
+{
+	if(input2._lichType != AUDIO)
+	{
+		if(input1._lichType == AUDIO)
+		{
+			// swap inputs if input2 isn't an audio source so that we're using .connect on an actual audio source.
+			var temp = input2;
+			input2 = input1;
+			input1 = temp;
+		}
+
+		else
+		{
+			throw new Error("gain must be used with at least one audio source.");
+		}
+	}
+
+	var gainNode = Soliton.context.createGain();
+
+	if(input1._lichType == AUDIO)
+		input1.connect(gainNode.gain);
+	else
+		gainNode.gain.value = input1;
+
+	input2.connect(gainNode);
+	
+	gainNode.startAll = function(time)
+	{ 
+		if(input1._lichType == AUDIO)
+			input1.startAll(time);
+
+		input2.startAll(time);
+	}
+
+	gainNode.stopAll = function(time)
+	{ 
+		if(input1._lichType == AUDIO)
+			input1.stopAll(time);
+
+		input2.stopAll(time);
+	}
+
+	gainNode._lichType = AUDIO;
+	ret(gainNode);
+}
+
+function delay(delayTime, feedbackLevel, input, ret)
+{
+	var ins = [delayTime, feedbackLevel, input];
+	var mix = Soliton.context.createGain();
+	var feedBack = Soliton.context.createGain();
+
+	if(feedbackLevel._lichType == AUDIO)
+		feedbackLevel.connect(feedBack.gain)
+	else
+		feedBack.gain.value = feedbackLevel;
+	
+	var delay = Soliton.context.createDelay();
+	
+	if(delayTime._lichType == AUDIO)
+		delayTime.connect(delay.delayTime);
+	else
+		delay.delayTime.value = delayTime;
+	
+	input.connect(delay);
+	input.connect(mix);
+	delay.connect(mix);
+	delay.connect(feedBack);
+	feedBack.connect(delay);
+	
+	mix.startAll = function(time)
+	{
+		ins.map(function(elem)
+		{
+			if(elem._lichType == AUDIO)
+				elem.startAll(time);
+		})
+	}
+
+	mix.stopAll = function(time)
+	{
+		ins.map(function(elem)
+		{
+			if(elem._lichType == AUDIO)
+				elem.stopAll(time);
+		})
+	}
+
+	mix._lichType = AUDIO;
+	ret(mix);
+}
+
+function mix2(input1, input2, ret)
+{
+	if(input1._lichType != AUDIO || input2._lichType != AUDIO)
+		throw new Error("mix2 can only be used with audio sources.");
+
+	var mix = Soliton.context.createGain();
+	input1.connect(mix);
+	input2.connect(mix);
+	mix.startAll = function(time){input1.startAll(time);input2.startAll(time);}
+	mix.stopAll = function(time){input1.stopAll(time);input2.stopAll(time);}
+	mix._lichType = AUDIO;
+	ret(mix);
+}
+
+ Soliton.createFilter = function(type, freq, input, q, gain)
+ {
+ 	if(input._lichType != AUDIO)
+ 		throw new Error("filters can only use audio sources as inputs.");
+
+ 	var ins = [freq, input, q, gain];
+	var filter = Soliton.context.createBiquadFilter();
+	input.connect(filter);
+	// Create and specify parameters for the low-pass filter.
+	filter.type = type; // Low-pass filter. See BiquadFilterNode docs
+
+	if(freq._lichType == AUDIO)
+		freq.connect(filter.frequency)
+	else
+		filter.frequency.value = freq;
+
+	if(q._lichType == AUDIO)
+		q.connect(filter.Q);
+	else if(typeof q === "number")
+		filter.Q.value = q;
+
+	if(gain._lichType == AUDIO)
+		gain.connect(filter.gain);
+	else if(typeof gain === "number")
+		filter.gain.value = gain;
+
+	filter.startAll = function(time)
+	{
+		ins.map(function(elem)
+		{
+			if(elem._lichType == AUDIO)
+				elem.startAll(time);
+		});
+	}
+
+	filter.stopAll = function(time)
+	{
+		ins.map(function(elem)
+		{
+			if(elem._lichType == AUDIO)
+				elem.stopAll(time);
+		});
+	}
+
+	filter._lichType = AUDIO;
+	return filter;
+ }
+
+function lowpass(freq, q, input, ret)
+{
+	ret(Soliton.createFilter("lowpass", freq, input, q, Lich.VM.Nothing));
+}
+
+function highpass(freq, q, input, ret)
+{
+	ret(Soliton.createFilter("highpass", freq, input, q, Lich.VM.Nothing));
+}
+
+function bandpass(freq, q, input, ret)
+{
+	ret(Soliton.createFilter("bandpass", freq, input, q, Lich.VM.Nothing));
+}
+
+function lowshelf(freq, boost, input, ret)
+{
+	ret(Soliton.createFilter("lowshelf", freq, input, Lich.VM.Nothing, boost));
+}
+
+function highshelf(freq, boost, input, ret)
+{
+	ret(Soliton.createFilter("highshelf", freq, input, Lich.VM.Nothing, boost));
+}
+
+function peaking(freq, q, boost, input, ret)
+{
+	ret(Soliton.createFilter("peaking", freq, input, q, boost));
+}
+
+function notch(freq, q, input, ret)
+{
+	ret(Soliton.createFilter("notch", freq, input, q, Lich.VM.Nothing));
+}
+
+function allpass(freq, q, input, ret)
+{
+	ret(Soliton.createFilter("allpass", freq, input, q, Lich.VM.Nothing));
+}
+
+// Buffer a url with an optional name for storage, callback on finish, 
+// and optional destination (for callback function)
+Soliton.bufferURL = function(name, callback)
+{
+	if(!Soliton.buffers.hasOwnProperty(name))
+	{
+		var url = "http://"
+		         + self.location.hostname
+		         + "/Samples/" + name + ".ogg";
+
+		Soliton.print("Downloading audio... " + url);
+		var request = new XMLHttpRequest();
+		request.open('GET', url, true);
+		request.responseType = 'arraybuffer';
+
+		// Decode asychronously
+		request.onload = function()
+		{
+			Soliton.context.decodeAudioData(
+				request.response, 
+				
+				function(buffer)
+				{
+					if(name != undefined)
+					 	Soliton.buffers[name] = buffer;
+
+					if(callback != undefined)
+						callback(buffer);
+				}, 
+
+				function()
+				{
+					var errorString = "Unable to load URL: ";
+					errorString = errorString.concat(url);
+					Soliton.printError(errorString);
+					throw new Error(errorString);
+				}
+			);
+		}
+
+		request.send();
+	}
+
+	else if(Soliton.buffers[name])
+	{
+		Soliton.print("Already Downloaded!");
+		if(callback != undefined)
+			callback(Soliton.buffers[name]);
+	}
+}
+
+// Play a buffer into the destination
+Soliton.playBuffer = function(buffer, rate, loopStart, loopEnd, ret)
+{
+	Lich.post("Playing Buffer!");
+	var source = Soliton.context.createBufferSource();
+	source.buffer = buffer;
+	source.loop = true;
+	source.playbackRate.value = rate;
+	source.loopStart = loopStart;
+	source.loopEnd = loopEnd;
+	
+	source.startAll = function(time)
+	{ 
+		source.start(time, loopStart)
+	}
+	
+	source.stopAll = source.stop;
+
+	source._lichType = AUDIO;
+	ret(source);
+}
+
+function playBuf(name, rate, loopStart, loopEnd, ret)
+{
+	if(typeof rate !== "number" || typeof loopStart !== "number" || typeof loopEnd !== "number")
+	{
+		throw new Error("playBuf can only be used with numbers. playBuf arguments cannot be modulated by audio unit generators");
+		Lich.post("playBuf can only be used with numbers. playBuf arguments cannot be modulated by audio unit generators");
+	}
+
+	Soliton.bufferURL(
+		name, 
+		function(buf)
+		{
+			Soliton.playBuffer(buf, rate, loopStart, loopEnd, ret)
+		}
+	);
+}
+
+function convolve(name, input, ret)
+{
+	Soliton.bufferURL(
+		name, 
+		function(buf)
+		{
+			var conv = Soliton.context.createConvolver();
+			conv.buffer = buf;
+			conv.normalize = true;
+			input.connect(conv);
+			conv.startAll = input.startAll;
+			conv.stopAll = input.stopAll;
+			conv._lichType = AUDIO;
+			ret(conv);
+		}
+	);
+}
+
+function play(synth, ret)
+{
+	if(synth._lichType !== AUDIO)
+		throw new Error("play can only be used with synth definitions.")
+
+	synth.connect(Soliton.masterGain);
+	synth.startAll(0);
+	ret(synth);
+}
+
+function stop(synth, ret)
+{
+	synth.disconnect(Soliton.masterGain);
+	synth.stopAll(0);
+	ret(Lich.VM.Void);
+}
+
+Soliton.AudioEvent = function(_nodeFunc, _startTime, _stopTime, _calcFunc)
+{
+	var nodeFunc = _nodeFunc;
+	var node = null;
+	this.startTime = _startTime;
+	var stopTime = _stopTime;
+	var calcFunc = _calcFunc;
+	var calcArray = [];
+
+	this.schedulePlay = function()
+	{
+		node = nodeFunc();
+		node.start(this.startTime);
+		node.gainNode.gain.setValueAtTime(0, this.startTime);
+		node.gainNode.gain.linearRampToValueAtTime(1, this.startTime + 0.001);
+		node.gainNode.gain.linearRampToValueAtTime(0, stopTime);
+		node.stop(stopTime);
+
+		calcArray = calcFunc(this.startTime);
+		this.startTime = calcArray[0];
+		stopTime = calcArray[1];
+
+		return this.startTime;
+	}
+}
+
+Soliton.SteadyScheduler = function()
+{
+	this.tempo = 280; // bpm
+	this.tempoSeconds = (60 / this.tempo); 
+	this.tempoMillis = this.tempoSeconds * 1000;
+	var playing = false;
+	var startTime = null;
+	var lookAhead = 25; // How frequently to call scheduling, in milliseconds
+	var scheduleAhead = 0.1; // How far ahead to actually schedule events, in seconds
+	 // We use 2 queues and a temporary variable to efficiently filter called events by swapping variables, only using push, 
+	 // and reassining currentQueue.length = 0
+	var currentQueue = [];
+	var nextQueue = [];
+	var tempQueue = null;
+	var timerID = null;
+	var requiresSchedule = 0;
+	var nextTime = 0;
+
+	this.scheduleEvent = function(event)
+	{
+		nextTime = event.schedulePlay();
+
+		// Schedule all events that fall within our requiresSchedule range.
+		while(nextTime != null)
+		{
+			if(nextTime < requiresSchedule)
+				nextTime = event.schedulePlay();
+			else
+				break;
+		}
+
+		// If nextTime still isn't null, reschedule the event for visitation in our scheduler's nextQueue
+		if(nextTime != null && typeof nextTime == "number")
+			nextQueue.push(event);
+
+	}
+
+	this.visitScheduledEvents = function()
+	{
+		// requiresSchedule ss the current time + the schedule ahead time. 
+		// This allows us to reduce jitter while still being reactive to pattern and tempo changes.
+		requiresSchedule = Soliton.context.currentTime + scheduleAhead;
+		//Lich.post("Requires schedule = " + requiresSchedule);
+		for(var i = 0; i < currentQueue.length; ++i)
+		{
+			// If the event time is within our barrier for look ahead time, then we schedule the audio event.
+			if(currentQueue[i].startTime < requiresSchedule)
+			{
+				Lich.scheduler.scheduleEvent(currentQueue[i]);
+			}
+
+			// Otherwise we push the event into the nextQueue for future evaluation.
+			else
+			{
+				nextQueue.push(currentQueue[i]);
+			}
+		}
+
+		currentQueue.length = 0; // Reassign length of the currentQueue so we can keep using push on the next visitScheduledEvents run
+		//// Here we swap the current and next queues, using a temporary variable. ////
+		tempQueue = currentQueue; // store the current Queue in a temporary variable for swapping
+		currentQueue = nextQueue; // Swap current queue with the next Queue
+		nextQueue = tempQueue; // swap the next queue with the previous current Queue, stored in the temporary variable.
+
+		// Reschedule visitScheduledEvents, keeping track of the ID for stopping/pausing.
+		timerID = setTimeout(Lich.scheduler.visitScheduledEvents, lookAhead);
+	}
+
+	this.start = function()
+	{
+		if(!playing)
+		{
+			playing = true;
+			Lich.scheduler.visitScheduledEvents();
+		}
+	}
+
+	this.pause = function()
+	{
+		if(playing)
+		{
+			playing = false;
+			clearTimeout(timerID);
+		}
+	}
+
+	this.stop = function()
+	{
+		playing = false;
+		clearTimeout(timerID);
+		currentQueue = [];
+		nextQueue = [];
+		tempQueue = null;
+		timerID = null;
+	}
+
+	this.freeScheduledEvents = function()
+	{
+		currentQueue = [];
+		nextQueue = [];
+		tempQueue = null;
+	}
+
+	this.addScheduledEvent = function(event)
+	{
+		currentQueue.push(event);
+	}
+
+	this.removeScheduledEvent = function(event)
+	{
+		var currentIndex = currentQueue.indexOf(event);
+		if(currentIndex != -1)
+			currentQueue.splice(currentIndex, currentIndex + 1);
+	}
+
+	this.setTempo = function(bpm)
+	{
+		Lich.scheduler.tempo = bpm;
+		Lich.scheduler.tempoSeconds = (60 / Lich.scheduler.tempo); 
+		Lich.scheduler.tempoMillis = Lich.scheduler.tempoSeconds * 1000;
+	}
 }

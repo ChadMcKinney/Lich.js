@@ -49,6 +49,7 @@ var LIST = 9;
 var ACTOR = 10;
 var PRIMITIVE = 11;
 var BOOLEAN = 12;
+var AUDIO = 13;
 
 function LichVoid() // Non-return value for the VM. 
 {

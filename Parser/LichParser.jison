@@ -33,6 +33,8 @@
 "<<:"                       return {val:"<<:",typ:"<<:"};
 "=>"                        return {val:"=>",typ:"=>"};
 "->"                        return {val:"->",typ:"->"};
+"+>"                        return {val:"+>",typ:"+>"};
+"~>"                        return {val:"~>",typ:"~>"};
 "=="                        return {val:"==",typ:"=="};
 "/="                        return {val:"/=",typ:"/="};
 ">="                        return {val:">=",typ:">="};
@@ -62,7 +64,7 @@
 "$"                         return {val:"$",typ:"$"};
 "&"                         return {val:"&",typ:"&"};
 ","                         return {val:",",typ:","};
-".."                         return {val:"..",typ:".."};
+".."                        return {val:"..",typ:".."};
 "."                         return {val:".",typ:"."};
 "@"                         return {val:"@",typ:"@"};   
 "|"                         return {val:"|",typ:"|"};
@@ -86,7 +88,7 @@
 "do"                        return {val:"do",typ:"do"};
 "foreign"                   return {val:"foreign",typ:"foreign"};
 "import"                    return {val:"import",typ:"import"};
-"importjs"                    return {val:"importjs",typ:"importjs"};
+"importjs"                  return {val:"importjs",typ:"importjs"};
 "infixl"                    return {val:"infixl",typ:"infixl"};
 "instance"                  return {val:"instance",typ:"instance"};
 "in"                        return {val:"in",typ:"in"};
@@ -109,12 +111,6 @@
 [[A-Z][A-Za-z0-9_]*"."]+["!""#""$""&"<"">""=""?""@""\\""|""~"]+ return {val:yytext,typ:"qvarsym"};
 [[A-Z][A-Za-z0-9_]*"."]+":"["!""#""$""&"<"">""=""?""@""\\""|""~"]+ return {val:yytext,typ:"qconsym"};
 
-/*
-qvarid = qs:(conid ".")+ ref:((!"." varid) !".") {qs = flatten(qs).join(""); return {val: flatten([qs, ref[0]]).join(""), typ: "qvarid", qual: qs.substr(0,qs.length-1)}}
-qconid = qs:(conid ".")+ ref:((!"." conid) !".") {qs = flatten(qs).join(""); return {val: flatten([qs, ref[0]]).join(""), typ: "qconid", qual: qs.substr(0,qs.length-1)}}
-qvarsym = qs:(conid ".")+ ref:(varsym !".") {qs = flatten(qs).join(""); return {val: flatten([qs, ref[0]]).join(""), typ: "qvarsym", qual: qs.substr(0,qs.length-1)}}
-qconsym = qs:(conid ".")+ ref:((!"." consym) !".") {qs = flatten(qs).join(""); return {val: flatten([qs, ref[0]]).join(""), typ: "qconsym", qual: qs.substr(0,qs.length-1)
-*/
 
 /lex
 
@@ -358,6 +354,8 @@ topexp
   | dataexp             {{$$ = $1;}}
   | letdecl             {{$$ = $1;}}
   | impdecl             {{$$ = $1;}}
+  | percStream          {{$$ = $1;}}
+  | soloStream          {{$$ = $1;}}
   ;
 
 topexps
@@ -449,12 +447,77 @@ lexp // : object
   : "if" exp "then" exp "else" exp  {{$$ = {astType:"ite",e1:$2,e2:$4,e3:$6,pos:@$}; }}
   | fexp                            {{$$ = ($1.length === 1) ? ($1[0]) : {astType:"application", exps:$1,pos:@$}; }}
   | exp "$" exp                     {{$$ = {astType:"function-application-op", lhs: $1, rhs: $3};}}
-  | '\' apats "->" exp              {{$$ = {astType:"lambda", args: $2, rhs: $4, pos: @$}; }}
+  | lambdaExp                       {{$$ = $1;}}
   | "case" exp "of" "†" alts "‡"    {{$$ = {astType:"case", exp: $2, alts: $5, pos: @$}; }}
   | "receive" "†" alts "‡"          {{$$ = {astType:"receive", alts:$3, pos:@$};}}
   | "let" decls "in" exp            {{$$ = {astType:"let", decls: $2, exp: $4, pos: @$}; }}
   | exp qop lexp                    {{$$ = {astType:"binop-exp",op:($2).id.id,lhs:$1,rhs:$3,pos:@$};}}
   | "do" "†" doList "‡"             {{$$ = {astType:"do-exp", exps: $3, pos: @$}; }}
+  ;
+
+lambdaExp
+  : '\' apats "->" exp              {{$$ = {astType:"lambda", args: $2, rhs: $4, pos: @$}; }}
+  ;
+
+///////////////
+// PercStream
+///////////////
+
+percStream
+  : varid "+>" percList               {{$$ = {astType:"percStream", id: $1, list:$3, modifiers: {astType:"percMods", list:[]} };}}
+  | varid "+>" percList "|" percMods  {{$$ = {astType:"percStream", id: $1, list:$3, modifiers: $5};}}
+  ;
+
+percList
+  : percItem                        {{$$ = {astType:"percList", list: [$1]};}}
+  | percList percItem               {{($1).list.push($2); $$ = $1;}}
+  ;
+
+percItem
+  : varid                           {{$$ = {astType:"varname", id:$1};}}
+  | "_"                             {{$$ = {astType:"Nothing"};}}
+  | "[" percList "]"                {{$$ = $2;}}
+  ;
+
+percMods
+  : percMod                 {{ $$ = {astType:"percMods", list:[$1]}; }}
+  | percMods percMod        {{ $1.list.push($2); $$ = $1;}}
+  ;
+
+percMod
+  : aexp                    {{ $$ = $1;}}
+  | "_"                     {{ $$ = {astType:"Nothing"};}}
+  ;
+
+/////////////////
+// SoloStream
+/////////////////
+
+soloStream
+  : varid "~>" varid soloList               {{$$ = {astType:"soloStream", id: $1, synth:$3, list:$4, modifiers: {astType:"soloMods", list:[]} };}}
+  | varid "~>" varid soloList "|" soloMods  {{$$ = {astType:"soloStream", id: $1, synth:$3, list:$4, modifiers: $6};}}
+  ;
+
+soloList
+  : soloItem                        {{$$ = {astType:"soloList", list: [$1]};}}
+  | soloList soloItem               {{($1).list.push($2); $$ = $1;}}
+  ;
+
+soloItem
+  : float                           {{$$ = {astType: "float-lit", value: Number($1), pos: @$};}}
+  | "-" float                       {{$$ = {astType: "float-lit", value: -Number($2), pos: @$};}}
+  | "_"                             {{$$ = {astType:"Nothing"};}}
+  | "[" soloList "]"                {{$$ = $2;}}
+  ;
+
+soloMods
+  : soloMod                 {{ $$ = {astType:"soloMods", list:[$1]}; }}
+  | soloMods soloMod        {{ $1.list.push($2); $$ = $1;}}
+  ;
+
+soloMod
+  : aexp                    {{ $$ = $1;}}
+  | "_"                     {{ $$ = {astType:"Nothing"};}}
   ;
 
 doList

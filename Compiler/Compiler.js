@@ -2,7 +2,7 @@
     Lich.js - JavaScript audio/visual live coding language
     Copyright (C) 2012 Chad McKinney
 
-	"http://chadmckinneyaudio.com/
+	http://chadmckinneyaudio.com/
 	seppukuzombie@gmail.com
 
 	LICENSE
@@ -386,206 +386,215 @@ function trampoline(result)
 // The Lich.js compiler traverse the abstract syntax tree returned by the parser and calls native JavaScript
 Lich.compileAST = function(ast, ret)
 {
-	try
+	if(ast instanceof Array)
 	{
-		if(ast instanceof Array)
-		{
-			var res = new Array();
-			for(var i = 0; i < ast.length; ++i)
-			{	
-				Lich.compileAST(ast[i], function(tempRes)
-				{
-					res.push(tempRes);
-				});
-
-				//if(i < ast.length - 1)
-				//	Lich.VM.Print(res);
-			}
-
-			//return res;
-			ret(res);
-		}
-
-		else if(ast instanceof Object)
-		{
-			/*
-			if (typeof ast === "function")
+		var res = new Array();
+		for(var i = 0; i < ast.length; ++i)
+		{	
+			Lich.compileAST(ast[i], function(tempRes)
 			{
-				Lich.post("AST FUNCTION?!: " + ast);
-				return; // Do nothing, this is a tail end function given by the parser we don't need.
-			}*/
+				res.push(tempRes);
+			});
 
-			//Lich.post("AST name: " + ast.astType);
-			//Lich.post(ast);
-
-			switch(ast.astType)
-			{
-				case "primitive":
-					return ast(ret);
-
-				case "decl-fun":
-					return Lich.compileDeclFun(ast,ret);
-
-				case "local-decl-fun":
-					return Lich.compileLocalDeclFun(ast,ret);
-					
-				case "fun-where":
-					return Lich.compileFunWhere(ast,ret);
-					
-				case "ite":
-					return Lich.compileIte(ast,ret);
-					
-				case "application":
-					return Lich.compileApplication(ast,ret);
-					
-				case "function-application-op":
-					return Lich.compileFunctionApplicationOp(ast,ret);
-
-				case "receive":
-					return Lich.compileReceive(ast,ret);
-					
-				case "function-composition":
-					return Lich.compileFunctionComposition(ast,ret);
-
-				case "function-stream":
-					return Lich.compileFunctionStream(ast,ret);
-
-				case "lambda":
-					return Lich.compileLambda(ast,ret);
-					
-				case "let":
-					return Lich.compileLet(ast,ret);
-					
-				case "let-one": // ghci style let expression for global definitions
-					return Lich.compileLetOne(ast,ret);
-					
-				case "listexp":
-					return Lich.compileListExp(ast,ret);
-					
-				case "qop":
-					return Lich.compileQop(ast,ret);
-					
-				case "conpat":
-					return Lich.compileConPat(ast,ret);
-					
-				case "wildcard":
-					ret({ _lichType: WILDCARD });
-					break;
-					
-				case "integer-lit":
-				case "char-lit":
-				case "number":
-				case "float-lit":
-				case "boolean-lit":
-				case "string-lit":
-					ret(ast.value);
-					break;
-					
-				case "varname":
-					return Lich.compileVarName(ast,ret);
-					
-				case "dacon":
-					return Lich.compileDacon(ast,ret);
-					
-				case "binop-exp":
-					return Lich.compileBinOpExp(ast,ret);
-
-				case "curried-binop-exp":
-					return Lich.compileCurriedBinOpExp(ast,ret);
-
-				case "left-curried-binop-exp":
-					return Lich.compileLeftCurriedBinOpExp(ast,ret);
-
-				case "right-curried-binop-exp":
-					return Lich.compileRightCurriedBinOpExp(ast,ret);
-					
-				case "negate":
-					return Lich.compileNegate(ast,ret);
-					
-				case "listrange":
-					return Lich.compileListRange(ast,ret);
-					
-				case "dictionary":
-					return Lich.compileDictionary(ast,ret);
-					
-				case "case":
-					return Lich.compileCase(ast,ret);
-					
-				case "Nothing":
-					ret("Lich.VM.Nothing");
-					break;
-					
-				case "list-comprehension":
-					return Lich.compileListComprehension(ast,ret);
-					
-				case "module":
-					return Lich.compileModule(ast,ret);
-					
-				case "body":
-					return Lich.compileBody(ast,ret);
-					
-				case "data-decl":
-					return Lich.compileDataDecl(ast,ret);
-					
-				case "data-inst":
-					return Lich.compileDataInst(ast,ret);
-					
-				case "data-lookup":
-					return Lich.compileDataLookup(ast,ret);
-					
-				case "data-update":
-					return Lich.compileDataUpdate(ast,ret);
-					
-				case "data-enum":
-					return Lich.compileDataEnum(ast,ret);
-					
-				case "data-match":
-					return Lich.compileDataMatch(ast,ret);
-					
-				case "topdecl-decl":
-					return Lich.compileTopdeclDecl(ast,ret);
-
-				case "class-exp":
-					return Lich.compileClassExpr(ast,ret);
-
-				case "class-decl":
-					return Lich.compileClassDecl(ast,ret);
-						
-				case "class-binop":
-					return Lich.compileClassBinOp(ast,ret);
-
-				case "top-exp":
-					return Lich.compileTopExp(ast, ret);
-
-				case "do-exp":
-					return Lich.compileDoExp(ast, ret);
-
-				case "guard-fun":
-					return Lich.compileGuardExp(ast, ret);
-
-				case "impjs":
-					return Lich.compileImportJS(ast,ret);
-
-				default:
-					return Lich.unsupportedSemantics(ast,ret);
-			}
+			//if(i < ast.length - 1)
+			//	Lich.VM.Print(res);
 		}
 
-		else if(typeof ast === "undefined")
-		{
-			ret(Lich.VM.Nothing);
-		}
+		//return res;
+		ret(res);
+	}
 
-		else
+	else if(ast instanceof Object)
+	{
+		/*
+		if (typeof ast === "function")
 		{
-			throw new Error("Unknown AST Type: " + (typeof ast));
+			Lich.post("AST FUNCTION?!: " + ast);
+			return; // Do nothing, this is a tail end function given by the parser we don't need.
+		}*/
+
+		//Lich.post("AST name: " + ast.astType);
+		//Lich.post(ast);
+
+		switch(ast.astType)
+		{
+			case "primitive":
+				return ast(ret);
+
+			case "percStream":
+				return Lich.compilePercStream(ast, ret);
+
+			case "percList":
+				return Lich.compilePercList(ast, ret);
+
+			case "percMods":
+				return Lich.compilePercMods(ast, ret);
+
+			case "soloStream":
+				return Lich.compileSoloStream(ast, ret);
+
+			case "soloList":
+				return Lich.compileSoloList(ast, ret);
+
+			case "soloMods":
+				return Lich.compileSoloMods(ast, ret);
+
+			case "decl-fun":
+				return Lich.compileDeclFun(ast,ret);
+
+			case "local-decl-fun":
+				return Lich.compileLocalDeclFun(ast,ret);
+				
+			case "fun-where":
+				return Lich.compileFunWhere(ast,ret);
+				
+			case "ite":
+				return Lich.compileIte(ast,ret);
+				
+			case "application":
+				return Lich.compileApplication(ast,ret);
+				
+			case "function-application-op":
+				return Lich.compileFunctionApplicationOp(ast,ret);
+
+			case "receive":
+				return Lich.compileReceive(ast,ret);
+				
+			case "function-composition":
+				return Lich.compileFunctionComposition(ast,ret);
+
+			case "function-stream":
+				return Lich.compileFunctionStream(ast,ret);
+
+			case "lambda":
+				return Lich.compileLambda(ast,ret);
+				
+			case "let":
+				return Lich.compileLet(ast,ret);
+				
+			case "let-one": // ghci style let expression for global definitions
+				return Lich.compileLetOne(ast,ret);
+				
+			case "listexp":
+				return Lich.compileListExp(ast,ret);
+				
+			case "qop":
+				return Lich.compileQop(ast,ret);
+				
+			case "conpat":
+				return Lich.compileConPat(ast,ret);
+				
+			case "wildcard":
+				ret({ _lichType: WILDCARD });
+				break;
+				
+			case "integer-lit":
+			case "char-lit":
+			case "number":
+			case "float-lit":
+			case "boolean-lit":
+			case "string-lit":
+				ret(ast.value);
+				break;
+				
+			case "varname":
+				return Lich.compileVarName(ast,ret);
+				
+			case "dacon":
+				return Lich.compileDacon(ast,ret);
+				
+			case "binop-exp":
+				return Lich.compileBinOpExp(ast,ret);
+
+			case "curried-binop-exp":
+				return Lich.compileCurriedBinOpExp(ast,ret);
+
+			case "left-curried-binop-exp":
+				return Lich.compileLeftCurriedBinOpExp(ast,ret);
+
+			case "right-curried-binop-exp":
+				return Lich.compileRightCurriedBinOpExp(ast,ret);
+				
+			case "negate":
+				return Lich.compileNegate(ast,ret);
+				
+			case "listrange":
+				return Lich.compileListRange(ast,ret);
+				
+			case "dictionary":
+				return Lich.compileDictionary(ast,ret);
+				
+			case "case":
+				return Lich.compileCase(ast,ret);
+				
+			case "Nothing":
+				ret("Lich.VM.Nothing");
+				break;
+				
+			case "list-comprehension":
+				return Lich.compileListComprehension(ast,ret);
+				
+			case "module":
+				return Lich.compileModule(ast,ret);
+				
+			case "body":
+				return Lich.compileBody(ast,ret);
+				
+			case "data-decl":
+				return Lich.compileDataDecl(ast,ret);
+				
+			case "data-inst":
+				return Lich.compileDataInst(ast,ret);
+				
+			case "data-lookup":
+				return Lich.compileDataLookup(ast,ret);
+				
+			case "data-update":
+				return Lich.compileDataUpdate(ast,ret);
+				
+			case "data-enum":
+				return Lich.compileDataEnum(ast,ret);
+				
+			case "data-match":
+				return Lich.compileDataMatch(ast,ret);
+				
+			case "topdecl-decl":
+				return Lich.compileTopdeclDecl(ast,ret);
+
+			case "class-exp":
+				return Lich.compileClassExpr(ast,ret);
+
+			case "class-decl":
+				return Lich.compileClassDecl(ast,ret);
+					
+			case "class-binop":
+				return Lich.compileClassBinOp(ast,ret);
+
+			case "top-exp":
+				return Lich.compileTopExp(ast, ret);
+
+			case "do-exp":
+				return Lich.compileDoExp(ast, ret);
+
+			case "guard-fun":
+				return Lich.compileGuardExp(ast, ret);
+
+			case "impjs":
+				return Lich.compileImportJS(ast,ret);
+
+			default:
+				return Lich.unsupportedSemantics(ast,ret);
 		}
 	}
 
-	catch(e)
+	else if(typeof ast === "undefined")
 	{
-		Lich.VM.clearProcedureStack();
-		throw e;
+		ret(Lich.VM.Nothing);
+	}
+
+	else
+	{
+		throw new Error("Unknown AST Type: " + (typeof ast));
 	}
 }
 
@@ -2257,4 +2266,106 @@ Lich.compileGuardExp = function(ast, ret)
 			);
 		});
 	});
+}
+
+Lich.compilePercStream = function(ast, ret)
+{
+	Lich.compileAST(ast.list, function(list)
+	{
+		Lich.compileAST(ast.modifiers, function(modifiers)
+		{
+			ret(ast.id+"=new Soliton.PercStream("+list+","+modifiers+");");
+		});
+	});
+}
+
+Lich.compilePercList = function(ast, ret)
+{
+	var res = [];
+	forEachCps(
+		ast.list,
+		function(listItem, i, next)
+		{
+			Lich.compileAST(listItem, function(listRes)
+			{
+				res.push(listRes);
+				next();
+			});
+		},
+		function()
+		{
+			ret("["+res.join(",")+"]");
+		}
+	)
+}
+
+Lich.compilePercMods = function(ast, ret)
+{
+	var res = [];
+	forEachCps(
+		ast.list,
+		function(listItem, i, next)
+		{
+			Lich.compileAST(listItem, function(listRes)
+			{
+				res.push(listRes);
+				next();
+			});
+		},
+		function()
+		{
+			ret("["+res.join(",")+"]");
+		}
+	)	
+}
+
+Lich.compileSoloStream = function(ast, ret)
+{
+	Lich.compileAST(ast.list, function(list)
+	{
+		Lich.compileAST(ast.modifiers, function(modifiers)
+		{
+			ret(ast.id+"=new Soliton.SoloStream("+list+","+modifiers+");");
+		});
+	});
+}
+
+Lich.compileSoloList = function(ast, ret)
+{
+	var res = [];
+	forEachCps(
+		ast.list,
+		function(listItem, i, next)
+		{
+			Lich.compileAST(listItem, function(listRes)
+			{
+				res.push(listRes);
+				next();
+			});
+		},
+		function()
+		{
+			ret("["+res.join(",")+"]");
+		}
+	)
+}
+
+Lich.compileSoloMods = function(ast, ret)
+{
+	var res = [];
+	forEachCps(
+		ast.list,
+		function(listItem, i, next)
+		{
+			Lich.compileAST(listItem, function(listRes)
+			{
+				res.push(listRes);
+				next();
+			});
+		},
+		function()
+		{
+			ret("["+res.join(",")+"]");
+		}
+	)	
 }

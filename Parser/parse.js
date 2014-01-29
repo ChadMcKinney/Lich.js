@@ -51,16 +51,7 @@ Lich.parse = function(input) {
     var y = Lich.Parser.preL(x);
     //Lich.post("Lich.Parser.preL(x) = " + y);
     
-    try
-    {
-      return LichParser.parse(y);  
-    }
-
-    catch(e)
-    {
-      Lich.VM.clearProcedureStack();
-      throw e;
-    }
+    return LichParser.parse(y); 
 }
 
 Lich.parseLibrary = function(input) {
@@ -109,15 +100,6 @@ Lich.parseLibrary = function(input) {
     var y = Lich.LibraryParser.preL(x);
     //Lich.post("Lich.Parser.preL(x) = " + y);
     
-    try
-    {
-      return LichLibraryParser.parse(y);  
-    }
-
-    catch(e)
-    {
-      Lich.VM.clearProcedureStack();
-      throw e;
-    }
+    return LichLibraryParser.parse(y);
 }
 

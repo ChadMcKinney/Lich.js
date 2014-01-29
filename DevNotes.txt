@@ -1255,3 +1255,106 @@ let fib n
     | otherwise = fib (n - 1) + fib (n - 2)
 
 fib 8
+
+setTempo 60
+setTempo 300
+
+let tempoSetter x = do setTempo x; sleep 0.1; tempoSetter $ random 60 1000
+tempoSetter 60
+
+
+
+{-
+    Sequencing Ideas!!!!!
+-}
+
+
+-- Percussion sequencing is similar to tidal, but _ represents a rest, space seperates identifiers. We use | like in list comprehensions, but here they're for tempo multipliers and offsets
+pattern     +> bass _
+pattern2    +> _ snare
+pattern3    +> _ hi
+pattern4    +> down down down _ down [_ _ down] | (*4)
+pattern     +> a | (*2) (\x -> 1 / x) (*3) (/4)
+
+-- We can predefine percussive patterns without assignment using lambda style syntax (+>). This will create a new pattern without autoplaying for storage.
+(+> a b c)
+(+> a b [hi hi [_ low low hi]] | (+4))
+-- Melodies use a similar scheme. Spaces separate numbers. Wild cards are rests. We use | like list comprehension but for offsets/multipliers which themselves can be sequenced with _ being default
+octoSynth ~> octopus 1 _ 2 _ 3 _ _ 4 5 _ 6 _ -1 _ 3 _ -66 -99 99 | (4-) (sqrt) _ _ _
+
+-- Lambda style melody pattern
+(~> synth1 1 2 3)
+(~> synth2 1 2 3 44 2 4 _ _ _ 1 _ (-4) 9 1 23 | (* 3) (/4) _ (+1) )
+(~> octopus 1 _ 2 _ 3 _ _ 4 5 _ 6 _ -1 _ 3 _ -66 -99 99 | (4-))
+-- We can pass any function expecting one argument, including lambdas
+(~> bass 1 _ 2 _ 3 _ _ 4 5 _ 6 _ -1 _ 3 _ -66 -99 99 | (sqrt) _ (\x -> if odd x then x + 1 else x))
+-- We can also use lists like in Perc Sequencing to get tuples
+(~> noise 1 2 [3 4 5] 1 [[1 2] 3])
+
+
+
+sine (sine 0.5)
+
+sine 0.5 >> sine >> rlpf 440
+pulse 
+
+div 2 1
+
+1 >> div 2
+
+
+
+let s = (sine 440) >> gain 0.5 >> play
+stop s
+
+
+let s = sine 3 >> gain 33 >> sine >> gain 666 >> sine >> gain 0.3 >> play
+s >> stop
+
+let s2 = sine 0.5 >> gain 66 >> sine >> gain 600 >> sine >> gain 0.3 >> play
+s2 >> stop
+
+let s3 = pulse 7 >> gain 66 >> pulse >> gain 33 >> pulse >> gain 0.2 >> play
+s3 >> stop
+
+
+let s4 = tri 2 >> gain 4 >> tri >> gain 99 >> pulse >> gain 0.2 >> play
+s4 >> stop
+
+
+let s5 = tri 66 >> gain 3 >> tri >> gain 14 >> pulse >> gain 0.3 >> play
+s5 >> stop
+
+
+let s = play (tri 440 >> gain 0.2)
+stop s
+
+
+let table = waveTable 33 (map (random 0) $ cycle 15 [(-1), 1]) >> play
+stop table
+
+let table = waveTable 33 (map (sin) [1..99]) >> play
+stop table
+
+
+-- Filters
+
+let allpasser =  (dry * 0.5) + (wet * 0.5) >> play
+    where
+        dry = (pulse 88) * ((saw 60) * 0.1)
+        wet = dry >> allpass (100) (sinOsc 0.5)
+
+stop allpasser
+
+
+
+-- Function Composition Styles for Synth Definitions
+
+let testFunc = play . sinOsc . gain 440 $ sinOsc 33
+stop testFunc
+
+let testFunc = sinOsc 33 >> gain 440 >> sinOsc >> play
+stop testFunc
+
+let testFunc = play(sinOsc (gain 440 (sinOsc 33)))
+stop testFunc

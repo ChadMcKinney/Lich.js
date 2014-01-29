@@ -398,6 +398,9 @@ function add(l, r, ret)
 	{
 		Lich.collapse(r, function(resR)
 		{
+			if(resL._lichType == AUDIO || resR._lichType == AUDIO)
+				return mix2(l,r, ret);
+
 			_checkNumStringOpError(resL, "+", resR);
 			ret(resL + resR);
 		});
@@ -438,6 +441,9 @@ function mul(l, r, ret)
 	{
 		Lich.collapse(r, function(resR)
 		{
+			if(resL._lichType == AUDIO || resR._lichType == AUDIO)
+				return gain(l,r, ret);
+
 			_checkNumOpError(resL, "*", resR);
 			ret(resL * resR);
 		});
@@ -489,6 +495,14 @@ function mod(l, r, ret)
 }
 
 _createPrimitive("%", mod);
+
+function sin(v, ret)
+{
+	Lich.collapse(v, function(value)
+	{
+		ret(Math.sin(v));
+	})
+}
 
 function _equivalent(l, r, ret)
 {
@@ -1586,6 +1600,53 @@ function replicate(_n, _i, _ret)
 	})
 }
 
+function cycle(_n, _i, _ret)
+{
+	Lich.collapse(_n, function(_number)
+	{
+		Lich.collapse(_i, function(_item)
+		{
+			if(typeof _number === "number")
+			{
+				var _res = [];
+
+				for(var i = 0; i < _number; ++i)
+				{
+					_res = _res.concat(_item);
+				}
+
+				_ret(_res);
+			}
+
+			else
+			{
+				throw new Error("replicate must be used like: replicate number value. Failed with: replicate " + Lich.VM.PrettyPrint(_number) 
+					+ " " + Lich.VM.PrettyPrint(_item));	
+			}
+		})
+	})
+}
+
+function flatten(container, ret)
+{
+	Lich.collapse(container, function(c)
+	{
+		var res = []
+		forEachCps(
+			c,
+			function(elem, i, next)
+			{
+				res = res.concat(elem);
+				next();
+			},
+			function()
+			{
+				ret(res);
+			}
+		);
+	})
+}
+
 function reverse(c, ret)
 {
 	Lich.collapse(c, function(container)
@@ -1715,6 +1776,14 @@ function randI(l, u, ret)
 }
 
 randomI = randI;
+
+function choose(list, ret)
+{
+	Lich.collapse(list, function(l)
+	{
+		ret(l[Math.round(Math.random() * (l.length - 1))]);
+	})
+}
 
 function odd(n, ret)
 {
@@ -1857,8 +1926,178 @@ function sleep(seconds, ret)
 // Constants
 pi = 3.141592653589793;
 
-/*
-Soliton.print = Lich.post; // Set Soliton.print to our Lich.post function
-Soliton.printError = Lich.post; // Set Soliton.print to our Lich.post function
-Lich.scheduler = Soliton.Clock.default.scheduler;
-*/
+function setTempo(bpm, ret)
+{
+	Lich.scheduler.setTempo(bpm);
+	ret(Lich.VM.Void);
+}
+
+// This should probably be moved out of Prelude and into a personal library file
+sampleList = new Array(
+	 "Airport",
+	 "Atmospheres",
+	 "Banya1",
+	 "Banya2",
+	 "BanyaSlap",
+	 "BassNogoro",
+	 "Bonang",
+	 "BurntUmberLogic",
+	 "Caxixi",
+	 "China",
+	 "Clap",
+	 "cluster",
+	 "Cosmic-Peel",
+	 "Crawling_Chaos",
+	 "Curtis_mix",
+	 "DanceCadaverous",
+	 "DarkGuitar",
+	 "eight_energon_cubes_SLASH_a_stone_among_stones_and_the_dead_among_the_dead",
+	 "FeldmanSQ2",
+	 "Feral_Christmas_Rooster_-_Merry_Christmas_From_the_Dragons_Lair_-_01_Santa_Claus_is_Comin_to_Town",
+	 "Feral_Christmas_Rooster_-_Merry_Christmas_From_the_Dragons_Lair_-_02_Rudolph_the_Red-nosed_Reindeer",
+	 "Feral_Christmas_Rooster_-_Merry_Christmas_From_the_Dragons_Lair_-_03_Twas_The_Night_Before_Christmas",
+	 "Feral_Christmas_Rooster_-_Merry_Christmas_From_the_Dragons_Lair_-_04_Jingle_Bell_Rock",
+	 "Feral_Christmas_Rooster_-_Merry_Christmas_From_the_Dragons_Lair_-_05_White_Christmas",
+	 "Feral_Christmas_Rooster_-_Merry_Christmas_From_the_Dragons_Lair_-_06_Silent_Night",
+	 "Feral_Christmas_Rooster_-_Merry_Christmas_From_the_Dragons_Lair_-_07_Don't_Even_Look_At_It",
+	 "Flam",
+	 "Foetid_Tunnels_ambient",
+	 "GreaterThanThree",
+	 "hallway",
+	 "HarpSoundBox",
+	 "Hip_trop",
+	 "Hydrogen_Atom_Living_with_Necromancer",
+	 "Insects_and_Plant_Monsters_demo_1",
+	 "Ionisation",
+	 "It_Came_From_The_Deep(With_Good_Chorus)",
+	 "Ketuk",
+	 "Killing_Music_(second_mix)",
+	 "Lanquidity",
+	 "Lost_To_Time",
+	 "Massacre_at_High_Noon_DEMO",
+	 "Merzcord",
+	 "Micron_Atlantis_Aurochs_Ceil_Chrysolite_Birdseed",
+	 "Military_dungeon_base",
+	 "MomentTrio",
+	 "monkdrone",
+	 "Monster",
+	 "myla_audio",
+	 "MyoBat",
+	 "Name_Randomly_Generated_Grad_Portfolio_Final",
+	 "Nano_Mi_dungeon_01",
+	 "Newspaper",
+	 "Nyogtha_-_Summoning_and_Arrival",
+	 "Octopodae_Vulgaris_(Third_Mixdown)",
+	 "Organism2",
+	 "Pranzo",
+	 "Rlyeh_Grad_Portfolio_Final",
+	 "Safezone_4",
+	 "SilverBat",
+	 "Sleep_Music_02",
+	 "SlendroLow5",
+	 "Sonnerie",
+	 "ss4",
+	 "Stochastic",
+	 "The_Sea_(second_Mixdown)_mp3",
+	 "ThitherAndYon",
+	 "Track_No08",
+	 "Turangalila",
+	 "Turtle_Shells_and_Cloud_Hopping_Beta_1",
+	 "Underground",
+	 "Ushi_Oni_vs._Karee_Koumori-_the_Demon_Attacks_normalized",
+	 "Vampire_of_the_Sun_section2(faster)",
+	 "YigSerpent",
+	 "Yog-Sothoth,_The_Key_and_The_Gate_(mp3)",
+	 "01_Dracula_II_the_Seal_of_the_Curse",
+	 "02_ia_ia",
+	 "03_Oh_Dae_Su",
+	 "04_Unicron,_Swirling,_Inifinite_Torrent_Of_Nothingness__At_The_End_Of_All_Things,_Divided_To_Create_Primus,__Progenitor_Of_The_Transformers",
+	 "05_Eternal_Hyper_Ooze_of_the_Aeons",
+	 "06_Elk_Clone",
+	 "Zither",
+	 "Aloke1",
+	"Aloke2",
+	"Aloke3",
+	"Aloke4",
+	"Aloke5",
+	"Aloke6",
+	"Aloke7",
+	"Aloke8",
+	"Aloke9",
+	"Bartok1",
+	"Bartok2",
+	"Bartok3",
+	"Bartok4",
+	"Berg1",
+	"Berg2",
+	"Berg3",
+	"Berg4",
+	"Berg5",
+	"Berg6",
+	"Berg7",
+	"Dillinger1",
+	"Dillinger2",
+	"Dillinger3",
+	"Dillinger4",
+	"Dillinger5",
+	"Dillinger6",
+	"Dillinger7",
+	"Dillinger8",
+	"Dillinger9",
+	"Dillinger10",
+	"Dillinger11",
+	"Dillinger12",
+	"Fantomas1",
+	"Fantomas2",
+	"Fantomas3",
+	"Fantomas4",
+	"Fantomas5",
+	"Fantomas6",
+	"Fantomas7",
+	"Fantomas8",
+	"Fantomas9",
+	"Fantomas10",
+	"Fantomas11",
+	"Fantomas12",
+	"Fantomas13",
+	"Fantomas14",
+	"Fantomas15",
+	"Fantomas16",
+	"Feldman1",
+	"Feldman2",
+	"Feldman3",
+	"Feldman4",
+	"Feldman5",
+	"Hella1",
+	"Hella2",
+	"Hella3",
+	"Ligoti1",
+	"Ligoti2",
+	"Ligoti3",
+	"Ligoti4",
+	"Ligoti5",
+	"Melvins1",
+	"Melvins2",
+	"Melvins3",
+	"Melvins4",
+	"Melvins5",
+	"Melvins6",
+	"MoonChild1",
+	"MoonChild2",
+	"MoonChild3",
+	"MoonChild4",
+	"MoonChild5",
+	"MoonChild6",
+	"MoonChild7",
+	"Peres1",
+	"Peres2",
+	"Peres3",
+	"Ra1",
+	"Ra2",
+	"Ra3",
+	"Varese1",
+	"Varese2",
+	"Varese3",
+	"Varese4",
+	"Varese5"
+);

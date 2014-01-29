@@ -299,7 +299,7 @@ textarea::selection {
     right: 0;
     font-family: Ubuntu Mono, DejaVu Sans Mono, Liberation Mono,Menlo,Bitstream Vera Sans Mono,Consolas,Monaco,Lucida Console,Courier New, monospace;
     overflow-x: hidden;
-
+    
     -webkit-transition: height 2s,top 2s, opacity 2s;
 			transition: height 2s,top 2s, opacity 2s;
 }

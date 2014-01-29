@@ -364,7 +364,7 @@ function parseCurrentLine(editor)
 		str = editor.session.getTextRange(selectionRange);
 	}
 	
-	Lich.post("Str = " + str);
+	//Lich.post("Str = " + str);
 	//str = line.line;
 	broadcastLichCode(str);
 
@@ -6981,4 +6981,11 @@ function compileLich()
 		Lich.post(e);
 		throw e;
 	}
+
+	Soliton.print = Lich.post; // Set Soliton.print to our Lich.post function
+	Soliton.printError = Lich.post; // Set Soliton.print to our Lich.post function
+	Soliton.init();
+	Lich.scheduler = new Soliton.SteadyScheduler();
+	Lich.scheduler.start();
+	//Lich.scheduler.addScheduledEvent(Soliton.testMetrognome());
 }

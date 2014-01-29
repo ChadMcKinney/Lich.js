@@ -38,49 +38,12 @@
 var Lich = new Object();
 
 Lich.VM = new Object();
-Lich.VM.procedureStack = new Array();
-Lich.VM.procedureStack.push(Lich.VM.main);
 Lich.VM.Nothing = new LichNothing(); // We only need one Nothing value because they're immutable and identical.
 Lich.VM.Void = new LichVoid(); // Same as Nothing, we only need one.
 Lich.VM.actorSupervisor = new ActorSupervisor();
 Lich.VM.reserved = {}; // For variables reserved by the language
 Lich.VM.currentThread = "main";
 Lich.VM.modules = [];
-
-Lich.VM.pushProcedure = function(procedure)
-{
-	Lich.VM.procedureStack.push(procedure);
-}
-
-Lich.VM.popProcedure = function()
-{
-	Lich.VM.procedureStack.pop();
-}
-
-Lich.VM.clearProcedureStack = function()
-{
-	while(Lich.VM.procedureStack.length > 1)
-		Lich.VM.popProcedure();
-}
-
-Lich.VM.getVar = function(varName) // Dynamically check scopes for a variable's value
-{
-	for(var i = Lich.VM.procedureStack.length - 1; i >= 0; --i)
-	{
-		if(Lich.VM.procedureStack[i].hasVar(varName))
-			return Lich.VM.procedureStack[i].getVar(varName);
-	}
-
-	return Lich.VM.Nothing; // Variable not found
-}
-
-Lich.VM.setVar = function(varName, value)
-{
-	if(Lich.VM.procedureStack.length > 0)
-	 	Lich.VM.procedureStack[Lich.VM.procedureStack.length - 1].setVar(varName, value);
-	else
-		throw new Error("Lich.VM.Main procedure is missing. Fatal exception. WTF THE WORLD IS ENDING!!!");
-}
 
 Lich.VM.reserveVar = function(varName, value)
 {
