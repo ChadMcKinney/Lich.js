@@ -4,6 +4,22 @@
 
 editors = {};
 
+// NEED TO MAKE IDE STYLE NEW/OPEN/SAVE functions for the text editor
+function newDocument()
+{
+	
+}
+
+function saveDocument()
+{
+
+}
+
+function openDocument()
+{
+
+}
+
 function writeTextToTerminal(id,text)
 {
 	if(id != clientName)

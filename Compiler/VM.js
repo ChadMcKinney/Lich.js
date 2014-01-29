@@ -84,6 +84,18 @@ Lich.VM.printDictionary = function(object)
 		return string + ")";
 }
 
+Lich.VM.printSynthDef = function(object)
+{
+	var string = "SynthDef (" + object._datatype;
+
+	for(var i = 0; i < object._argNames.length; ++i)
+	{
+		string = string + " " + object._argNames[i];
+	}
+
+	return string + ")";
+}
+
 Lich.VM.printData = function(object)
 {
 	var string = object._datatype + " { ";
@@ -194,6 +206,8 @@ Lich.VM.PrettyPrint = function(object)
 	//Lich.post(Lich.VM.printData(object));
 	if(object == null || typeof object === "undefined")
 		return "Nothing"; // undefined == Nothing
+	else if(object._lichType == SYNTHDEF)
+		return Lich.VM.printSynthDef(object);
 	else if(object._lichType == DATA)
 		return Lich.VM.printData(object);
 	else if(typeof object === "string")

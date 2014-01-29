@@ -228,6 +228,7 @@ topdecl // : object
     : decl                    {{$$ = {astType: "topdecl-decl", decl: $1, pos: @$};}}
     | impdecl                       {{$$ = $1;}}
     | dataexp                       {{$$ = $1;}}
+    | synthDef                      {{$$ = $1;}}
     ;
 
 
@@ -356,6 +357,7 @@ topexp
   | impdecl             {{$$ = $1;}}
   | percStream          {{$$ = $1;}}
   | soloStream          {{$$ = $1;}}
+  | synthDef            {{$$ = $1;}}
   ;
 
 topexps
@@ -431,9 +433,6 @@ binop
   | "++"        {{$$ = $1;}}
   | "&&"        {{$$ = $1;}}
   | "||"        {{$$ = $1;}}
-  //| ">>="       {{$$ = $1;}}
-  //| ">>"        {{$$ = $1;}}
-  //| "=<<"       {{$$ = $1;}}
   | "<<"        {{$$ = $1;}}
   | "?"         {{$$ = $1;}}
   | ":>>"       {{$$ = $1;}}
@@ -457,6 +456,25 @@ lexp // : object
 
 lambdaExp
   : '\' apats "->" exp              {{$$ = {astType:"lambda", args: $2, rhs: $4, pos: @$}; }}
+  ;
+
+/////////////////////
+// SynthDefinitions
+/////////////////////
+
+synthDef
+  : conid synthRhs            {{ $$ = {astType:"synthdef", id:$1, args:[], rhs:$2};}}
+  | conid synthArgs synthRhs  {{ $$ = {astType:"synthdef", id:$1, args:$2, rhs:$3};}}
+  ;
+
+synthArgs
+  : varid                     {{$$ = [{astType:"decl-fun", ident: {astType:"varname", id:$1}, args: [], rhs:{astType:"float-lit",value:0}, pos: @$}];}}
+  | synthArgs varid           {{$1.push({astType:"decl-fun", ident: {astType:"varname", id:$2}, args: [], rhs:{astType:"float-lit",value:0}, pos: @$}); $$ = $1;}}
+  ;
+
+synthRhs
+  : "=>" exp                 {{$$ = {astType: "fun-where", exp: $2, decls: [], pos: @$}; }}
+  | "=>" exp "where" decls   {{$$ = {astType: "fun-where", exp: $2, decls: $4, pos: @$}; }}
   ;
 
 ///////////////
@@ -632,7 +650,7 @@ dictexp_1_comma
   ;
 
 dictpair
-  : exp "=>" exp               {{$$ = [$1,$3];}}
+  : exp "=" exp               {{$$ = [$1,$3];}}
   ;
 
 

@@ -337,6 +337,7 @@ Soliton.waveShape = function(nodeID, curve)
 		source.disconnect(0);
 		// Create the filter
 		var shape = Soliton.context.createWaveShaper();
+		shape.oversample = "4x";
 		source.connect(shape);
 		shape.connect(Soliton.masterGain);		
 		// Create and specify parameters for the low-pass filter.
@@ -6241,8 +6242,24 @@ function delay(delayTime, feedbackLevel, input, ret)
 
 function mix2(input1, input2, ret)
 {
-	if(input1._lichType != AUDIO || input2._lichType != AUDIO)
-		throw new Error("mix2 can only be used with audio sources.");
+	//if(input1._lichType != AUDIO || input2._lichType != AUDIO)
+	//	throw new Error("mix2 can only be used with audio sources.");
+
+	if(typeof input1 === "number")
+	{
+		dc(input1, function(dc1)
+		{
+			input1 = dc1;
+		});
+	}
+
+	if(typeof input2 === "number")
+	{
+		dc(input2, function(dc2)
+		{
+			input2 = dc2;
+		});
+	}
 
 	var mix = Soliton.context.createGain();
 	input1.connect(mix);
@@ -6251,6 +6268,56 @@ function mix2(input1, input2, ret)
 	mix.stopAll = function(time){input1.stopAll(time);input2.stopAll(time);}
 	mix._lichType = AUDIO;
 	ret(mix);
+}
+
+function range(low, high, input,ret)
+{
+	if(typeof low !== "number" || typeof high !== "number")
+		throw new Error("range low and high values can only be numbers. It is not modulatable.");
+
+	if(input._lichType != AUDIO)
+		throw new Error("range can only be used with audio ugens.");
+
+	var mulVal = (high - low) * 0.5;
+	var addVal = mulVal + low;
+
+	gain(mulVal,input,function(mulRes)
+	{
+		mix2(addVal,mulRes, ret);
+	})
+}
+
+Soliton.linexpUGen = function(inMin, inMax, outMin, outMax)
+{
+	var outRatio = outMax / outMin;
+	var inRatio = 1 / (inMax - inMin);
+	var minusLow = inRatio * -inMin;
+
+	return function(event)
+	{
+		var inputArrayL = event.inputBuffer.getChannelData(0);
+		var inputArrayR = event.inputBuffer.getChannelData(1);
+		var outputArrayL = event.outputBuffer.getChannelData(0);
+		var outputArrayR = event.outputBuffer.getChannelData(1);
+
+		for(var i = 0; i < 1024; ++i)
+		{
+			outputArrayL[i] = outMin * Math.pow(outRatio, inputArrayL[i] * inRatio + minusLow);
+			outputArrayR[i] = outMin * Math.pow(outRatio, inputArrayR[i] * inRatio + minusLow);
+		}
+	}
+}
+
+function exprange(low, high, input, ret)
+{
+	//this.linexp(-1, 1, lo, hi, nil)
+	var rangeFunc = Soliton.context.createScriptProcessor(1024, 2, 2);
+	rangeFunc.onaudioprocess = Soliton.linexpUGen(-1, 1, low, high);
+	rangeFunc.startAll = input.startAll;
+	rangeFunc.stopAll = input.stopAll;
+	rangeFunc._lichType = AUDIO;
+	input.connect(rangeFunc);
+	ret(rangeFunc);
 }
 
  Soliton.createFilter = function(type, freq, input, q, gain)
@@ -6449,14 +6516,70 @@ function convolve(name, input, ret)
 	);
 }
 
+function dc(value, ret)
+{
+	var dcFunc = Soliton.context.createScriptProcessor(1024, 0, 2);
+	dcFunc.value = value;
+
+	dcFunc.onaudioprocess = function(event)
+	{
+		var outputArrayL = event.outputBuffer.getChannelData(0);
+		var outputArrayR = event.outputBuffer.getChannelData(1);
+		var val = this.value;
+
+		for(var i = 0; i < 1024; ++i)
+		{
+			outputArrayL[i] = val;
+			outputArrayR[i] = val;
+		}
+	}
+
+	dcFunc.startAll = function(time){};
+	dcFunc.stopAll = function(time){};
+	dcFunc._lichType = AUDIO;
+	ret(dcFunc);
+}
+
+function set(value, input, ret)
+{
+	if(input._lichType != AUDIO || typeof value !== "number")
+		throw new Error("set can only be used on Synth control inputs with floats as values.");
+
+	input.setPeriodicWave(new Float32Array([value]), new Float32Array([0]));
+	ret(input);
+}
+
+function main(input, ret)
+{
+	input.connect(Soliton.masterGain);
+	ret(input);
+}
+
 function play(synth, ret)
 {
-	if(synth._lichType !== AUDIO)
-		throw new Error("play can only be used with synth definitions.")
+	Lich.VM.Print(synth);
 
-	synth.connect(Soliton.masterGain);
-	synth.startAll(0);
-	ret(synth);
+	if(synth._lichType != AUDIO && synth._lichType != SYNTHDEF)
+		throw new Error("play can only be used with synth definitions and audio functions.");
+
+	if(synth._lichType == AUDIO)
+	{
+		synth.connect(Soliton.masterGain);
+		synth.startAll(0);
+		ret(synth);
+	}
+
+	else
+	{		
+		Lich.collapse(synth._audioFunc, function(audioRes)
+		{
+			if(audioRes._lichType != AUDIO)
+				throw new Error("play can only be used with synth definitions and audio functions.");
+			
+			audioRes.startAll(0);
+			ret(audioRes);
+		});
+	}
 }
 
 function stop(synth, ret)

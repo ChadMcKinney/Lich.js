@@ -1382,3 +1382,11 @@ stop filterer
 
 let filterer = pulse 33 >> peaking 3333 16 30 >> gain 0.3 >> play
 stop filterer
+
+
+-- range and exprange work!
+let filterer = pulse 5 >> lowpass ((tri 1 >> range 1 100) * (sinOsc 0.1 >> range 1 100)) 3 >> play
+stop filterer
+
+let filterer2 = pulse 13 >> lowpass ((saw 3 >> exprange 1 100) * (sinOsc 0.3 >> exprange 1 100)) 3 >> play
+stop filterer2

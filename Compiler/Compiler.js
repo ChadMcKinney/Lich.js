@@ -579,6 +579,9 @@ Lich.compileAST = function(ast, ret)
 			case "guard-fun":
 				return Lich.compileGuardExp(ast, ret);
 
+			case "synthdef":
+				return Lich.compileSynthDef(ast,ret);
+
 			case "impjs":
 				return Lich.compileImportJS(ast,ret);
 
@@ -2368,4 +2371,36 @@ Lich.compileSoloMods = function(ast, ret)
 			ret("["+res.join(",")+"]");
 		}
 	)	
+}
+
+Lich.compileSynthDef = function(ast,ret)
+{
+	var argNames = [];
+	var initialData = [];
+	mapCps(
+		ast.args,
+		function(elem,i,callback)
+		{
+			Lich.compileAST(elem.rhs, function(rhsRes)
+			{
+				argNames.push("\""+elem.ident.id+"\"");
+				callback(elem.ident.id+":"+rhsRes);
+			});
+		},
+		function(dataPairs)
+		{
+			ast.rhs.decls = ast.rhs.decls.concat(ast.args);
+
+			Lich.compileAST(ast.rhs, function(rhs)
+			{
+				//ret(ast.id+"={_lichType:SYNTHDEF,id:\""+ast.id+"\", _audioFunc:"+rhs+"};");
+				initialData.push("_lichType:SYNTHDEF");
+				initialData.push("_datatype:\""+ast.id+"\"");
+				initialData.push("_argNames:["+argNames.join(",")+"]");
+				initialData.push("_audioFunc:"+rhs);
+				ret(ast.id+"={"+initialData.concat(dataPairs).join(",")+"}");
+
+			});
+		}
+	);
 }

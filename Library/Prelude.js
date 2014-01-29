@@ -504,6 +504,47 @@ function sin(v, ret)
 	})
 }
 
+function linlin(value, inMin, inMax, outMin, outMax, ret)
+{
+    if(value <= inMin)
+		ret(outMin);
+	else if(value >= inMax)
+		ret(outMax);
+    else
+        ret(((value - inMin) / (inMax - inMin)) * (outMax - outMin) + outMin);
+}
+
+function explin(value, inMin, inMax, outMin, outMax, ret)
+{
+    if(value <= inMin)
+		ret(outMin);
+	else if(value >= inMax)
+		ret(outMax);
+    else
+        ret((Math.log(value / inMin) / Math.log(inMax / inMin)) * (outMax - outMin) + outMin);
+}
+
+function expexp(value, inMin, inMax, outMin, outMax, ret)
+{
+    if(value <= inMin)
+		ret(outMin);
+	else if(value >= inMax)
+		ret(outMax);
+    else
+        ret(Math.pow(outMax/outMin, Math.log(value/inMin) / Math.log(inMax/inMin)) * outMin);
+}
+
+// Map a number from a linear range to an exponential range
+function linexp(val, inMin, inMax, outMin, outMax, ret)
+{
+	if(val <= inMin)
+		ret(outMin);
+	else if(val >= inMax)
+		ret(outMax);
+	else
+		ret(Math.pow(outMax / outMin, (val - inMin) / (inMax - inMin)) * outMin);
+}
+
 function _equivalent(l, r, ret)
 {
 	Lich.collapse(l, function(resL)
