@@ -1292,21 +1292,8 @@ octoSynth ~> octopus 1 _ 2 _ 3 _ _ 4 5 _ 6 _ -1 _ 3 _ -66 -99 99 | (4-) (sqrt) _
 (~> noise 1 2 [3 4 5] 1 [[1 2] 3])
 
 
-
-sine (sine 0.5)
-
-sine 0.5 >> sine >> rlpf 440
-pulse 
-
-div 2 1
-
-1 >> div 2
-
-
-
 let s = (sine 440) >> gain 0.5 >> play
 stop s
-
 
 let s = sine 3 >> gain 33 >> sine >> gain 666 >> sine >> gain 0.3 >> play
 s >> stop
@@ -1358,3 +1345,40 @@ stop testFunc
 
 let testFunc = play(sinOsc (gain 440 (sinOsc 33)))
 stop testFunc
+
+
+let p = (playBuf (choose sampleList) 2 0 2) >> play
+stop p
+
+let convolver = pulse 2 >> convolve "cluster" >> play
+stop convolver
+
+let filterer = pulse 80 >> lowpass 666 20 >> gain 0.3 >> play
+stop filterer
+
+let filterer = pulse 80 >> highpass 666 20 >> gain 0.3 >> play
+stop filterer
+
+let filterer = pulse 80 >> bandpass 666 20 >> gain 0.3 >> play
+stop filterer
+
+let filterer = pulse 80 >> notch 666 20 >> gain 0.3 >> play
+stop filterer
+
+let filterer = pulse 80 >> lowpass 666 20 >> gain 0.3 >> play
+stop filterer
+
+let filterer = pulse 80 >> highpass 666 20 >> gain 0.3 >> play
+stop filterer
+
+let filterer = pulse 80 >> bandpass 666 20 >> gain 0.3 >> play
+stop filterer
+
+let filterer = pulse 33 >> lowshelf 33 16 >> gain 0.3 >> play
+stop filterer
+
+let filterer = pulse 33 >> highshelf 3333 16 >> gain 0.3 >> play
+stop filterer
+
+let filterer = pulse 33 >> peaking 3333 16 30 >> gain 0.3 >> play
+stop filterer
