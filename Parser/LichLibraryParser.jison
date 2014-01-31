@@ -493,6 +493,7 @@ percList
 
 percItem
   : varid                           {{$$ = {astType:"varname", id:$1};}}
+  | conid                           {{$$ = {astType:"varname", id:$1};}}
   | "_"                             {{$$ = {astType:"Nothing"};}}
   | "[" percList "]"                {{$$ = $2;}}
   ;
@@ -743,7 +744,7 @@ qual
 
 funcstream
   : exp ">>" exp           {{$$ = {astType:"function-stream", exps:[$1,$3]};}}
-  | exp ">>" funcstream    {{($3.exps = [$1].concat($3.exps)); $$ = $3;}}
+  | funcstream ">>" exp    {{$1.exps.push($3); $$ = $1;}}
   ;
 
 funccomp

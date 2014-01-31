@@ -1301,15 +1301,15 @@ s >> stop
 let s2 = sine 0.5 >> gain 66 >> sine >> gain 600 >> sine >> gain 0.3 >> play
 s2 >> stop
 
-let s3 = pulse 7 >> gain 66 >> pulse >> gain 33 >> pulse >> gain 0.2 >> play
+let s3 = square 7 >> gain 66 >> square >> gain 33 >> square >> gain 0.2 >> play
 s3 >> stop
 
 
-let s4 = tri 2 >> gain 4 >> tri >> gain 99 >> pulse >> gain 0.2 >> play
+let s4 = tri 2 >> gain 4 >> tri >> gain 99 >> square >> gain 0.2 >> play
 s4 >> stop
 
 
-let s5 = tri 66 >> gain 3 >> tri >> gain 14 >> pulse >> gain 0.3 >> play
+let s5 = tri 66 >> gain 3 >> tri >> gain 14 >> square >> gain 0.3 >> play
 s5 >> stop
 
 
@@ -1328,7 +1328,7 @@ stop table
 
 let allpasser =  (dry * 0.5) + (wet * 0.5) >> play
     where
-        dry = (pulse 88) * ((saw 60) * 0.1)
+        dry = (square 88) * ((saw 60) * 0.1)
         wet = dry >> allpass (100) (sinOsc 0.5)
 
 stop allpasser
@@ -1350,43 +1350,73 @@ stop testFunc
 let p = (playBuf (choose sampleList) 2 0 2) >> play
 stop p
 
-let convolver = pulse 2 >> convolve "cluster" >> play
+let convolver = square 2 >> convolve "cluster" >> play
 stop convolver
 
-let filterer = pulse 80 >> lowpass 666 20 >> gain 0.3 >> play
+let filterer = square 80 >> lowpass 666 20 >> gain 0.3 >> play
 stop filterer
 
-let filterer = pulse 80 >> highpass 666 20 >> gain 0.3 >> play
+let filterer = square 80 >> highpass 666 20 >> gain 0.3 >> play
 stop filterer
 
-let filterer = pulse 80 >> bandpass 666 20 >> gain 0.3 >> play
+let filterer = square 80 >> bandpass 666 20 >> gain 0.3 >> play
 stop filterer
 
-let filterer = pulse 80 >> notch 666 20 >> gain 0.3 >> play
+let filterer = square 80 >> notch 666 20 >> gain 0.3 >> play
 stop filterer
 
-let filterer = pulse 80 >> lowpass 666 20 >> gain 0.3 >> play
+let filterer = square 80 >> lowpass 666 20 >> gain 0.3 >> play
 stop filterer
 
-let filterer = pulse 80 >> highpass 666 20 >> gain 0.3 >> play
+let filterer = square 80 >> highpass 666 20 >> gain 0.3 >> play
 stop filterer
 
-let filterer = pulse 80 >> bandpass 666 20 >> gain 0.3 >> play
+let filterer = square 80 >> bandpass 666 20 >> gain 0.3 >> play
 stop filterer
 
-let filterer = pulse 33 >> lowshelf 33 16 >> gain 0.3 >> play
+let filterer = square 33 >> lowshelf 33 16 >> gain 0.3 >> play
 stop filterer
 
-let filterer = pulse 33 >> highshelf 3333 16 >> gain 0.3 >> play
+let filterer = square 33 >> highshelf 3333 16 >> gain 0.3 >> play
 stop filterer
 
-let filterer = pulse 33 >> peaking 3333 16 30 >> gain 0.3 >> play
+let filterer = square 33 >> peaking 3333 16 30 >> gain 0.3 >> play
 stop filterer
 
 
 -- range and exprange work!
-let filterer = pulse 5 >> lowpass ((tri 1 >> range 1 100) * (sinOsc 0.1 >> range 1 100)) 3 >> play
+let filterer = square 5 >> lowpass ((tri 1 >> range 1 100) * (sinOsc 0.1 >> range 1 100)) 3 >> play
 stop filterer
 
-let filterer2 = pulse 13 >> lowpass ((saw 3 >> exprange 1 100) * (sinOsc 0.3 >> exprange 1 100)) 3 >> play
+let filterer2 = square 13 >> lowpass ((saw 3 >> exprange 1 100) * (sinOsc 0.3 >> exprange 1 100)) (sinOsc 0.2 >> range 0.1 10) >> play
 stop filterer2
+
+
+let glitter = (sinOsc (sinOsc 0.3 >> exprange 1 66)) * (sinOsc 666) * (sinOsc 3) >> delay (1/13) 0.9 >> gain 0.1 >> play
+
+let glitter2 = (sinOsc (sinOsc 0.2 >> exprange 1 33)) * (sinOsc (999)) * (sinOsc 3) >> delay (4/13) 0.9 >> gain 0.1 >> play
+
+let glitter3 = (sinOsc (sinOsc 0.5 >> exprange 1 66)) * (sinOsc (666*2)) * (sinOsc 2) >> delay (3/13) 0.5 >> gain 0.1 >> play
+
+let glitter4 = (sinOsc (sinOsc 0.1 >> exprange 1 33)) * (sinOsc (333*5)) * (sinOsc 6.5) >> delay (1/13) 0.9 >> gain 0.1 >> play
+
+
+let guitar = (saw 80) * (square 3) >> lowpass (sinOsc 0.1 >> exprange 20 20000) 10 >> delay (1/3) 0.9 >> gain 0.3 >> play
+stop guitar
+
+
+
+Kick => square 80 >> perc 0.0 0.7 0.05
+kicker +> Kick
+
+Snare => square (80 * 16) >> perc 0.0 0.7 0.05
+snarer +> _ Snare
+
+HiHate => tri (mul 80 $ randomI 1 32) >> perc 0.0 0.4 0.05
+hater +> _ HiHate _ _ _
+hater2 +> _ _ HiHate _ _ _
+hater2 +> _ HiHate _ _ _ _ _
+hater3 +> HiHate _ _
+hater4 +> HiHate _ _ _ _ _ _ _ _
+
+setTempo 500

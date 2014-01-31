@@ -206,7 +206,7 @@ Lich.VM.PrettyPrint = function(object)
 	//Lich.post(Lich.VM.printData(object));
 	if(object == null || typeof object === "undefined")
 		return "Nothing"; // undefined == Nothing
-	else if(object._lichType == SYNTHDEF)
+	else if(object._lichType == SYNTH)
 		return Lich.VM.printSynthDef(object);
 	else if(object._lichType == DATA)
 		return Lich.VM.printData(object);

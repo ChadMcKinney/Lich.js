@@ -415,6 +415,9 @@ function minus(l, r, ret)
 	{
 		Lich.collapse(r, function(resR)
 		{
+			if(resL._lichType == AUDIO || resR._lichType == AUDIO)
+				return _subtractMix(l,r, ret);
+			
 			_checkNumOpError(resL, "-", resR);
 			ret(resL - resR);
 		});
@@ -458,6 +461,9 @@ function div(l, r, ret)
 	{
 		Lich.collapse(r, function(resR)
 		{
+			if(resL._lichType == AUDIO || resR._lichType == AUDIO)
+				return _audioDivision(l,r, ret);
+
 			_checkNumOpError(resL, "/", resR);
 			ret(resL / resR);
 		});

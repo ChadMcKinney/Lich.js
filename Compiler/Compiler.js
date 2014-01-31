@@ -1553,7 +1553,8 @@ Lich.compileDataInst = function(ast,ret)
 		},
 		function(members)
 		{
-			ret("(function(_ret){Lich.newData("+ast.id+",["+members.join(",")+"],_ret)})");
+			//ret("(function(_ret){Lich.newData("+ast.id+",["+members.join(",")+"],_ret)})");
+			ret(ast.id+".curry("+members.join(",")+")");
 		}
 	);
 }
@@ -2277,7 +2278,7 @@ Lich.compilePercStream = function(ast, ret)
 	{
 		Lich.compileAST(ast.modifiers, function(modifiers)
 		{
-			ret(ast.id+"=new Soliton.PercStream("+list+","+modifiers+");");
+			ret(ast.id+"=new Soliton.PercStream("+list+","+modifiers+");Lich.scheduler.addScheduledEvent("+ast.id+");");
 		});
 	});
 }
@@ -2375,31 +2376,33 @@ Lich.compileSoloMods = function(ast, ret)
 
 Lich.compileSynthDef = function(ast,ret)
 {
+	var args = []
 	var argNames = [];
+	var argControls = [];
 	var initialData = [];
-	mapCps(
+	var dataPairs = [];
+	forEachCps(
 		ast.args,
-		function(elem,i,callback)
+		function(elem,i,next)
 		{
-			Lich.compileAST(elem.rhs, function(rhsRes)
-			{
-				argNames.push("\""+elem.ident.id+"\"");
-				callback(elem.ident.id+":"+rhsRes);
-			});
+			argNames.push("\""+elem.ident.id+"\"");
+			args.push(elem.ident.id);
+			//argControls.push("dc("+elem.ident.id+",function(res){"+elem.ident.id+"=res})");
+			dataPairs.push(elem.ident.id+":"+elem.ident.id);
+			next();
 		},
-		function(dataPairs)
+		function()
 		{
-			ast.rhs.decls = ast.rhs.decls.concat(ast.args);
-
 			Lich.compileAST(ast.rhs, function(rhs)
 			{
-				//ret(ast.id+"={_lichType:SYNTHDEF,id:\""+ast.id+"\", _audioFunc:"+rhs+"};");
-				initialData.push("_lichType:SYNTHDEF");
+				initialData.push("_lichType:SYNTH");
 				initialData.push("_datatype:\""+ast.id+"\"");
 				initialData.push("_argNames:["+argNames.join(",")+"]");
-				initialData.push("_audioFunc:"+rhs);
-				ret(ast.id+"={"+initialData.concat(dataPairs).join(",")+"}");
-
+				initialData.push("_audioFunc:_rhsRes");
+				var def = ast.id+"=function ("+args.concat("_sRet").join(",")+"){"
+				def = def + argControls.join(";")+";var _rhsRes="+rhs+";Lich.collapse(_rhsRes,function(res){_rhsRes=res});";
+				def = def + "_sRet({"+initialData.concat(dataPairs).join(",")+"})};";
+				ret(def);
 			});
 		}
 	);

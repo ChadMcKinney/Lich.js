@@ -103,6 +103,13 @@ function createTextArea(name,num,total)
 		    readOnly: false // false if this command should not apply in readOnly mode
 		});
 
+		editor.commands.addCommand({
+			name: "killall",
+			bindKey: {win: 'Ctrl-.', mac: "Command-."},
+			exec: killall,
+			readOnly: false
+		})
+
 		input = document.getElementById('terminal'+name);
 		input.style.fontSize = '1.1em';
 		input.style.overflow = "hidden";
