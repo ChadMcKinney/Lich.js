@@ -6647,6 +6647,11 @@ function perc(attack, peak, decay, input, ret)
 	if(typeof attack !== "number" || typeof peak !== "number" || typeof decay !== "number")
 		throw new Error("perc can only use numbers for attack, peak, and decay arguments.");
 
+	if(typeof input == "number")
+	{
+		dc(input, function(inRes){input = inRes});
+	}
+
 	var percGain = Soliton.context.createGain();
 	input.connect(percGain);
 	
@@ -6751,35 +6756,71 @@ Soliton.PercStream = function(_events, _modifiers)
 	this.nextTime = Math.floor((Soliton.context.currentTime / Lich.scheduler.tempoSeconds) + 0.5) * Lich.scheduler.tempoSeconds;
 	var currentModifier = 0;
 	var macroBeat = 0;
+	var modifierBeat = 0;
+	var hasModifiers = modifiers.length > 0;
 
 	// Push to the next metric down beat
 	this.nextTime += ((this.nextTime / Lich.scheduler.tempoSeconds) % _events.length) * Lich.scheduler.tempoSeconds;
 
 	
-	Lich.post("NextTime = " + this.nextTime);
+	//Lich.post("NextTime = " + this.nextTime);
 	//Lich.post("events = " + Lich.VM.PrettyPrint(events));
-	Lich.VM.Print(modifiers);
+	//Lich.VM.Print(modifiers);
 
-	this.schedulePlay = function()
+	this.subSchedulePlay = function(nevent, nDuration, offset)
 	{
-		var event = events[macroBeat];
-		//Lich.post("PercStream.event._lichType" + event._lichType);
-		if(event != Lich.VM.Nothing)
+		if(nevent instanceof Array)
+		{
+			if(nevent.length > 0)
+			{
+				var divDuration = nDuration / nevent.length;
+				for(var i = 0; i < nevent.length; ++i)
+				{
+					this.subSchedulePlay(nevent[i], divDuration, offset + (divDuration * i));
+				}
+			}
+		}
+
+		else if(nevent != Lich.VM.Nothing)
 		{
 			var synth;
-			event(function(_synth)
+			nevent(function(_synth)
 			{
 				synth = _synth;
 			});
 
 			synth._audioFunc.connect(Soliton.masterGain);
-			synth._audioFunc.startAll(this.nextTime);
+			synth._audioFunc.startAll(this.nextTime + offset);
 		}
+	}
 
+	this.schedulePlay = function()
+	{
+		var event = events[macroBeat];
+		var beatDuration = Lich.scheduler.tempoSeconds;
+		
 		if(++macroBeat >= events.length)
 				macroBeat = 0;
 
-		this.nextTime += Lich.scheduler.tempoSeconds; // increment by tempo
+		if(hasModifiers)
+		{
+			var modifier = modifiers[modifierBeat];
+
+			if(modifier != Lich.VM.Nothing)
+			{
+				modifier(Lich.scheduler.tempoSeconds, function(_beatDuration)
+				{
+					beatDuration = _beatDuration;
+				});
+			}
+
+			if(++modifierBeat >= modifiers.length)
+					modifierBeat = 0;
+		}
+		
+		this.subSchedulePlay(event, beatDuration, 0); // recursively schedule beat, adjusting for tuple nesting
+		this.nextTime += beatDuration;
+
 		//Lich.post("PercStream nextTime = " + this.nextTime);
 		//Lich.post("Soliton.context.currentTime = " + Soliton.context.currentTime);
 		return this.nextTime;

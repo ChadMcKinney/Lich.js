@@ -1401,13 +1401,13 @@ let glitter3 = (sinOsc (sinOsc 0.5 >> exprange 1 66)) * (sinOsc (666*2)) * (sinO
 let glitter4 = (sinOsc (sinOsc 0.1 >> exprange 1 33)) * (sinOsc (333*5)) * (sinOsc 6.5) >> delay (1/13) 0.9 >> gain 0.1 >> play
 
 
-let guitar = (saw 80) * (square 3) >> lowpass (sinOsc 0.1 >> exprange 20 20000) 10 >> delay (1/3) 0.9 >> gain 0.3 >> play
+let guitar = (saw 80) * (square 3) >> lowpass (sinOsc 0.1 >> exprange 20 2000) 10 >> delay (1/3) 0.9 >> gain 0.3 >> play
 stop guitar
 
 
 
 Kick => square 80 >> perc 0.0 0.7 0.05
-kicker +> Kick
+kicker +> Kick _
 
 Snare => square (80 * 16) >> perc 0.0 0.7 0.05
 snarer +> _ Snare
@@ -1420,3 +1420,14 @@ hater3 +> HiHate _ _
 hater4 +> HiHate _ _ _ _ _ _ _ _
 
 setTempo 500
+setTempo 1000
+
+-- Metric Onset Test, should produce consistent quarter notes no matter the timing of the starts
+HiHate => tri (mul 80 $ randomI 1 24) >> perc 0.0 0.4 0.05
+hater +> _ HiHate _ _
+hater2 +> HiHate _ _ _
+hater2 +> _ _ HiHate _
+hater3 +> _ _ _ HiHate
+
+
+-- WE CAN INLINE MODIFIERS BY EVALUATING THEM ON PATTERN CREATION AGAIN 1. Then just apply those values to this.nextTime.
