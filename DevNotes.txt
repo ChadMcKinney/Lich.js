@@ -1469,3 +1469,16 @@ stop glitter4
 
 let filterer2 = square 80 >> lowpass ((saw 3 >> exprange 1 100) * (sin 0.3 >> exprange 1 100)) (sin 0.2 >> range 0.1 10) >> gain 0.3 >> play
 stop filterer2
+
+
+setTempo 300
+
+Cluster => square 20 >> waveShape (map (nsin) [1..99]) >> lowshelf 40 12 >> perc 0 1 0.1
+clusterz +> Cluster _ Cluster Cluster | (/2)
+Cluster2 => square 20 >> waveShape (map (nsin) [1..179]) >> perc 0 1 0.1
+clusterz2 +> _ Cluster2 _ | (/2)
+Cluster3 => square 20 >> waveShape (map (nsin) [1..199]) >> perc 0 1 0.05
+clusterz3 +> _ Cluster3 | (/2)
+clusterz4 +> Cluster3 _  _ Cluster3 | (/2)
+Cluster0 => playBuf "cluster" 1 (random 0 1) 2 >> waveShape (map (nsin) [1..99]) >> perc 0 0.4 0.5
+clusterz0 +> _ Cluster0 | (*4)

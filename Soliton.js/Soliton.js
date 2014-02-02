@@ -117,12 +117,12 @@ Function.prototype.inheritsFrom = function(parentClassOrObject)
 
 Soliton.print = function(text) // You should probably redefine Soliton.print somewhere in your code!!!!
 {
-	console.log(text);
+	Lich.post(text);
 }
 
 Soliton.printError = function(text) // You should probably redefine Soliton.print somewhere in your code!!!!
 {
-	console.error(text);
+	Lich.post(text);
 }
 
 Soliton.roundUp = function(inval, quant)
@@ -160,7 +160,7 @@ Soliton.bufferURL = function(url, name, callback, callbackDestination, offset, d
 {
 	if(!Soliton.buffers.hasOwnProperty(name))
 	{
-		Soliton.print("Downloading audio...");
+		Lich.post("Downloading audio...");
 		var request = new XMLHttpRequest();
 		request.open('GET', url, true);
 		request.responseType = 'arraybuffer';
@@ -184,7 +184,7 @@ Soliton.bufferURL = function(url, name, callback, callbackDestination, offset, d
 				{
 					var errorString = "Unable to load URL: ";
 					errorString = errorString.concat(url);
-					Soliton.printError(errorString);
+					Lich.post(errorString);
 				}
 			);
 		}
@@ -250,7 +250,7 @@ Soliton.bufferGarbage = function(size, name, callback, callbackDestination)
 
 	catch(e)
 	{
-		Soliton.printError(e);
+		Lich.post(e);
 	}
 }
 
@@ -6078,6 +6078,59 @@ Soliton.spliceFX = function(lang, divider, nodeID)
 	return Soliton.addNode(oscNode);
 }
 
+/////////////////////////////////////////////////////
+// Custom UGens
+
+function white(ret)
+{
+	var ugenFunc = Soliton.context.createScriptProcessor(1024, 0, 1);
+
+	ugenFunc.onaudioprocess = function(event)
+	{
+		var outputArrayL = event.outputBuffer.getChannelData(0);
+		//var outputArrayR = event.outputBuffer.getChannelData(1);
+
+		for(var i = 0; i < 1024; ++i)
+		{
+			outputArrayL[i] = Math.random() * 2 - 1;
+			//outputArrayR[i] = val;
+		}
+	}
+
+	ugenFunc.startAll = function(time){};
+	ugenFunc.stopAll = function(time){};
+	ugenFunc._lichType = AUDIO;
+	ret(ugenFunc);
+}
+
+
+// Implementation via http://www.dsprelated.com/showcode/216.php
+function pink(ret)
+{
+	var pinkFunc = Soliton.context.createScriptProcessor(1024, 0, 1);
+
+	pinkFunc.onaudioprocess = function(event)
+	{
+		var outputArrayL = event.outputBuffer.getChannelData(0);
+		//var outputArrayR = event.outputBuffer.getChannelData(1);
+
+		
+		for(var i = 0; i < 1024; ++i)
+		{
+			
+		}
+
+		Lich.post(outputArrayL[0]);
+	}
+
+	pinkFunc.startAll = function(time){};
+	pinkFunc.stopAll = function(time){};
+	pinkFunc._lichType = AUDIO;
+	ret(pinkFunc);
+}
+
+/////////////////////////////////////////////////////
+
 function sin(freq, ret)
 {
 	ret(Soliton.createOscillatorNode("sine",freq));
@@ -6473,7 +6526,7 @@ Soliton.bufferURL = function(name, callback)
 		         + self.location.hostname
 		         + "/Samples/" + name + ".ogg";
 
-		Soliton.print("Downloading audio... " + url);
+		//Lich.post("Downloading audio... " + url);
 		var request = new XMLHttpRequest();
 		request.open('GET', url, true);
 		request.responseType = 'arraybuffer';
@@ -6497,7 +6550,7 @@ Soliton.bufferURL = function(name, callback)
 				{
 					var errorString = "Unable to load URL: ";
 					errorString = errorString.concat(url);
-					Soliton.printError(errorString);
+					Lich.post(errorString);
 					throw new Error(errorString);
 				}
 			);
@@ -6506,9 +6559,9 @@ Soliton.bufferURL = function(name, callback)
 		request.send();
 	}
 
-	else if(Soliton.buffers[name])
+	else
 	{
-		Soliton.print("Already Downloaded!");
+		//Soliton.print("Already Downloaded!");
 		if(callback != undefined)
 			callback(Soliton.buffers[name]);
 	}
@@ -6517,7 +6570,7 @@ Soliton.bufferURL = function(name, callback)
 // Play a buffer into the destination
 Soliton.playBuffer = function(buffer, rate, loopStart, loopEnd, ret)
 {
-	Lich.post("Playing Buffer!");
+	//Lich.post("Playing Buffer!");
 	var source = Soliton.context.createBufferSource();
 	source.buffer = buffer;
 	source.loop = true;
@@ -6541,7 +6594,7 @@ function playBuf(name, rate, loopStart, loopEnd, ret)
 	if(typeof rate !== "number" || typeof loopStart !== "number" || typeof loopEnd !== "number")
 	{
 		throw new Error("playBuf can only be used with numbers. playBuf arguments cannot be modulated by audio unit generators");
-		Lich.post("playBuf can only be used with numbers. playBuf arguments cannot be modulated by audio unit generators");
+		//Lich.post("playBuf can only be used with numbers. playBuf arguments cannot be modulated by audio unit generators");
 	}
 
 	Soliton.bufferURL(
@@ -6740,6 +6793,7 @@ function stop(synth, ret)
 
 function killall(ret)
 {
+	Lich.scheduler.freeScheduledEvents();
     Soliton.masterGain.disconnect(0);
 	Soliton.masterGain = Soliton.context.createGain();
 	Soliton.masterGain.connect(Soliton.context.destination);
@@ -6912,7 +6966,15 @@ Soliton.SteadyScheduler = function()
 
 	this.scheduleEvent = function(event)
 	{
-		nextTime = event.schedulePlay();
+		try
+		{
+			nextTime = event.schedulePlay();
+		}
+
+		catch(e)
+		{
+			Lich.post(e);
+		}
 
 		// Schedule all events that fall within our requiresSchedule range.
 		while(nextTime != null)
