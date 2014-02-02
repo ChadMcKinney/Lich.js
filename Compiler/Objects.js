@@ -51,6 +51,8 @@ var PRIMITIVE = 11;
 var BOOLEAN = 12;
 var AUDIO = 13;
 var SYNTH = 14;
+var IMPSTREAM = 15;
+var SOLOSTREAM = 16;
 
 function LichVoid() // Non-return value for the VM. 
 {

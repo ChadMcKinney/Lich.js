@@ -6078,7 +6078,7 @@ Soliton.spliceFX = function(lang, divider, nodeID)
 	return Soliton.addNode(oscNode);
 }
 
-function sinOsc(freq, ret)
+function sin(freq, ret)
 {
 	ret(Soliton.createOscillatorNode("sine",freq));
 }
@@ -6679,21 +6679,27 @@ function play(synth, ret)
 {
 	Lich.collapse(synth, function(synth)
 	{
-		if(synth._lichType != AUDIO && synth._lichType != SYNTH)
-			throw new Error("play can only be used with audio functions.");
+		var type = synth._lichType;
+		if(type != AUDIO && type != SYNTH && type != IMPSTREAM && type != SOLOSTREAM)
+			throw new Error("play can only be used with synth definitions, functions, or patterns.");
 
-		if(synth._lichType == AUDIO)
+		if(type == AUDIO)
 		{
 			synth.connect(Soliton.masterGain);
 			synth.startAll(Soliton.context.currentTime);
 			ret(synth);
 		}
 
-		else
+		else if(type == SYNTH)
 		{
 			synth._audioFunc.connect(Soliton.masterGain);
 			synth._audioFunc.startAll(Soliton.context.currentTime);
 			ret(synth);
+		}
+
+		else
+		{
+			synth.play();
 		}
 	});
 }
@@ -6702,17 +6708,18 @@ function stop(synth, ret)
 {
 	Lich.collapse(synth, function(synth)
 	{
-		if(synth._lichType != AUDIO && synth._lichType != SYNTH)
-			throw new Error("play can only be used with synth definitions and audio functions.");
+		var type = synth._lichType;
+		if(type != AUDIO && type != SYNTH && type != IMPSTREAM && type != SOLOSTREAM)
+			throw new Error("stop can only be used with synth definitions, functions, or patterns.");
 
-		if(synth._lichType == AUDIO)
+		if(type == AUDIO)
 		{
 			synth.disconnect(Soliton.masterGain);
 			synth.stopAll(0);
 			ret(Lich.VM.Void);
 		}
 
-		else
+		else if(type == SYNTH)
 		{		
 			Lich.collapse(synth._audioFunc, function(audioRes)
 			{
@@ -6722,6 +6729,11 @@ function stop(synth, ret)
 				audioRes.stopAll(0);
 				ret(Lich.VM.Void);
 			});
+		}
+
+		else
+		{
+			synth.stop();
 		}
 	});
 }
@@ -6758,6 +6770,8 @@ Soliton.PercStream = function(_events, _modifiers)
 	var macroBeat = 0;
 	var modifierBeat = 0;
 	var hasModifiers = modifiers.length > 0;
+	this._lichType = IMPSTREAM;
+	var playing = true;
 
 	// Push to the next metric down beat
 	this.nextTime += ((this.nextTime / Lich.scheduler.tempoSeconds) % _events.length) * Lich.scheduler.tempoSeconds;
@@ -6766,6 +6780,21 @@ Soliton.PercStream = function(_events, _modifiers)
 	//Lich.post("NextTime = " + this.nextTime);
 	//Lich.post("events = " + Lich.VM.PrettyPrint(events));
 	//Lich.VM.Print(modifiers);
+
+	this.stop = function()
+	{
+		playing = false;
+		Lich.scheduler.removeScheduledEvent(this);
+	}
+
+	this.play = function()
+	{
+		if(!playing)
+		{
+			playing = true;
+			Lich.scheduler.addScheduledEvent(this);
+		}
+	}
 
 	this.subSchedulePlay = function(nevent, nDuration, offset)
 	{
@@ -6831,6 +6860,7 @@ Soliton.SoloStream = function(_events, _modifiers)
 {
 	var events = _events;
 	var modifiers = _modifiers;
+	this._lichType = SOLOSTREAM;
 
 	Lich.post("events = " + Lich.VM.PrettyPrint(events));
 	Lich.VM.Print(modifiers);
@@ -6973,7 +7003,7 @@ Soliton.SteadyScheduler = function()
 	{
 		var currentIndex = currentQueue.indexOf(event);
 		if(currentIndex != -1)
-			currentQueue.splice(currentIndex, currentIndex + 1);
+			currentQueue.splice(currentIndex, 1);
 	}
 
 	this.setTempo = function(bpm)

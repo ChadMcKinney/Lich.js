@@ -1292,13 +1292,13 @@ octoSynth ~> octopus 1 _ 2 _ 3 _ _ 4 5 _ 6 _ -1 _ 3 _ -66 -99 99 | (4-) (sqrt) _
 (~> noise 1 2 [3 4 5] 1 [[1 2] 3])
 
 
-let s = (sine 440) >> gain 0.5 >> play
+let s = (sin 440) >> gain 0.5 >> play
 stop s
 
-let s = sine 3 >> gain 33 >> sine >> gain 666 >> sine >> gain 0.3 >> play
+let s = sin 3 >> gain 33 >> sin >> gain 666 >> sin >> gain 0.3 >> play
 s >> stop
 
-let s2 = sine 0.5 >> gain 66 >> sine >> gain 600 >> sine >> gain 0.3 >> play
+let s2 = sin 0.5 >> gain 66 >> sin >> gain 600 >> sin >> gain 0.3 >> play
 s2 >> stop
 
 let s3 = square 7 >> gain 66 >> square >> gain 33 >> square >> gain 0.2 >> play
@@ -1329,7 +1329,7 @@ stop table
 let allpasser =  (dry * 0.5) + (wet * 0.5) >> play
     where
         dry = (square 88) * ((saw 60) * 0.1)
-        wet = dry >> allpass (100) (sinOsc 0.5)
+        wet = dry >> allpass (100) (sin 0.5)
 
 stop allpasser
 
@@ -1337,13 +1337,13 @@ stop allpasser
 
 -- Function Composition Styles for Synth Definitions
 
-let testFunc = play . sinOsc . gain 440 $ sinOsc 33
+let testFunc = play . sin . gain 440 $ sin 33
 stop testFunc
 
-let testFunc = sinOsc 33 >> gain 440 >> sinOsc >> play
+let testFunc = sin 33 >> gain 440 >> sin >> play
 stop testFunc
 
-let testFunc = play(sinOsc (gain 440 (sinOsc 33)))
+let testFunc = play(sin (gain 440 (sin 33)))
 stop testFunc
 
 
@@ -1385,23 +1385,23 @@ stop filterer
 
 
 -- range and exprange work!
-let filterer = square 5 >> lowpass ((tri 1 >> range 1 100) * (sinOsc 0.1 >> range 1 100)) 3 >> play
+let filterer = square 5 >> lowpass ((tri 1 >> range 1 100) * (sin 0.1 >> range 1 100)) 3 >> play
 stop filterer
 
-let filterer2 = square 13 >> lowpass ((saw 3 >> exprange 1 100) * (sinOsc 0.3 >> exprange 1 100)) (sinOsc 0.2 >> range 0.1 10) >> play
+let filterer2 = square 13 >> lowpass ((saw 3 >> exprange 1 100) * (sin 0.3 >> exprange 1 100)) (sin 0.2 >> range 0.1 10) >> play
 stop filterer2
 
 
-let glitter = (sinOsc (sinOsc 0.3 >> exprange 1 66)) * (sinOsc 666) * (sinOsc 3) >> delay (1/13) 0.9 >> gain 0.1 >> play
+let glitter = (sin (sin 0.3 >> exprange 1 66)) * (sin 666) * (sin 3) >> delay (1/13) 0.9 >> gain 0.1 >> play
 
-let glitter2 = (sinOsc (sinOsc 0.2 >> exprange 1 33)) * (sinOsc (999)) * (sinOsc 3) >> delay (4/13) 0.9 >> gain 0.1 >> play
+let glitter2 = (sin (sin 0.2 >> exprange 1 33)) * (sin (999)) * (sin 3) >> delay (4/13) 0.9 >> gain 0.1 >> play
 
-let glitter3 = (sinOsc (sinOsc 0.5 >> exprange 1 66)) * (sinOsc (666*2)) * (sinOsc 2) >> delay (3/13) 0.5 >> gain 0.1 >> play
+let glitter3 = (sin (sin 0.5 >> exprange 1 66)) * (sin (666*2)) * (sin 2) >> delay (3/13) 0.5 >> gain 0.1 >> play
 
-let glitter4 = (sinOsc (sinOsc 0.1 >> exprange 1 33)) * (sinOsc (333*5)) * (sinOsc 6.5) >> delay (1/13) 0.9 >> gain 0.1 >> play
+let glitter4 = (sin (sin 0.1 >> exprange 1 33)) * (sin (333*5)) * (sin 6.5) >> delay (1/13) 0.9 >> gain 0.1 >> play
 
 
-let guitar = (saw 80) * (square 3) >> lowpass (sinOsc 0.1 >> exprange 20 2000) 10 >> delay (1/3) 0.9 >> gain 0.3 >> play
+let guitar = (saw 80) * (square 3) >> lowpass (sin 0.1 >> exprange 20 2000) 10 >> delay (1/3) 0.9 >> gain 0.3 >> play
 stop guitar
 
 
@@ -1430,4 +1430,42 @@ hater2 +> _ _ HiHate _
 hater3 +> _ _ _ HiHate
 
 
--- WE CAN INLINE MODIFIERS BY EVALUATING THEM ON PATTERN CREATION AGAIN 1. Then just apply those values to this.nextTime.
+
+-- Just Intonation Fun
+
+Kick => square 80 >> perc 0.0 0.7 0.05
+kicker +> Kick _ _ Kick _ _ Kick _ | (/2)
+stop kicker
+
+Kick2 => square 320 >> perc 0.0 0.7 0.05
+kicker2 +> Kick2 _ _ _ Kick2 _ Kick2 _ _ _ | (/4)
+stop kicker2
+
+HiHate => tri (mul 80 12) >> perc 0.0 0.4 0.05
+hate +> _ HiHate | (/2)
+
+HiHate2 => sin (160 * 10) >> perc 0 0.2 0.1
+hate2 +> HiHate2 HiHate2 _
+
+HiHate3 => tri (160 * 12) >> perc 0 0.2 0.1
+hate2 +> HiHate3 _ _ | (/2)
+hate3 +> HiHate3 _ _ _ _ | (/2)
+
+BigSnare => square (160) >> perc 0.0 0.3 2
+snarer2 +> _ _ BigSnare _ | (*2)
+stop snarer2
+
+Snare => square (80 * 16) >> perc 0.0 0.7 0.05
+LKick => square 40 >> perc 0 0.7 0.5
+lkicker +> LKick Snare [_ LKick] Snare | (*2)
+stop lkicker
+
+Guitar => (saw (40 * (randomI 1 10))) * (square 3) >> lowpass (sin 0.1 >> exprange 20 2000) 10 >> delay (1/3) 0.9 >> perc 0.1 0.3 3
+guitarer +> Guitar _ Guitar _ _ Guitar _ _
+stop guitarer
+
+let glitter4 = (sin (sin 0.1 >> exprange 1 33)) * (sin (160*10)) * (sin 6.5) >> delay (1/13) 0.9 >> gain 0.1 >> play
+stop glitter4
+
+let filterer2 = square 80 >> lowpass ((saw 3 >> exprange 1 100) * (sin 0.3 >> exprange 1 100)) (sin 0.2 >> range 0.1 10) >> gain 0.3 >> play
+stop filterer2

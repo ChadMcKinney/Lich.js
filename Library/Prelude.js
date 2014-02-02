@@ -502,7 +502,7 @@ function mod(l, r, ret)
 
 _createPrimitive("%", mod);
 
-function sin(v, ret)
+function nsin(v, ret)
 {
 	Lich.collapse(v, function(value)
 	{
