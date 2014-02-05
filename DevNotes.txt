@@ -1406,79 +1406,71 @@ stop guitar
 
 
 
-Kick => square 80 >> perc 0.0 0.7 0.05
-kicker +> Kick _
+Synth kick = square 80 >> perc 0.0 0.7 0.05
+kicker +> kick _
 
-Snare => square (80 * 16) >> perc 0.0 0.7 0.05
-snarer +> _ Snare
+Synth snare = square (80 * 16) >> perc 0.0 0.7 0.05
+snarer +> _ snare
 
-HiHate => tri (mul 80 $ randomI 1 32) >> perc 0.0 0.4 0.05
-hater +> _ HiHate _ _ _
-hater2 +> _ _ HiHate _ _ _
-hater2 +> _ HiHate _ _ _ _ _
-hater3 +> HiHate _ _
-hater4 +> HiHate _ _ _ _ _ _ _ _
+Synth hihate = tri (mul 80 $ randomI 1 32) >> perc 0.0 0.4 0.05
+hater +> _ hihate _ _ _
+hater2 +> _ _ hihate _ _ _
+hater2 +> _ hihate _ _ _ _ _
+hater3 +> hihate _ _
+hater4 +> hihate _ _ _ _ _ _ _ _
 
 setTempo 500
 setTempo 1000
 
 -- Metric Onset Test, should produce consistent quarter notes no matter the timing of the starts
-HiHate => tri (mul 80 $ randomI 1 24) >> perc 0.0 0.4 0.05
-hater +> _ HiHate _ _
-hater2 +> HiHate _ _ _
-hater2 +> _ _ HiHate _
-hater3 +> _ _ _ HiHate
+Synth hihate = tri (mul 80 $ randomI 1 24) >> perc 0.0 0.4 0.05
+hater +> _ hihate _ _
+hater2 +> hihate _ _ _
+hater2 +> _ _ hihate _
+hater3 +> _ _ _ hihate
 
 
 
 -- Just Intonation Fun
 
-Kick => square 80 >> perc 0.0 0.7 0.05
-kicker +> Kick _ _ Kick _ _ Kick _ | (/2)
-stop kicker
+let glitter4 = (sin (saw 0.1 >> exprange 1 40)) * (sin (160*10)) * (tri 6.5) >> delay (1/3) 0.3 >> gain 0.1 >> play
 
-Kick2 => square 320 >> perc 0.0 0.7 0.05
-kicker2 +> Kick2 _ _ _ Kick2 _ Kick2 _ _ _ | (/4)
-stop kicker2
+Synth k = tri 40 >> lowpass 320 1 >> perc 0.0001 1 0.3
+kicker +> k _ _ k _ _ k _ | (/2)
 
-HiHate => tri (mul 80 12) >> perc 0.0 0.4 0.05
-hate +> _ HiHate | (/2)
+Synth hh = sin (mul 80 12) >> perc 0.0 0.4 0.05
+hate5 +> _ hh | (/2)
 
-HiHate2 => sin (160 * 10) >> perc 0 0.2 0.1
-hate2 +> HiHate2 HiHate2 _
+Synth hh2 = sin (160 * 10) >> perc 0 0.3 0.1
+hate2 +> hh2 hh2 _
 
-HiHate3 => tri (160 * 12) >> perc 0 0.2 0.1
-hate2 +> HiHate3 _ _ | (/2)
-hate3 +> HiHate3 _ _ _ _ | (/2)
+Synth hh3 = white >> gain 10 >> bandpass (80 * 17) 455 >> gain 10 >> perc 0.0001 1 0.1
+hihate3 +> hh3 _ _ | (/2)
+hihate4 +> hh3 _ _ _ _ | (/2)
 
-BigSnare => square (160) >> perc 0.0 0.3 2
-snarer2 +> _ _ BigSnare _ | (*2)
-stop snarer2
+Synth snare = white >> perc 0.0 0.7 0.5
+Synth lkick = tri 40 >> perc 0.001 0.7 0.75
+lkicker +> lkick snare [_ lkick] snare | (*2)
 
-Snare => square (80 * 16) >> perc 0.0 0.7 0.05
-LKick => square 40 >> perc 0 0.7 0.5
-lkicker +> LKick Snare [_ LKick] Snare | (*2)
-stop lkicker
 
-Guitar => (saw (40 * (randomI 1 10))) * (square 3) >> lowpass (sin 0.1 >> exprange 20 2000) 10 >> delay (1/3) 0.9 >> perc 0.1 0.3 3
-guitarer +> Guitar _ Guitar _ _ Guitar _ _
-stop guitarer
-
-let glitter4 = (sin (sin 0.1 >> exprange 1 33)) * (sin (160*10)) * (sin 6.5) >> delay (1/13) 0.9 >> gain 0.1 >> play
-stop glitter4
+Synth guitar = (saw (40 * (randomI 1 10))) * (sin 3) >> lowpass (80*17) 10 >> delay (1/5) 0.4 >> perc 0.1 0.3 3
+guitarer +> guitar _ guitar _ _ guitar _ _
 
 let filterer2 = square 80 >> lowpass ((saw 3 >> exprange 1 100) * (sin 0.3 >> exprange 1 100)) (sin 0.2 >> range 0.1 10) >> gain 0.3 >> play
+stop guitarer
 stop filterer2
+stop glitter4
+
 
 
 setTempo 300
 
-Cluster => square 20 >> waveShape (map (nsin) [1..99]) >> lowshelf 40 12 >> perc 0 1 0.1
-clusterz +> Cluster _ Cluster Cluster | (/2)
-Cluster2 => square 20 >> waveShape (map (nsin) [1..179]) >> perc 0 1 0.1
-clusterz2 +> _ Cluster2 _ | (/2)
-Cluster3 => square 20 >> waveShape (map (nsin) [1..199]) >> perc 0 1 0.05
-clusterz3 +> _ Cluster3 | (/2)
-clusterz4 +> Cluster3 _  _ Cluster3 | (/2)
-Cluster0 => playBuf "cluster" 1 (random 0 1) 2 >> waveShape (map (nsin) [1..99]) >> perc 0 0.4 0.5
-clusterz0 +> _ Cluster0 | (*4)
+Synth cluster = square 20 >> waveShape (map (nsin) [1..99]) >> lowshelf 40 12 >> perc 0 1 0.1
+clusterz +> cluster _ cluster cluster | (/2)
+Synth cluster2 = square 20 >> waveShape (map (nsin) [1..179]) >> perc 0 1 0.1
+clusterz2 +> _ cluster2 _ | (/2)
+Synth cluster3 = square 20 >> waveShape (map (nsin) [1..199]) >> perc 0 1 0.05
+clusterz3 +> _ cluster3 | (/2)
+clusterz4 +> cluster3 _  _ cluster3 | (/2)
+Synth cluster0 = white >> perc 0 0.4 0.5
+clusterz0 +> _ cluster0 | (*2)

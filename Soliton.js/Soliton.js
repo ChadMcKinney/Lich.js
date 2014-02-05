@@ -43,6 +43,7 @@ Soliton.spliceFuncBlockSize = 64; // block size for splice generated osc node fu
 Soliton.spliceFuncBlockRatio = Soliton.blockSize / Soliton.spliceFuncBlockSize; // Ratio use for sample generation in splice osc nodes
 Soliton.buffers = {}; // Soliton.buffers namespace
 Soliton.nodes = new Array();
+Soliton.synthDefs = {};
 
 //window.addEventListener('load', Soliton.init, false);
 
@@ -59,6 +60,11 @@ Soliton.init = function()
 		Soliton.masterGain = Soliton.context.createGain();
 		Soliton.masterGain.connect(Soliton.context.destination);
 		Soliton.masterGain.gain.value = 0.25;
+
+		for(var i = 0; i < (Soliton.context.sampleRate * 4); ++i) 
+		{
+			Soliton.whiteTable.push(Math.random());
+		}
 	}
 
 	catch(e)
@@ -6081,8 +6087,23 @@ Soliton.spliceFX = function(lang, divider, nodeID)
 /////////////////////////////////////////////////////
 // Custom UGens
 
+Soliton.white = function(event)
+{
+	var outputArrayL = event.outputBuffer.getChannelData(0);
+	//var outputArrayR = event.outputBuffer.getChannelData(1);
+
+	for(var i = 0; i < 1024; ++i)
+	{
+		outputArrayL[i] = Math.random() * 2 - 1;
+		//outputArrayR[i] = val;
+	}
+}
+
+Soliton.whiteTable = [];
+
 function white(ret)
 {
+	/*
 	var ugenFunc = Soliton.context.createScriptProcessor(1024, 0, 1);
 
 	ugenFunc.onaudioprocess = function(event)
@@ -6095,15 +6116,34 @@ function white(ret)
 			outputArrayL[i] = Math.random() * 2 - 1;
 			//outputArrayR[i] = val;
 		}
+
+		if(this.stop)
+			event.disconnect();
 	}
 
 	ugenFunc.startAll = function(time){};
-	ugenFunc.stopAll = function(time){};
-	ugenFunc._lichType = AUDIO;
-	ret(ugenFunc);
+	ugenFunc.stopAll = function(time){setTimeout(function(){ugenFunc.onaudioprocess = null; ugenFunc.stop = true}, time*1010)};*/
+
+	var node = Soliton.context.createBufferSource();
+	var buffer = Soliton.context.createBuffer(1, Soliton.context.sampleRate * 4, Soliton.context.sampleRate);
+	var data = buffer.getChannelData(0);
+
+	for(var i = 0; i < (Soliton.context.sampleRate * 4); ++i)
+	{
+		data[i] = Soliton.whiteTable[i];
+		//outputArrayR[i] = val;
+	}
+
+	node.buffer = buffer;
+	node.loop = true;
+	node.startAll = node.start;
+	node.stopAll = node.stop;
+
+	node._lichType = AUDIO;
+	ret(node);
 }
 
-
+/*
 // Implementation via http://www.dsprelated.com/showcode/216.php
 function pink(ret)
 {
@@ -6127,7 +6167,7 @@ function pink(ret)
 	pinkFunc.stopAll = function(time){};
 	pinkFunc._lichType = AUDIO;
 	ret(pinkFunc);
-}
+}*/
 
 /////////////////////////////////////////////////////
 
@@ -6379,6 +6419,7 @@ function exprange(low, high, input, ret)
 	rangeFunc.stopAll = input.stopAll;
 	rangeFunc._lichType = AUDIO;
 	input.connect(rangeFunc);
+	rangeFunc.stopAll = function(time){input.stopAll(time); input.disconnect(0);}
 	ret(rangeFunc);
 }
 
@@ -6387,14 +6428,13 @@ Soliton.divisionUGen = function(event)
 	var inputArray1 = event.inputBuffer.getChannelData(0);
 	var inputArray2 = event.inputBuffer.getChannelData(1);
 	var outputArrayL = event.outputBuffer.getChannelData(0);
-	var outputArrayR = event.outputBuffer.getChannelData(1);
 
 	for(var i = 0; i < 1024; ++i)
 	{
 		if(inputArray2[i] == 0)
-			outputArrayR[i] = outputArrayL[i] = 0;
+			outputArrayL[i] = 0;
 		else	
-			outputArrayR[i] = outputArrayL[i] = inputArray1[i] / inputArray2[i];
+			outputArrayL[i] = inputArray1[i] / inputArray2[i];
 	}
 }
 
@@ -6416,11 +6456,11 @@ function _audioDivision(input1, input2, ret)
 		});
 	}
 
-	var divisionFunc = Soliton.context.createScriptProcessor(1024, 2, 2);
+	var divisionFunc = Soliton.context.createScriptProcessor(1024, 2, 1);
 	divisionFunc.onaudioprocess = Soliton.divisionUGen;
 	divisionFunc.channelInterpretation = "discrete";
-	divisionFunc.startAll = function(time){ input2.startAll(time); input1.startAll(time); }
-	divisionFunc.stopAll = function(time){ input1.stopAll(time); input2.stopAll(time); }
+	divisionFunc.startAll = function(time){ input2.startAll(time); input1.startAll(time);}
+	divisionFunc.stopAll = function(time){ input1.stopAll(time); input2.stopAll(time); input1.disconnect(0); input2.disconnect(0);}
 	divisionFunc._lichType = AUDIO;
 	input1.connect(divisionFunc);
 	input2.connect(divisionFunc);
@@ -6697,29 +6737,32 @@ function fade(time, input, ret)
 
 function perc(attack, peak, decay, input, ret)
 {
-	if(typeof attack !== "number" || typeof peak !== "number" || typeof decay !== "number")
+	Lich.collapse(input, function(input)
+	{
+		if(typeof attack !== "number" || typeof peak !== "number" || typeof decay !== "number")
 		throw new Error("perc can only use numbers for attack, peak, and decay arguments.");
 
-	if(typeof input == "number")
-	{
-		dc(input, function(inRes){input = inRes});
-	}
+		if(typeof input == "number")
+		{
+			dc(input, function(inRes){input = inRes});
+		}
 
-	var percGain = Soliton.context.createGain();
-	input.connect(percGain);
-	
-	percGain.startAll = function(time)
-	{
-		input.startAll(time);
-		percGain.gain.setValueAtTime(0, time);
-		percGain.gain.linearRampToValueAtTime(peak, attack + time);
-		percGain.gain.linearRampToValueAtTime(0, attack + decay + time);
-		input.stopAll(attack + decay + time);
-	}
+		var percGain = Soliton.context.createGain();
+		input.connect(percGain);
+		
+		percGain.startAll = function(time)
+		{
+			input.startAll(time);
+			percGain.gain.setValueAtTime(0, time);
+			percGain.gain.linearRampToValueAtTime(peak, attack + time);
+			percGain.gain.linearRampToValueAtTime(0, attack + decay + time);
+			input.stopAll(attack + decay + time);
+		}
 
-	percGain.stopAll = input.stopAll;
-	percGain._lichType = AUDIO;
-	ret(percGain);
+		percGain.stopAll = input.stopAll;
+		percGain._lichType = AUDIO;
+		ret(percGain);
+	});
 }
 
 function main(input, ret)
@@ -6730,6 +6773,11 @@ function main(input, ret)
 
 function play(synth, ret)
 {
+	if(typeof synth === "string")
+	{
+		synth = Soliton.synthDefs[synth];
+	}
+
 	Lich.collapse(synth, function(synth)
 	{
 		var type = synth._lichType;
@@ -6774,7 +6822,7 @@ function stop(synth, ret)
 
 		else if(type == SYNTH)
 		{		
-			Lich.collapse(synth._audioFunc, function(audioRes)
+			Lich.collapse(synth, function(audioRes)
 			{
 				if(audioRes._lichType != AUDIO)
 					throw new Error("play can only be used with synth definitions and audio functions.");
@@ -6820,7 +6868,6 @@ Soliton.PercStream = function(_events, _modifiers)
 	var events = _events;
 	var modifiers = _modifiers;
 	this.nextTime = Math.floor((Soliton.context.currentTime / Lich.scheduler.tempoSeconds) + 0.5) * Lich.scheduler.tempoSeconds;
-	var currentModifier = 0;
 	var macroBeat = 0;
 	var modifierBeat = 0;
 	var hasModifiers = modifiers.length > 0;
@@ -6837,6 +6884,7 @@ Soliton.PercStream = function(_events, _modifiers)
 
 	this.stop = function()
 	{
+		Lich.post("STOP!!!!!");
 		playing = false;
 		Lich.scheduler.removeScheduledEvent(this);
 	}
@@ -6866,14 +6914,12 @@ Soliton.PercStream = function(_events, _modifiers)
 
 		else if(nevent != Lich.VM.Nothing)
 		{
-			var synth;
-			nevent(function(_synth)
+			var nextTime = this.nextTime;
+			Lich.collapse(Soliton.synthDefs[nevent], function(synth)
 			{
-				synth = _synth;
+				synth.connect(Soliton.masterGain);
+				synth.startAll(nextTime + offset);
 			});
-
-			synth._audioFunc.connect(Soliton.masterGain);
-			synth._audioFunc.startAll(this.nextTime + offset);
 		}
 	}
 
@@ -6907,6 +6953,28 @@ Soliton.PercStream = function(_events, _modifiers)
 		//Lich.post("PercStream nextTime = " + this.nextTime);
 		//Lich.post("Soliton.context.currentTime = " + Soliton.context.currentTime);
 		return this.nextTime;
+	}
+
+	this.update = function(newEvents, newModifiers)
+	{
+		events = newEvents;
+		modifiers = newModifiers;
+		macroBeat = macroBeat % events.length;
+
+		if(modifiers.length)
+			modifierBeat = modifierBeat % modifiers.length;
+		else
+			modifierBeat = 0;
+
+		hasModifiers = modifiers.length > 0;
+
+		if(!playing)
+		{
+			this.nextTime = Math.floor((Soliton.context.currentTime / Lich.scheduler.tempoSeconds) + 0.5) * Lich.scheduler.tempoSeconds;
+			this.nextTime += ((this.nextTime / Lich.scheduler.tempoSeconds) % _events.length) * Lich.scheduler.tempoSeconds;
+		}
+
+		this.play();
 	}
 }
 
@@ -7043,6 +7111,22 @@ Soliton.SteadyScheduler = function()
 	{
 		playing = false;
 		clearTimeout(timerID);
+
+		for(var i = 0; i < currentQueue.length; ++i)
+		{
+			currentQueue[i].stop();
+		}
+		
+		for(var i = 0; i < nextQueue.length; ++i)
+		{
+			nextQueue[i].stop();
+		}
+
+		for(var i = 0; i < tempQueue.length; ++i)
+		{
+			tempQueue[i].stop();
+		}
+
 		currentQueue = [];
 		nextQueue = [];
 		tempQueue = null;
@@ -7051,6 +7135,27 @@ Soliton.SteadyScheduler = function()
 
 	this.freeScheduledEvents = function()
 	{
+		for(var i = 0; i < currentQueue.length; ++i)
+		{
+			var elem = currentQueue[i];
+			if(elem._lichType == IMPSTREAM || elem._lichType == SOLOSTREAM)
+				elem.stop();
+		}
+		
+		for(var i = 0; i < nextQueue.length; ++i)
+		{
+			var elem = nextQueue[i];
+			if(elem._lichType == IMPSTREAM || elem._lichType == SOLOSTREAM)
+				elem.stop();
+		}
+
+		for(var i = 0; i < tempQueue.length; ++i)
+		{
+			var elem = tempQueue[i];
+			if(elem._lichType == IMPSTREAM || elem._lichType == SOLOSTREAM)
+				elem.stop();
+		}
+
 		currentQueue = [];
 		nextQueue = [];
 		tempQueue = null;
