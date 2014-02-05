@@ -1553,8 +1553,8 @@ Lich.compileDataInst = function(ast,ret)
 		},
 		function(members)
 		{
-			//ret("(function(_ret){Lich.newData("+ast.id+",["+members.join(",")+"],_ret)})");
-			ret(ast.id+".curry("+members.join(",")+")");
+			ret("(function(_ret){Lich.newData("+ast.id+",["+members.join(",")+"],_ret)})");
+			//ret(ast.id+".curry("+members.join(",")+")");
 		}
 	);
 }
