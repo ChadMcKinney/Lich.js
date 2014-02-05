@@ -71,9 +71,9 @@ data Monster {
 }
 
 data Game {
-	players		= ("Nobody" => Player),
-	monsters 	= ("Nobody" => Monster),
-	locations 	= ("Nowhere" => Location),
+	players		= ("Nobody" = Player),
+	monsters 	= ("Nobody" = Monster),
+	locations 	= ("Nowhere" = Location),
 	narration 	= "",
 	gameOver	= False
 }
@@ -134,7 +134,7 @@ narrateStatus player game =
 -- |placeItemAtLocation Item -> Location -> Location
 placeItemAtLocation item location = location {items = newItems}
 	where
-		newItems = ((item :: name) => item) : (location :: items)
+		newItems = ((item :: name) = item) : (location :: items)
 
 -- |removeItemFromLocation Item -> Location -> Location
 removeItemFromLocation item location = location{items = newItems}
@@ -144,7 +144,7 @@ removeItemFromLocation item location = location{items = newItems}
 -- |giveItemToPlayer Item -> Player -> Player
 giveItemToPlayer item player = player{items = newItems}
 	where
-		newItems = ((item::name) => item) : (player::items)
+		newItems = ((item::name) = item) : (player::items)
 
 -- |removeItemFromPlayer Item -> Player -> Player
 removeItemFromPlayer item player = player{items = newItems}
@@ -154,7 +154,7 @@ removeItemFromPlayer item player = player{items = newItems}
 -- |updateLocation Location -> Game -> Game
 updateLocation location game = game{locations = newLocations}
 	where
-		newLocations = ((location::name) => location) : (game::locations)
+		newLocations = ((location::name) = location) : (game::locations)
 
 -- | addLocations:: Dict -> Game -> Game
 addLocations newLocations game = game{locations = combinedLocations}
@@ -188,12 +188,12 @@ getSomething name game = player ? monster ? location
 -- |updatePlayer Player -> Game -> Game
 updatePlayer player game = game{players = newPlayers}
 	where
-		newPlayers = ((player::name) => player) : (game::players)
+		newPlayers = ((player::name) = player) : (game::players)
 
 -- |updateMonster Monster -> Game -> Game
 updateMonster monster game = game{monsters = newMonsters}
 	where
-		newMonsters = (monster::name => monster) : (game::monsters)
+		newMonsters = (monster::name = monster) : (game::monsters)
 
 -- |moveItemFromPlayerToLocation Item -> Location -> Player -> Game -> Game
 moveItemFromPlayerToLocation item player game = updatePlayer newPlayer newGame
@@ -293,19 +293,19 @@ checkPlayerDeath player game =
 		True	-> (addNarration "You died." game){gameOver = True}
 		False	-> game
 
--- |damagePlayer Int Player Game => Game
+-- |damagePlayer Int Player Game = Game
 damagePlayer damage player game = checkPlayerDeath damagedPlayer newGame
 	where
 		newHealth		= player::health - damage
 		damagedPlayer 	= player {health = newHealth}
 		newGame 		= updatePlayer damagedPlayer game
 
--- |monsterAttacksPlayer Monster Player Game => Game
+-- |monsterAttacksPlayer Monster Player Game = Game
 monsterAttacksPlayer monster player game = damagePlayer (monster::attack) player game
 
 updateItemInHolder item itemName holder game = newGame
 	where
-		newHolder = (itemName=>item) : holder::items
+		newHolder = (itemName=item) : holder::items
 		newGame =
 			case newHolder of
 				Monster 	-> updateMonster newHolder game
@@ -488,7 +488,7 @@ camp 			= Location "Camp" n s e w u d desc fDesc items mov
 		--desc 	= "I stood amongst the ruins of my forward scout's base camp. They had gone missing. We are part of a small group of biologists exploring the reaches of Antartica. To the north, east, and west I can see three prominent mounds of snow. Given the scout's absence, this seemed ominous. "
 		desc 	= "I stand amongst the ruins of my forward scout's base camp. To the north, east, and west I can see three prominent mounds of snow. Given the scout's absence, this seems ominous. "
 		fDesc 	= "You see a white blasted, frigid looking camp."	
-		items 	= ("diary" => diary)
+		items 	= ("diary" = diary)
 		mov 	= True
 
 mound 		= Location "Mound" n s e w u d desc fDesc items mov
@@ -501,7 +501,7 @@ mound 		= Location "Mound" n s e w u d desc fDesc items mov
 		d 		= "Nowhere"
 		desc 	= "Standing before me is a strange greenish mound in the snow. To the north are a series of mountains. To the south is the scout camp."
 		fDesc 	= "the vauge outline of a small hill of some kind in the snow."	
-		items 	= ("dog corpse" => dogCorpse)
+		items 	= ("dog corpse" = dogCorpse)
 		mov 	= True
 
 mound2  		= Location "Mound2" n s e w u d desc fDesc items mov
@@ -514,7 +514,7 @@ mound2  		= Location "Mound2" n s e w u d desc fDesc items mov
 		d 		= "Nowhere"
 		desc 	= "I am standing above a strange redish mound in the snow. To the east is the scout camp, to the north is another of these mounds."
 		fDesc 	= "the vauge outline of a small hill of some kind in the snow."	
-		items 	= ("corpse" => corpse)
+		items 	= ("corpse" = corpse)
 		mov 	= True
 
 mound3 			= Location "Mound3" n s e w u d desc fDesc items mov
@@ -527,7 +527,7 @@ mound3 			= Location "Mound3" n s e w u d desc fDesc items mov
 		d 		= "Nowhere"
 		desc 	= "I am standing on a strange redish mound in the snow. To the west is the scout camp, to the north is another of these mounds."
 		fDesc 	= "the vauge outline of a small hill of some kind in the snow."	
-		items 	= ("bloated corpse" => corpse2)
+		items 	= ("bloated corpse" = corpse2)
 		mov 	= True
 
 mountains 	 	= Location "Mountains" n s e w u d desc fDesc items mov
@@ -572,7 +572,7 @@ underRuins 		= Location "UnderRuins" n s e w u d desc fDesc items mov
 		d 		= "UnderRuins"
 		desc 	= "The structures open up into an intricately carved passageway."
 		fDesc 	= "There seems to be some kind of passageway leading underground."	
-		items 	= ("Carvings" => carvings)
+		items 	= ("Carvings" = carvings)
 		mov 	= True
 
 
@@ -592,7 +592,7 @@ murals 	 		= Location "Murals" n s e w u d desc fDesc items mov
 		d 		= "UnderMurals"
 		desc 	= "A strange room-like structure, made of an unknown metallic material, and containing several crystalline murals. A portal seems to lead deeper down."
 		fDesc 	= "There appears to be ruins of somekind, with glints of glass gleaming from them."	
-		items 	= ("mural" => mural)
+		items 	= ("mural" = mural)
 		mov 	= True
 
 mural2  		= Item name fDesc desc
@@ -611,12 +611,12 @@ underMurals 	= Location "UnderMurals" n s e w u d desc fDesc items mov
 		d 		= "Nowhere"
 		desc 	= "The portal leads deeper into the structure. There are more murals, and though you have clearly descended several hundred feet below the surface, an impossible light still radiates from behind them."
 		fDesc 	= "It appears to be a portal leading deep underground."	
-		items 	= ("mural" => mural2)
+		items 	= ("mural" = mural2)
 		mov 	= True
 		--THIS SHOULD PROBABLY BE FIXED
 		--mov 	= False
 
-gameLocations 	= ("Camp"=>camp,"Mound"=>mound,"Mound2"=>mound2,"Mound3"=>mound3,"Mountains"=>mountains,"Ruins"=>ruins,"UnderRuins"=>underRuins,"Murals"=>murals,"UnderMurals"=>underMurals,"Nowhere"=>Location)
+gameLocations 	= ("Camp"=camp,"Mound"=mound,"Mound2"=mound2,"Mound3"=mound3,"Mountains"=mountains,"Ruins"=ruins,"UnderRuins"=underRuins,"Murals"=murals,"UnderMurals"=underMurals,"Nowhere"=Location)
 initGame 		= Game () () gameLocations
 
 ---------------------------------------------------------------------------------------------------------------------
