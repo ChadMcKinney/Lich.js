@@ -2335,7 +2335,10 @@ Lich.compileSoloStream = function(ast, ret)
 	{
 		Lich.compileAST(ast.modifiers, function(modifiers)
 		{
-			ret(ast.id+"=new Soliton.SoloStream("+list+","+modifiers+");");
+			if(eval ("typeof "+ast.id+" !== \"undefined\""))
+				ret(ast.id+".update("+list+","+modifiers+");");
+			else
+				ret(ast.id+"=new Soliton.SoloStream(\""+ast.synth+"\","+list+","+modifiers+");Lich.scheduler.addScheduledEvent("+ast.id+");");
 		});
 	});
 }

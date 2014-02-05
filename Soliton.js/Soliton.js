@@ -6330,7 +6330,7 @@ function delay(delayTime, feedbackLevel, input, ret)
 		{
 			if(elem._lichType == AUDIO)
 				elem.startAll(time);
-		})
+		});
 	}
 
 	mix.stopAll = function(time)
@@ -6339,7 +6339,7 @@ function delay(delayTime, feedbackLevel, input, ret)
 		{
 			if(elem._lichType == AUDIO)
 				elem.stopAll(time);
-		})
+		});
 	}
 
 	mix._lichType = AUDIO;
@@ -6884,7 +6884,6 @@ Soliton.PercStream = function(_events, _modifiers)
 
 	this.stop = function()
 	{
-		Lich.post("STOP!!!!!");
 		playing = false;
 		Lich.scheduler.removeScheduledEvent(this);
 	}
@@ -6978,14 +6977,122 @@ Soliton.PercStream = function(_events, _modifiers)
 	}
 }
 
-Soliton.SoloStream = function(_events, _modifiers)
+Soliton.SoloStream = function(_instrument, _events, _modifiers)
 {
+	var instrument = _instrument;
 	var events = _events;
 	var modifiers = _modifiers;
+	this.nextTime = Math.floor((Soliton.context.currentTime / Lich.scheduler.tempoSeconds) + 0.5) * Lich.scheduler.tempoSeconds;
+	var macroBeat = 0;
+	var modifierBeat = 0;
+	var hasModifiers = modifiers.length > 0;
 	this._lichType = SOLOSTREAM;
+	var playing = true;
 
-	Lich.post("events = " + Lich.VM.PrettyPrint(events));
-	Lich.VM.Print(modifiers);
+	// Push to the next metric down beat
+	this.nextTime += ((this.nextTime / Lich.scheduler.tempoSeconds) % _events.length) * Lich.scheduler.tempoSeconds;
+
+	
+	//Lich.post("NextTime = " + this.nextTime);
+	//Lich.post("events = " + Lich.VM.PrettyPrint(events));
+	//Lich.VM.Print(modifiers);
+
+	this.stop = function()
+	{
+		playing = false;
+		Lich.scheduler.removeScheduledEvent(this);
+	}
+
+	this.play = function()
+	{
+		if(!playing)
+		{
+			playing = true;
+			Lich.scheduler.addScheduledEvent(this);
+		}
+	}
+
+	this.subSchedulePlay = function(nevent, nDuration, offset)
+	{
+		if(nevent instanceof Array)
+		{
+			if(nevent.length > 0)
+			{
+				var divDuration = nDuration / nevent.length;
+				for(var i = 0; i < nevent.length; ++i)
+				{
+					this.subSchedulePlay(nevent[i], divDuration, offset + (divDuration * i));
+				}
+			}
+		}
+
+		else if(nevent != Lich.VM.Nothing)
+		{
+			if(hasModifiers)
+			{
+				var modifier = modifiers[modifierBeat];
+
+				if(modifier != Lich.VM.Nothing)
+				{
+					modifier(nevent, function(_newEvent)
+					{
+						nevent = _newEvent;
+					});
+				}
+			}
+
+			var nextTime = this.nextTime;
+			Soliton.synthDefs[instrument](nevent, function(synth)
+			{
+				synth.connect(Soliton.masterGain);
+				synth.startAll(nextTime + offset);
+			});
+		}
+	}
+
+	this.schedulePlay = function()
+	{
+		var event = events[macroBeat];
+		var beatDuration = Lich.scheduler.tempoSeconds;
+		
+		if(++macroBeat >= events.length)
+				macroBeat = 0;
+		
+		this.subSchedulePlay(event, beatDuration, 0); // recursively schedule beat, adjusting for tuple nesting
+		this.nextTime += beatDuration;
+
+		if(hasModifiers)
+		{
+			if(++modifierBeat >= modifiers.length)
+					modifierBeat = 0;
+		}
+
+		//Lich.post("PercStream nextTime = " + this.nextTime);
+		//Lich.post("Soliton.context.currentTime = " + Soliton.context.currentTime);
+		return this.nextTime;
+	}
+
+	this.update = function(newEvents, newModifiers)
+	{
+		events = newEvents;
+		modifiers = newModifiers;
+		macroBeat = macroBeat % events.length;
+
+		if(modifiers.length)
+			modifierBeat = modifierBeat % modifiers.length;
+		else
+			modifierBeat = 0;
+
+		hasModifiers = modifiers.length > 0;
+
+		if(!playing)
+		{
+			this.nextTime = Math.floor((Soliton.context.currentTime / Lich.scheduler.tempoSeconds) + 0.5) * Lich.scheduler.tempoSeconds;
+			this.nextTime += ((this.nextTime / Lich.scheduler.tempoSeconds) % _events.length) * Lich.scheduler.tempoSeconds;
+		}
+
+		this.play();
+	}
 }
 
 Soliton.AudioEvent = function(_nodeFunc, _startTime, _stopTime, _calcFunc)

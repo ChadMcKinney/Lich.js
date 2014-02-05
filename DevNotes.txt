@@ -1474,3 +1474,38 @@ clusterz3 +> _ cluster3 | (/2)
 clusterz4 +> cluster3 _  _ cluster3 | (/2)
 Synth cluster0 = white >> perc 0 0.4 0.5
 clusterz0 +> _ cluster0 | (*2)
+
+
+-- Melody sequencing is beginning to work!
+Synth hh = white >> perc 0 0.5 0.1
+hhh +> hh [_ hh] [_ hh] hh
+
+Synth hh2 = white >> bandpass (100 * 16) 100 >> gain 20 >> perc 0 0.5 0.05
+hhh4 +> hh2 hh2 | (/2)
+
+Synth snare = white >> perc 0.0 0.7 0.3
+Synth ss = white >> bandpass (340 * 8) 100 >> gain 30 >> perc 0.0 1 0.1
+Synth lkick = square 80 >> add (tri 40) >> perc 0 1 0.1
+lkicker2 +> [lkick lkick] [snare _ ss snare] [ss [lkick lkick]] [_ ss snare _] | (*2)
+
+Synth bass freq = (sin freq) + white >> lowpass (freq * (pow 2 $ randomI 1 3)) 40 >> perc 0.01 0.3 (random 0.05 3)
+bassSeq ~> bass 20 42.5 _ 80 160 _ 190 | (*2) (/2) (*1.75) _ _ (*1.5) (*2) _
+
+Synth bass2 freq = (square freq) + white >> lowpass (freq * (pow 2 $ randomI 2 3)) 40 >> perc 0.0 0.6 0.1
+bassSeq2 ~> bass2 [20 42.5] [42.5 80] [160 160] [190 190] | (*2) _ (*1.75) _ _ (*1.5) (*2) _ (*1.5)
+
+Synth plunk freq = (sin freq * 16) >> perc 0.0 0.1 0.05
+plunkSeq ~> plunk [80 170] [40 42.5] [42.5 80] [160 160] [190 _ 190 20] | (*2) (*2) (*1.75) (*6) (*8) (*6) (*4) (*2) (*1.5)
+
+stop bassSeq
+stop lkicker2
+stop hhh4
+stop hhh
+stop plunkSeq
+stop bassSeq2
+
+bassSeq2 ~> bass2 [20 42.5] [42.5 80] [160 160] [190 190] | _ _ _ _  (/2) (/2) (/2) (/2)
+bassSeq2 ~> bass2 [42.5 80] [160 160] | (/4)
+bassSeq2 ~> bass2 [40 40]
+
+stop bassSeq2
