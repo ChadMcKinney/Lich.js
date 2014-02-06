@@ -272,11 +272,13 @@ movePlayer cardinal player game =
 
 moveMonster cardinal monster game = 
 	case newLocation::moveable of
-		True	-> updateMonster newMonster game
+		True	-> newGame
 		False	-> addNarration "That way is blocked." game 
 	where
-		newLocation 	= locationAtCardinal cardinal player game
-		newMonster 		= monster{location=newLocation::name}
+		newLocation 	= locationAtCardinal cardinal monster game
+		newLocationName	= newLocation::name
+		newMonster 		= monster{location=newLocationName}
+		newGame			= addLocationNarration newLocation $ updateMonster newMonster game
 
 movePlayerOrMonster cardinal name game = newGame
 	where
@@ -623,18 +625,22 @@ initGame 		= Game () () gameLocations
 -- IO Functions
 ---------------------------------------------------------------------------------------------------------------------
 
+
 --
 -- Start the game
 --
 startGame message playerName = send
 	where
-		player 	= Player playerName 100 "Camp"
-		game 	= updatePlayer player initGame
-		actor 	= spawn "madnessLoop" madnessLoop [game]
-		send 	=
+		player 				= Player playerName 100 "Camp"
+		createMonster name 	= Monster name 100 "Mound"
+		insertMonster m d	= insert (m::name = m) d
+		monsters 			= remove playerName $ foldr (insertMonster) () $ map (createMonster) lichUsers
+		game 				= Game (playerName = player) monsters gameLocations
+		actor 				= spawn "madnessLoop" madnessLoop [game]
+		send =
 			case message of
-				Intro 	-> [message,playerName,clientName] :>> actor
-				Start 	-> [message,playerName,clientName] :>> actor
+				Intro 	-> [message,clientName,clientName] :>> actor
+				Start 	-> [message,clientName,clientName] :>> actor
 
 --
 -- Controls
@@ -644,7 +650,9 @@ walk cardinal pName 	= [Walk,cardinal,pName,clientName] 		:>> "madnessLoop"
 look at itemName pName  = [Look,itemName,pName,clientName] 		:>> "madnessLoop"
 view pName 				= [View,pName,clientName] 				:>> "madnessLoop"
 pickup itemName pName 	= [Pickup,itemName,pName,clientName] 	:>> "madnessLoop"
-putdown itemName pName 	= [Putdown,itemName,pName,clientName] 	:>> "madnessLoop"
+put down itemName pName = [Putdown,itemName,pName,clientName] 	:>> "madnessLoop"
+pick up itemName pName 	= [Pickup,itemName,pName,clientName] 	:>> "madnessLoop"
+putdown itemName pName 	= [Pstdown,itemName,pName,clientName] 	:>> "madnessLoop"
 inventory pName 		= [Inventory,pName,clientName] 			:>> "madnessLoop"
 talk text pName 		= [Talk,text,pName,clientName] 			:>> "madnessLoop"
 status pName 			= [Status,pName,clientName]				:>> "madnessLoop"
@@ -669,11 +677,11 @@ madnessLoop game =
 		[Intro,pName,myName]			-> loop pName myName $ addPlayerLocationNarration pName game
 		[Start,pName,myName] 			-> loop pName myName $ addPlayerLocationNarration pName game
 		[View,pName,myName] 			-> loop pName myName $ addPlayerLocationNarration pName game
-		[Walk,cardinal,pName,myName]	-> loop pName myName $ movePlayer cardinal (getPlayer pName game) game
-		[Look,itemName,pName,myName]	-> loop pName myName $ lookAtItem itemName (getPlayer pName game) game
+		[Walk,cardinal,pName,myName]	-> loop pName myName $ movePlayerOrMonster cardinal pName game
+		[Look,itemName,pName,myName]	-> loop pName myName $ lookAtItem itemName (getSomething pName game) game
 		[Pickup,itemName,pName,myName]	-> loop pName myName $ pickupItemFromLocation itemName (getSomething pName game) game
 		[Putdown,itemName,pName,myName]	-> loop pName myName $ putdownItem itemName (getSomething pName game) game
 		[Inventory,pName,myName]		-> loop pName myName $ narrateInventory (getSomething pName game) game
 		[Status,pName,myName]			-> loop pName myName $ narrateStatus (getSomething pName game) game
-		[Talk,text,pName,myName]		-> madnessLoop . narrateGame $ narrateStatus (getSomething pName game) game
+		[Talk,text,pName,myName]		-> madnessLoop . narrateGame $ addNarration (pName + ": " + text) game
 		Finish							-> game
