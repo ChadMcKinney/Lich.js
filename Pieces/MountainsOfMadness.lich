@@ -677,4 +677,3 @@ madnessLoop game =
 		[Status,pName,myName]			-> loop pName myName $ narrateStatus (getSomething pName game) game
 		[Talk,text,pName,myName]		-> madnessLoop . narrateGame $ narrateStatus (getSomething pName game) game
 		Finish							-> game
-
