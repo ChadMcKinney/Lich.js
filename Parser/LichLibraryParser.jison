@@ -117,7 +117,7 @@
 /* operator associations and precedence */
 
 // 0
-%right '='
+%right '=' '=>'
 
 // 1
 %right '$' '<<'
@@ -251,12 +251,14 @@ list_decl_comma_1 // : [decl]
 //  ;
 decl // : object
   //: decl_fixity           {{$$ = $1;}}
-  : var rhs           {{$$ = {astType:"decl-fun", ident: $1, args: [], rhs: $2, pos: @$};}}
-  | var apats rhs     {{$$ = {astType:"decl-fun", ident: $1, args: $2, rhs: $3, pos: @$};}}
-  | pat varop pat rhs {{$$ = {astType:"decl-fun", ident: $2, args: [$1,$3], rhs: $4, pos: @$, orig: "infix"};}}
+  : var '=' rhs           {{$$ = {astType:"decl-fun", ident: $1, args: [], rhs: $3, pos: @$};}}
+  | var apats '=' rhs     {{$$ = {astType:"decl-fun", ident: $1, args: $2, rhs: $4, pos: @$};}}
+  | pat varop pat '=' rhs {{$$ = {astType:"decl-fun", ident: $2, args: [$1,$3], rhs: $5, pos: @$, orig: "infix"};}}
   | '(' pat varop pat ')' apats rhs
-    {{$$ = {astType:"decl-fun", ident: $3, args: [$2,$4].concat($6), rhs: $7, pos: @$, orig: "infix"};}}
+    {{$$ = {astType:"decl-fun", ident: $3, args: [$2,$4].concat($6), rhs: $8, pos: @$, orig: "infix"};}}
   | guardexp                        {{$$ = $1;}}
+  | var '=>' rhs                    {{ $$ = {astType:"synthdef", ident:$1, args:[], rhs:$3};}}
+  | var apats '=>' rhs              {{ $$ = {astType:"synthdef", ident:$1, args:$2, rhs:$4};}} 
   ;
 
 //funlhs // : object
@@ -266,8 +268,8 @@ decl // : object
 //    ;
 
 rhs // : object
-    : '=' exp                  {{$$ = $2;}}
-    | '=' exp "where" decls    {{$$ = {astType: "fun-where", exp: $2, decls: $4, pos: @$}; }}
+    : exp                  {{$$ = $1;}}
+    | exp "where" decls    {{$$ = {astType: "fun-where", exp: $1, decls: $3, pos: @$}; }}
     ; //TODO
 
 decl_fixity // : type declaration | fixity
@@ -357,7 +359,6 @@ topexp
   | impdecl             {{$$ = $1;}}
   | percStream          {{$$ = $1;}}
   | soloStream          {{$$ = $1;}}
-  | "let" synthDef      {{$$ = $2;}}
   ;
 
 topexps
@@ -462,10 +463,12 @@ lambdaExp
 // SynthDefinitions
 /////////////////////
 
+/*
 synthDef
   : varid synthRhs            {{ $$ = {astType:"synthdef", id:$1, args:[], rhs:$2};}}
   | varid synthArgs synthRhs  {{ $$ = {astType:"synthdef", id:$1, args:$2, rhs:$3};}}
   ;
+*/
 
 synthArgs
   : varid                     {{$$ = [{astType:"decl-fun", ident: {astType:"varname", id:$1}, args: [], rhs:{astType:"float-lit",value:0}, pos: @$}];}}
@@ -709,8 +712,8 @@ classmems
 
 classmem
   : decl                    {{$$ = {astType:"class-decl", decl:$1};}}
-  | varid binop varid rhs   {{$$ = {astType:"class-binop", left:$1, binop:$2, right:$3, rhs:$4};}}
-  | varid varsym varid rhs  {{$$ = {astType:"class-binop", left:$1, binop:$2, right:$3, rhs:$4};}}
+  | varid binop varid '=' rhs   {{$$ = {astType:"class-binop", left:$1, binop:$2, right:$3, rhs:$5};}}
+  | varid varsym varid '=' rhs  {{$$ = {astType:"class-binop", left:$1, binop:$2, right:$3, rhs:$5};}}
   | varid binop varid       {{$$ = {astType:"class-binop", left:$1, binop:$2, right:$3};}}
   | varid varsym varid      {{$$ = {astType:"class-binop", left:$1, binop:$2, right:$3};}}
   ;
