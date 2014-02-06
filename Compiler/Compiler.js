@@ -1553,8 +1553,8 @@ Lich.compileDataInst = function(ast,ret)
 		},
 		function(members)
 		{
-			//ret("(function(_ret){Lich.newData("+ast.id+",["+members.join(",")+"],_ret)})");
-			ret(ast.id+".curry("+members.join(",")+")");
+			ret("(function(_ret){Lich.newData("+ast.id+",["+members.join(",")+"],_ret)})");
+			//ret(ast.id+".curry("+members.join(",")+")");
 		}
 	);
 }
@@ -2278,7 +2278,10 @@ Lich.compilePercStream = function(ast, ret)
 	{
 		Lich.compileAST(ast.modifiers, function(modifiers)
 		{
-			ret(ast.id+"=new Soliton.PercStream("+list+","+modifiers+");Lich.scheduler.addScheduledEvent("+ast.id+");");
+			if(eval ("typeof "+ast.id+" !== \"undefined\""))
+				ret(ast.id+".update("+list+","+modifiers+");");
+			else
+				ret(ast.id+"=new Soliton.PercStream("+list+","+modifiers+");Lich.scheduler.addScheduledEvent("+ast.id+");");
 		});
 	});
 }
@@ -2292,7 +2295,10 @@ Lich.compilePercList = function(ast, ret)
 		{
 			Lich.compileAST(listItem, function(listRes)
 			{
-				res.push(listRes);
+				if(listItem.astType == "Nothing" || listItem.astType === "percList")
+					res.push(listRes);
+				else
+					res.push("\""+listItem.id+"\"");
 				next();
 			});
 		},
@@ -2329,7 +2335,10 @@ Lich.compileSoloStream = function(ast, ret)
 	{
 		Lich.compileAST(ast.modifiers, function(modifiers)
 		{
-			ret(ast.id+"=new Soliton.SoloStream("+list+","+modifiers+");");
+			if(eval ("typeof "+ast.id+" !== \"undefined\""))
+				ret(ast.id+".update("+list+","+modifiers+");");
+			else
+				ret(ast.id+"=new Soliton.SoloStream(\""+ast.synth+"\","+list+","+modifiers+");Lich.scheduler.addScheduledEvent("+ast.id+");");
 		});
 	});
 }
@@ -2395,6 +2404,7 @@ Lich.compileSynthDef = function(ast,ret)
 		{
 			Lich.compileAST(ast.rhs, function(rhs)
 			{
+				/*
 				initialData.push("_lichType:SYNTH");
 				initialData.push("_datatype:\""+ast.id+"\"");
 				initialData.push("_argNames:["+argNames.join(",")+"]");
@@ -2402,7 +2412,13 @@ Lich.compileSynthDef = function(ast,ret)
 				var def = ast.id+"=function ("+args.concat("_sRet").join(",")+"){"
 				def = def + argControls.join(";")+";var _rhsRes="+rhs+";Lich.collapse(_rhsRes,function(res){_rhsRes=res});";
 				def = def + "_sRet({"+initialData.concat(dataPairs).join(",")+"})};";
-				ret(def);
+				ret(def);*/
+				//var def = ast.id+"=function ("+args.concat("_sRet").join(",")+"){";
+				//def = def + "_sRet("+initialData.concat(dataPairs).join(",")+"})};";
+				ret(
+					"Soliton.synthDefs[\""+ast.id+"\"]=function ("+args.concat("_sRet").join(",")+"){"+rhs+"(_sRet)};"
+					+ast.id+"=Soliton.synthDefs[\""+ast.id+"\"];"
+				);
 			});
 		}
 	);
