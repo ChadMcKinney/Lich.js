@@ -18,7 +18,7 @@
 <comment>\n                 yylineno++;
 "--".*                      {/* skip whitespace and comments */}
 \s+                         return {val:yytext};
-[0-9]+("."[0-9]+)?          return {val:yytext,typ:"float"};
+("-")?[0-9]+("."[0-9]+)?      return {val:yytext,typ:"float"};
 "::"                        return {val:"::",typ:"::"};
 "[]"                        return {val:"[]",typ:"[]"};
 "["                         return {val:"[",typ:"["};
@@ -99,7 +99,6 @@
 "Nothing"                   return {val:"Nothing",typ:"Nothing"};
 "receive"                   return {val:"receive",typ:"receive"};
 "otherwise"                 return {val:"otherwise",typ:"otherwise"};
-"Synth"                     return {val:"Synth",typ:"Synth"};
 [a-z][A-Za-z0-9_]*          return {val:yytext,typ:"varid"};
 [A-Z][A-Za-z0-9_]*          return {val:yytext,typ:"conid"};
 \"([^\"])*\"                return {val:yytext,typ:"string-lit"};
@@ -146,7 +145,7 @@
 %left '*' '/' '%'
 
 // 9
-%left '^'
+%left '^' 
 
 // 10
 %right '.'
@@ -229,7 +228,7 @@ topdecl // : object
     : decl                    {{$$ = {astType: "topdecl-decl", decl: $1, pos: @$};}}
     | impdecl                       {{$$ = $1;}}
     | dataexp                       {{$$ = $1;}}
-    | synthDef                      {{$$ = $1;}}
+    //| synthDef                      {{$$ = $1;}}
     ;
 
 
@@ -358,7 +357,7 @@ topexp
   | impdecl             {{$$ = $1;}}
   | percStream          {{$$ = $1;}}
   | soloStream          {{$$ = $1;}}
-  | synthDef            {{$$ = $1;}}
+  | "let" synthDef      {{$$ = $2;}}
   ;
 
 topexps
@@ -387,8 +386,7 @@ letdecl
 
 exp // : object
   // : infixexp %prec NOSIGNATURE  {{$$ = $1;}}
-  : lexp                {{$$ = $1}}
-  | funccomp            {{$$ = $1;}}
+  : funccomp            {{$$ = $1;}}
   | funcstream          {{$$ = $1;}}
   | datalookup          {{$$ = $1;}}
   | datainst            {{$$ = $1;}}
@@ -414,6 +412,7 @@ exp // : object
   | exp "<<" exp        {$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
   | exp "?"  exp        {$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
   | exp ":>>" exp       {$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
+  | lexp                {{$$ = $1}}
   ;
 
 binop
@@ -464,19 +463,19 @@ lambdaExp
 /////////////////////
 
 synthDef
-  : "Synth" varid rhs            {{ $$ = {astType:"synthdef", id:$2, args:[], rhs:$3};}}
-  | "Synth" varid synthArgs rhs  {{ $$ = {astType:"synthdef", id:$2, args:$3, rhs:$4};}}
+  : varid synthRhs            {{ $$ = {astType:"synthdef", id:$1, args:[], rhs:$2};}}
+  | varid synthArgs synthRhs  {{ $$ = {astType:"synthdef", id:$1, args:$2, rhs:$3};}}
   ;
 
 synthArgs
   : varid                     {{$$ = [{astType:"decl-fun", ident: {astType:"varname", id:$1}, args: [], rhs:{astType:"float-lit",value:0}, pos: @$}];}}
   | synthArgs varid           {{$1.push({astType:"decl-fun", ident: {astType:"varname", id:$2}, args: [], rhs:{astType:"float-lit",value:0}, pos: @$}); $$ = $1;}}
   ;
-/*
+
 synthRhs
   : "=>" exp                 {{$$ = {astType: "fun-where", exp: $2, decls: [], pos: @$}; }}
   | "=>" exp "where" decls   {{$$ = {astType: "fun-where", exp: $2, decls: $4, pos: @$}; }}
-  ;*/
+  ;
 
 ///////////////
 // PercStream
@@ -621,7 +620,7 @@ aexp // : object
   | gcon                    {{$$ = $1;}}
   | literal                 {{$$ = $1;}}
   | "(" exp ")"             {{$$ = $2;}}
-  | '(' '-' exp ')'         {{$$ = {astType:"negate",rhs:$3};}}
+  //| '-' exp %prec UMINUS    {{$$ = {astType:"negate",rhs:$2};}}
   | dictexp                 {{$$ = $1;}}
   | listexp                 {{$$ = $1;}}
   | "(" binop ")"           {{ $$ = {astType:"curried-binop-exp",op:$2,pos:@$};}}

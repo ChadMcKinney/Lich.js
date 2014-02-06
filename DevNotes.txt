@@ -1406,13 +1406,13 @@ stop guitar
 
 
 
-Synth kick = square 80 >> perc 0.0 0.7 0.05
+let kick => square 80 >> perc 0.0 0.7 0.05
 kicker +> kick _
 
-Synth snare = square (80 * 16) >> perc 0.0 0.7 0.05
+let snare => square (80 * 16) >> perc 0.0 0.7 0.05
 snarer +> _ snare
 
-Synth hihate = tri (mul 80 $ randomI 1 32) >> perc 0.0 0.4 0.05
+let hihate => tri (mul 80 $ randomI 1 32) >> perc 0.0 0.4 0.05
 hater +> _ hihate _ _ _
 hater2 +> _ _ hihate _ _ _
 hater2 +> _ hihate _ _ _ _ _
@@ -1423,7 +1423,7 @@ setTempo 500
 setTempo 1000
 
 -- Metric Onset Test, should produce consistent quarter notes no matter the timing of the starts
-Synth hihate = tri (mul 80 $ randomI 1 24) >> perc 0.0 0.4 0.05
+let hihate => tri (mul 80 $ randomI 1 24) >> perc 0.0 0.4 0.05
 hater +> _ hihate _ _
 hater2 +> hihate _ _ _
 hater2 +> _ _ hihate _
@@ -1433,30 +1433,30 @@ hater3 +> _ _ _ hihate
 
 -- Just Intonation Fun
 
-let glitter4 = (sin (saw 0.1 >> exprange 1 40)) * (sin (160*10)) * (tri 6.5) >> delay (1/3) 0.3 >> gain 0.1 >> play
+let glitter4 => (sin (saw 0.1 >> exprange 1 40)) * (sin (160*10)) * (tri 6.5) >> delay (1/3) 0.3 >> gain 0.1 >> play
 
-Synth k = tri 40 >> lowpass 320 1 >> perc 0.0001 1 0.3
+let k => tri 40 >> lowpass 320 1 >> perc 0.0001 1 0.3
 kicker +> k _ _ k _ _ k _ | (/2)
 
-Synth hh = sin (mul 80 12) >> perc 0.0 0.4 0.05
+let hh => sin (mul 80 12) >> perc 0.0 0.4 0.05
 hate5 +> _ hh | (/2)
 
-Synth hh2 = sin (160 * 10) >> perc 0 0.3 0.1
+let hh2 => sin (160 * 10) >> perc 0 0.3 0.1
 hate2 +> hh2 hh2 _
 
-Synth hh3 = white >> gain 10 >> bandpass (80 * 17) 455 >> gain 10 >> perc 0.0001 1 0.1
+let hh3 => white >> gain 10 >> bandpass (80 * 17) 455 >> gain 10 >> perc 0.0001 1 0.1
 hihate3 +> hh3 _ _ | (/2)
 hihate4 +> hh3 _ _ _ _ | (/2)
 
-Synth snare = white >> perc 0.0 0.7 0.5
-Synth lkick = tri 40 >> perc 0.001 0.7 0.75
+let snare => white >> perc 0.0 0.7 0.5
+let lkick => square 40 >> perc 0.001 0.7 0.4
 lkicker +> lkick snare [_ lkick] snare | (*2)
 
 
-Synth guitar = (saw (40 * (randomI 1 10))) * (sin 3) >> lowpass (80*17) 10 >> delay (1/5) 0.4 >> perc 0.1 0.3 3
+let guitar => (saw (40 * (randomI 1 10))) * (sin 3) >> lowpass (80*17) 10 >> delay (1/5) 0.4 >> perc 0.1 0.3 3
 guitarer +> guitar _ guitar _ _ guitar _ _
 
-let filterer2 = square 80 >> lowpass ((saw 3 >> exprange 1 100) * (sin 0.3 >> exprange 1 100)) (sin 0.2 >> range 0.1 10) >> gain 0.3 >> play
+let filterer2 => square 80 >> lowpass ((saw 3 >> exprange 1 100) * (sin 0.3 >> exprange 1 100)) (sin 0.2 >> range 0.1 10) >> gain 0.3 >> play
 stop guitarer
 stop filterer2
 stop glitter4
@@ -1465,36 +1465,36 @@ stop glitter4
 
 setTempo 300
 
-Synth cluster = square 20 >> waveShape (map (nsin) [1..99]) >> lowshelf 40 12 >> perc 0 1 0.1
+let cluster => square 20 >> waveShape (map (nsin) [1..99]) >> lowshelf 40 12 >> perc 0 1 0.1
 clusterz +> cluster _ cluster cluster | (/2)
-Synth cluster2 = square 20 >> waveShape (map (nsin) [1..179]) >> perc 0 1 0.1
+let cluster2 => square 20 >> waveShape (map (nsin) [1..179]) >> perc 0 1 0.1
 clusterz2 +> _ cluster2 _ | (/2)
-Synth cluster3 = square 20 >> waveShape (map (nsin) [1..199]) >> perc 0 1 0.05
+let cluster3 => square 20 >> waveShape (map (nsin) [1..199]) >> perc 0 1 0.05
 clusterz3 +> _ cluster3 | (/2)
 clusterz4 +> cluster3 _  _ cluster3 | (/2)
-Synth cluster0 = white >> perc 0 0.4 0.5
+let cluster0 => white >> perc 0 0.4 0.5
 clusterz0 +> _ cluster0 | (*2)
 
 
 -- Melody sequencing is beginning to work!
-Synth hh = white >> perc 0 0.5 0.1
+let hh => white >> perc 0 0.5 0.1
 hhh +> hh [_ hh] [_ hh] hh
 
-Synth hh2 = white >> bandpass (100 * 16) 100 >> gain 20 >> perc 0 0.5 0.05
+let hh2 => white >> bandpass (100 * 16) 100 >> gain 20 >> perc 0 0.5 0.05
 hhh4 +> hh2 hh2 | (/2)
 
-Synth snare = white >> perc 0.0 0.7 0.3
-Synth ss = white >> bandpass (340 * 8) 100 >> gain 30 >> perc 0.0 1 0.1
-Synth lkick = square 80 >> add (tri 40) >> perc 0 1 0.1
+let snare => white >> perc 0.0 0.7 0.3
+let ss => white >> bandpass (340 * 8) 100 >> gain 30 >> perc 0.0 1 0.1
+let lkick => square 80 >> add (tri 40) >> perc 0 1 0.1
 lkicker2 +> [lkick lkick] [snare _ ss snare] [ss [lkick lkick]] [_ ss snare _] | (*2)
 
-Synth bass freq = (sin freq) + white >> lowpass (freq * (pow 2 $ randomI 1 3)) 40 >> perc 0.01 0.3 (random 0.05 3)
+let bass freq => (sin freq) + white >> lowpass (freq * (pow 2 $ randomI 1 3)) 40 >> perc 0.01 0.3 (random 0.05 3)
 bassSeq ~> bass 20 42.5 _ 80 160 _ 190 | (*2) (/2) (*1.75) _ _ (*1.5) (*2) _
 
-Synth bass2 freq = (square freq) + white >> lowpass (freq * (pow 2 $ randomI 2 3)) 40 >> perc 0.0 0.6 0.1
+let bass2 freq => (square freq) + white >> lowpass (freq * (pow 2 $ randomI 2 3)) 40 >> perc 0.0 0.6 0.1
 bassSeq2 ~> bass2 [20 42.5] [42.5 80] [160 160] [190 190] | (*2) _ (*1.75) _ _ (*1.5) (*2) _ (*1.5)
 
-Synth plunk freq = (sin freq * 16) >> perc 0.0 0.1 0.05
+let plunk freq => (sin freq * 16) >> perc 0.0 0.1 0.05
 plunkSeq ~> plunk [80 170] [40 42.5] [42.5 80] [160 160] [190 _ 190 20] | (*2) (*2) (*1.75) (*6) (*8) (*6) (*4) (*2) (*1.5)
 
 stop bassSeq
@@ -1502,7 +1502,6 @@ stop lkicker2
 stop hhh4
 stop hhh
 stop plunkSeq
-stop bassSeq2
 
 bassSeq2 ~> bass2 [20 42.5] [42.5 80] [160 160] [190 190] | _ _ _ _  (/2) (/2) (/2) (/2)
 bassSeq2 ~> bass2 [42.5 80] [160 160] | (/4)

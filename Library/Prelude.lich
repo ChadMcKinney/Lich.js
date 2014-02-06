@@ -47,6 +47,9 @@ zipFlat l r = foldl (\acc [x,y] -> acc ++ [x,y]) [] $ zip l r -- zip then flatte
 mapSpawn f l = map (\x -> spawn f [x]) l -- Spawn an actor, given a function, passing an argument from each item in a container
 zipSpawn l r = map (\[x,y] -> spawn x [y]) $ zip l r -- Spawn an actor from a function in l and argument in r, resulting in a list of Actors
 replicateN dimensions@(x:xs) value = foldl (\acc x -> replicate x acc) value $ reverse dimensions
+negate n = 0 - n
+neg n = 0 - n
+--doom => (square 40) + (square 80) >> highpass (1000 perc 0.1 1 1) 1 >> perc 0 1 1
 
 -- Recursive map over multidimensional list
 deepMap f list@(x:xs) = map (deepFunc) list
