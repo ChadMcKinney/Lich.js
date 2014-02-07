@@ -6916,8 +6916,11 @@ Soliton.PercStream = function(_events, _modifiers)
 			var nextTime = this.nextTime;
 			Lich.collapse(Soliton.synthDefs[nevent], function(synth)
 			{
-				synth.connect(Soliton.masterGain);
-				synth.startAll(nextTime + offset);
+				if(synth._lichType == AUDIO)
+				{
+					synth.connect(Soliton.masterGain);
+					synth.startAll(nextTime + offset);
+				}
 			});
 		}
 	}
@@ -7044,8 +7047,11 @@ Soliton.SoloStream = function(_instrument, _events, _modifiers)
 			var nextTime = this.nextTime;
 			Soliton.synthDefs[instrument](nevent, function(synth)
 			{
-				synth.connect(Soliton.masterGain);
-				synth.startAll(nextTime + offset);
+				if(synth._lichType == AUDIO)
+				{
+					synth.connect(Soliton.masterGain);
+					synth.startAll(nextTime + offset);
+				}
 			});
 		}
 	}

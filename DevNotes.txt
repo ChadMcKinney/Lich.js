@@ -1557,6 +1557,8 @@ setPositionAll [random -50 50, random -50 50, random -50 50]
 scale [random 0.1 1, random 0.1 1, random 0.1 1] s
 scaleAll [random 0.1 1, random 0.1 1, random 0.1 10]
 
+-- supports streaming style syntax
+s >> wireframe (choose [true, false]) >> setPosition [random -10 10, random -10 10, random -10 10] >> setColor [random 0 255, random 0 255, random 0 255] >> linear [random -1 1, random -1 1, random -1 1]
 
 cloudMesh (random 10 100) [random 0 255, random 0 255, random 0 255]
 gaussianMesh (random 10 100) [random 0 255, random 0 255, random 0 255]
@@ -1610,3 +1612,15 @@ scale [7, 7, 7] s
 angular [0.01, 0.01, 0.03] s
 
 spliceShader $ randomString $ random 1 5
+
+-- Patterns are supported as well!
+initGraphics
+let s = sphere [random -100 100, random -100 100, random -10 10] 50 [random 0 255, random 0 255, random 0 255]
+let c = cube [random -100 100, random -100 100, random -10 10] [50,50,50] [0.1,0,0] [random 0 255, random 0 255, random 0 255]
+let meshSynth => s >> wireframe (choose [true, false]) >> setPosition [random -10 10, random -10 10, random -10 10] >> setColor [random 0 255, random 0 255, random 0 255] >> linear [random -1 1, random -1 1, random -1 1]
+let meshSynth2 => c >> wireframe (choose [true, false]) >> setPosition [random -10 10, random -10 10, random -10 10] >> setColor [random 0 255, random 0 255, random 0 255] >> linear [random -1 1, random -1 1, random -1 1] >> angular [random 0 0.1, random 0 0.1, random 0 0.1]
+meshSeq +> meshSynth meshSynth2 meshSynth [meshSynth2 meshSynth]
+
+-- Shader sequencing, yay!
+let shaderSynth => spliceShader $ randomString $ random 1 5
+shaderSeq +> shaderSynth _ _ _
