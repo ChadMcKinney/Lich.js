@@ -1506,3 +1506,107 @@ stop bassSeq2
 
 -- chill for a minute
 stop bassSeq
+
+
+
+///////////////////////////////////
+// GRAPHICS TEST CODE
+///////////////////////////////////
+
+initGraphics -- MUST DO THIS FIRST!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+setBackground (random 0 255) (random 0 255) (random 0 255)
+let s = sphere [random -100 100, random -100 100, random -10 10] 50 [random 0 255, random 0 255, random 0 255]
+let c = cube [random -100 100, random -100 100, random -100 100] [25, 25, 25] [random 0 (2*pi), random 0 (2*pi), random 0 (2*pi)] [0,200,150] 
+
+setShader $ choose shaders
+deleteMesh s
+deleteMesh c
+
+deleteScene
+shaders
+setShaders $ map (choose) $ replicate 3 shaders
+clearShaders
+wireframe true s
+wireframe true c
+wireframe false s
+wireframe false c
+
+
+wireframeAll (choose [true, false])
+
+move [-1, -10, -2] s
+move [-1, 1, -1] c
+moveAll [random -1 1, random -1 1, random -1 1]
+
+setColor [random 0 255, random 0 255, random 0 255] c
+setColor [random 0 255, random 0 255, random 0 255] s
+setColorAll [random 0 255, random 0 255, random 0 255]
+
+rotate [random -1 1, random -1 1, random -1 1] c
+rotateAll [random -1 1, random -1 1, random -1 1]
+
+linear [0, 0, 1] c
+linearAll [random -1 1, random -1 1, random -1 1]
+
+angular [random -0.1 0.1, random -0.1 0.1, random -0.1 0.1] c
+angularAll [random -0.1 0.1, random -0.1 0.1, random -0.1 0.1]
+
+setPosition [random -50 50, random -50 50, random -50 50] s
+setPositionAll [random -50 50, random -50 50, random -50 50]
+
+scale [random 0.1 1, random 0.1 1, random 0.1 1] s
+scaleAll [random 0.1 1, random 0.1 1, random 0.1 10]
+
+
+cloudMesh (random 10 100) [random 0 255, random 0 255, random 0 255]
+gaussianMesh (random 10 100) [random 0 255, random 0 255, random 0 255]
+sinMesh (random 10 100) [random 0 255, random 0 255, random 0 255]
+
+sinMapMesh 30 30 [random 0 255, random 0 255, random 0 255]
+scaleAll [4, 4, 4]
+
+let n = noiseMapMesh 30 30 [random 0 255, random 0 255, random 0 255]
+scale [4, 4, 4] n
+angular [0.01, 0.01, 0.03] n
+
+deleteMesh n
+
+let g = gaussianMapMesh 30 30 [random 0 255, random 0 255, random 0 255]
+scale [4, 4, 4] g
+angular [0.01, 0.01, 0.03] g
+
+deleteMesh g
+
+
+let s = squareMapMesh 30 30 [random 0 255, random 0 255, random 0 255]
+scale [6,6,6] s
+angular [0.01, 0.01, 0.03] s
+
+deleteMesh s
+
+let s = sawMapMesh 30 30 [random 0 255, random 0 255, random 0 255]
+scale [4, 4, 4] s
+angular [0.01, 0.01, 0.03] s
+
+deleteMesh s
+
+let t = triMapMesh 30 30 [random 0 255, random 0 255, random 0 255]
+scale [10, 10, 10] t
+angular [0.01, 0.01, 0.03] t
+
+deleteMesh t
+
+-- Won't be able to initially see it because of culling, set the angular!
+let f = flatMapMesh 30 30 [random 0 255, random 0 255, random 0 255]
+scale [4, 4, 4] f
+angular [0.01, 0.01, 0.03] f
+
+deleteMesh f
+deleteScene
+initGraphics
+
+let s = sawMapMesh 20 20 [random 0 255, random 0 255, random 0 255]
+scale [7, 7, 7] s
+angular [0.01, 0.01, 0.03] s
+
+spliceShader $ randomString $ random 1 5

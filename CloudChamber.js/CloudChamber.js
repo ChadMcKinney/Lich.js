@@ -412,7 +412,7 @@ CloudChamber.addShader = function(shader, amount)
 	CloudChamber.numShaders += 1;
 }
 
-function setShader(shader/*, amount*/, ret)
+function setShader(shader, ret)
 {
 	var pass = new THREE.ShaderPass(CloudChamber.shadersMap[shader]);
 	// pass.uniforms["amount"].value = amount;
@@ -425,6 +425,21 @@ function setShader(shader/*, amount*/, ret)
 
 	CloudChamber.numShaders = 1;
 	CloudChamber.composer.addPass(pass);
+	ret(Lich.VM.Void);
+}
+
+function clearShaders(ret)
+{	
+	for(var i = 0; i < CloudChamber.numShaders; ++i)
+	{
+		CloudChamber.composer.passes.pop();
+	}
+
+	CloudChamber.numShaders = 1;
+	var rgbEffect = new THREE.ShaderPass(THREE.RGBShiftShader);
+	rgbEffect.uniforms["amount"].value = 0.0;
+	rgbEffect.renderToScreen = true;
+	CloudChamber.composer.addPass(rgbEffect);
 	ret(Lich.VM.Void);
 }
 
