@@ -1979,6 +1979,16 @@ function setTempo(bpm, ret)
 	ret(Lich.VM.Void);
 }
 
+function initGraphics()
+{
+	CloudChamber.setup(document.getElementById("canvas"), 24, undefined, Lich.post); // Create the CloudChamber instance
+
+	(function animloop(time){
+		requestAnimFrame(animloop);
+		CloudChamber.draw(time);
+	})();
+}
+
 // This should probably be moved out of Prelude and into a personal library file
 sampleList = new Array(
 	 "Airport",

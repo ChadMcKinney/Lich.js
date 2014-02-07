@@ -81,8 +81,11 @@ function createTextArea(name,num,total)
 		input.style.width = "100%";
 		
 		input.style.opacity = getShowingOpacity();*/
-		document.body.appendChild(input);
+		
+		
+		div.appendChild(input);
 
+		//document.body.appendChild(input);
 		var editor = ace.edit("terminal"+name);
 		editor.setTheme("ace/theme/lich");
 		editor.getSession().setMode("ace/mode/haskell");
@@ -115,6 +118,7 @@ function createTextArea(name,num,total)
 		input.style.overflow = "hidden";
 		//input.style.fontSize = '14px';
 		input.position = "relative";
+		//input.position = "absolute";
 		editors[name] = editor;
 
 		//Terminal nameTag
@@ -145,7 +149,7 @@ function createTextArea(name,num,total)
 	}
 	
 	input.style.opacity = getShowingOpacity();
-	//input.style.top = (document.documentElement.clientHeight * 0.78 * (num/total)) + "px";
+	input.style.top = (document.documentElement.clientHeight * 0.78 * (num/total)) + "px";
 	input.style.height = (document.documentElement.clientHeight * 0.78 * (1/total)) + "px";
 
 	/*

@@ -6987,5 +6987,15 @@ function compileLich()
 	Soliton.init();
 	Lich.scheduler = new Soliton.SteadyScheduler();
 	Lich.scheduler.start();
+	
+	/*
+	CloudChamber.setup(document.getElementById("canvas"), 24, undefined, Lich.post); // Create the CloudChamber instance
+
+	var lichShaderArray = new Array();
+	
+	for(var i = 0; i < CloudChamber.shaderArray.length; ++i)
+	{
+		lichShaderArray.push(CloudChamber.shaderArray[i]);
+	}*/
 	//Lich.scheduler.addScheduledEvent(Soliton.testMetrognome());
 }

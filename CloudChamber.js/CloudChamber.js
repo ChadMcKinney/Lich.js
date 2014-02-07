@@ -34,6 +34,7 @@ CloudChamber.POSITION_DATA_SIZE = 3;
 CloudChamber.COLOR_DATA_SIZE = 4;
 CloudChamber.pointers = new Array();
 CloudChamber.update_queue = {};
+CloudChamber.meshes = new Array();
 
 ////////////////////////////////////////
 // Helper functions for loading files
@@ -191,26 +192,21 @@ CloudChamber.checkGLError = function()
 
 CloudChamber.draw = function(time)
 {		
-		for(var i = 0; i < CloudChamber.pointers.length; ++i)
-		{
-			if(CloudChamber.pointers[i] != null)
-			{
-				if(CloudChamber.pointers[i].momentum_update)
-				{
-					var linear = CloudChamber.pointers[i].linear_momentum;
-					var angular = CloudChamber.pointers[i].angular_momentum;
-					CloudChamber.pointers[i].position.x += linear.x;
-					CloudChamber.pointers[i].position.y += linear.y;
-					CloudChamber.pointers[i].position.z += linear.z;
-					
-					CloudChamber.pointers[i].rotation.x += angular.x;
-					CloudChamber.pointers[i].rotation.y += angular.y;
-					CloudChamber.pointers[i].rotation.z += angular.z;
-				}
-			}
-		}	
+	for(var i = 0; i < CloudChamber.meshes.length; ++i)
+	{
+		var mesh = CloudChamber.meshes[i];
+		var linear = mesh.linear_momentum;
+		var angular = mesh.angular_momentum;
+		mesh.position.x += linear[0];
+		mesh.position.y += linear[1]
+		mesh.position.z += linear[2];
+				
+		mesh.rotation.x += angular[0];
+		mesh.rotation.y += angular[1];
+		mesh.rotation.z += angular[2];
+	}	
 
-		CloudChamber.composer.render(CloudChamber.scene, CloudChamber.camera);
+	CloudChamber.composer.render(CloudChamber.scene, CloudChamber.camera);
 }
 
 /******************************************************************************************************************
@@ -282,7 +278,7 @@ CloudChamber.setup = function(canvas, framerate, drawCallback, printCallback)
 	CloudChamber.testLight.position.z = 130;	
 
 	CloudChamber.scene.add(CloudChamber.testLight);
-	CloudChamber.renderer.setClearColorHex(0x000000, 1);
+	CloudChamber.renderer.setClearColorHex(0x141414, 1);
 
 	// postprocessing
 	CloudChamber.composer = new THREE.EffectComposer(CloudChamber.renderer);
@@ -372,6 +368,8 @@ CloudChamber.setup = function(canvas, framerate, drawCallback, printCallback)
 		"VignetteShader"
 	);
 
+	shaders = CloudChamber.shaderArray;
+
 	// shim layer with setTimeout fallback
 	window.requestAnimFrame = (function()
 	{
@@ -414,7 +412,7 @@ CloudChamber.addShader = function(shader, amount)
 	CloudChamber.numShaders += 1;
 }
 
-CloudChamber.setShader = function(shader, amount)
+function setShader(shader/*, amount*/, ret)
 {
 	var pass = new THREE.ShaderPass(CloudChamber.shadersMap[shader]);
 	// pass.uniforms["amount"].value = amount;
@@ -427,9 +425,10 @@ CloudChamber.setShader = function(shader, amount)
 
 	CloudChamber.numShaders = 1;
 	CloudChamber.composer.addPass(pass);
+	ret(Lich.VM.Void);
 }
 
-CloudChamber.setShaders = function(shaders)
+function setShaders(shaders, ret)
 {
 	for(var i = 0; i < shaders.length; ++i)
 	{
@@ -451,6 +450,8 @@ CloudChamber.setShaders = function(shaders)
 		CloudChamber.composer.addPass(pass);
 		CloudChamber.numShaders += 1;
 	}
+
+	ret(Lich.VM.Void);
 }
 
 CloudChamber.addPointer = function(object)
@@ -464,11 +465,11 @@ CloudChamber.removePointer = function(pointer)
 	CloudChamber.pointers[pointer] = null;
 }
 
-CloudChamber.sphere = function(sPosition, sRadius, sColor)
+function sphere(sPosition, sRadius, sColor, ret)
 {
 	var sphereMaterial = new THREE.MeshLambertMaterial(
 		{
-			color: sColor
+			color: CloudChamber.packRGB(sColor[0],sColor[1],sColor[2])
 		}
 	);
 
@@ -479,40 +480,44 @@ CloudChamber.sphere = function(sPosition, sRadius, sColor)
 		sphereMaterial
 	);
 
-	sphere.position = sPosition;
-	sphere.linear_momentum = { x:0, y:0, z:0 };
-	sphere.angular_momentum = { x:0, y:0, z:0 };
+	sphere.position = { x:sPosition[0], y:sPosition[1], z:sPosition[2] };
+	sphere.linear_momentum = [0, 0, 0];
+	sphere.angular_momentum = [0, 0, 0];
 	sphere.momentum_update = false;
 	CloudChamber.scene.add(sphere);
 	CloudChamber.print("Sphere: " + sPosition);
-	return CloudChamber.addPointer(sphere);
+	CloudChamber.meshes.push(sphere);
+	ret(sphere);
+	//ret(CloudChamber.addPointer(sphere));
 }
 
-CloudChamber.cube = function(cPosition, cSize, cRotation, cColor)
+function cube(cPosition, cSize, cRotation, cColor, ret)
 {
 	var cubeMaterial = new THREE.MeshLambertMaterial(
 		{
-			color: cColor
+			color: CloudChamber.packRGB(cColor[0],cColor[1],cColor[2])
 		}
 	);
 
 	var cube = new THREE.Mesh(
 		new THREE.CubeGeometry(
-			cSize.x,
-			cSize.y,
-			cSize.z
+			cSize[0],
+			cSize[1],
+			cSize[2]
 		),
 		cubeMaterial
 	);
 
-	cube.position = cPosition;
-	cube.rotation = cRotation;
-	cube.linear_momentum = { x:0, y:0, z:0 };
-	cube.angular_momentum = { x:0, y:0, z:0 };
+	cube.position = { x:cPosition[0], y:cPosition[1], z:cPosition[2] };
+	cube.rotation = new THREE.Euler(cRotation[0], cRotation[1], cRotation[2], 'XYZ');
+	cube.linear_momentum = [0, 0, 0];
+	cube.angular_momentum = [0, 0, 0];
 	cube.momentum_update = false;
 	CloudChamber.scene.add(cube);
 	CloudChamber.print("Cube: " + cPosition);
-	return CloudChamber.addPointer(cube);
+	CloudChamber.meshes.push(cube);
+	ret(cube);
+	//return CloudChamber.addPointer(cube);
 }
 
 CloudChamber.all = function(func)
@@ -537,113 +542,169 @@ CloudChamber.allArg = function(func, arg)
 	}	
 }
 
-CloudChamber.delete = function(pointer)
+function deleteMesh(mesh, ret)
 {
-	if(pointer < CloudChamber.pointers.length)
+	var index = CloudChamber.meshes.indexOf(mesh);
+	
+	if(index > 0)
 	{
-		CloudChamber.scene.remove(CloudChamber.pointers[pointer]);
-		CloudChamber.removePointer(pointer);
+		CloudChamber.meshes.splice(index, 1);
 	}
+
+	CloudChamber.scene.remove(mesh);
+	ret(Lich.VM.Void);
 }
 
-CloudChamber.deleteAll = function()
+function deleteScene()
 {
-	CloudChamber.all(CloudChamber.delete);
+	for(var i = 0; i < CloudChamber.meshes.length; ++i)
+	{
+		CloudChamber.scene.remove(CloudChamber.meshes[i]);
+	}
+
+	CloudChamber.meshes = new Array();
+	//CloudChamber.all(CloudChamber.delete);
 }
 
-CloudChamber.wireframe = function(pointer, active)
+function wireframe(active, mesh, ret)
 {
-	CloudChamber.pointers[pointer].material.wireframe = active;
+	mesh.material.wireframe = active;
+	ret(mesh);
 }
 
-CloudChamber.wireframeAll = function(active)
+function wireframeAll(active, ret)
 {
-	CloudChamber.allArg(CloudChamber.wireframe, active);
+	for(var i = 0; i < CloudChamber.meshes.length; ++i)
+	{
+		wireframe(active, CloudChamber.meshes[i], function(){});
+	}
+
+	ret(Lich.VM.Void);
 }
 
-CloudChamber.move = function(pointer, relPosition)
+function move(relPosition, object, ret)
 {
-	var object = CloudChamber.pointers[pointer];
 	var position = object.position;
-	position.x += relPosition.x;
-	position.y += relPosition.y;
-	position.z += relPosition.z;
-	CloudChamber.pointers[pointer].position = position;
+	position.x += relPosition[0];
+	position.y += relPosition[1];
+	position.z += relPosition[2];
+	object.position = position;
+	ret(object);
 }
 
-CloudChamber.moveAll = function(relPosition)
+function moveAll(relPosition, ret)
 {
-	CloudChamber.allArg(CloudChamber.move, relPosition);
+	for(var i = 0; i < CloudChamber.meshes.length; ++i)
+	{
+		move(relPosition, CloudChamber.meshes[i], function(){});
+	}
+
+	ret(Lich.VM.Void);
 }
 
-CloudChamber.colorize = function(pointer, color)
+function setColor(color, mesh, ret)
 {
-	CloudChamber.pointers[pointer].material.color = color;
+	mesh.material.color = new THREE.Color(CloudChamber.packRGB(color[0], color[1], color[2]));
+	ret(mesh);
 }
 
-CloudChamber.colorizeAll = function(color)
+function setColorAll(color, ret)
 {
-	CloudChamber.allArg(CloudChamber.colorize, color);
+	for(var i = 0; i < CloudChamber.meshes.length; ++i)
+	{
+		setColor(color, CloudChamber.meshes[i], function(){});
+	}
+
+	ret(Lich.VM.Void);
 }
 
-CloudChamber.rotate = function(pointer, relRotation)
+function rotate(relRotation, object, ret)
 {
-	var object = CloudChamber.pointers[pointer];
 	var rotation = object.rotation;
-	rotation.x += relRotation.x;
-	rotation.y += relRotation.y;
-	rotation.z += relRotation.z;
-	CloudChamber.pointers[pointer].rotation = rotation;	
+	rotation.x += relRotation[0];
+	rotation.y += relRotation[0];
+	rotation.z += relRotation[0];
+	object.rotation = rotation;	
+	ret(object);
 }
 
-CloudChamber.rotateAll = function(relRotation)
+function rotateAll(relRotation, ret)
 {
-	CloudChamber.allArg(CloudChamber.rotate, relRotation);
+	for(var i = 0; i < CloudChamber.meshes.length; ++i)
+	{
+		rotate(relRotation, CloudChamber.meshes[i], function(){});
+	}
+
+	ret(Lich.VM.Void);
 }
 
-CloudChamber.linear = function(pointer, linear_momentum)
+function linear(linear_momentum, object, ret)
 {
-	CloudChamber.pointers[pointer].linear_momentum = linear_momentum;
-	CloudChamber.pointers[pointer].momentum_update = true;
+	object.linear_momentum = linear_momentum;
+	object.momentum_update = true;
+	ret(object);
 }
 
-CloudChamber.linearAll = function(linear_momentum)
+function linearAll(linear_momentum, ret)
 {
-	CloudChamber.allArg(CloudChamber.linear, linear_momentum);
+	for(var i = 0; i < CloudChamber.meshes.length; ++i)
+	{
+		linear(linear_momentum, CloudChamber.meshes[i], function(){});
+	}
+
+	ret(Lich.VM.Void);
 }
 
-CloudChamber.angular = function(pointer, angular_momentum)
+function angular(angular_momentum, object, ret)
 {
-	CloudChamber.pointers[pointer].angular_momentum = angular_momentum;
-	CloudChamber.pointers[pointer].momentum_update = true;
+	object.angular_momentum = angular_momentum;
+	object.momentum_update = true;
+	ret(object);
 }
 
-CloudChamber.angularAll = function(angular_momentum)
+function angularAll(angular_momentum, ret)
 {
-	CloudChamber.allArg(CloudChamber.angular, angular_momentum);
+	for(var i = 0; i < CloudChamber.meshes.length; ++i)
+	{
+		angular(angular_momentum, CloudChamber.meshes[i], function(){});
+	}
+
+	ret(Lich.VM.Void);
 }
 
-CloudChamber.position = function(pointer, position)
+function setPosition(position, object, ret)
 {
-	CloudChamber.pointers[pointer].position = position;
+	object.position = {x:position[0],y:position[1],z:position[2] };
+	ret(object);
 }
 
-CloudChamber.positionAll = function(position)
+function setPositionAll(position,ret)
 {
-	CloudChamber.allArg(CloudChamber.position, position);
+	for(var i = 0; i < CloudChamber.meshes.length; ++i)
+	{
+		setPosition(position, CloudChamber.meshes[i], function(){});
+	}
+
+	ret(Lich.VM.Void);
 }
 
-CloudChamber.scale = function(pointer, scale)
+function scale(scaleVec, object, ret)
 {
-	CloudChamber.pointers[pointer].scale = { x: scale, y: scale, z: scale };
+	object.scale = { x: scaleVec[0], y: scaleVec[1], z: scaleVec[2] };
+	ret(object);
 }
 
-CloudChamber.scaleAll = function(scale)
+function scaleAll(scaleVec, ret)
 {
-	CloudChamber.allArg(CloudChamber.scale, scale);
+	for(var i = 0; i < CloudChamber.meshes.length; ++i)
+	{
+		scale(scaleVec, CloudChamber.meshes[i], function(){});
+	}
+
+	ret(Lich.VM.Void);
 }
 
-CloudChamber.pointCloud = function(numTriangles)
+function cloudMesh(numTriangles, color, ret)
 {
 	var triangles = new Array();
 
@@ -656,7 +717,12 @@ CloudChamber.pointCloud = function(numTriangles)
 		triangles.push(triangle);
 	}
 
-	return triangles;
+	ret(
+		CloudChamber.mesh(
+			triangles, // mesh
+			new THREE.Color(CloudChamber.packRGB(color[0], color[1], color[2])) // color
+		)
+	);
 }
 
 CloudChamber.nrand = function() {
@@ -670,7 +736,7 @@ CloudChamber.nrand = function() {
 	return x1 * c;
 }
 
-CloudChamber.gaussianCloud = function(numTriangles)
+function gaussianMesh(numTriangles,color, ret)
 {
 	var triangles = new Array();
 
@@ -683,10 +749,15 @@ CloudChamber.gaussianCloud = function(numTriangles)
 		triangles.push(triangle);
 	}
 
-	return triangles;
+	ret(
+		CloudChamber.mesh(
+			triangles, // mesh
+			new THREE.Color(CloudChamber.packRGB(color[0], color[1], color[2])) // color
+		)
+	);
 }
 
-CloudChamber.sine = function(numTriangles)
+function sinMesh(numTriangles, color, ret)
 {
 	var triangles = new Array();
 	var freq1 = CloudChamber.nrand() * 0.1;
@@ -704,7 +775,12 @@ CloudChamber.sine = function(numTriangles)
 		triangles.push(triangle);
 	}
 
-	return triangles;
+	ret(
+		CloudChamber.mesh(
+			triangles, // mesh
+			new THREE.Color(CloudChamber.packRGB(color[0], color[1], color[2])) // color
+		)
+	);
 }
 
 CloudChamber.heightMap = function(mapFunction, width, depth)
@@ -790,6 +866,18 @@ CloudChamber.sineMap = function(width, depth)
 	return map;
 }
 
+function sinMapMesh(width, depth, color, ret)
+{
+	var triangles = CloudChamber.heightMap(CloudChamber.sineMap, width, depth);
+
+	ret(
+		CloudChamber.mesh(
+			triangles, // mesh
+			new THREE.Color(CloudChamber.packRGB(color[0], color[1], color[2])) // color
+		)
+	);
+}
+
 CloudChamber.noiseMap = function(width, depth)
 {
 	var map = CloudChamber.newMap(width, depth);
@@ -802,6 +890,18 @@ CloudChamber.noiseMap = function(width, depth)
 	return map;	
 }
 
+function noiseMapMesh(width, depth, color, ret)
+{
+	var triangles = CloudChamber.heightMap(CloudChamber.noiseMap, width, depth);
+
+	ret(
+		CloudChamber.mesh(
+			triangles, // mesh
+			new THREE.Color(CloudChamber.packRGB(color[0], color[1], color[2])) // color
+		)
+	);
+}
+
 CloudChamber.gaussianMap = function(width, depth)
 {
 	var map = CloudChamber.newMap(width, depth);
@@ -812,6 +912,18 @@ CloudChamber.gaussianMap = function(width, depth)
 	}
 
 	return map; 
+}
+
+function gaussianMapMesh(width, depth, color, ret)
+{
+	var triangles = CloudChamber.heightMap(CloudChamber.gaussianMap, width, depth);
+
+	ret(
+		CloudChamber.mesh(
+			triangles, // mesh
+			new THREE.Color(CloudChamber.packRGB(color[0], color[1], color[2])) // color
+		)
+	);
 }
 
 CloudChamber.square = function(i, freq)
@@ -838,6 +950,18 @@ CloudChamber.squareMap = function(width, depth)
 	return map;
 }
 
+function squareMapMesh(width, depth, color, ret)
+{
+	var triangles = CloudChamber.heightMap(CloudChamber.squareMap, width, depth);
+
+	ret(
+		CloudChamber.mesh(
+			triangles, // mesh
+			new THREE.Color(CloudChamber.packRGB(color[0], color[1], color[2])) // color
+		)
+	);
+}
+
 CloudChamber.saw = function(i, freq)
 {
 	return ((i % freq) / freq) * 2 - 1;
@@ -859,6 +983,18 @@ CloudChamber.sawMap = function(width, depth)
 	return map;
 }
 
+function sawMapMesh(width, depth, color, ret)
+{
+	var triangles = CloudChamber.heightMap(CloudChamber.sawMap, width, depth);
+
+	ret(
+		CloudChamber.mesh(
+			triangles, // mesh
+			new THREE.Color(CloudChamber.packRGB(color[0], color[1], color[2])) // color
+		)
+	);
+}
+
 CloudChamber.tri = function(i, freq)
 {
 	return freq / 2 - Math.abs(i % (2*freq) - freq);
@@ -878,6 +1014,30 @@ CloudChamber.triMap = function(width, depth)
 	}
 
 	return map;
+}
+
+function triMapMesh(width, depth, color, ret)
+{
+	var triangles = CloudChamber.heightMap(CloudChamber.triMap, width, depth);
+
+	ret(
+		CloudChamber.mesh(
+			triangles, // mesh
+			new THREE.Color(CloudChamber.packRGB(color[0], color[1], color[2])) // color
+		)
+	);
+}
+
+function flatMapMesh(width, depth, color, ret)
+{
+	var triangles = CloudChamber.heightMap(CloudChamber.newMap, width, depth);
+
+	ret(
+		CloudChamber.mesh(
+			triangles, // mesh
+			new THREE.Color(CloudChamber.packRGB(color[0], color[1], color[2])) // color
+		)
+	);
 }
 
 CloudChamber.calculateNormal = function(p1, p2, p3)
@@ -939,12 +1099,13 @@ CloudChamber.mesh = function(mGeometry, mColor)
 	// mesh.rotation = mRotation;
 	mesh.doubleSided = true;
 	mesh.overdraw = true;
-	mesh.linear_momentum = { x:0, y:0, z:0 };
-	mesh.angular_momentum = { x:0, y:0, z:0 };
+	mesh.linear_momentum = [0,0,0];
+	mesh.angular_momentum = [0,0,0];
 	mesh.momentum_update = false;
+	CloudChamber.meshes.push(mesh);
 	CloudChamber.scene.add(mesh);
-	CloudChamber.print("Mesh");
-	return CloudChamber.addPointer(mesh);
+	//CloudChamber.print("Mesh");
+	return mesh;
 }
 
 CloudChamber.march = function(mColor)
@@ -1467,7 +1628,7 @@ CloudChamber.parsesplice = function(lang)
 	return CloudChamber.shaderTemplate(vertArray.join("\n"), fragArray.join("\n"));
 }
 
-CloudChamber.spliceShader = function(lang)
+function spliceShader(lang, ret)
 {
 	var shader = CloudChamber.parsesplice(lang);
 	CloudChamber.print(shader.vertexShader);
@@ -1483,6 +1644,58 @@ CloudChamber.spliceShader = function(lang)
 
 	CloudChamber.numShaders = 1;
 	CloudChamber.composer.addPass(pass);
+	ret(Lich.VM.Void);
+}
+
+function randomString(length, ret) // length
+{
+	var randString = new Array("");
+
+	for(var i = 0; i < length; ++i)
+	{
+		randString.push(String.fromCharCode(Math.random() * 127));
+	}
+
+	ret(randString.join(""));
 }
 
 // NOTE: CACHE SHADERS UP TO 20 OF THEM, THEN START POPPING 
+
+CloudChamber.decimalToHexString = function(number)
+{
+    if (number < 0)
+    {
+    	number = 0xFFFFFFFF + number + 1;
+    }
+
+    return number.toString(16).toUpperCase();
+}
+
+CloudChamber.packRGB = function(r, g, b)
+{
+	return ((1 << 24) + (Math.floor(r) << 16) + (Math.floor(g) << 8) + Math.floor(b));
+}
+
+CloudChamber.rgbToHex = function(r, g, b) {
+    return "0x" + CloudChamber.packRGB(r, g, b).toString(16).slice(1);
+}
+
+CloudChamber.arrayToVector = function(array)
+{
+	return {
+		x: array[0],
+		y: array[1],
+		z: array[2]	
+	}
+}
+
+CloudChamber.arrayToColor = function(array)
+{
+	return CloudChamber.packRGB(array[0], array[1], array[2]);
+}
+
+function setBackground(r, g, b, ret)
+{
+	CloudChamber.renderer.setClearColorHex(CloudChamber.packRGB(r,g,b), 1);
+	ret(CloudChamber.packRGB(r,g,b));
+}

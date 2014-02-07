@@ -4,10 +4,12 @@ exports.isDark = true;
 exports.cssClass = "ace-lich";
 exports.cssText = ".ace-lich,\
 .ace-lich {\
-  background: #e8e8e8;\
-  color: #333\
-  width:100%\
-  height:100%\
+  background: transparent;\
+  color: #333;\
+  width:100%;\
+  height:100%;\
+  position:absolute;\
+  opacity: 0.0;\
 }\
 \
 .ace_gutter {\
@@ -21,7 +23,7 @@ exports.cssText = ".ace-lich,\
 }\
 \
 .ace-lich {\
-  background-color: #141414;\
+  background-color: transparent;\
   color: #f1e3e2\
 }\
 \
