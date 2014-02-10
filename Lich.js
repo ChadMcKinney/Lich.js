@@ -380,7 +380,7 @@ function parseCurrentLine(editor)
 			Lich.compileAST(ast, function(res)
 			{
 				//Lich.VM.Print(res);
-				Lich.post("JS Source> " + res);
+				//Lich.post("JS Source> " + res);
 				
 				if(res instanceof Array)
 				{

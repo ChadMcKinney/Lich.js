@@ -2,6 +2,9 @@
 //        Parser/preL.js
 //        Parser/iterL.js
 //        Parser/parser.js
+
+Lich.parseType = "library";
+Lich.libraryNamespace = [];
          
 Lich.ParseError = function(msg,pos){
   this.msg = msg;
@@ -13,6 +16,8 @@ Lich.ParseError.prototype.toString = function(){
 };
  
 Lich.parse = function(input) {
+    Lich.parseType = "interactive";
+
     // var z = Lich.Parser.tokenize.parse(input);
     if(typeof Lich.Lexer === "undefined")
     {
@@ -55,6 +60,9 @@ Lich.parse = function(input) {
 }
 
 Lich.parseLibrary = function(input) {
+    Lich.parseType = "library";
+    Lich.libraryNamespace = [];
+
     // var z = Lich.Parser.tokenize.parse(input);
     if(typeof Lich.LibraryLexer === "undefined")
     {

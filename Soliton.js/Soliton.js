@@ -4139,9 +4139,9 @@ Soliton.parseSpliceOsc = function(lang)
 	return audioFuncArray;
 }
 
-Soliton.spliceOSC = function(lang, divider)
+function spliceOsc(lang, divider, ret)
 {
-	var oscNode = Soliton.context.createScriptProcessor(Soliton.blockSize, 0, 2);
+	var oscNode = Soliton.context.createScriptProcessor(Soliton.blockSize, 0, 1);
 	oscNode.audioFuncArray = Soliton.parseSpliceOsc(lang);
 	oscNode.currentFunc = 0;
 	oscNode.divider = divider;
@@ -4149,10 +4149,10 @@ Soliton.spliceOSC = function(lang, divider)
 	oscNode.onaudioprocess = function(event)
 	{
 		var outputArrayL = event.outputBuffer.getChannelData(0);
-		var outputArrayR = event.outputBuffer.getChannelData(1);
+		//var outputArrayR = event.outputBuffer.getChannelData(1);
 		var output;
 
-		for(var i = 0; i < Soliton.blockSize; i += (Soliton.spliceFuncBlockSize * this.divider))
+		for(var i = 0; i < 1024; /*i += (Soliton.spliceFuncBlockSize * this.divider)*/ ++i)
 		{
 			output = this.audioFuncArray[this.currentFunc](i);
 
@@ -4161,7 +4161,7 @@ Soliton.spliceOSC = function(lang, divider)
 				
 				for(var k = 1; k <= this.divider; ++k)
 				{
-					outputArrayL[i + (j * k)] = outputArrayR[i + (j * k)] = output[j];	
+					outputArrayL[i + (j * k)] /*= outputArrayR[i + (j * k)]*/ = output[j];	
 				}  
 			}
 
@@ -4171,13 +4171,18 @@ Soliton.spliceOSC = function(lang, divider)
 	}
 
 	oscNode.onaudioprocess.parentNode = oscNode;
+	oscNode._lichType = AUDIO;
+	oscNode.startAll = function(time){}
+	oscNode.stopAll = function(time){}
+	/*
 	var fadeGain = Soliton.context.createGain();
 	oscNode.connect(fadeGain);
 	fadeGain.connect(Soliton.masterGain);
 	fadeGain.gain.value = 1.0;
 	fadeGain.gain.linearRampToValueAtTime(1.0, Soliton.context.currentTime + 0.1);
 	fadeGain.gain.linearRampToValueAtTime(0.0, Soliton.context.currentTime + 1);
-	return Soliton.addNode(oscNode);
+	//return Soliton.addNode(oscNode);*/
+	ret(oscNode);
 }
 
 //////////////////
@@ -4188,7 +4193,6 @@ Soliton.parseSpliceFXChar = function(character)
 {
 	switch(character)
 	{
-	/*
 	case '!': 
 		
 		return function(inputL, inputR, i)
@@ -5978,8 +5982,6 @@ Soliton.parseSpliceFXChar = function(character)
 
 		break;
 
-*/
-
 	default:
 		var sample = (character.charCodeAt(0) / 256 * 2 - 1);
 		return function(inputL, inputR, i)
@@ -6008,10 +6010,11 @@ Soliton.parseSpliceFX = function(lang)
 		audioFuncArray[i] = Soliton.parseSpliceFXChar(lang[i]);
 	}
 
+	Lich.post(audioFuncArray);
 	return audioFuncArray;
 }
 
-Soliton.spliceFX = function(lang, divider, nodeID)
+function spliceFX(lang, divider, source, ret)
 {
 	/*
 	var source = Soliton.nodes[nodeID];
@@ -6035,10 +6038,10 @@ Soliton.spliceFX = function(lang, divider, nodeID)
 
 	return null;*/
 
-	var source = Soliton.nodes[nodeID];
+	//var source = Soliton.nodes[nodeID];
 
-	if(source == null)
-		return null;
+	//if(source == null)
+	//	return null;
 
 	var oscNode = Soliton.context.createScriptProcessor(Soliton.blockSize, 2, 2);
 	oscNode.audioFuncArray = Soliton.parseSpliceFX(lang);
@@ -6053,11 +6056,11 @@ Soliton.spliceFX = function(lang, divider, nodeID)
 		var inputArrayR = event.inputBuffer.getChannelData(1);
 		var output;
 
-		for(var i = 0; i < Soliton.blockSize; i += (Soliton.spliceFuncBlockSize * this.divider))
+		for(var i = 0; i < 1024; /*i += (1024 * this.divider)*/ ++i)
 		{
 			output = this.audioFuncArray[this.currentFunc](inputArrayL, inputArrayR, i);
 
-			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j)
+			for(var j = 0; j < 1024; ++j)
 			{
 				
 				for(var k = 1; k <= this.divider; ++k)
@@ -6073,6 +6076,11 @@ Soliton.spliceFX = function(lang, divider, nodeID)
 	}
 
 	oscNode.onaudioprocess.parentNode = oscNode;
+	oscNode._lichType = AUDIO;
+	oscNode.startAll = function(time){source.startAll(time)}
+	oscNode.stopAll = function(time){source.stopAll(time)}
+	source.connect(oscNode);
+	/*
 	var fadeGain = Soliton.context.createGain();
 	source.disconnect(0);
 	source.connect(oscNode);
@@ -6081,7 +6089,8 @@ Soliton.spliceFX = function(lang, divider, nodeID)
 	fadeGain.gain.value = 1.0;
 	fadeGain.gain.linearRampToValueAtTime(1.0, Soliton.context.currentTime + 0.1);
 	fadeGain.gain.linearRampToValueAtTime(0.0, Soliton.context.currentTime + 1);
-	return Soliton.addNode(oscNode);
+	return Soliton.addNode(oscNode);*/
+	ret(oscNode);
 }
 
 /////////////////////////////////////////////////////
@@ -6143,6 +6152,8 @@ function white(ret)
 	ret(node);
 }
 
+_createPrimitive("white", white);
+
 /*
 // Implementation via http://www.dsprelated.com/showcode/216.php
 function pink(ret)
@@ -6176,25 +6187,35 @@ function sin(freq, ret)
 	ret(Soliton.createOscillatorNode("sine",freq));
 }
 
+_createPrimitive("sin", sin);
+
 function tri(freq, ret)
 {
 	ret(Soliton.createOscillatorNode("triangle",freq));
 }
+
+_createPrimitive("tri", tri);
 
 function square(freq, ret)
 {
 	ret(Soliton.createOscillatorNode("square",freq));
 }
 
+_createPrimitive("square", square);
+
 function saw(freq, ret)
 {
 	ret(Soliton.createOscillatorNode("sawtooth",freq));
 }
 
+_createPrimitive("saw", saw);
+
 function waveTable(freq, table, ret)
 {
 	ret(Soliton.createOscillatorNode("custom",freq, new Float32Array(table)));
 }
+
+_createPrimitive("waveTable", waveTable);
 
 function waveShape(shape, input, ret)
 {
@@ -6207,6 +6228,8 @@ function waveShape(shape, input, ret)
 	shaper._lichType = AUDIO;
 	ret(shaper);
 }
+
+_createPrimitive("waveShape", waveShape);
 
 function gain(input1, input2, ret)
 {
@@ -6254,6 +6277,8 @@ function gain(input1, input2, ret)
 	gainNode._lichType = AUDIO;
 	ret(gainNode);
 }
+
+_createPrimitive("gain", gain);
 
 function _subtractMix(input1, input2, ret)
 {	
@@ -6346,6 +6371,8 @@ function delay(delayTime, feedbackLevel, input, ret)
 	ret(mix);
 }
 
+_createPrimitive("delay", delay);
+
 function mix2(input1, input2, ret)
 {
 	//if(input1._lichType != AUDIO || input2._lichType != AUDIO)
@@ -6376,6 +6403,8 @@ function mix2(input1, input2, ret)
 	ret(mix);
 }
 
+_createPrimitive("mix2", mix2);
+
 function range(low, high, input,ret)
 {
 	if(typeof low !== "number" || typeof high !== "number")
@@ -6392,6 +6421,8 @@ function range(low, high, input,ret)
 		mix2(addVal,mulRes, ret);
 	})
 }
+
+_createPrimitive("range", range);
 
 Soliton.linexpUGen = function(inMin, inMax, outMin, outMax)
 {
@@ -6521,25 +6552,35 @@ function lowpass(freq, q, input, ret)
 	ret(Soliton.createFilter("lowpass", freq, input, q, Lich.VM.Nothing));
 }
 
+_createPrimitive("lowpass", lowpass);
+
 function highpass(freq, q, input, ret)
 {
 	ret(Soliton.createFilter("highpass", freq, input, q, Lich.VM.Nothing));
 }
+
+_createPrimitive("highpass", highpass);
 
 function bandpass(freq, q, input, ret)
 {
 	ret(Soliton.createFilter("bandpass", freq, input, q, Lich.VM.Nothing));
 }
 
+_createPrimitive("bandpass", bandpass);
+
 function lowshelf(freq, boost, input, ret)
 {
 	ret(Soliton.createFilter("lowshelf", freq, input, Lich.VM.Nothing, boost));
 }
 
+_createPrimitive("lowshelf", lowshelf);
+
 function highshelf(freq, boost, input, ret)
 {
 	ret(Soliton.createFilter("highshelf", freq, input, Lich.VM.Nothing, boost));
 }
+
+_createPrimitive("highshelf", highshelf);
 
 function peaking(freq, q, boost, input, ret)
 {
@@ -6551,10 +6592,14 @@ function notch(freq, q, input, ret)
 	ret(Soliton.createFilter("notch", freq, input, q, Lich.VM.Nothing));
 }
 
+_createPrimitive("notch", notch);
+
 function allpass(freq, q, input, ret)
 {
 	ret(Soliton.createFilter("allpass", freq, input, q, Lich.VM.Nothing));
 }
+
+_createPrimitive("allpass", allpass);
 
 // Buffer a url with an optional name for storage, callback on finish, 
 // and optional destination (for callback function)
@@ -6646,6 +6691,8 @@ function playBuf(name, rate, loopStart, loopEnd, ret)
 	);
 }
 
+_createPrimitive("playBuf", playBuf);
+
 function convolve(name, input, ret)
 {
 	Soliton.bufferURL(
@@ -6663,6 +6710,8 @@ function convolve(name, input, ret)
 		}
 	);
 }
+
+_createPrimitive("convolve", convolve);
 
 function dc(value, ret)
 {
@@ -6691,6 +6740,9 @@ function dc(value, ret)
 	});
 }
 
+_createPrimitive("dc", dc);
+
+/*
 function set(argument, value, input, ret)
 {
 	if(typeof argument !== "string" || input._lichType != SYNTH || typeof value !== "number")
@@ -6700,6 +6752,7 @@ function set(argument, value, input, ret)
 	input[argument] = value;
 	ret(input);
 }
+*/
 
 function contextTime(ret)
 {
@@ -6765,11 +6818,7 @@ function perc(attack, peak, decay, input, ret)
 	});
 }
 
-function main(input, ret)
-{
-	input.connect(Soliton.masterGain);
-	ret(input);
-}
+_createPrimitive("perc", perc);
 
 function play(synth, ret)
 {
@@ -6805,6 +6854,8 @@ function play(synth, ret)
 	});
 }
 
+_createPrimitive("play", play);
+
 function stop(synth, ret)
 {
 	Lich.collapse(synth, function(synth)
@@ -6839,6 +6890,8 @@ function stop(synth, ret)
 	});
 }
 
+_createPrimitive("stop", stop);
+
 function killall(ret)
 {
 	Lich.scheduler.freeScheduledEvents();
@@ -6848,6 +6901,8 @@ function killall(ret)
 	Soliton.masterGain.gain.value = 0.25;
 	ret(Lich.VM.Void);
 }
+
+_createPrimitive("killall", killall);
 
 Soliton.testMetrognome = function()
 {

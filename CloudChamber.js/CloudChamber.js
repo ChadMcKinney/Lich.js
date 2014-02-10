@@ -269,7 +269,6 @@ CloudChamber.setup = function(canvas, framerate, drawCallback, printCallback)
 	CloudChamber.camera.position.z = 300;
 	CloudChamber.renderer.setSize(CloudChamber.canvas.clientWidth, CloudChamber.canvas.clientHeight);
 	CloudChamber.canvas.parentNode.replaceChild(CloudChamber.renderer.domElement, CloudChamber.canvas);
-	CloudChamber.print("CloudChamber created.");
 
 	CloudChamber.testLight = new THREE.PointLight(0xFFFFFF);
 
@@ -385,7 +384,7 @@ CloudChamber.setup = function(canvas, framerate, drawCallback, printCallback)
         }
 	})();
 
-
+	CloudChamber.print("Graphics initialized.");
 	// usage:
 	// instead of setInterval(render, 16) ....
 
@@ -428,6 +427,26 @@ function setShader(shader, ret)
 	ret(Lich.VM.Void);
 }
 
+_createPrimitive("setShader", setShader);
+
+function setNativeShader(shader, ret)
+{
+	var pass = new THREE.ShaderPass(shader);
+	// pass.uniforms["amount"].value = amount;
+	pass.renderToScreen = true;
+	
+	for(var i = 0; i < CloudChamber.numShaders; ++i)
+	{
+		CloudChamber.composer.passes.pop();
+	}
+
+	CloudChamber.numShaders = 1;
+	CloudChamber.composer.addPass(pass);
+	ret(Lich.VM.Void);
+}
+
+_createPrimitive("setNativeShader", setNativeShader);
+
 function clearShaders(ret)
 {	
 	for(var i = 0; i < CloudChamber.numShaders; ++i)
@@ -442,6 +461,8 @@ function clearShaders(ret)
 	CloudChamber.composer.addPass(rgbEffect);
 	ret(Lich.VM.Void);
 }
+
+_createPrimitive("clearShaders", clearShaders);
 
 function setShaders(shaders, ret)
 {
@@ -468,6 +489,8 @@ function setShaders(shaders, ret)
 
 	ret(Lich.VM.Void);
 }
+
+_createPrimitive("setShaders", setShaders);
 
 CloudChamber.addPointer = function(object)
 {
@@ -506,6 +529,8 @@ function sphere(sPosition, sRadius, sColor, ret)
 	//ret(CloudChamber.addPointer(sphere));
 }
 
+_createPrimitive("sphere", sphere);
+
 function cube(cPosition, cSize, cRotation, cColor, ret)
 {
 	var cubeMaterial = new THREE.MeshLambertMaterial(
@@ -534,6 +559,8 @@ function cube(cPosition, cSize, cRotation, cColor, ret)
 	ret(cube);
 	//return CloudChamber.addPointer(cube);
 }
+
+_createPrimitive("cube", cube);
 
 CloudChamber.all = function(func)
 {
@@ -570,6 +597,8 @@ function deleteMesh(mesh, ret)
 	ret(Lich.VM.Void);
 }
 
+_createPrimitive("deleteMesh", deleteMesh);
+
 function deleteScene()
 {
 	for(var i = 0; i < CloudChamber.meshes.length; ++i)
@@ -581,11 +610,15 @@ function deleteScene()
 	//CloudChamber.all(CloudChamber.delete);
 }
 
+_createPrimitive("deleteScene", deleteScene);
+
 function wireframe(active, mesh, ret)
 {
 	mesh.material.wireframe = active;
 	ret(mesh);
 }
+
+_createPrimitive("wireframe", wireframe);
 
 function wireframeAll(active, ret)
 {
@@ -597,6 +630,8 @@ function wireframeAll(active, ret)
 	ret(Lich.VM.Void);
 }
 
+_createPrimitive("wireframeAll", wireframeAll);
+
 function move(relPosition, object, ret)
 {
 	var position = object.position;
@@ -606,6 +641,8 @@ function move(relPosition, object, ret)
 	object.position = position;
 	ret(object);
 }
+
+_createPrimitive("move", move);
 
 function moveAll(relPosition, ret)
 {
@@ -617,11 +654,15 @@ function moveAll(relPosition, ret)
 	ret(Lich.VM.Void);
 }
 
+_createPrimitive("moveAll", moveAll);
+
 function setColor(color, mesh, ret)
 {
 	mesh.material.color = new THREE.Color(CloudChamber.packRGB(color[0], color[1], color[2]));
 	ret(mesh);
 }
+
+_createPrimitive("setColor", setColor);
 
 function setColorAll(color, ret)
 {
@@ -633,6 +674,8 @@ function setColorAll(color, ret)
 	ret(Lich.VM.Void);
 }
 
+_createPrimitive("setColorAll", setColorAll);
+
 function rotate(relRotation, object, ret)
 {
 	var rotation = object.rotation;
@@ -642,6 +685,8 @@ function rotate(relRotation, object, ret)
 	object.rotation = rotation;	
 	ret(object);
 }
+
+_createPrimitive("rotate", rotate);
 
 function rotateAll(relRotation, ret)
 {
@@ -653,12 +698,16 @@ function rotateAll(relRotation, ret)
 	ret(Lich.VM.Void);
 }
 
+_createPrimitive("rotateAll", rotateAll);
+
 function linear(linear_momentum, object, ret)
 {
 	object.linear_momentum = linear_momentum;
 	object.momentum_update = true;
 	ret(object);
 }
+
+_createPrimitive("linear", linear);
 
 function linearAll(linear_momentum, ret)
 {
@@ -670,12 +719,16 @@ function linearAll(linear_momentum, ret)
 	ret(Lich.VM.Void);
 }
 
+_createPrimitive("linearAll", linearAll);
+
 function angular(angular_momentum, object, ret)
 {
 	object.angular_momentum = angular_momentum;
 	object.momentum_update = true;
 	ret(object);
 }
+
+_createPrimitive("angular", angular);
 
 function angularAll(angular_momentum, ret)
 {
@@ -687,11 +740,15 @@ function angularAll(angular_momentum, ret)
 	ret(Lich.VM.Void);
 }
 
+_createPrimitive("angularAll", angularAll);
+
 function setPosition(position, object, ret)
 {
 	object.position = {x:position[0],y:position[1],z:position[2] };
 	ret(object);
 }
+
+_createPrimitive("setPosition", setPosition);
 
 function setPositionAll(position,ret)
 {
@@ -703,11 +760,15 @@ function setPositionAll(position,ret)
 	ret(Lich.VM.Void);
 }
 
+_createPrimitive("setPositionAll", setPositionAll);
+
 function scale(scaleVec, object, ret)
 {
 	object.scale = { x: scaleVec[0], y: scaleVec[1], z: scaleVec[2] };
 	ret(object);
 }
+
+_createPrimitive("scale", scale);
 
 function scaleAll(scaleVec, ret)
 {
@@ -718,6 +779,8 @@ function scaleAll(scaleVec, ret)
 
 	ret(Lich.VM.Void);
 }
+
+_createPrimitive("scaleAll", scaleAll);
 
 function cloudMesh(numTriangles, color, ret)
 {
@@ -739,6 +802,8 @@ function cloudMesh(numTriangles, color, ret)
 		)
 	);
 }
+
+_createPrimitive("cloudMesh", cloudMesh);
 
 CloudChamber.nrand = function() {
 	var x1, x2, rad, y1;
@@ -772,6 +837,8 @@ function gaussianMesh(numTriangles,color, ret)
 	);
 }
 
+_createPrimitive("nrand", nrand);
+
 function sinMesh(numTriangles, color, ret)
 {
 	var triangles = new Array();
@@ -797,6 +864,8 @@ function sinMesh(numTriangles, color, ret)
 		)
 	);
 }
+
+_createPrimitive("sinMesh", sinMesh);
 
 CloudChamber.heightMap = function(mapFunction, width, depth)
 {
@@ -893,6 +962,8 @@ function sinMapMesh(width, depth, color, ret)
 	);
 }
 
+_createPrimitive("sinMapMesh", sinMapMesh);
+
 CloudChamber.noiseMap = function(width, depth)
 {
 	var map = CloudChamber.newMap(width, depth);
@@ -917,6 +988,8 @@ function noiseMapMesh(width, depth, color, ret)
 	);
 }
 
+_createPrimitive("noiseMapMesh", noiseMapMesh);
+
 CloudChamber.gaussianMap = function(width, depth)
 {
 	var map = CloudChamber.newMap(width, depth);
@@ -940,6 +1013,8 @@ function gaussianMapMesh(width, depth, color, ret)
 		)
 	);
 }
+
+_createPrimitive("gaussianMapMesh", gaussianMapMesh);
 
 CloudChamber.square = function(i, freq)
 {
@@ -977,6 +1052,8 @@ function squareMapMesh(width, depth, color, ret)
 	);
 }
 
+_createPrimitive("squareMapMesh", squareMapMesh);
+
 CloudChamber.saw = function(i, freq)
 {
 	return ((i % freq) / freq) * 2 - 1;
@@ -1009,6 +1086,8 @@ function sawMapMesh(width, depth, color, ret)
 		)
 	);
 }
+
+_createPrimitive("sawMapMesh", sawMapMesh);
 
 CloudChamber.tri = function(i, freq)
 {
@@ -1043,6 +1122,8 @@ function triMapMesh(width, depth, color, ret)
 	);
 }
 
+_createPrimitive("triMapMesh", triMapMesh);
+
 function flatMapMesh(width, depth, color, ret)
 {
 	var triangles = CloudChamber.heightMap(CloudChamber.newMap, width, depth);
@@ -1054,6 +1135,8 @@ function flatMapMesh(width, depth, color, ret)
 		)
 	);
 }
+
+_createPrimitive("flatMapMesh", flatMapMesh);
 
 CloudChamber.calculateNormal = function(p1, p2, p3)
 {
@@ -1123,13 +1206,13 @@ CloudChamber.mesh = function(mGeometry, mColor)
 	return mesh;
 }
 
-CloudChamber.march = function(mColor)
+function marchingCubes(mColor)
 {
 	var map = MarchingCubes.march();
 
 	var material = new THREE.MeshLambertMaterial(
 		{
-			color: mColor
+			color: new THREE.Color(CloudChamber.packRGB(mColor[0], mColor[1], mColor[2]))
 		}
 	);
 
@@ -1164,6 +1247,8 @@ CloudChamber.march = function(mColor)
 	CloudChamber.print("March");
 	return CloudChamber.addPointer(mesh);
 }
+
+_createPrimitive("marchingCubes", marchingCubes);
 
 ///////////////////////////////////////////////////////////////////////////////////////
 // splice language
@@ -1662,6 +1747,8 @@ function spliceShader(lang, ret)
 	ret(Lich.VM.Void);
 }
 
+_createPrimitive("spliceShader", spliceShader);
+
 function randomString(length, ret) // length
 {
 	var randString = new Array("");
@@ -1673,6 +1760,8 @@ function randomString(length, ret) // length
 
 	ret(randString.join(""));
 }
+
+_createPrimitive("randomString", randomString);
 
 // NOTE: CACHE SHADERS UP TO 20 OF THEM, THEN START POPPING 
 
@@ -1714,3 +1803,5 @@ function setBackground(r, g, b, ret)
 	CloudChamber.renderer.setClearColorHex(CloudChamber.packRGB(r,g,b), 1);
 	ret(CloudChamber.packRGB(r,g,b));
 }
+
+_createPrimitive("setBackground", setBackground);

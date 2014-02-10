@@ -383,6 +383,20 @@ function trampoline(result)
     }
 }
 
+Lich.verifyDef = function(name)
+{
+	if(Lich.parseType === "library")
+	{
+		if(Lich.libraryNamespace.indexOf(name) != -1)
+			throw new Error("Duplicate definition for " + name);
+		else
+			Lich.libraryNamespace.push(name);
+	}
+
+	if(Lich.VM.reserved.hasOwnProperty(name))
+		throw new Error("Duplication definition for reserved variable " + name + ". Use a different name.");
+}
+
 // The Lich.js compiler traverse the abstract syntax tree returned by the parser and calls native JavaScript
 Lich.compileAST = function(ast, ret)
 {
@@ -1099,6 +1113,19 @@ Lich.compileLocalDeclFun = function(ast,ret)
 
 	else
 	{
+		var localArgNames = [];
+
+		for(var i = 0; i < ast.args.length; ++i)
+		{
+			if(ast.args[i].astType == "varname")
+			{
+				if(localArgNames.indexOf(ast.args[i].id) != -1)
+					throw new Error("Duplicate definition for argument: " + ast.args[i].id + " in function " + ast.ident.id);
+				else
+					localArgNames.push(ast.args[i].id);
+			}
+		}
+
 		Lich.compileAST(ast.rhs, function(rhs)
 		{
 			Lich.generateArgNamesAndMatchVars(ast.args, function(argNames, matchVars)
@@ -1126,6 +1153,8 @@ Lich.printAll = function(arr)
 
 Lich.compileDeclFun = function(ast,ret)
 {
+	Lich.verifyDef(ast.ident.id);
+
 	if(ast.args.length == 0)
 	{
 		Lich.compileAST(ast.rhs, function(rhs)
@@ -1142,6 +1171,19 @@ Lich.compileDeclFun = function(ast,ret)
 
 	else
 	{
+		var localArgNames = [];
+
+		for(var i = 0; i < ast.args.length; ++i)
+		{
+			if(ast.args[i].astType == "varname")
+			{
+				if(localArgNames.indexOf(ast.args[i].id) != -1)
+					throw new Error("Duplicate definition for argument: " + ast.args[i].id + " in function " + ast.ident.id);
+				else
+					localArgNames.push(ast.args[i].id);
+			}
+		}
+
 		Lich.compileAST(ast.rhs, function(rhs)
 		{
 			Lich.generateArgNamesAndMatchVars(ast.args, function(argNames, matchVars)
@@ -1159,6 +1201,16 @@ Lich.compileDeclFun = function(ast,ret)
 
 Lich.compileFunWhere = function(ast,ret)
 {
+	var declNames = [];
+
+	for(var i = 0; i < ast.decls.length; ++i)
+	{
+		if(declNames.indexOf(ast.decls[i].ident.id) != -1)
+			throw new Error("Duplicate definition for local declaration: " + ast.decls[i].ident.id);
+		else
+			declNames.push(ast.decls[i].ident.id);
+	}
+
 	var func = "((function(){";
 
 	mapCps(
@@ -1384,6 +1436,16 @@ Lich.compileLambda = function(ast,ret)
 
 Lich.compileLet = function(ast,ret)
 {
+	var declNames = [];
+
+	for(var i = 0; i < ast.decls.length; ++i)
+	{
+		if(declNames.indexOf(ast.decls[i].ident.id) != -1)
+			throw new Error("Duplicate definition for local declaration: " + ast.decls[i].ident.id);
+		else
+			declNames.push(ast.decls[i].ident.id);
+	}
+
 	var func = "((function(){";
 
 	mapCps(
@@ -1502,6 +1564,8 @@ Lich.collapseDataConstructor = function(dict, members)
 
 Lich.compileDataDecl = function(ast,ret)
 {
+	Lich.verifyDef(ast.id);
+
 	var argNames = [];
 	var initialData = [];
 	mapCps(
@@ -1616,6 +1680,8 @@ Lich.compileDataUpdate = function(ast,ret)
 
 Lich.compileDataEnum = function(ast,ret)
 {
+	Lich.verifyDef(ast.id);
+
 	mapCps(
 		ast.members,
 		function(elem,i,callback)
@@ -2279,14 +2345,25 @@ Lich.compileGuardExp = function(ast, ret)
 
 Lich.compilePercStream = function(ast, ret)
 {
+	Lich.verifyDef(ast.id);
 	Lich.compileAST(ast.list, function(list)
 	{
 		Lich.compileAST(ast.modifiers, function(modifiers)
 		{
+			var res;
 			if(eval ("typeof "+ast.id+" !== \"undefined\""))
-				ret(ast.id+".update("+list+","+modifiers+");");
+			{
+				res = ast.id+".update("+list+","+modifiers+");";
+			}
+				
 			else
-				ret(ast.id+"=new Soliton.PercStream("+list+","+modifiers+");Lich.scheduler.addScheduledEvent("+ast.id+");");
+			{
+				res = ast.id+"=new Soliton.PercStream("+list+","+modifiers+");";
+				if(Lich.parseType !== "library")
+					res += "Lich.scheduler.addScheduledEvent("+ast.id+");";
+			}
+
+			ret(res);
 		});
 	});
 }
@@ -2336,14 +2413,26 @@ Lich.compilePercMods = function(ast, ret)
 
 Lich.compileSoloStream = function(ast, ret)
 {
+	Lich.verifyDef(ast.id);
+
 	Lich.compileAST(ast.list, function(list)
 	{
 		Lich.compileAST(ast.modifiers, function(modifiers)
 		{
+			var res;
 			if(eval ("typeof "+ast.id+" !== \"undefined\""))
-				ret(ast.id+".update("+list+","+modifiers+");");
+			{
+				res = ast.id+".update("+list+","+modifiers+");";
+			}
+				
 			else
-				ret(ast.id+"=new Soliton.SoloStream(\""+ast.synth+"\","+list+","+modifiers+");Lich.scheduler.addScheduledEvent("+ast.id+");");
+			{
+				res = ast.id+"=new Soliton.SoloStream(\""+ast.synth+"\","+list+","+modifiers+");";
+				if(Lich.parseType !== "library")
+					res += "Lich.scheduler.addScheduledEvent("+ast.id+");";
+			}
+
+			ret(res);
 		});
 	});
 }

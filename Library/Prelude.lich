@@ -49,7 +49,7 @@ zipSpawn l r = map (\[x,y] -> spawn x [y]) $ zip l r -- Spawn an actor from a fu
 replicateN dimensions@(x:xs) value = foldl (\acc x -> replicate x acc) value $ reverse dimensions
 negate n = 0 - n
 neg n = 0 - n
-doom => (square 40) + (square 80) >> highpass (1000 >> perc 0.1 1 1) 1 >> perc 0 1 1
+testSynth => (square 40) + (square 80) >> highpass (1000 >> perc 0.1 1 1) 1 >> perc 0 1 1
 
 -- Recursive map over multidimensional list
 deepMap f list@(x:xs) = map (deepFunc) list

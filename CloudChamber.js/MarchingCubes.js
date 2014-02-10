@@ -4,7 +4,6 @@
 // www.glitchlich.com
 //
 // A translation of Cory Bloyd's C++ implementation found here: http://paulbourke.net/geometry/polygonise/
-// This single file (as opposed to the rest of Lich.js), is public domain
 // requires THREE.js
 
 // Marching Cubes namespace

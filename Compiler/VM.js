@@ -74,7 +74,7 @@ Lich.VM.printDictionary = function(object)
     {
     	if(n != "_lichType" && n != "curry")
     	{
-    		string = string + "\"" + n + "\" => " + Lich.VM.PrettyPrint(object[n]) + ", ";
+    		string = string + "\"" + n + "\" = " + Lich.VM.PrettyPrint(object[n]) + ", ";
     	}
     }
 
