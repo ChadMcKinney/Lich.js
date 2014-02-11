@@ -1107,7 +1107,7 @@ Lich.compileLocalDeclFun = function(ast,ret)
 	{
 		Lich.compileAST(ast.rhs, function(rhs)
 		{
-			ret("var "+ast.ident.id + "=" + rhs + ";");
+			ret("var "+ast.ident.id + "=" + rhs + ";Lich.collapse("+ast.ident.id+",function(res){"+ast.ident.id+"=res});");
 		});
 	}
 
@@ -2479,37 +2479,6 @@ Lich.compileSoloMods = function(ast, ret)
 
 Lich.compileSynthDef = function(ast,ret)
 {
-	/*
-	var args = []
-	var argNames = [];
-	var argControls = [];
-	var initialData = [];
-	var dataPairs = [];
-	var id = ast.ident.id;
-	forEachCps(
-		ast.args,
-		function(elem,i,next)
-		{
-			argNames.push("\""+elem.ident.id+"\"");
-			args.push(elem.ident.id);
-			//argControls.push("dc("+elem.ident.id+",function(res){"+elem.ident.id+"=res})");
-			dataPairs.push(elem.ident.id+":"+elem.ident.id);
-			next();
-		},
-		function()
-		{
-			Lich.compileAST(ast.rhs, function(rhs)
-			{
-				//var def = ast.id+"=function ("+args.concat("_sRet").join(",")+"){";
-				//def = def + "_sRet("+initialData.concat(dataPairs).join(",")+"})};";
-				ret(
-					"Soliton.synthDefs[\""+id+"\"]=function ("+args.concat("_sRet").join(",")+"){"+rhs+"(_sRet)};"
-					+id+"=Soliton.synthDefs[\""+id+"\"];"
-				);
-			});
-		}
-	);*/
-
 	ast.astType = "decl-fun";
 	ast.noCollapse = true;
 	Lich.compileAST(ast, function(declRes)

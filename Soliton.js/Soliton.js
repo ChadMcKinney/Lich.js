@@ -42,8 +42,9 @@ Soliton.blockSize = 4096; // Audio block size
 Soliton.spliceFuncBlockSize = 64; // block size for splice generated osc node functions
 Soliton.spliceFuncBlockRatio = Soliton.blockSize / Soliton.spliceFuncBlockSize; // Ratio use for sample generation in splice osc nodes
 Soliton.buffers = {}; // Soliton.buffers namespace
-Soliton.nodes = new Array();
 Soliton.synthDefs = {};
+Soliton.buses = [];
+Soliton.numBuses = 10;
 
 //window.addEventListener('load', Soliton.init, false);
 
@@ -64,6 +65,14 @@ Soliton.init = function()
 		for(var i = 0; i < (Soliton.context.sampleRate * 4); ++i) 
 		{
 			Soliton.whiteTable.push(Math.random());
+		}
+
+		for(var i = 0; i < Soliton.numBuses; ++i)
+		{
+			var bus = Soliton.context.createGain();
+			bus.startAll = function(){};
+			bus.stopAll = function(){};
+			Soliton.buses.push(bus);
 		}
 	}
 
@@ -6891,6 +6900,78 @@ function stop(synth, ret)
 }
 
 _createPrimitive("stop", stop);
+
+function auxIn(num, ret)
+{
+	if(num >= 0 && num < Soliton.numBuses)
+		ret(Soliton.buses[num]);
+	else
+		throw new Error("Bus number " + num + " exceeds the number of buses: " + Soliton.numBuses);
+}
+
+_createPrimitive("auxIn", auxIn);
+
+function localBus(ret)
+{
+	var bus = Soliton.context.createGain();
+	bus.startAll = function(){};
+	bus.stopAll = function(){}
+	bus._lichType = AUDIO;
+	ret(bus);
+}
+
+_createPrimitive("localBus", localBus);
+
+function auxOut(bus, input, ret)
+{
+	if(typeof bus === "number")
+	{
+		if(bus >= 0 && bus < Soliton.numBuses)
+		{
+			bus = Soliton.buses[bus];		
+		}
+			
+		else
+		{
+			throw new Error("Bus number " + bus + " exceeds the number of buses: " + Soliton.numBuses);
+		}
+	}
+
+	input.connect(bus);
+	ret({
+		_lichType:AUDIO, 
+		startAll:input.startAll, 
+		stopAll:input.stopAll, 
+		connect:function(){}, 
+		disconnect:function()
+		{
+			input.disconnect();
+		}
+	});
+}
+
+_createPrimitive("auxOut", auxOut);
+
+function auxThrough(bus, input, ret)
+{
+	if(typeof bus === "number")
+	{
+		if(bus >= 0 && bus < Soliton.numBuses)
+		{
+			bus = Soliton.buses[bus];		
+		}
+			
+		else
+		{
+			throw new Error("Bus number " + bus + " exceeds the number of buses: " + Soliton.numBuses);
+		}
+	}
+
+	input.connect(bus);
+	ret(input);
+}
+
+_createPrimitive("auxThrough", auxThrough);
 
 function killall(ret)
 {

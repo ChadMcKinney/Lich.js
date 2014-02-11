@@ -1030,6 +1030,27 @@ shaderSeq +> shaderSynth _ _ _
 
 
 
+-- Bus tests
+
+let s = square 33 >> auxOut 0 >> play
+let s2 = saw 13 >> gain 0.1 >> auxOut 0 >> play
+let v = auxIn 0 >> convolve "cluster" >> gain 0.03 >> delay 1 0 >> auxThrough 0 >> play
+
+stop s
+stop s2
+stop v
+
+fade 1 v
+
+-- We can use aux buses for feedback
+let s3 = auxIn 1 >> exprange 40 160 >> square >> gain 0.2 >> delay 1 0.5 >> auxThrough 1 >> gain 2 >> play
+stop s3
+
+-- We can also use a localBus so as to not collide with anything else that might use a particular auxillary bus
+let s4 = feed >> exprange 40 160 >> square >> gain 0.2 >> delay 1 0.5 >> auxThrough feed >> gain 2 >> play
+    where feed = localBus
+
+
 -- Graphics Notes
 Make Graphics API more like Audio API
 you should use stop instead of delete
@@ -1042,7 +1063,7 @@ Mesh loading from file, similar to sample loading
 More shader generating code -- Compile Lich.js directly to a shader?
 
 -- Language to do
-Enforce purity:
+Enforce purity: Done?!
     Prevent redefinition of variables at global scope in library compilation
     Prevent multiple declaration of variables in and let statements
 
@@ -1052,3 +1073,4 @@ Fix Node leaks with custom UGens
 SpliceFilter? -> Adds poles according to splice string characters
 Implement Limiter, writeBuf, and any other loose ends. Put in Master limiter?
 Buses and Effects routing
+Panning!

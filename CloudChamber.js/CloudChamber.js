@@ -837,7 +837,7 @@ function gaussianMesh(numTriangles,color, ret)
 	);
 }
 
-_createPrimitive("nrand", nrand);
+_createPrimitive("gaussianMesh", gaussianMesh);
 
 function sinMesh(numTriangles, color, ret)
 {
