@@ -6376,6 +6376,19 @@ function delay(delayTime, feedbackLevel, input, ret)
 			if(elem._lichType == AUDIO)
 				elem.stopAll(time);
 		});
+
+		setTimeout(function()
+		{
+			ins.map(function(elem)
+			{
+				if(elem._lichType == AUDIO)
+					elem.disconnect(0);
+
+				feedBack.disconnect(0);
+				delay.disconnect(0);
+			});
+		},
+		(time - Soliton.context.currentTime) * 1000)
 	}
 
 	mix._lichType = AUDIO;
@@ -6409,7 +6422,12 @@ function mix2(input1, input2, ret)
 	input1.connect(mix);
 	input2.connect(mix);
 	mix.startAll = function(time){input1.startAll(time);input2.startAll(time);}
-	mix.stopAll = function(time){input1.stopAll(time);input2.stopAll(time);}
+	mix.stopAll = function(time)
+	{
+		input1.stopAll(time);
+		input2.stopAll(time);
+		setTimeout(function(){input1.disconnect(0); input2.disconnect(0)}, (time - Soliton.context.currentTime) * 1000);
+	}
 	mix._lichType = AUDIO;
 	ret(mix);
 }
