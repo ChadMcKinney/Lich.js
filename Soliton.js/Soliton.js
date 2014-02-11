@@ -403,6 +403,8 @@ Soliton.createOscillator = function(target, type, freq, table)
 	osc.gainNode.connect(target);
 	osc.gainNode.gain.value = 0;
 	osc.connect(osc.gainNode);
+	osc.startAll = osc.start;
+	osc.stopAll = osc.stop;
 	return osc;
 }
 
@@ -6456,10 +6458,9 @@ function exprange(low, high, input, ret)
 	var rangeFunc = Soliton.context.createScriptProcessor(1024, 1, 1);
 	rangeFunc.onaudioprocess = Soliton.linexpUGen(-1, 1, low, high);
 	rangeFunc.startAll = input.startAll;
-	rangeFunc.stopAll = input.stopAll;
 	rangeFunc._lichType = AUDIO;
 	input.connect(rangeFunc);
-	rangeFunc.stopAll = function(time){input.stopAll(time); input.disconnect(0);}
+	rangeFunc.stopAll = function(time){input.stopAll(time); setTimeout(function(){input.disconnect(0)}, (time - Soliton.context.currentTime) * 1000)}
 	ret(rangeFunc);
 }
 
@@ -6469,6 +6470,7 @@ Soliton.divisionUGen = function(event)
 	var inputArray2 = event.inputBuffer.getChannelData(1);
 	var outputArrayL = event.outputBuffer.getChannelData(0);
 
+	Lich.post(inputArray2[0]);
 	for(var i = 0; i < 1024; ++i)
 	{
 		if(inputArray2[i] == 0)
@@ -6496,14 +6498,34 @@ function _audioDivision(input1, input2, ret)
 		});
 	}
 
-	var divisionFunc = Soliton.context.createScriptProcessor(1024, 2, 1);
-	divisionFunc.onaudioprocess = Soliton.divisionUGen;
-	divisionFunc.channelInterpretation = "discrete";
+	var divisionFunc = Soliton.context.createScriptProcessor(1024, 2, 2);
+	divisionFunc.onaudioprocess = function(event)
+	{
+		var inputArray1 = event.inputBuffer.getChannelData(0);
+		var inputArray2 = event.inputBuffer.getChannelData(1);
+		var outputArrayL = event.outputBuffer.getChannelData(0);
+
+		Lich.post(inputArray2[0]);
+		for(var i = 0; i < 1024; ++i)
+		{
+			if(inputArray2[i] == 0)
+				outputArrayL[i] = 0;
+			else	
+				outputArrayL[i] = inputArray1[i] / inputArray2[i];
+		}
+	}
+	//divisionFunc.channelInterpretation = "discrete";
 	divisionFunc.startAll = function(time){ input2.startAll(time); input1.startAll(time);}
-	divisionFunc.stopAll = function(time){ input1.stopAll(time); input2.stopAll(time); input1.disconnect(0); input2.disconnect(0);}
+	divisionFunc.stopAll = function(time)
+	{
+		input1.stopAll(time);
+		input2.stopAll(time); 
+		setTimeout(function(){input1.disconnect(0); input2.disconnect(0)}, (time - Soliton.context.currentTime) * 1000);
+	}
+	
 	divisionFunc._lichType = AUDIO;
-	input1.connect(divisionFunc);
-	input2.connect(divisionFunc);
+	input1.connect(divisionFunc, 0, 0);
+	input2.connect(divisionFunc, 0, 0);
 	ret(divisionFunc);
 }
 
@@ -6839,27 +6861,13 @@ function play(synth, ret)
 	Lich.collapse(synth, function(synth)
 	{
 		var type = synth._lichType;
-		if(type != AUDIO && type != SYNTH && type != IMPSTREAM && type != SOLOSTREAM)
+		if(type != AUDIO && type != IMPSTREAM && type != SOLOSTREAM)
 			throw new Error("play can only be used with synth definitions, functions, or patterns.");
 
-		if(type == AUDIO)
-		{
-			synth.connect(Soliton.masterGain);
-			synth.startAll(Soliton.context.currentTime);
-			ret(synth);
-		}
-
-		else if(type == SYNTH)
-		{
-			synth._audioFunc.connect(Soliton.masterGain);
-			synth._audioFunc.startAll(Soliton.context.currentTime);
-			ret(synth);
-		}
-
-		else
-		{
-			synth.play();
-		}
+		synth.connect(Soliton.masterGain);
+		synth.startAll(Soliton.context.currentTime);
+		synth.startAll = function(){}
+		ret(synth);
 	});
 }
 
