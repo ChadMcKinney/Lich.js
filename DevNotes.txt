@@ -1030,11 +1030,11 @@ shaderSeq +> shaderSynth _ _ _
 
 
 
--- Bus tests
+-- Bus and Feed Back tests
 
-let s = square 33 >> auxOut 0 >> play
-let s2 = saw 13 >> gain 0.1 >> auxOut 0 >> play
-let v = auxIn 0 >> convolve "cluster" >> gain 0.03 >> delay 1 0 >> auxThrough 0 >> play
+let s = square 1 >> auxOut 0 >> play
+let s2 = saw 3 >> gain 0.1 >> auxOut 0 >> play
+let v = auxIn 0 >> convolve "cluster" >> gain 0.5 >> play
 
 stop s
 stop s2
