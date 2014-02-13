@@ -833,7 +833,7 @@ hater3 +> _ _ _ hihate
 
 -- Just Intonation Fun
 
-let glitter4 => (sin (saw 0.1 >> exprange 1 40)) * (sin (160*10)) * (tri 6.5) >> delay (1/3) 0.3 >> gain 0.1 >> play
+let glitter4 = (sin (saw 0.1 >> exprange 1 40)) * (sin (160*10)) * (tri 6.5) >> delay (1/3) 0.3 >> gain 0.1 >> play
 
 let k => tri 40 >> lowpass 320 1 >> perc 0.0001 1 0.3
 kicker +> k _ _ k _ _ k _ | (/2)
@@ -1048,8 +1048,13 @@ stop s3
 
 -- We can also use a localBus so as to not collide with anything else that might use a particular auxillary bus
 let s4 = feed >> exprange 40 160 >> square >> gain 0.2 >> delay 1 0.5 >> auxThrough feed >> gain 2 >> play
-    where feed = localBus
+    where feed = localBus/
 
+-- splice filters and feed back is cool, but they blow easily. Remember children, ctr-. is your friend!
+square (saw 1 >> exprange 1 20000) >> add (auxIn 0 >> delay (1/3) 0 >> gain 0.9) >> spliceFilter (randomString 16) >> limiter -6 >> auxThrough 0 >> play
+
+-- We can implement something similar with an fir and it will be much more stable
+square (saw 1 >> exprange 1 20000) >> add (auxIn 0 >> delay (1/6) 0) >> fir [random -0.4 0.4 | x <- [1..10]] >> limiter -3 >> auxThrough 0 >> play
 
 -- Graphics Notes
 Make Graphics API more like Audio API
@@ -1070,7 +1075,7 @@ Enforce purity: Done?!
 
 -- Audio to do
 Fix Node leaks with custom UGens -- Fixed? Need to implement disconnect via setTimeout for all inputs like in exprange
-SpliceFilter? -> Adds poles according to splice string characters
-Implement Limiter, writeBuf, and any other loose ends. Put in Master limiter?
+spliceFilter? -> Adds poles according to splice string characters
+Implement Limiter, writeBuf, and any other loose ends. Put in Master limiter? -- No write buffer in API. Compressor/Limiter is done.
 Buses and Effects routing -- Done!?
-Panning!
+Panning! -- Doneish, the API isn't responding to float panning

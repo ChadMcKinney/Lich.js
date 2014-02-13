@@ -38,8 +38,8 @@
 var Lich = new Object();
 
 Lich.VM = new Object();
-Lich.VM.Nothing = new LichNothing(); // We only need one Nothing value because they're immutable and identical.
-Lich.VM.Void = new LichVoid(); // Same as Nothing, we only need one.
+Lich.VM.Nothing = {_lichType: NOTHING }; // We only need one Nothing value because they're immutable and identical.
+Lich.VM.Void = {_lichType: VOID }; // Same as Nothing, we only need one.
 Lich.VM.actorSupervisor = new ActorSupervisor();
 Lich.VM.reserved = {}; // For variables reserved by the language
 Lich.VM.currentThread = "main";

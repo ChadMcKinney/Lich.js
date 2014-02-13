@@ -38,6 +38,7 @@
 var Soliton = {}; // Soliton namespace
 Soliton.context = 0;
 Soliton.masterGain = 0;
+Soliton.limiter = 0;
 Soliton.blockSize = 4096; // Audio block size
 Soliton.spliceFuncBlockSize = 64; // block size for splice generated osc node functions
 Soliton.spliceFuncBlockRatio = Soliton.blockSize / Soliton.spliceFuncBlockSize; // Ratio use for sample generation in splice osc nodes
@@ -61,6 +62,14 @@ Soliton.init = function()
 		Soliton.masterGain = Soliton.context.createGain();
 		Soliton.masterGain.connect(Soliton.context.destination);
 		Soliton.masterGain.gain.value = 0.25;
+		Soliton.limiter = Soliton.context.createDynamicsCompressor();
+		Soliton.limiter.threshold.value = -3;
+		//compr.knee.value = knee;
+		Soliton.limiter.ratio.value = 20;
+		Soliton.limiter.attack.value = 0.003;
+		Soliton.limiter.release.value = 0.003;
+		Soliton.masterGain.connect(Soliton.limiter);
+		Soliton.limiter.connect(Soliton.context.destination);
 
 		for(var i = 0; i < (Soliton.context.sampleRate * 4); ++i) 
 		{
@@ -70,6 +79,7 @@ Soliton.init = function()
 		for(var i = 0; i < Soliton.numBuses; ++i)
 		{
 			var bus = Soliton.context.createGain();
+			bus._lichType = AUDIO;
 			bus.startAll = function(){};
 			bus.stopAll = function(){};
 			Soliton.buses.push(bus);
@@ -4152,7 +4162,7 @@ Soliton.parseSpliceOsc = function(lang)
 
 function spliceOsc(lang, divider, ret)
 {
-	var oscNode = Soliton.context.createScriptProcessor(Soliton.blockSize, 0, 1);
+	var oscNode = Soliton.context.createScriptProcessor(1024, 0, 1);
 	oscNode.audioFuncArray = Soliton.parseSpliceOsc(lang);
 	oscNode.currentFunc = 0;
 	oscNode.divider = divider;
@@ -4163,17 +4173,21 @@ function spliceOsc(lang, divider, ret)
 		//var outputArrayR = event.outputBuffer.getChannelData(1);
 		var output;
 
-		for(var i = 0; i < 1024; /*i += (Soliton.spliceFuncBlockSize * this.divider)*/ ++i)
+		for(var i = 0; i < 1024; i ++)
 		{
 			output = this.audioFuncArray[this.currentFunc](i);
 
-			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j)
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; j += divider)
 			{
 				
-				for(var k = 1; k <= this.divider; ++k)
-				{
-					outputArrayL[i + (j * k)] /*= outputArrayR[i + (j * k)]*/ = output[j];	
-				}  
+				//for(var k = 1; k <= this.divider; ++k)
+				//{
+					outputArrayL[i] /*= outputArrayR[i + (j * k)]*/ += output[j];
+
+					if(outputArrayL[i] > 1 || outputArrayL[i] < -1)
+						outputArrayL[i] = 1/outputArrayL[i];
+
+				//}  
 			}
 
 			if(++this.currentFunc >= this.audioFuncArray.length)
@@ -4184,7 +4198,7 @@ function spliceOsc(lang, divider, ret)
 	oscNode.onaudioprocess.parentNode = oscNode;
 	oscNode._lichType = AUDIO;
 	oscNode.startAll = function(time){}
-	oscNode.stopAll = function(time){}
+	oscNode.stopAll = function(time){setTimeout(function(){oscNode.disconnect(0)}, (time - Soliton.context.currentTime) * 1000)}
 	/*
 	var fadeGain = Soliton.context.createGain();
 	oscNode.connect(fadeGain);
@@ -5997,15 +6011,16 @@ Soliton.parseSpliceFXChar = function(character)
 		var sample = (character.charCodeAt(0) / 256 * 2 - 1);
 		return function(inputL, inputR, i)
 		{ 
-			var outputL = new Array(Soliton.spliceFuncBlockSize);
-			var outputR = new Array(Soliton.spliceFuncBlockSize);
+			var output = new Array(Soliton.spliceFuncBlockSize);
+			//var outputR = new Array(Soliton.spliceFuncBlockSize);
 			for(var j = 0; j < Soliton.spliceFuncBlockSize; ++j) 
 			{ 
-				outputL[j] = Soliton.wrap(inputL[i +j] + sample);
-				outputR[j] = Soliton.wrap(inputR[i +j] + sample);
+				output[j] = Soliton.wrap(inputL[i + j] + sample);
+				//outputR[j] = Soliton.wrap(inputR[i +j] + sample);
 			} 
 
-			return { l: outputL, r: outputR };
+			return output;
+			//return { l: outputL, r: outputR };
 		};
 		
 		break;
@@ -6054,7 +6069,7 @@ function spliceFX(lang, divider, source, ret)
 	//if(source == null)
 	//	return null;
 
-	var oscNode = Soliton.context.createScriptProcessor(Soliton.blockSize, 2, 2);
+	var oscNode = Soliton.context.createScriptProcessor(1024, 1, 1);
 	oscNode.audioFuncArray = Soliton.parseSpliceFX(lang);
 	oscNode.currentFunc = 0;
 	oscNode.divider = divider;
@@ -6062,28 +6077,33 @@ function spliceFX(lang, divider, source, ret)
 	oscNode.onaudioprocess = function(event)
 	{
 		var outputArrayL = event.outputBuffer.getChannelData(0);
-		var outputArrayR = event.outputBuffer.getChannelData(1);
+		//var outputArrayR = event.outputBuffer.getChannelData(1);
 		var inputArrayL = event.inputBuffer.getChannelData(0);
-		var inputArrayR = event.inputBuffer.getChannelData(1);
+		//var inputArrayR = event.inputBuffer.getChannelData(1);
 		var output;
 
 		for(var i = 0; i < 1024; /*i += (1024 * this.divider)*/ ++i)
 		{
-			output = this.audioFuncArray[this.currentFunc](inputArrayL, inputArrayR, i);
+			output = this.audioFuncArray[this.currentFunc](inputArrayL, outputArrayL, i);
 
-			for(var j = 0; j < 1024; ++j)
+			for(var j = 0; j < Soliton.spliceFuncBlockSize; j += this.divider)
 			{
 				
-				for(var k = 1; k <= this.divider; ++k)
-				{
-					outputArrayL[i + (j * k)] = output.l[j];
-					outputArrayR[i + (j * k)] = output.r[j];	
-				}  
+				//for(var k = 1; k <= this.divider; ++k)
+				//{
+					outputArrayL[i] += output[j];
+
+					if(isNaN(outputArrayL[i]))
+						outputArrayL[i] = inputArrayL[i];
+					else if(outputArrayL[i] > 1 || outputArrayL[i] < -1)
+						outputArrayL[i] = 1/outputArrayL[i];
+				//}  
 			}
 
 			if(++this.currentFunc >= this.audioFuncArray.length)
 			 	this.currentFunc = 0;
 		}
+		//Lich.post(outputArrayL[0]);
 	}
 
 	oscNode.onaudioprocess.parentNode = oscNode;
@@ -6103,6 +6123,182 @@ function spliceFX(lang, divider, source, ret)
 	return Soliton.addNode(oscNode);*/
 	ret(oscNode);
 }
+
+_createPrimitive("spliceFX", spliceFX);
+
+
+function spliceFilter(spliceString, input, ret)
+{
+	if(spliceString.length == 1)
+		spliceString += spliceString;
+
+	var string1 = spliceString.slice(0, Math.floor(spliceString.length / 2));
+	var string2 = spliceString.slice(Math.floor(spliceString.length / 2), spliceString.length);
+	var coeff1 = new Array();
+	var coeff2 = new Array();
+	var inMem = new Array();
+	var outMem = new Array();
+
+	for(var i = 0; i < string1.length; ++i)
+	{
+		coeff1.push(string1.charCodeAt(i) / 256 - 0.25);
+		inMem.push(0);
+	}
+
+	for(var i = 0; i < string2.length; ++i)
+	{
+		coeff2.push(string2.charCodeAt(i) / 128 - 0.5);
+		outMem.push(0);
+	}
+
+	var filt = Soliton.context.createScriptProcessor(1024, 1, 1);
+
+	filt.onaudioprocess = function(event)
+	{
+		var inputArray = event.inputBuffer.getChannelData(0);
+		var outputArray = event.outputBuffer.getChannelData(0);
+
+		for(var i = 0; i < 1024; i ++)
+		{
+			outMem[0] = 0;
+			inMem[0] = inputArray[i];
+			for(var j = coeff1.length - 1; j > 0; --j)
+			{
+				outMem[0] += coeff1[j] * inMem[j];
+				inMem[j] = inMem[j - 1];
+			}
+
+			outMem[0] += coeff1[0] * inMem[0];
+
+			for(var j = coeff2.length - 1; j > 0; --j)
+			{
+				outMem[0] += -coeff2[j] * outMem[j];
+				outMem[j] = outMem[j - 1];
+			}
+
+			outputArray[i] = outMem[0];
+		}
+	}
+
+
+	filt._lichType = AUDIO;
+	input.connect(filt);
+	filt.startAll = function(time){input.startAll(time)};
+	filt.stopAll = function(time)
+	{
+		input.stopAll(time);
+		setTimeout(function(){input.disconnect(0); filt.disconnect(0)}, (time - Soliton.context.currentTime) * 1000)
+	};
+
+	ret(filt);
+}
+
+_createPrimitive("spliceFilter", spliceFilter);
+
+function iir(coeff1, coeff2, input, ret)
+{
+	var inMem = new Array();
+	var outMem = new Array();
+
+	for(var i = 0; i < coeff1.length; ++i)
+	{
+		inMem.push(0);
+	}
+
+	for(var i = 0; i < coeff2.length; ++i)
+	{
+		outMem.push(0);
+	}
+
+	var filt = Soliton.context.createScriptProcessor(1024, 1, 1);
+
+	filt.onaudioprocess = function(event)
+	{
+		var inputArray = event.inputBuffer.getChannelData(0);
+		var outputArray = event.outputBuffer.getChannelData(0);
+
+		for(var i = 0; i < 1024; i ++)
+		{
+			outMem[0] = 0;
+			inMem[0] = inputArray[i];
+			for(var j = coeff1.length - 1; j > 0; --j)
+			{
+				outMem[0] += coeff1[j] * inMem[j];
+				inMem[j] = inMem[j - 1];
+			}
+
+			outMem[0] += coeff1[0] * inMem[0];
+
+			for(var j = coeff2.length - 1; j > 0; --j)
+			{
+				outMem[0] += -coeff2[j] * outMem[j];
+				outMem[j] = outMem[j - 1];
+			}
+
+			outputArray[i] = outMem[0];
+		}
+	}
+
+
+	filt._lichType = AUDIO;
+	input.connect(filt);
+	filt.startAll = function(time){input.startAll(time)};
+	filt.stopAll = function(time)
+	{
+		input.stopAll(time);
+		setTimeout(function(){input.disconnect(0); filt.disconnect(0)}, (time - Soliton.context.currentTime) * 1000)
+	};
+
+	ret(filt);
+}
+
+_createPrimitive("iir", iir);
+
+function fir(coeff, input, ret)
+{
+	var inMem = new Array();
+
+	for(var i = 0; i < coeff.length; ++i)
+	{
+		inMem.push(0);
+	}
+
+	var filt = Soliton.context.createScriptProcessor(1024, 1, 1);
+
+	filt.onaudioprocess = function(event)
+	{
+		var inputArray = event.inputBuffer.getChannelData(0);
+		var outputArray = event.outputBuffer.getChannelData(0);
+
+		for(var i = 0; i < 1024; i ++)
+		{
+			inMem[0] = inputArray[i];
+			var res = 0;
+			
+			for(var j = coeff.length - 1; j > 0; --j)
+			{
+				res += coeff[j] * inMem[j];
+				inMem[j] = inMem[j - 1];
+			}
+			
+			outputArray[i] = res;
+		}
+	}
+
+
+	filt._lichType = AUDIO;
+	input.connect(filt);
+	filt.startAll = function(time){input.startAll(time)};
+	filt.stopAll = function(time)
+	{
+		input.stopAll(time);
+		setTimeout(function(){input.disconnect(0); filt.disconnect(0)}, (time - Soliton.context.currentTime) * 1000)
+	};
+
+	ret(filt);
+}
+
+_createPrimitive("fir", fir);
 
 /////////////////////////////////////////////////////
 // Custom UGens
@@ -6396,6 +6592,95 @@ function delay(delayTime, feedbackLevel, input, ret)
 }
 
 _createPrimitive("delay", delay);
+
+function compressor(threshold, knee, ratio, attack, release, input, ret)
+{
+	Lich.collapse(input, function(input)
+	{
+		var compr = Soliton.context.createDynamicsCompressor();
+		compr.threshold.value = threshold;
+		compr.knee.value = knee;
+		compr.ratio.value = ratio;
+		compr.attack.value = attack;
+		compr.release.value = release;
+		input.connect(compr);
+		compr.startAll = input.startAll;
+		compr._lichType = AUDIO;
+		compr.stopAll = function(time)
+		{
+			input.stopAll(time);
+			setTimeout(
+				function()
+				{
+					input.disconnect(0);
+				},
+				(time - Soliton.context) * 1000
+			)
+		}
+
+		ret(compr);
+	});
+}
+
+_createPrimitive("compressor", compressor);
+
+function limiter(threshold, input, ret)
+{
+	Lich.collapse(input, function(input)
+	{
+		var compr = Soliton.context.createDynamicsCompressor();
+		compr.threshold.value = threshold;
+		//compr.knee.value = knee;
+		compr.ratio.value = 20;
+		Soliton.limiter.attack.value = 0.003;
+		Soliton.limiter.release.value = 0.003;
+		input.connect(compr);
+		compr.startAll = input.startAll;
+		compr._lichType = AUDIO;
+		compr.stopAll = function(time)
+		{
+			input.stopAll(time);
+			setTimeout(
+				function()
+				{
+					input.disconnect(0);
+				},
+				(time - Soliton.context) * 1000
+			)
+		}
+
+		ret(compr);
+	});
+}
+
+_createPrimitive("limiter", limiter);
+
+function pan(position, input, ret)
+{
+	if(typeof position !== "number")
+		throw new Error("Panning position can only be a number.");
+
+	var panner = Soliton.context.createPanner();
+	panner.panningModel = "equalpower";
+	panner._lichType = AUDIO;
+	panner.setPosition(position, 0, 0); // This seems to be broken or a bug. Just hard pans -1, 0, or 1. Can't do 0.5 or -0.1 for instance.
+	input.connect(panner);
+	
+	panner.startAll = function(time)
+	{
+		input.startAll(time);
+	}
+
+	panner.stopAll = function(time)
+	{
+		input.stopAll(time);
+		input.disconnect(0);
+	}
+
+	ret(panner);
+}
+
+_createPrimitive("pan", pan);
 
 function mix2(input1, input2, ret)
 {
@@ -7004,9 +7289,28 @@ function killall(ret)
 	Lich.scheduler.freeScheduledEvents();
     Soliton.masterGain.disconnect(0);
 	Soliton.masterGain = Soliton.context.createGain();
-	Soliton.masterGain.connect(Soliton.context.destination);
+	//Soliton.masterGain.connect(Soliton.context.destination);
 	Soliton.masterGain.gain.value = 0.25;
-	ret(Lich.VM.Void);
+	Soliton.limiter = Soliton.context.createDynamicsCompressor();
+	Soliton.limiter.threshold.value = 0;
+	//compr.knee.value = knee;
+	Soliton.limiter.ratio.value = 15;
+	Soliton.limiter.attack.value = 0.01;
+	Soliton.limiter.release.value = 0.01;
+	Soliton.masterGain.connect(Soliton.limiter);
+	Soliton.limiter.connect(Soliton.context.destination);
+	
+	Soliton.buses = [];
+	for(var i = 0; i < Soliton.numBuses; ++i)
+	{
+		var bus = Soliton.context.createGain();
+		bus._lichType = AUDIO;
+		bus.startAll = function(){};
+		bus.stopAll = function(){};
+		Soliton.buses.push(bus);
+	}
+	
+	//ret(Lich.VM.Void);
 }
 
 _createPrimitive("killall", killall);
