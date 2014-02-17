@@ -2113,8 +2113,8 @@ function _wrap(value, lo, hi)
         if (value >= lo) return value;
     } 
 
-    //else 
-    //	return value;
+    else 
+    	return value;
 
     if (hi == lo) 
     	return lo;

@@ -5805,7 +5805,6 @@ function clip(value, input, ret)
 	var merger = Soliton.context.createChannelMerger(2);
 	merger.channelInterpretation = "discrete";
 	var clipNode = Soliton.context.createScriptProcessor(1024, 2, 1);
-	//clipNode.channelInterpretation = "discrete";
 
 	clipNode.onaudioprocess = function(event)
 	{
@@ -5870,6 +5869,269 @@ function clip(value, input, ret)
 }
 
 _createPrimitive("clip", clip);
+
+function wrap(value, input, ret)
+{
+	if(input._lichType != AUDIO)
+	{
+		throw new Error("clip must be used with at least one audio source.");
+	}
+
+	else if(value._lichType != AUDIO)
+	{
+		dc(value, function(vRes){value = vRes;});
+	}
+
+	var merger = Soliton.context.createChannelMerger(2);
+	merger.channelInterpretation = "discrete";
+	var wrapNode = Soliton.context.createScriptProcessor(1024, 2, 1);
+
+	wrapNode.onaudioprocess = function(event)
+	{
+		var inputArray = event.inputBuffer.getChannelData(0);
+		var wrapArray = event.inputBuffer.getChannelData(1);
+		var outputArray = event.outputBuffer.getChannelData(0);
+		var pos = 0;
+		var neg = 0;
+
+		for(var i = 0; i < 1024; ++i)
+		{
+			pos = Math.abs(wrapArray[i]);
+			neg = -pos;
+			outputArray[i] = _wrap(inputArray[i], neg, pos);
+		}
+	}
+
+	input.connect(merger, 0, 0);
+	value.connect(merger, 0, 1);
+	merger.connect(wrapNode);
+
+	wrapNode.startAll = function(time)
+	{ 
+		input.startAll(time);
+		value.startAll(time);
+	}
+
+	wrapNode.stopAll = function(time)
+	{ 
+		input.stopAll(time);
+		value.stopAll(time);
+		setTimeout(function(){input.disconnect(); value.disconnect(); merger.disconnect(); wrapNode.disconnect()}, (time - Soliton.context.currentTime) * 1000);
+	}
+
+	wrapNode._lichType = AUDIO;
+	ret(wrapNode);
+}
+
+_createPrimitive("wrap", wrap);
+
+Soliton._mod = function(value, hi)
+{
+   	var lo = 0;
+    if (value >= hi) {
+    	value -= hi;
+        if (value < hi) return value;
+    } else if (value < lo) {
+    	value += hi;
+        if (value >= lo) return value;
+    } else return value;
+
+    if (hi == lo) return lo;
+
+    var c = value % hi;
+    if(c < 0) c += hi;
+    
+    return c;
+}
+
+
+Soliton._fold = function(value, lo, hi)
+{
+	var b = hi - lo;
+    var b2 = b + b;
+    var c = Soliton._mod(value - lo, b2);
+    if(c > b) c = b2 - c;
+    return c + lo;
+}
+
+function fold(value, input, ret)
+{
+	if(input._lichType != AUDIO)
+	{
+		throw new Error("clip must be used with at least one audio source.");
+	}
+
+	else if(value._lichType != AUDIO)
+	{
+		dc(value, function(vRes){value = vRes;});
+	}
+
+	var merger = Soliton.context.createChannelMerger(2);
+	merger.channelInterpretation = "discrete";
+	var foldNode = Soliton.context.createScriptProcessor(1024, 2, 1);
+
+	foldNode.onaudioprocess = function(event)
+	{
+		var inputArray = event.inputBuffer.getChannelData(0);
+		var foldArray = event.inputBuffer.getChannelData(1);
+		var outputArray = event.outputBuffer.getChannelData(0);
+		var pos = 0;
+		var neg = 0;
+
+		for(var i = 0; i < 1024; ++i)
+		{
+			pos = Math.abs(foldArray[i]);
+			neg = -pos;
+			outputArray[i] = Soliton._fold(inputArray[i], neg, pos);
+		}
+	}
+
+	input.connect(merger, 0, 0);
+	value.connect(merger, 0, 1);
+	merger.connect(foldNode);
+
+	foldNode.startAll = function(time)
+	{ 
+		input.startAll(time);
+		value.startAll(time);
+	}
+
+	foldNode.stopAll = function(time)
+	{ 
+		input.stopAll(time);
+		value.stopAll(time);
+		setTimeout(function(){input.disconnect(); value.disconnect(); merger.disconnect(); foldNode.disconnect()}, (time - Soliton.context.currentTime) * 1000);
+	}
+
+	foldNode._lichType = AUDIO;
+	ret(foldNode);
+}
+
+_createPrimitive("fold", fold);
+
+function crunch(depth, input, ret)
+{
+	if(input._lichType != AUDIO)
+	{
+		throw new Error("clip must be used with at least one audio source.");
+	}
+
+	else if(depth._lichType != AUDIO)
+	{
+		dc(depth, function(vRes){depth = vRes;});
+	}
+
+	var merger = Soliton.context.createChannelMerger(2);
+	merger.channelInterpretation = "discrete";
+	var fxNode = Soliton.context.createScriptProcessor(1024, 2, 1);
+
+	fxNode.onaudioprocess = function(event)
+	{
+		var inputArray = event.inputBuffer.getChannelData(0);
+		var crunchArray = event.inputBuffer.getChannelData(1);
+		var outputArray = event.outputBuffer.getChannelData(0);
+		var quant = 0;
+
+		for(var i = 0; i < 1024; ++i)
+		{
+			quant = Math.pow(0.5, crunchArray[i]);
+			outputArray[i] = crunchArray[i] == 0 ? inputArray[i] : Math.floor(inputArray[i]/quant) * quant;
+		}
+
+		//Lich.post("["+inputArray[0]+","+crunchArray[0]+"]");
+	}
+
+
+	input.connect(merger, 0, 0);
+	depth.connect(merger, 0, 1);
+	merger.connect(fxNode);
+
+	fxNode.startAll = function(time)
+	{ 
+		input.startAll(time);
+		depth.startAll(time);
+	}
+
+	fxNode.stopAll = function(time)
+	{ 
+		depth.stopAll(time);
+		input.stopAll(time);
+		setTimeout(function(){input.disconnect(); depth.disconnect(); merger.disconnect(); fxNode.disconnect()}, (time - Soliton.context.currentTime) * 1000);
+	}
+
+	fxNode._lichType = AUDIO;
+	ret(fxNode);
+}
+
+_createPrimitive("crunch", crunch);
+
+function decimate(rate, input, ret)
+{
+	if(input._lichType != AUDIO)
+	{
+		throw new Error("clip must be used with at least one audio source.");
+	}
+
+	else if(rate._lichType != AUDIO)
+	{
+		dc(rate, function(vRes){rate = vRes;});
+	}
+
+	var merger = Soliton.context.createChannelMerger(2);
+	merger.channelInterpretation = "discrete";
+	var fxNode = Soliton.context.createScriptProcessor(1024, 2, 1);
+	var currentSample = 0;
+	var decimCount = 0;
+	var ratio = 1;
+
+	fxNode.onaudioprocess = function(event)
+	{
+		var inputArray = event.inputBuffer.getChannelData(0);
+		var rateArray = event.inputBuffer.getChannelData(1);
+		var outputArray = event.outputBuffer.getChannelData(0);
+
+		for(var i = 0; i < 1024; ++i)
+		{
+			if(rateArray[i] > Soliton.context.sampleRate)
+				ratio = 1;
+			else
+				ratio = rateArray[i] / Soliton.context.sampleRate;
+
+			decimCount += ratio;
+
+			if(decimCount >= 1)
+			{
+				decimCount = 0;
+				currentSample = inputArray[i];
+			}
+
+			outputArray[i] = currentSample;
+		}
+	}
+
+
+	input.connect(merger, 0, 0);
+	rate.connect(merger, 0, 1);
+	merger.connect(fxNode);
+
+	fxNode.startAll = function(time)
+	{ 
+		input.startAll(time);
+		rate.startAll(time);
+	}
+
+	fxNode.stopAll = function(time)
+	{ 
+		rate.stopAll(time);
+		input.stopAll(time);
+		setTimeout(function(){input.disconnect(); depth.disconnect(); merger.disconnect(); fxNode.disconnect()}, (time - Soliton.context.currentTime) * 1000);
+	}
+
+	fxNode._lichType = AUDIO;
+	ret(fxNode);
+}
+
+_createPrimitive("decimate", decimate);
 
 function killall(ret)
 {
