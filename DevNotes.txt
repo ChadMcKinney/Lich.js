@@ -1090,6 +1090,10 @@ sin 440 >> clip (tri 1 >> range 0 1) >> gain 0.4 >> play
 -- Feedback clip modulation, use headhones!
 square 40 >> clip (delay (1.6) 0 (auxIn 0) >> range 0.01 1) >> auxThrough 0 >> gain 0.4 >> play
 
+
+-- Audio division works, yay!
+sin (simplex 1 >> exprange 1 2000) >> delay (1/(simplex 0.79 >> exprange 2 100)) 0.9 >> gain 0.2 >> play
+
 -- Graphics Notes
 Make Graphics API more like Audio API
 you should use stop instead of delete

@@ -5301,6 +5301,8 @@ function _audioDivision(input1, input2, ret)
 		});
 	}
 
+	var merger = Soliton.context.createChannelMerger(2);
+	merger.channelInterpretation = "discrete";
 	var divisionFunc = Soliton.context.createScriptProcessor(1024, 2, 2);
 	divisionFunc.onaudioprocess = function(event)
 	{
@@ -5308,7 +5310,7 @@ function _audioDivision(input1, input2, ret)
 		var inputArray2 = event.inputBuffer.getChannelData(1);
 		var outputArrayL = event.outputBuffer.getChannelData(0);
 
-		Lich.post(inputArray2[0]);
+		//Lich.post(inputArray2[0]);
 		for(var i = 0; i < 1024; ++i)
 		{
 			if(inputArray2[i] == 0)
@@ -5316,6 +5318,8 @@ function _audioDivision(input1, input2, ret)
 			else	
 				outputArrayL[i] = inputArray1[i] / inputArray2[i];
 		}
+
+		//Lich.post(inputArray1[0] + " , " + inputArray2[0]);
 	}
 	//divisionFunc.channelInterpretation = "discrete";
 	divisionFunc.startAll = function(time){ input2.startAll(time); input1.startAll(time);}
@@ -5323,12 +5327,16 @@ function _audioDivision(input1, input2, ret)
 	{
 		input1.stopAll(time);
 		input2.stopAll(time); 
-		setTimeout(function(){input1.disconnect(0); input2.disconnect(0)}, (time - Soliton.context.currentTime) * 1000);
+		setTimeout(
+			function(){input1.disconnect(0); input2.disconnect(0); merger.disconnect(); divisionFunc.disconnect()}, 
+			(time - Soliton.context.currentTime) * 1000
+		);
 	}
 	
 	divisionFunc._lichType = AUDIO;
-	input1.connect(divisionFunc, 0, 0);
-	input2.connect(divisionFunc, 0, 0);
+	input1.connect(merger, 0, 0);
+	input2.connect(merger, 0, 1);
+	merger.connect(divisionFunc);
 	ret(divisionFunc);
 }
 
