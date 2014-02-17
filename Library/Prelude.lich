@@ -60,3 +60,91 @@ deepMap f list@(x:xs) = map (deepFunc) list
 
 --| Networking
 myName = clientName
+
+
+--| Tunings
+justTuning = [1, 16/15, 9/8, 6/5, 5/4, 4/3, 45/32, 3/2, 8/5, 5/3, 9/5, 15/8]
+equalTuning = map (\x -> pow 2 (x / 12)) [0..11]
+sruti = [1, 256/243, 16/15, 10/9, 9/8, 32/27, 6/5, 5/4, 81/64,4/3, 27/20, 45/32, 729/512, 3/2, 128/81, 8/5, 5/3, 27/16, 16/9, 9/5, 15/8, 243/128]
+slendroTuning = [1,1.1654065573126493,1.3263853707896778,1.5087286267502333,1.743113687764283]
+slendroTuning2 = [1,1.0204225362734822,1.1044540007443515,1.1721576888192515,1.2191142483402215,1.3464556089438007,1.3464556089438007,1.4870982841226525,1.5457782086418603,1.6405353335201565,1.7766588275058794,1.8118958124688056]
+pelogTuning = [1,1.0999973132782155,1.3763365917680923,1.4581778243945491,1.629203328218162]
+ankaraTuning = [1,1053/1000,533/500,1079/1000,273/250,111/100,281/250,589/500,239/200,1211/1000,123/100,156/125,158/125,1333/1000,677/500,1373/1000,1393/1000,7/5,1421/1000,721/500,3/2,317/200,201/125,407/250,1653/1000,167/100,211/125,1777/1000,1801/1000,1827/1000,1853/1000,47/25,951/500,1931/1000]
+flamencoTuning = [1,160/153,512/459,32/27,64/51,4/3,1216/867,76/51,80/51,256/153,16/9,4096/2187]
+hawaiianTuning = [1,1418440/1360773,168926/151197,60354/50399,566204/453591,67431/50399,1897784/1360773,75338/50399,2120315/1360773,84172/50399,90219/50399,846376/453591]
+kotoTuning =  [107/152,3/4,5/4,143/114,45/32,429/304,3/2,1/1,5/4,15/8,143/76]
+mothraTuning = [1,1.1189384464207068,1.1436839646530013,1.2797119586051036,1.3080130110044073,1.4635860464313424,1.49595350624323,1.6738798921934088,1.7108980369568154,1.914389591456696,1.9567266500238074]
+egyptianTuning =  [1/2,107/96,9/8,11/9,59/48,4/3,1/1,3/2,5/3,121/72,11/6,133/72]
+
+--| Scales
+data Scale { tuning = justTuning, degrees = [0,2,4,5,7,9,11], pitchesPerOctave = 2, rootFreq = 261.6255653006}
+
+-- equal temperament scales
+major = Scale equalTuning [0,2,4,5,7,9,11] 12 261.6255653006
+ionian = major
+dorian = Scale equalTuning [0,2,3,5,7,9,10] 12 261.6255653006
+phrygian = Scale equalTuning [0,1,3,5,7,8,10] 12 261.6255653006
+lydian = Scale equalTuning [0,2,4,6,7,9,11] 12 261.6255653006
+mixolydian = Scale equalTuning [0,2,4,5,7,9,10] 12 261.6255653006
+minor = Scale equalTuning [0,2,3,5,7,8,10] 12 261.6255653006
+aeolian = minor
+locrian = Scale equalTuning [0,1,3,5,6,7,8,10] 12 261.6255653006
+harmonicMinor = Scale equalTuning [0,2,3,5,7,8,11] 12 261.6255653006
+bartok = Scale equalTuning [0,2,4,5,7,8,10] 12 261.6255653006
+majorPentatonic = Scale equalTuning [0,2,4,7,9] 12 261.6255653006
+minorPentatonic = Scale equalTuning [0,3,5,7,10] 12 261.6255653006
+whole = Scale equalTuning [0,2..10] 12 261.6255653006
+augmented = Scale equalTuning [0,3,4,7,8,11] 12 261.6255653006
+chromatic = Scale equalTuning [0..11] 12 261.6255653006
+romanianMinor = Scale equalTuning [0,2,3,6,7,9,10] 12 261.6255653006
+neapolitonMinor = Scale equalTuning [0,1,3,5,7,8,11] 12 261.6255653006
+enigmatic = Scale equalTuning [0,1,4,6,8,10,11] 12 261.6255653006
+
+-- just scales
+justMajor = Scale justTuning [0,2,4,5,7,9,11] 12 261.6255653006
+justIonian = justMajor
+justDorian = Scale justTuning [0,2,3,5,7,9,10] 12 261.6255653006
+justPhrygian = Scale justTuning [0,1,3,5,7,8,10] 12 261.6255653006
+justLydian = Scale justTuning [0,2,4,6,7,9,11] 12 261.6255653006
+justMixolydian = Scale justTuning [0,2,4,5,7,9,10] 12 261.6255653006
+justMinor = Scale justTuning [0,2,3,5,7,8,10] 12 261.6255653006
+justAeolian = justMinor
+justLocrian = Scale justTuning [0,1,3,5,6,7,8,10] 12 261.6255653006
+justHarmonicMinor = Scale justTuning [0,2,3,5,7,8,11] 12 261.6255653006
+hindu = Scale justTuning [0,2,4,5,7,8,10] 12 261.6255653006
+justMajorPentatonic = Scale justTuning [0,2,4,7,9] 12 261.6255653006
+justMinorPentatonic = Scale justTuning [0,3,5,7,10] 12 261.6255653006
+justAugmented = Scale justTuning [0,3,4,7,8,11] 12 261.6255653006
+prometheus = Scale justTuning [0,2,4,6,11] 12 261.6255653006
+scriabin = Scale justTuning [0,1,4,7,9] 12 261.6255653006
+
+-- Other scales
+egyptian = Scale justTuning [0,2,5,7,10] 5 261.6255653006
+egyptianRast = Scale egyptianTuning [0..(subtract 1 $ length egyptianTuning)] (length egyptianTuning) 261.6255653006
+kumoi = Scale justTuning [0,2,3,7,9] 5 261.6255653006
+koto = Scale kotoTuning [0..(subtract 1 $ length kotoTuning)] (length kotoTuning) 261.6255653006
+hirajoshi = Scale [1.1179326948564068,1.2290128500397486,1.5148413070990605,1.5883182356387209,1.9988450882827615] [0..4] 5 261.6255653006
+hirajoshi2 = Scale [1,1.1127786663921269,1.214896433458163,1.483666323795931,1.5782582946772832] [0..4] 5 261.6255653006
+iwato = Scale justTuning [0,1,5,6,10] 5 261.6255653006
+chinese = Scale justTuning [0,4,6,7,11] 5 261.6255653006
+indian = Scale justTuning [0,4,5,7,10] 5 261.6255653006
+pelog = Scale pelogTuning [0,1,2,3,4] 5 261.6255653006
+slendro = Scale slendroTuning [0,1,2,3,4] 5 261.6255653006
+slendro2 = Scale slendroTuning2 [0,2,4,7,9] 12 261.6255653006
+alfarabi = Scale [16/15,8/7,4/3,3/2,8/5,12/7,2/1] [0..6] 7 261.6255653006
+ankara = Scale ankaraTuning [0..(subtract 1 $ length ankaraTuning)] (length ankaraTuning) 261.6255653006
+archytas = Scale [1,9/8,5/4,4/3,3/2,8/5,16/9] [0..6] 7 261.6255653006
+degung = Scale [1,1.0936636901250125,1.2203859705254885,1.4931129786811597,1.6088158125951093] [0..4] 5 261.6255653006
+degungSejati = Scale [1,1.277508892327913,1.3302216591077187,1.5035088222376056,1.9207458901020087] [0..4] 5 261.6255653006
+spanish = Scale flamencoTuning [0,1,4,5,7,8,10] 12 261.6255653006
+hawaiianMajor = Scale hawaiianTuning [0,2,4,5,7,9,11] 12 261.6255653006
+hawaiianMinor = Scale hawaiianTuning [0,2,3,5,7,8,10] 12 261.6255653006
+hijazira = Scale [1,13/12,5/4,4/3,3/2,13/8,11/6] [0..6] 7 261.6255653006
+mothra = Scale mothraTuning [0..10] 11 261.6255653006
+
+-- Raga modes
+todi = Scale justTuning [0,1,3,6,7,8,11] 12 261.6255653006
+purvi = Scale justTuning [0,1,4,6,7,8,11] 12 261.6255653006
+marva = Scale justTuning [0,1,4,6,7,9,11] 12 261.6255653006
+bhairav = Scale justTuning [0,1,4,5,7,8,11] 12 261.6255653006
+ahirbhairav = Scale justTuning [0,1,4,5,7,9,10] 12 261.6255653006

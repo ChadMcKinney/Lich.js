@@ -1454,7 +1454,7 @@ function length(c, ret)
 			ret(container.length);
 		}
 
-		if(Lich.getType(container) == DICTIONARY)
+		else if(Lich.getType(container) == DICTIONARY)
 		{
 			var size = 0, key;
 			    
@@ -1467,7 +1467,7 @@ function length(c, ret)
 
 		else
 		{
-			throw new Error("length can only be applied to lists. Failed with: length " + Lich.VM.PrettyPrint(container));	
+			throw new Error("length can only be applied to lists or dictionaries. Failed with: length " + Lich.VM.PrettyPrint(container));	
 		}
 	});
 }
@@ -2090,11 +2090,60 @@ _createPrimitive("pi", pi);
 
 function setTempo(bpm, ret)
 {
-	Lich.scheduler.setTempo(bpm);
-	ret(Lich.VM.Void);
+	Lich.collapse(bpm, function(bpm)
+	{
+		Lich.scheduler.setTempo(bpm);
+		ret(Lich.VM.Void);
+	});
 }
 
 _createPrimitive("setTempo", setTempo);
+
+function _wrap(value, lo, hi)
+{
+	if (value >= hi) 
+    {
+    	value -= hi;
+    	if (value < hi) return value;
+    } 
+
+    else if (value < lo) 
+    {
+        value += hi;
+        if (value >= lo) return value;
+    } 
+
+    //else 
+    //	return value;
+
+    if (hi == lo) 
+    	return lo;
+    
+ 	return value - hi*Math.floor(value/hi);
+}
+
+function _wrapAt(index, list)
+{
+	index = Math.floor(index);
+	return list[_wrap(index, 0, list.length)];
+}
+
+function degree2Freq(scale, degree, ret)
+{
+	Lich.collapse(degree, function(degree)
+	{
+		Lich.collapse(scale, function(scale)
+		{
+			if(scale._datatype != "Scale")
+				throw new Error("degree2Freq can only be used with Scale data objects.");
+
+			var octave = Math.pow(2, Math.floor(degree / scale.degrees.length));
+			ret(scale.tuning[_wrapAt(degree, scale.degrees)] * octave * scale.rootFreq);
+		});
+	});
+}
+
+_createPrimitive("degree2Freq", degree2Freq);
 
 function initGraphics()
 {

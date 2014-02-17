@@ -73,7 +73,7 @@ Soliton.init = function()
 
 		for(var i = 0; i < (Soliton.context.sampleRate * 4); ++i) 
 		{
-			Soliton.whiteTable.push(Math.random());
+			Soliton.whiteTable.push(Math.random() * 2 - 1);
 		}
 
 		for(var i = 0; i < Soliton.numBuses; ++i)
@@ -96,49 +96,6 @@ Soliton.init = function()
 // Soliton Functions
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-Soliton.addNode = function(node)
-{
-	var nodeID = Soliton.nodes.indexOf(null);
-
-	if(nodeID >= 0)
-	{
-		Soliton.nodes[nodeID] = node;
-		return nodeID;
-	}
-
-	else
-	{
-		Soliton.nodes.push(node);
-		return Soliton.nodes.length - 1;
-	}
-}
-
-Soliton.removeNode = function(nodeID)
-{
-	Soliton.nodes[nodeID] = null;
-}
-
-// Adding inheritance
-Function.prototype.inheritsFrom = function(parentClassOrObject)
-{ 
-	if(parentClassOrObject.constructor == Function) 
-	{ 
-		//Normal Inheritance 
-		this.prototype = new parentClassOrObject;
-		this.prototype.constructor = this;
-		this.prototype.parent = parentClassOrObject.prototype;
-	} 
-	
-	else 
-	{ 
-		//Pure Virtual Inheritance 
-		this.prototype = parentClassOrObject;
-		this.prototype.constructor = this;
-		this.prototype.parent = parentClassOrObject;
-	} 
-	
-	return this;
-} 
 
 Soliton.print = function(text) // You should probably redefine Soliton.print somewhere in your code!!!!
 {
@@ -153,30 +110,6 @@ Soliton.printError = function(text) // You should probably redefine Soliton.prin
 Soliton.roundUp = function(inval, quant)
 {
 	return quant == 0.0 ? inval : Math.ceil(inval / quant) * quant;
-}
-
-Soliton.createEnvelope = function(type, duration)
-{
-	var env = Soliton.context.createGain();
-	env.gain.value = 0.0;
-
-	switch(type)
-	{
-	case "perc":
-	case "Perc":
-		env.gain.linearRampToValueAtTime(1.0, Soliton.context.currentTime + 0.1);
-		env.gain.linearRampToValueAtTime(0.0, Soliton.context.currentTime + duration);
-		break;
-
-	case "swell":
-	case "Swell":
-		env.gain.linearRampToValueAtTime(1.0, Soliton.context.currentTime + (duration / 2));
-		env.gain.linearRampToValueAtTime(1, Soliton.context.currentTime + duration);
-		break;
-	}
-
-	env.connect(Soliton.masterGain);
-	return Soliton.addNode(env);
 }
 
 // Buffer a url with an optional name for storage, callback on finish, 
@@ -229,56 +162,6 @@ Soliton.bufferURL = function(url, name, callback, callbackDestination, offset, d
 	}
 }
 
-Soliton.bufferGarbage = function(size, name, callback, callbackDestination)
-{
-	var buffer;
-
-	try
-	{
-		var NUM_CHANNELS = 1;
-		var NUM_SAMPLES = size * Soliton.context.sampleRate;
-		var reader = new FileReader();
-		// Create buffer here!
-		buffer = Soliton.context.createBuffer(NUM_CHANNELS, NUM_SAMPLES, Soliton.context.sampleRate);
-
-		var audioChunk = new Int16Array(NUM_SAMPLES);
-		var data = new Array(NUM_SAMPLES);
-		
-		for(var i = 0; i < NUM_SAMPLES; ++i)
-		{
-
-			data[i] = i % 800 - 10 * 0.1;
-		}
-
-		audioChunk.set(data, 0);
-
-		buffer.getChannelData(0).set(audioChunk);
-
-		/*
-		var bufferView = new Uint16Array(buffer);
-
-		for(var i = 0; i < bufferView.size(); ++i)
-		{
-			var printString = "Garbage[";
-			printString = printString.concat(i).concat("]: ").concat(bufferView[i]);
-			Soliton.print(printString);
-		}
-
-		delete bufferView;*/
-
-		if(name != undefined)
-			Soliton.buffers[name] = buffer;
-
-		if(callback != undefined)
-			callback(buffer, callbackDestination);
-	}
-
-	catch(e)
-	{
-		Lich.post(e);
-	}
-}
-
 // Play a url with an optional name for the buffer that will be created to store the audio and optional destination
 Soliton.playURL = function(url, name, destination, offset, duration)
 {
@@ -296,18 +179,6 @@ Soliton.playURL = function(url, name, destination, offset, duration)
 	return context;
 }
 
-// Play a buffer fille with garbage with an optional name for the buffer that will be created to store the audio 
-// and optional destination
-Soliton.playGarbage = function(size, name, destination)
-{
-	if(name == undefined)
-		name = size;
-
-	if(destination == undefined)
-		destination = Soliton.masterGain;
-
-	Soliton.bufferGarbage(size, name, Soliton.playBuffer, destination);
-}
 
 Soliton.filter = function(nodeID, freq, type)
 {
@@ -450,1756 +321,6 @@ Soliton.createOscillatorNode = function(type, freq, table)
 	osc.startAll = function(time){ if(input != null){ input.startAll(time); }; osc.start(time); }
 	return osc;
 }
-
-/////////////////////////////////////////////////////////////////////////////////////////
-// Soliton Classes
-/////////////////////////////////////////////////////////////////////////////////////////
-
-// Most of this code is translated from the SuperCollider class library. Many thanks to the devs.
-
-//////////
-// Object
-//////////
-Soliton.Object = function() // Abstract class for Soliton objects. Override these methods!
-{
-	this.yield = function()
-	{
-
-	}
-
-	this.value = function()
-	{
-		return null;
-	}
-
-	// Stream support
-	this.asStream = function()
-	{
-		return this;
-	}
-
-	this.next = function(inval)
-	{
-		return this;
-	}
-
-	this.reset = function()
-	{
-		return this;
-	}
-
-	this.first = function(inval)
-	{
-		this.reset();
-		return this.next(inval);
-	}
-
-	this.stop = function()
-	{
-		return this;
-	}
-
-	this.removedFromScheduler = function()
-	{
-		return this;
-	}
-
-	this.isPlaying = function()
-	{
-		return false;
-	}
-
-	this.embedInStream = function()
-	{
-		return this;
-	}
-
-	this.eventAt = function(key)
-	{
-		return null;
-	}
-
-	this.do = function(func)
-	{
-		func(this, 0);
-	}
-
-	this.processRest = function(inval)
-	{
-		return this;
-	}
-}
-
-/////////////////////
-// Array (extension)
-/////////////////////
-Array.prototype.do = function(func)
-{
-	for(var i = 0; i < this.length; ++i)
-	{
-		func(this[i], i);
-	}
-}
-
-/////////////
-// TimeQueue
-/////////////
-
-Soliton.TimeQueue = function()
-{
-	var array = new Array();
-
-	this.getArray = function()
-	{
-		return array;
-	}
-
-	this.timeSort = function(a, b) // Later times to earlier, descending
-	{
-		return b.time - a.time;
-	}
-
-	this.put = function(_time, _value)
-	{
-		array.push(
-			{
-				time: _time,
-				value: _value
-			}
-		);
-
-		array.sort(this.timeSort);
-	}
-
-	this.pop = function()
-	{
-		if(array.length > 0)
-			return array.pop().value;
-		else
-			return null;
-	}
-
-	this.topPriority = function()
-	{
-		if(array.length > 0)
-			return array[array.length - 1].time;
-		else
-			return null;
-
-	}
-
-	this.clear = function()
-	{
-		array = new Array();
-	}
-
-	this.isEmpty = function()
-	{
-		return array.length == 0;
-	}
-
-	this.notEmpty = function()
-	{
-		return array.length != 0;
-	}
-
-	this.removeValue = function(value)
-	{
-		var newObject = new Soliton.TimeQueue();
-		var currentPriority, topObject;
-
-		while(this.notEmpty())
-		{
-			currentPriority = this.topPriority();
-			topObject = this.pop();
-
-			if(topObject != value)
-			{
-				newObject.put(currentPriority, topObject);
-			}
-		}
-
-		this.array = newObject.getArray();
-	}
-
-	this.do = function(func)
-	{
-		for(var i = 0; i < this.array.length; ++i)
-		{
-			func(this.array[i].time, this.array[i].value);
-		}
-	}
-}
-
-Soliton.TimeQueue.inheritsFrom(Soliton.Object);
-
-/////////////////
-// Dictionary
-/////////////////
-
-Soliton.Dictionary = function(n)
-{
-	this.n = typeof n !== 'undefined' ? n : 8;
-	this.namespace = {};
-
-	this.has = function(key)
-	{
-		return this.namespace.hasOwnProperty(key);
-	}
-
-	this.includesKey = function(key)
-	{
-		return this.has(key);
-	}
-
-	this.at = function(key)
-	{
-		if(this.has(key))
-		{
-			return this.namespace[key];
-		}
-
-		else
-		{
-			return null;
-		}
-		
-	}
-
-	this.put = function(key, value)
-	{
-		this.namespace[key] = value;
-	}
-
-	this.keys = function()
-	{
-		var keyArray = new Array();
-
-		for(var i in this.namespace)
-		{
-			if(this.has(i))
-			{
-				keyArray.push(i);
-			}
-		}
-
-		return keyArray;
-	}
-
-	this.values = function()
-	{
-		var valueArray = new Array();
-
-		for(var i in this.namespace)
-		{
-			if(this.has(i))
-			{
-				valueArray.push(this.namespace[i]);
-			}
-		}
-
-		return valueArray;
-	}
-
-	this.removeAt = function(key)
-	{
-		if(this.has(key))
-			this.namespace[key] = null;
-	}
-
-	this.copy = function()
-	{
-		var dict = new Soliton.Dictionary();
-		var newNamespace = {};
-
-		for(var i in this.namespace)
-		{
-			if(this.has(i))
-			{
-				newNamespace[i] = this.namespace[i];
-			}
-		}
-
-		dict.namespace = newNamespace;
-		return dict;
-	}
-
-	/////////////////
-	// Quant Support
-	/////////////////
-
-	this.nextTimeOnGrid = function(clock)
-	{
-		if(this.has('nextTimeOnGrid')) 
-		{
-			return this.at('nextTimeOnGrid').value(this, clock);
-		} 
-
-		else
-		{
-			var quant = this.at('quant') != null ? this.at('quant') : 1;
-			var phase = this.at('phase') != null ? this.at('phase') : 0;
-			var offset = this.at('offset') != null ? this.at('offset') : 0;
-
-			return clock.nextTimeOnGrid(quant, phase - offset);
-		}
-	}
-	
-	this.asQuant = function()
-	{
-		return this.copy();
-	}
-
-	this.timingOffset = function()
-	{
-		return this.at('timingOffset'); 
-	}		// for synchWithQuant()
-}
-
-Soliton.Dictionary.inheritsFrom(Soliton.Object);
-
-///////////////
-// Environment
-///////////////
-
-Soliton.Environment = function()
-{
-	this.make = function(func)
-	{
-		var saveEnvir = Soliton.Environment.currentEnvironment;
-		Soliton.Environment.currentEnvironment = this;
-
-		try
-		{
-			func(this);
-		}
-
-		catch(e)
-		{
-			Soliton.Environment.currentEnvironment = saveEnvir;
-		}
-	}
-
-	this.use = function(func)
-	{
-		var result = null;
-		var saveEnvir = Soliton.Environment.currentEnvironment;
-		Soliton.Environment.currentEnvironment = this;
-
-		try
-		{
-			result = func(this);
-		}
-
-		catch(e)
-		{
-			Soliton.Environment.currentEnvironment = saveEnvir;
-		}
-
-		return result;
-	}
-
-	this.eventAt = function(key)
-	{
-		return this.at(key);
-	}
-
-	this.pop = function()
-	{
-		Soliton.Environment.pop();
-	}
-
-	this.push = function()
-	{
-		Soliton.Environment.push(this);
-	}
-}
-
-// Static vars
-Soliton.Environment.currentEnvironment = new Soliton.Environment();
-Soliton.Environment.stack = new Array();
-
-
-// Static functions
-Soliton.Environment.make = function(func)
-{
-	return new Soliton.Environment().make(func);
-}
-
-Soliton.Environment.use = function(func)
-{
-	return new Soliton.Environment().use(func);
-}
-
-Soliton.Environment.pop = function()
-{
-	if(Soliton.Environment.length > 0)
-		Soliton.Environment.currentEnvironment = Soliton.Environment.stack.pop();
-}
-
-Soliton.Environment.push = function(envir)
-{
-	Soliton.Environment.stack.push(currentEnvironment);
-	Soliton.Environment.currentEnvironment = envir;
-}
-
-Soliton.Environment.inheritsFrom(Soliton.Dictionary);
-
-/////////////
-// Event
-/////////////
-Soliton.Event = function(n, proto, parent, know)
-{
-	this.n = typeof n !== 'undefined' ? n : 8;
-	this.proto = proto;
-	this.parent = parent;
-	this.know = typeof know !== 'undefined' ? know : true;
-	
-	this.namespace = {
-		'type': 'note',
-		'mtranspose': 0,
-		'gtranspose': 0.0,
-		'ctranspose': 0.0,
-
-		'octave': 5.0,
-		'root': 0.0,					// root of the scale
-		'degree': 0,
-		'scale': new Array(0, 2, 4, 5, 7, 9, 11), 	// diatonic major scale
-		'stepsPerOctave': 12.0,
-		'detune': 0.0,					// detune in Hertz
-		'harmonic': 1.0,				// harmonic ratio
-		'octaveRatio': 2.0,
-		'freq': 440,
-		'amp': 1,
-		'pan': 0,
-		'play': { value: function() { return null } }, // null play
-		'tempo': null,
-		'dur': 1.0,
-		'stretch': 1.0,
-		'legato': 0.8,
-		'sustain': function(_self) 
-		{ 
-			return function() 
-			{ 
-				_self.at('dur') * _self.at('legato') * _self.at('stretch') 
-			} 
-		} (this),
-		'lag': 0.0,
-		'strum': 0.0,
-	}
-
-	
-
-	this.delta = function() 
-	{
-		if(this.has('delta'))
-		{
-			return this.at('delta');
-		}
-
-		else
-		{
-			// Soliton.print("STEP 13: Event.delta");
-			if(this.at('dur') == null)
-				return null;
-			else
-				return this.at('dur') * this.at('stretch');
-		}
-	}
-	
-	this.play = function() 
-	{
-		if(this.parent == null) 
-		{
-			this.parent = Soliton.Event.defaultParentEvent;
-		}
-
-		this.at('play').value();
-
-		/*
-		this.use {
-			this[\play].value;
-		};*/
-	}
-	this.playAndDelta = function(cleanup, mute)
-	{
-		// Soliton.print("STEP 12: Event.playAndDelta");
-		if(mute) { this.put('type', 'rest') };
-		// cleanup.update(this);
-		this.play();
-		return this.delta();
-	}
-
-	// this[\isRest] may be nil
-	this.isRest = function() 
-	{
-		if(this.has('isRest'))
-		{
-			return this.at('isRest');
-		}
-
-		else
-		{
-			if(this.has('type'))
-			{
-				return this.at('type') == 'rest';
-			}
-
-			else
-			{
-				if(this.parent == null)
-					this.parent = Soliton.Event.defaultParentEvent;
-
-				return this.parent.freq.value().isRest();
-			}
-		}
-	}
-
-	this.copy = function()
-	{
-		var event = new Soliton.Event();
-		var newNamespace = {};
-
-		for(var i in this.namespace)
-		{
-			if(this.has(i))
-			{
-				newNamespace[i] = this.namespace[i];
-			}
-		}
-
-		event.namespace = newNamespace;
-		return event;
-	}
-}
-
-Soliton.Event.inheritsFrom(Soliton.Environment);
-
-///////////
-// Number
-///////////
-/*
-Soliton.Number = function(number)
-{
-	this.number = number;
-
-	this.value = function(inval)
-	{
-		return this.number;
-	}
-
-	this.next = function(inval)
-	{
-		return this;
-	}
-}*/
-
-// Extend number to support streaming
-Number.prototype.value = function(inval)
-{
-	return this;
-}
-
-Number.prototype.next = function(inval)
-{
-	return this;
-}
-
-Number.prototype.asStream = function()
-{
-	return this;
-}
-
-Number.prototype.embedInStream = function(inval)
-{
-	return this;
-}
-
-Number.prototype.do = function(func)
-{
-	for(var i = 0; i < this; ++i)
-	{
-		func(i, i);
-	}
-}
-
-// Soliton.Number.inheritsFrom(Soliton.Object);
-// Number.inheritsFrom(Soliton.Object);
-
-/////////////
-// Quant
-/////////////
-Soliton.Quant = function(quant, phase, timingOffset)
-{
-	this.quant = typeof quant !== 'undefined' ? quant : 0;
-	this.phase = typeof phase !== 'undefined' ? phase : 0;
-	this.timingOffset = typeof timingOffset !== 'undefined' ? timingOffset : 0;
-
-	this.nextTimeOnGrid = function(clock)
-	{
-		// Soliton.print("Quant.nextTimeOnGrid: clock.nextTimeOnGrid");
-		return new Soliton.Quant(clock.nextTimeOnGrid(this.quant, this.phase - this.timingOffset));;
-	}
-
-	this.value = function()
-	{
-		return this.quant;
-	}
-
-	this.copy = function()
-	{
-		return new Soliton.Quant(this.quant, this.phase, this.timingOffset);
-	}
-
-	this.asQuant = function()
-	{
-		return this.copy();
-	}
-}
-
-/////////////
-// Scheduler
-/////////////
-Soliton.Scheduler = function(clock, drift, recursive)
-{
-	var queue = new Soliton.TimeQueue();
-	var expired = new Array();
-	var scheduleID = 0;
-	var startTime = 0;
-	var lastElapsedTime = startTime;
-	var drift = typeof drift !== 'undefined' ? drift : false;
-	var recursive = typeof recursive !== 'undefined' ? recursive : false;
-	this.beats = 0.0;
-	this.seconds = 0.0;
-	this.clock = clock;
-
-	this.play = function(task, quant)
-	{
-		this.sched(task, 0);
-	}
-
-	this.sched = function(task, delta)
-	{
-		var fromTime;
-
-		if(delta != null)
-		{
-			if(drift)
-				fromTime = startTime; // Should be an equivalent to Main.ElapsedTime
-			else
-				fromTime = this.seconds;
-
-			// Soliton.print("Scheduler.sched: fromTime = " + fromTime);
-			// Soliton.print("Scheduler.sched: this.seconds = " + this.seconds);
-			// Soliton.print("Scheduler.sched: fromTime + delta.value(): " + (fromTime + delta.value()));
-			queue.put(fromTime + delta.value(), task);
-		}
-	}
-
-	this.schedAbs = function(task, delta)
-	{
-		// Soliton.print("Scheduler.schedAbs.delta: " + delta.value());
-		queue.put(delta.value(), task);
-	}
-
-	this.clear = function()
-	{
-		queue.do(function(delta, value)
-		{
-			value.removedFromScheduler();
-		});
-
-		queue.clear();
-	}
-
-	this.isEmpty = function()
-	{
-		return queue.isEmpty();
-	}
-
-	this.wakeup = function(task)
-	{
-		var delta;
-		delta = task.awake(this.beats, this.seconds, this.clock);
-		
-		if(delta != null)
-		{
-			this.sched(task, delta);
-		}
-	}
-
-	this.setSeconds = function(newSeconds)
-	{
-		if(recursive)
-		{
-			this.seconds = queue.topPriority();
-			while(this.seconds != null && this.seconds <= newSeconds)
-			{
-				this.beats = this.clock.seconds2beats(seconds);
-				this.wakeup(queue.pop());
-				this.seconds = queue.topPriority();
-			}
-		}
-
-		else
-		{
-			this.seconds = queue.topPriority();
-			while(this.seconds != null && this.seconds <= newSeconds)
-			{
-				// Soliton.print("Scheduler.setSeconds: this.seconds = " + this.seconds);
-
-				expired.push({
-					time: this.seconds,
-					value: queue.pop()
-				});
-
-				this.seconds = queue.topPriority();
-			}
-
-			for(var i = 0; i < expired.length; ++i)
-			{
-				this.seconds = expired[i].time;
-				this.wakeup(expired[i].value);
-			}
-
-			expired = new Array();
-		}
-
-		this.seconds = newSeconds;
-		// Soliton.print("Scheduler.setSeconds: this.seconds = " + this.seconds);
-		this.beats = this.clock.seconds2beats(newSeconds);
-	}
-
-	this.advance = function(delta)
-	{
-		this.setSeconds(this.seconds + delta);
-	}
-}
-
-/////////////
-// Clock
-/////////////
-Soliton.Clock = function(tempo, beats, seconds, queueSize, sleepTime) // TempoClock
-{
-	this.sleepTime = sleepTime; // Millis to sleep between checking time.
-	this.startTime = new Date().getTime();
-	this.lastElapsedTime = 0;
-	this.scheduler = new Soliton.Scheduler(this, false, false);
-	this.ptr = null; // 1?!?!?
-	this.tempo = tempo;
-	this.beats = beats;
-	this.seconds = seconds;
-	this.queueSize = typeof queueSize !== 'undefined' ? queueSize : 256;
-	this.beatsPerBar = 4.0;
-	this.barsPerBeat = 0.25;
-	this.baseBarBeat = 0.0;
-	this.baseSeconds = 1.0;
-	this.baseBar = 0.0;
-	this.baseBeats = beats;
-	this.baseSeconds = seconds;
-	this.permanent = false;
-	this.queue = new Array();
-
-	this.play = function(task, quant)
-	{
-		quant = typeof quant !== 'undefined' ? quant : Soliton.Quant.default;
-		this.schedAbs(task, quant.nextTimeOnGrid(this));
-	}
-
-	this.sched = function(task, quant)
-	{
-		this.scheduler.sched(task, quant);
-	}
-
-	this.schedAbs = function(task, quant)
-	{
-		this.scheduler.schedAbs(task, quant);
-	}
-
-	this.beats2seconds = function(beats)
-	{
-		return ((beats - this.baseBeats) * this.beatDur) + this.baseSeconds;
-	}
-
-	this.seconds2beats = function(seconds)
-	{
-		return ((seconds - this.baseSeconds) * this.tempo) + this.baseBeats;
-	}
-
-	this.nextTimeOnGrid = function(quant, phase)
-	{
-		quant = typeof quant !== 'undefined' ? quant : Soliton.Quant.default.value();
-		phase = typeof phase !== 'undefined' ? phase : 0;
-
-		if(quant == 0)
-		{
-			return this.seconds2beats(this.seconds) + phase;;
-		}
-
-		if(quant < 0)
-		{
-			quant = this.beatsPerBar * (quant * -1);
-		}
-
-		if(phase < 0)
-		{
-			phase = phase % quant;
-		}
-
-		return Soliton.roundUp(this.beats - this.baseBarBeat - (phase % quant), quant) + this.baseBarBeat + phase;
-	}
-
-	this.run = function()
-	{
-		var time = new Date().getTime() - this.startTime;
-		this.scheduler.advance((time - this.lastElapsedTime) / 1000);
-		this.lastElapsedTime = time;
-		this.seconds = this.lastElapsedTime / 1000.0;
-		this.beats = this.seconds2beats(this.seconds);
-
-		// Soliton.print(time);
-	}
-
-	this.stop = function()
-	{
-		clearInterval(scheduleID);
-	}
-
-	this.start = function()
-	{
-		this.startTime = new Date().getTime();
-
-		this.scheduleID = setInterval(
-			(
-				function(self) 
-				{
-    				return function() { self.run(); } 
-    			}
-    		)(this), 
-    		this.sleepTime
-    	);
-	}
-
-	this.setTempoAtBeat = function(tempo, beats)
-	{
-		this.tempo = tempo;
-		Soliton.print("new Tempo: " + tempo);
-	}
-
-	this.setTempoAtTime = function(tempo, seconds)
-	{
-		this.tempo = tempo;
-		Soliton.print("new tempo: " + tempo);
-	}
-
-	this.setAll = function(tempo, beats, seconds)
-	{
-
-	}
-
-	this.setAll = function(tempo, beats, seconds)
-	{
-
-	}
-
-	this.elapsedBeats = function()
-	{
-		return this.seconds2beats(this.seconds);
-	}
-
-	this.clear = function()
-	{
-		this.scheduler.clear();
-	}
-
-	this.getTempo = function()
-	{
-		return this.tempo;
-	}
-
-	this.getBeatDur = function()
-	{
-		return this.beatDur;
-	}
-
-	this.start(); // Automatically start on creation
-}
-
-///////////
-// Stream
-///////////
-Soliton.Stream = function()
-{
-	this.reset = function()
-	{
-
-	}
-
-	this.yield = function()
-	{
-		return null; // override this
-	}
-
-	this.next = function(inval)
-	{
-		return null; // override this
-	}
-
-	this.value = function(inval)
-	{
-		return this.next(inval);
-	}
-
-	this.embedInStream = function(inval)
-	{
-		var outval = this.value(inval);
-		
-		while(outval != null)
-		{
-			inval = outval.yield;
-		}
-
-		return inval;
-	}
-
-	this.asStream = function()
-	{
-		return this;
-	}
-
-	this.play = function(clock, quant)
-	{
-		Soliton.print("Soliton.Stream.play");
-		clock = typeof clock !== 'undefined' ? clock : Soliton.Clock.default;
-		quant = typeof quant !== 'undefined' ? new Soliton.Quant(quant) : Soliton.Quant.default;
-		clock.play(this, quant.asQuant());
-	}
-}
-
-Soliton.Stream.inheritsFrom(Soliton.Object);
-
-///////////////
-// FuncStream
-///////////////
-
-Soliton.FuncStream = function(nextFunc, resetFunc)
-{
-	this.nextFunc = typeof nextFunc !== 'undefined' ? nextFunc : null;
-	this.resetFunc = typeof resetFunc !== 'undefined' ? resetFunc : null;
-	this.envir = Soliton.Environment.currentEnvironment;
-
-	this.next = function(inval)
-	{
-		return this.envir.use(function(self)
-		{
-			return function(envir)
-			{
-				// return self.nextFunc(inval).processRest(inval);
-				return self.nextFunc(inval)
-			}
-		}(this));
-	}
-
-	this.reset = function()
-	{
-		return this.envir.use(function(self)
-		{
-			return function()
-			{
-				return self.resetFunc();
-			}
-		}(this));
-	}
-}
-
-Soliton.FuncStream.inheritsFrom(Soliton.Stream);
-
-//////////////
-// Thread
-//////////////
-Soliton.Thread = function(func, stackSize)
-{
-	this.func = func;
-	this.stackSize = typeof stackSize !== 'undefined' ? stackSize : 512;
-	
-	this.init = function()
-	{
-		this.state = 2; //Soliton.Thread.Init
-		this.method = null;
-		this.block = null;
-		this.frame = null;
-		this.ip = 0;
-		this.sp = 0;
-		this.numpop = 0;
-		this.receiver = null;
-		this.numArgsPushed = 0;
-		this.parent = null;
-		this.terminalValue= null;
-		this.primitiveError = 0;
-		this.primitiveIndex = 0;
-		this.randData = 0;
-		this.beats = 0.0;
-		this.seconds = 0.0;
-		// Currently there is no distinction between app and system clocks
-		this.clock = null; 
-		this.nextBeat = null;
-		this.endBeat = null;
-		this.endValue = null;
-		this.environment = null;
-		this.exceptionHandler= null;
-		this.threadPlayer = null;
-		this.executingPath = null;
-		this.oldExecutingPath = null;
-	}
-
-	this.init();	
-
-	this.copy = function()
-	{
-		return this;
-	}
-
-	this.setClock = function(inClock)
-	{
-		this.clock = inClock;
-		this.beats = this.clock.seconds2beats(this.seconds);
-	}
-
-	this.setSeconds = function(inSeconds)
-	{
-		this.seconds = inSeconds;
-		this.beats = this.clock.seconds2beats(this.seconds);
-	}
-
-	this.setBeats = function(inBeats)
-	{
-		this.beats = inBeats;
-		this.seconds = this.clock.beats2seconds(this.beats);
-	}
-
-	this.isPlaying = function()
-	{
-		return this.state == 5; // Use enum?
-	}
-
-	this.threadPlayer = function()
-	{
-		var player = typeof this.threadPlayer !== 'undefined' ? this.threadPlayer : this.findThreadPlayer();
-		return player;
-	}
-
-	this.findThreadPlayer = function()
-	{
-		var parent = this.parent;
-		if(parent != null) // && !== thisProcess.mainThread
-		{
-			return parent.threadPlayer();
-		}
-
-		else
-		{
-			return this;
-		}
-	}
-
-	this.handleError = function(error)
-	{
-		var handler = typeof this.exceptionHandler !== 'undefined' ? this.exceptionHandler : this.parent;
-		
-		if(handler != null)
-			handler.handleError(error);
-	}
-
-	this.next = function()
-	{
-		return this;
-	}
-
-	this.value = function()
-	{
-		return this;
-	}
-
-	this.valueArray = function()
-	{
-		return this;
-	}
-}
-
-// State Enum
-Soliton.Thread.Suspended = 0;
-Soliton.Thread.Done = 1;
-Soliton.Thread.Init = 2;
-Soliton.Thread.Running = 3;
-
-Soliton.Thread.inheritsFrom(Soliton.Stream);
-
-
-/////////////
-// Routine
-/////////////
-
-Soliton.Routine = function(func, stackSize)
-{
-	this.func = func; // Must take an inval parameter
-	this.stackSize = typeof stackSize !== 'undefined' ? stackSize : 512;
-
-	this.yield = function()
-	{
-		this.state = Soliton.Thread.Suspended;
-		return null;
-	}
-
-	this.resume = function(inval)
-	{
-		this.state = Soliton.Thread.Running;
-		return this.func(inval);
-	}
-
-	this.next = function(inval)
-	{
-		return this.resume(inval);	
-	}
-
-	this.value = function(inval)
-	{
-		return this.resume(inval);
-	}
-
-	this.run = function(inval)
-	{
-		return this.resume(inval);
-	}
-
-	this.valueArray = function(inval)
-	{
-		return this.value(inval);
-	}
-
-	this.reset = function()
-	{
-		if(this.state == Soliton.Thread.Suspended ||
-			this.state == Soliton.Thread.Done)
-		{
-			this.init();
-		}
-	}
-
-	this.stop = function()
-	{
-		this.state = Soliton.Thread.Done;
-	}
-
-	// Private
-	var awake = function(inBeats, inSeconds, inClock)
-	{
-		this.state = Soliton.Thread.Running;
-		return this.next(inBeats);
-	}
-
-	this.prStart = function(inval)
-	{
-		this.func.value(inval);
-		this.state = Soliton.Thread.Running;
-		// nil.alwaysYield !?!? Not sure if this is right
-		// this.parent.yield(); 
-		// switchToThread(parent, tDone);
-	}
-}
-
-// static functions
-Soliton.Routine.run = function(func, stackSize, clock, quant)
-{
-	var routine = new Soliton.Routine(func, stackSize);
-	return routine.play(clock, quant);
-} 
-
-Soliton.Routine.inheritsFrom(Soliton.Thread);
-
-//////////////////////
-// EventStreamPlayer
-//////////////////////
-Soliton.EventStreamPlayer = function(stream, event)
-{
-	this.event =  typeof event !== 'undefined' ? event : Soliton.Event.default;
-	this.originalStream = typeof stream !== 'undefined' ? stream : new Soliton.Stream();
-	this.stream = null;
-	this.isWaiting = false;
-	this.nextBeat = null;
-	this.streamHasEnded = false;
-	this.cleanup = null;
-	this.muteCount = 0;
-	this.routine = new Soliton.Routine(
-		(
-			function(_self)
-			{
-				return function(inTime) 
-				{ 
-					// loop { inTime = _self.next(inTime).yield } 
-					this.inTime = _self.next(inTime);
-					this.yield;
-				}
-			}
-		)(this)
-	);
-
-	this.awake = function(beats, seconds, inClock)
-	{
-		this.stream.beats = beats;
-		return this.next(beats);
-	}
-
-	this.reset = function()
-	{
-		this.routine.reset();
-		// super.reset();
-	}
-
-	this.mute = function()
-	{
-		this.muteCount += 1;
-	}
-
-	this.unmute = function()
-	{
-		this.muteCount -= 1;
-	}
-
-	this.isPlaying = function()
-	{
-		return this.stream != null;
-	}
-
-	this.value = function(inval)
-	{
-		return this.next(inval);
-	}
-
-	this.do = function(func, inval)
-	{
-		var item = this.next(inval);
-		var i = 0;
-
-		while(item != null)
-		{
-			func(item, i);
-			++i;
-			item = this.next(inval);
-		}
-	}
-
-	this.awake = function(beats, seconds, inClock)
-	{
-		// Soliton.print("STEP 9: EventStreamPlayer.awake");
-		this.stream.beats = beats;
-		return this.next(beats)
-	}
-
-	this.reset = function()
-	{
-		this.originalStream.reset();
-	}
-
-	this.refresh = function()
-	{
-		this.stream = this.originalStream;
-	}
-
-	this.stop = function()
-	{
-		this.stream = null;
-		this.isWaiting = false;
-	}
-
-	this.start = function(clock, quant)
-	{
-		clock = typeof clock !== 'undefined' ? clock : Soliton.Clock.default;
-		this.play(clock, true, new Soliton.Quant(quant));
-	}
-
-	this.resume = function(clock, quant)
-	{
-		clock = typeof clock !== 'undefined' ? clock : Soliton.Clock.default;
-		this.play(clock, false, new Soliton.Quant(quant));
-	}
-
-	this.removedFromScheduler = function()
-	{
-		this.stop();
-		this.nextBeat = null;
-	}
-
-	this.play = function(clock, doReset, quant)
-	{
-		// Soliton.print("STEP 7: EventStreamPlayer.play");
-		doReset = typeof doReset !== 'undefined' ? doReset : false;
-		quant = typeof quant !== 'undefined' ? new Soliton.Quant(quant) : Soliton.Quant.default;
-
-		if(this.stream != null)
-		{
-			Soliton.print("EventStream Already playing.");
-			return this;
-		}
-
-		if(doReset)
-		{
-			this.reset();
-		}
-
-		this.streamHasEnded = false;
-		this.refresh();
-		this.isWaiting = true;
-		
-		/*
-		var task = function(clock) // Start our EventStream on a downbeat
-		{
-			if(this.isWaiting && (this.nextBeat == null))
-			{
-				clock.sched(this, 0);
-				this.isWaiting = false;
-			}
-		}*/
-
-		var clock = typeof clock !== 'undefined' ? clock : Soliton.Clock.default;
-
-		// This is really crazy looking, yes? We're returning an anonymous function that resolves _self to this
-		// instance of EventStreamPlayer. So that scheduler can call .awake we assign it in an associative array.
-		var task = (
-			function(_self) 
-			{
-				var taskFunc = function(beats, seconds, inClock) // Start our EventStream on a downbeat
-				{
-					// Soliton.print("STEP 8: EventStreamPlayer taskFunc");
-					if(_self.isWaiting && (_self.nextBeat == null))
-					{
-						inClock.sched(_self, new Soliton.Quant(0));
-						_self.isWaiting = false;
-					}
-
-					return null;
-				}
-
-    			return { awake: taskFunc };
-    		}
-    	)(this);
-
-    	clock.play(task, quant.asQuant());
-	}
-
-	this.next = function(inval)
-	{
-		// Soliton.print("STEP 10: EventStreamPlayer.next");
-		var nextTime = null;
-		var outEvent = this.stream.next(this.event.copy());
-
-		if(outEvent == null)
-		{
-			// Soliton.print("STEP 11A: outEvent == Null: GAMEOVER MAN");
-			this.streamHasEnded = this.stream != null;
-			// EventStreamClean?!?!?
-			this.removedFromScheduler();
-			return null;
-		}
-
-		else
-		{
-			// Soliton.print("STEP 11B: outEvent != Null");
-			nextTime = outEvent.playAndDelta(this.cleanup, this.muteCount > 0);
-			
-			if(nextTime == null)
-			{
-				// Soliton.print("STEP 14A: nextTime == null EventStreamPlayer.removedFromScheduler");
-				this.removedFromScheduler();
-				return null;
-			}
-
-			// Soliton.print("STEP 14B: nextTime != null this.nextBeat = inval + nextTime");
-			this.nextBeat = inval + nextTime; // inval is current logical beat
-			// Soliton.print("EventStreamPlayer.inval: " + inval);
-			return nextTime;
-		}
-
-		return null;	
-	}
-
-	this.put = function(item)
-	{
-
-	}
-
-	this.asEventStreamPlayer = function()
-	{ 
-		return this 
-	}
-}
-
-Soliton.EventStreamPlayer.inheritsFrom(Soliton.Stream);
-
-/////////////
-// Pattern
-/////////////
-
-Soliton.Pattern = function()
-{
-	this.play = function(clock, protoEvent, quant)
-	{
-		// Soliton.print("STEP 2: Play the Pbind");
-		return this.asEventStreamPlayer(protoEvent).play(clock, false, quant);
-	}
-
-	// phase causes pattern to start somewhere in the current measure rather than on a downbeat
-	// offset allows pattern to compute ahead a bit to allow negative lags for strummed chords
-	// and to ensure one pattern computes ahead of another
-
-	this.asStream = function()
-	{
-		// Soliton.print("STEP 4: this.asStream");
-		// Create an anonymous function to transfer 'this' correctly, creating a routine to call embedInsStream
-		return (
-			function(self) 
-			{
-				// Soliton.print("STEP 5: new Soliton.Routine()");
-				return new Soliton.Routine(function(inval) { return self.embedInStream(inval); }); 
-			}
-		)(this); 
-	}
-
-	this.iter = function()
-	{
-		return this.asStream();
-	}
-
-	this.asEventStreamPlayer = function(protoEvent)
-	{
-		// Soliton.print("STEP 3: this.asEventStreamPlayer");
-		return new Soliton.EventStreamPlayer(this.asStream(), protoEvent);
-	}
-	
-	this.embedInStream = function(inval) // Override this!
-	{
-		return this.asStream().embedInStream(inval);
-	}
-
-	this.do = function(func)
-	{
-		this.asStream().do(func);
-	}
-}
-
-Soliton.Pattern.inheritsFrom(Soliton.Object);
-
-//////////
-// Pfunc
-/////////
-
-Soliton.Pfunc = function(nextFunc, resetFunc)
-{
-	this.nextFunc = typeof nextFunc !== 'undefined' ? nextFunc : null;
-	this.resetFunc = typeof resetFunc !== 'undefined' ? resetFunc : null;
-
-	this.asStream = function()
-	{
-		return new Soliton.FuncStream(this.nextFunc, this.resetFunc);
-	}
-}
-
-Soliton.Pfunc.inheritsFrom(Soliton.Pattern);
-
-//////////
-// Pbind
-//////////
-
-Soliton.Pbind = function()
-{
-	// Soliton.print("STEP 1: Create the Pbind");
-	this.patternpairs = {};
-
-	if(arguments.length % 2 != 0)
-	{
-		Soliton.print("Pbind should have an even number of args");
-	}
-
-	else
-	{
-		this.patternpairs = arguments;
-	}
-
-	this.copyPairs = function()
-	{
-		var pairs = new Array();
-
-		for(var i = 0; i < this.patternpairs.length; ++i)
-		{
-			pairs.push(this.patternpairs[i]);
-		}
-
-		return pairs;
-	}
-
-	this.embedInStream = function(inevent)
-	{
-		// Soliton.print("STEP 6: Pbind.embedInStream");
-		var event;
-		var sawNil = false;
-		var streampairs = this.copyPairs();
-		var endval = streampairs.length - 1;
-
-		for(var i = 1; i <= endval; i += 2)
-		{
-			streampairs[i] = streampairs[i].asStream();
-		}
-
-		// Loop/coroutine-style yield support
-		var index = 0;
-	    var thisRef = this;
-
-	    var nextFunc = function(inevent) 
-		{
-			// Soliton.print("Pbind::loop.next()");
-			if(inevent == null)
-			{
-				return null;
-			}
-
-			event = inevent.copy();
-			for(var i = 0; i < endval; i += 2)
-			{
-				var name = streampairs[i];
-				var stream = streampairs[i + 1];
-				var streamout = stream.next(event);
-
-				if(stream == null)
-				{
-					Soliton.print("NULL!");
-					return inevent;
-				}
-
-				if(typeof name !== 'string')
-				{
-					for(var i = 0; i < name.size; ++i)
-					{
-						event.put(name[i], streamout[i]);
-					}
-				}
-
-				else
-				{
-					event.put(name, streamout);
-				}
-			}
-
-			inevent = event;
-			index++;
-			// Soliton.print(event);
-			return event;
-		}
-
-		var loop = {
-			next: nextFunc,
-			value: nextFunc,
-			hasNext: function()
-			{
-				Soliton.print("Pbind::loop.hasNext()");
-				return true;
-			}
-		}
-
-		loop.asStream = loop;
-		
-		if(inevent == null)
-			return null;
-		else
-			return loop.next(inevent);
-	}
-}
-
-Soliton.Pbind.inheritsFrom(Soliton.Pattern);
-
-//////////
-// Pwhite
-//////////
-Soliton.Pwhite = function(lo, hi, length)
-{
-	this.lo = lo;
-	this.hi = hi;
-	this.length = typeof length !== 'undefined' ? length : Infinity; 
-
-	this.embedInStream = function(inval)
-	{
-		// inval = new Soliton.Number((Math.random() * (this.hi - this.lo)) + this.lo);
-		// inval = (Math.random() * (this.hi - this.lo)) + this.lo;
-		// Soliton.print(inval.value());
-
-		// Loop/coroutine-style yield support
-		var index = 0;
-	    var thisRef = this;
-	    var loStr = thisRef.lo.asStream();
-		var hiStr = thisRef.hi.asStream();
-		var hiVal, loVal;
-
-		var nextFunc = function() 
-		{
-			// Soliton.print("Pwhite::loop.next()");
-			if(index < thisRef.length)
-			{
-				hiVal = hiStr.next(inval);
-				loVal = loStr.next(inval);
-
-				if(hiVal == null || loVal == null)
-				{
-					Soliton.print("hiVal == null || loVal == null");
-					return inval;
-				}
-
-				inval = (Math.random() * (hiVal - loVal)) + loVal;
-
-				index++;	
-			}
-			
-			Soliton.print(inval.value());
-			return inval;
-		}
-
-
-		var loop = {
-			next: nextFunc,
-			value: nextFunc,
-			hasNext: function()
-			{
-				Soliton.print("Pwhite::loop.hasNext()");
-				return index < thisRef.length;
-			}
-		}
-
-		loop.asStream = loop;
-		return loop.next();
-	}
-}
-
-Soliton.Pwhite.inheritsFrom(Soliton.Pattern);
-
-////////////////////
-// ListPattern
-////////////////////
-
-Soliton.ListPattern = function() // list, repeats
-{
-	// this.list = list;
-	// this.repeats = repeats;
-
-	this.prConstructor = function()
-	{
-		if(this.list.length == 0)
-		{
-			Soliton.print("ListPattern requires a non empty collection");
-			Soliton.print("Replacing with [0]");
-			this.list = new Array(0);
-		}
-
-		this.repeats = typeof this.repeats !== 'undefined' ? this.repeats : 1;
-	}
-
-	this.copyList = function()
-	{
-		var newList = new Array();
-
-		for(var i = 0; i < this.list.length; ++i)
-		{
-			newList.push(this.list[i]);
-		}
-
-		return newList;
-	}
-
-	this.copy = function()
-	{
-		return new Soliton.ListPattern(copyList(), this.repeats);
-	}
-}
-
-Soliton.ListPattern.inheritsFrom(Soliton.Pattern);
-
-
-////////////////////
-// Pseq
-////////////////////
-
-Soliton.Pseq = function(list, repeats, offset)
-{
-	this.list = list;
-	this.repeats = repeats;
-	this.offset = typeof offset !== 'undefined' ? offset : 0;
-	this.repeatNum = 0;
-	this.listIndex = 0;
-
-	this.embedInStream = function(inval)
-	{
-		var item, offsetValue;
-		offsetValue = this.offset.value(inval);
-
-		/* No reverse support current, maybe later
-		if(inval.eventAt('reverse') == true)
-		{
-			this.repeats.value(inval).do(
-				function()
-				{
-	
-				}
-			)
-		}*/
-
-		/* Original way with Coroutines, but we don't have generators yet
-		// We'll have to settle fo coroutine emulation
-		repeats.value(inval).do(
-			function(j)
-			{
-				this.list.length.do(
-					function(i)
-					{
-						item = this.list.
-					}
-				)
-			}
-		)*/
-
-		if(this.repeatNum < this.repeats)
-		{
-			item = this.list[(this.listIndex + offsetValue) % this.list.length];
-			inval = item.embedInStream(inval);
-			++this.listIndex;
-			
-			if(this.listIndex >= this.list.length)
-			{
-				this.listIndex = 0;
-				++this.repeatNum;
-			}
-		}
-
-		else
-		{
-			return null;
-		}
-
-		Soliton.print(inval);
-		return inval;
-	}
-
-	this.prConstructor();
-}
-
-Soliton.Pseq.inheritsFrom(Soliton.ListPattern);
-
-////////////////////
-// DEFAULTS
-////////////////////
-
-Soliton.Event.defaultParentEvent = null;
-Soliton.Event.default = new Soliton.Event(8, null, Soliton.Event.defaultParentEvent, true);
-Soliton.Quant.default = new Soliton.Quant(1, 0, 0);
-// tempo (beats per second), current beats , current seconds, queueSize, sleepTime (millis)
-Soliton.Clock.default = new Soliton.Clock(1, 0, 0, 256, 1); // default
-Soliton.Clock.permanent = true;
-Soliton.Scheduler.default = Soliton.Clock.default.scheduler;
 
 ///////////////////////////////////////////////////////////////////////////////////////
 // splice language
@@ -4182,10 +2303,13 @@ function spliceOsc(lang, divider, ret)
 				
 				//for(var k = 1; k <= this.divider; ++k)
 				//{
-					outputArrayL[i] /*= outputArrayR[i + (j * k)]*/ += output[j];
+					outputArrayL[i] = outputArrayR[i] += output[j];
 
 					if(outputArrayL[i] > 1 || outputArrayL[i] < -1)
 						outputArrayL[i] = 1/outputArrayL[i];
+
+					//if(outputArrayR[i] > 1 || outputArrayR[i] < -1)
+					//	outputArrayR[i] = 1/outputArrayR[i];
 
 				//}  
 			}
@@ -6084,7 +4208,7 @@ function spliceFX(lang, divider, source, ret)
 
 		for(var i = 0; i < 1024; /*i += (1024 * this.divider)*/ ++i)
 		{
-			output = this.audioFuncArray[this.currentFunc](inputArrayL, outputArrayL, i);
+			output = this.audioFuncArray[this.currentFunc](inputArrayL, inputArrayL, i);
 
 			for(var j = 0; j < Soliton.spliceFuncBlockSize; j += this.divider)
 			{
@@ -6097,6 +4221,13 @@ function spliceFX(lang, divider, source, ret)
 						outputArrayL[i] = inputArrayL[i];
 					else if(outputArrayL[i] > 1 || outputArrayL[i] < -1)
 						outputArrayL[i] = 1/outputArrayL[i];
+
+					/*outputArrayR[i] += output[j];
+
+					if(isNaN(outputArrayR[i]))
+						outputArrayR[i] = inputArrayR[i];
+					else if(outputArrayR[i] > 1 || outputArrayR[i] < -1)
+						outputArrayR[i] = 1/outputArrayR[i];*/
 				//}  
 			}
 
@@ -6292,7 +4423,7 @@ function fir(coeff, input, ret)
 	filt.stopAll = function(time)
 	{
 		input.stopAll(time);
-		setTimeout(function(){input.disconnect(0); filt.disconnect(0)}, (time - Soliton.context.currentTime) * 1000)
+		setTimeout(function(){input.disconnect(); filt.disconnect()}, (time - Soliton.context.currentTime) * 1000)
 	};
 
 	ret(filt);
@@ -6300,8 +4431,209 @@ function fir(coeff, input, ret)
 
 _createPrimitive("fir", fir);
 
-/////////////////////////////////////////////////////
-// Custom UGens
+function hpz1(input, ret)
+{
+	var filt = Soliton.context.createScriptProcessor(1024, 1, 1);
+	var lastVal = 0.0;
+
+	filt.onaudioprocess = function(event)
+	{
+		var inputArray = event.inputBuffer.getChannelData(0);
+		var outputArray = event.outputBuffer.getChannelData(0);
+
+		for(var i = 0; i < 1024; i ++)
+		{
+			outputArray[i] = 0.5 * (inputArray[i] - lastVal);
+			lastVal = inputArray[i];
+		}
+	}
+
+
+	filt._lichType = AUDIO;
+	input.connect(filt);
+	filt.startAll = function(time){input.startAll(time)};
+	filt.stopAll = function(time)
+	{
+		input.stopAll(time);
+		setTimeout(function(){input.disconnect(); filt.disconnect()}, (time - Soliton.context.currentTime) * 1000)
+	};
+
+	ret(filt);
+}
+
+_createPrimitive("hpz1", hpz1);
+
+function hpz2(input, ret)
+{
+	var filt = Soliton.context.createScriptProcessor(1024, 1, 1);
+	var lastVal1 = 0.0;
+	var lastVal2 = 0.0;
+
+
+	filt.onaudioprocess = function(event)
+	{
+		var inputArray = event.inputBuffer.getChannelData(0);
+		var outputArray = event.outputBuffer.getChannelData(0);
+
+		for(var i = 0; i < 1024; i ++)
+		{
+			outputArray[i] = 0.25 * (inputArray[i] - (2 * lastVal1) + lastVal2);
+			lastVal2 = lastVal1;
+			lastVal1 = inputArray[i];
+		}
+	}
+
+
+	filt._lichType = AUDIO;
+	input.connect(filt);
+	filt.startAll = function(time){input.startAll(time)};
+	filt.stopAll = function(time)
+	{
+		input.stopAll(time);
+		setTimeout(function(){input.disconnect(); filt.disconnect()}, (time - Soliton.context.currentTime) * 1000)
+	};
+
+	ret(filt);
+}
+
+_createPrimitive("hpz2", hpz2);
+
+function lpz1(input, ret)
+{
+	var filt = Soliton.context.createScriptProcessor(1024, 1, 1);
+	var lastVal = 0.0;
+
+	filt.onaudioprocess = function(event)
+	{
+		var inputArray = event.inputBuffer.getChannelData(0);
+		var outputArray = event.outputBuffer.getChannelData(0);
+
+		for(var i = 0; i < 1024; i ++)
+		{
+			outputArray[i] = 0.5 * (inputArray[i] + lastVal);
+			lastVal = inputArray[i];
+		}
+	}
+
+
+	filt._lichType = AUDIO;
+	input.connect(filt);
+	filt.startAll = function(time){input.startAll(time)};
+	filt.stopAll = function(time)
+	{
+		input.stopAll(time);
+		setTimeout(function(){input.disconnect(); filt.disconnect()}, (time - Soliton.context.currentTime) * 1000)
+	};
+
+	ret(filt);
+}
+
+_createPrimitive("lpz1", lpz1);
+
+function lpz2(input, ret)
+{
+	var filt = Soliton.context.createScriptProcessor(1024, 1, 1);
+	var lastVal1 = 0.0;
+	var lastVal2 = 0.0;
+
+
+	filt.onaudioprocess = function(event)
+	{
+		var inputArray = event.inputBuffer.getChannelData(0);
+		var outputArray = event.outputBuffer.getChannelData(0);
+
+		for(var i = 0; i < 1024; i ++)
+		{
+			outputArray[i] = 0.25 * (inputArray[i] + (2 * lastVal1) + lastVal2);
+			lastVal2 = lastVal1;
+			lastVal1 = inputArray[i];
+		}
+	}
+
+
+	filt._lichType = AUDIO;
+	input.connect(filt);
+	filt.startAll = function(time){input.startAll(time)};
+	filt.stopAll = function(time)
+	{
+		input.stopAll(time);
+		setTimeout(function(){input.disconnect(); filt.disconnect()}, (time - Soliton.context.currentTime) * 1000)
+	};
+
+	ret(filt);
+}
+
+_createPrimitive("lpz2", lpz2);
+
+function bpz2(input, ret)
+{
+	var filt = Soliton.context.createScriptProcessor(1024, 1, 1);
+	var lastVal1 = 0.0;
+	var lastVal2 = 0.0;
+
+
+	filt.onaudioprocess = function(event)
+	{
+		var inputArray = event.inputBuffer.getChannelData(0);
+		var outputArray = event.outputBuffer.getChannelData(0);
+
+		for(var i = 0; i < 1024; i ++)
+		{
+			outputArray[i] = 0.5 * (inputArray[i] - lastVal2);
+			lastVal2 = lastVal1;
+			lastVal1 = inputArray[i];
+		}
+	}
+
+
+	filt._lichType = AUDIO;
+	input.connect(filt);
+	filt.startAll = function(time){input.startAll(time)};
+	filt.stopAll = function(time)
+	{
+		input.stopAll(time);
+		setTimeout(function(){input.disconnect(); filt.disconnect()}, (time - Soliton.context.currentTime) * 1000)
+	};
+
+	ret(filt);
+}
+
+_createPrimitive("bpz2", bpz2);
+
+function brz2(input, ret)
+{
+	var filt = Soliton.context.createScriptProcessor(1024, 1, 1);
+	var lastVal1 = 0.0;
+	var lastVal2 = 0.0;
+
+
+	filt.onaudioprocess = function(event)
+	{
+		var inputArray = event.inputBuffer.getChannelData(0);
+		var outputArray = event.outputBuffer.getChannelData(0);
+
+		for(var i = 0; i < 1024; i ++)
+		{
+			outputArray[i] = 0.5 * (inputArray[i] + lastVal2);
+			lastVal2 = lastVal1;
+			lastVal1 = inputArray[i];
+		}
+	}
+
+
+	filt._lichType = AUDIO;
+	input.connect(filt);
+	filt.startAll = function(time){input.startAll(time)};
+	filt.stopAll = function(time)
+	{
+		input.stopAll(time);
+		setTimeout(function(){input.disconnect(); filt.disconnect()}, (time - Soliton.context.currentTime) * 1000)
+	};
+
+	ret(filt);
+}
+
+_createPrimitive("brz2", brz2);
 
 Soliton.white = function(event)
 {
@@ -6361,33 +4693,201 @@ function white(ret)
 
 _createPrimitive("white", white);
 
-/*
-// Implementation via http://www.dsprelated.com/showcode/216.php
+// Thanks to noise hack for the nice implementation: http://noisehack.com/generate-noise-web-audio-api/#pink-noise
 function pink(ret)
 {
 	var pinkFunc = Soliton.context.createScriptProcessor(1024, 0, 1);
 
-	pinkFunc.onaudioprocess = function(event)
-	{
-		var outputArrayL = event.outputBuffer.getChannelData(0);
-		//var outputArrayR = event.outputBuffer.getChannelData(1);
-
-		
-		for(var i = 0; i < 1024; ++i)
-		{
-			
-		}
-
-		Lich.post(outputArrayL[0]);
-	}
+	var b0, b1, b2, b3, b4, b5, b6;
+    b0 = b1 = b2 = b3 = b4 = b5 = b6 = 0.0;
+    pinkFunc.onaudioprocess = function(e) {
+        var output = e.outputBuffer.getChannelData(0);
+        for (var i = 0; i < 1024; i++) {
+            var white = Math.random() * 2 - 1;
+            b0 = 0.99886 * b0 + white * 0.0555179;
+            b1 = 0.99332 * b1 + white * 0.0750759;
+            b2 = 0.96900 * b2 + white * 0.1538520;
+            b3 = 0.86650 * b3 + white * 0.3104856;
+            b4 = 0.55000 * b4 + white * 0.5329522;
+            b5 = -0.7616 * b5 - white * 0.0168980;
+            output[i] = b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362;
+            output[i] *= 0.11; // (roughly) compensate for gain
+            b6 = white * 0.115926;
+        }
+    }
 
 	pinkFunc.startAll = function(time){};
-	pinkFunc.stopAll = function(time){};
+	pinkFunc.stopAll = function(time)
+	{
+		setTimeout(function(){pinkFunc.disconnect(0);}, (time - Soliton.context.currentTime) * 1000)
+	};
 	pinkFunc._lichType = AUDIO;
 	ret(pinkFunc);
-}*/
+}
 
-/////////////////////////////////////////////////////
+_createPrimitive("pink", pink);
+
+
+// Thanks to noise hack for the nice implementation: http://noisehack.com/generate-noise-web-audio-api/#pink-noise
+function violet(ret)
+{
+	var violetFunc = Soliton.context.createScriptProcessor(1024, 0, 1);
+	var lastVal = 0.0;
+    violetFunc.onaudioprocess = function(e) {
+        var output = e.outputBuffer.getChannelData(0);
+        for (var i = 0; i < 1024; i++) {
+            var white = Math.random() * 2 - 1;
+            output[i] = 0.5 * (white - lastVal);
+            lastVal = output[i]; 
+        }
+    }
+
+	violetFunc.startAll = function(time){};
+	violetFunc.stopAll = function(time)
+	{
+		setTimeout(function(){violetFunc.disconnect(0);}, (time - Soliton.context.currentTime) * 1000)
+	};
+	violetFunc._lichType = AUDIO;
+	ret(violetFunc);
+}
+
+_createPrimitive("violet", violet);
+
+// Thanks to noise hack for the nice implementation: http://noisehack.com/generate-noise-web-audio-api/#brown-noise
+function brown(ret)
+{
+	var brownFunc = Soliton.context.createScriptProcessor(1024, 0, 1);
+	var lastOut = 0;
+	brownFunc.onaudioprocess = function(e) {
+        var output = e.outputBuffer.getChannelData(0);
+        for (var i = 0; i < 1024; i++) {
+            var white = Math.random() * 2 - 1;
+            output[i] = (lastOut + (0.02 * white)) / 1.02;
+            lastOut = output[i];
+            output[i] *= 3.5; // (roughly) compensate for gain
+        }
+    }
+
+	brownFunc.startAll = function(time){};
+	brownFunc.stopAll = function(time)
+	{
+		setTimeout(function(){brownFunc.disconnect(0);}, (time - Soliton.context.currentTime) * 1000)
+	};
+	brownFunc._lichType = AUDIO;
+	ret(brownFunc);
+}
+
+_createPrimitive("brown", brown);
+
+function clipNoise(ret)
+{
+	var clipNoise = Soliton.context.createScriptProcessor(1024, 0, 1);
+
+	clipNoise.onaudioprocess = function(e) {
+        var output = e.outputBuffer.getChannelData(0);
+        for (var i = 0; i < 1024; i++) {
+            output[i] = Math.random() > 0.5 ? 1 : -1;
+        }
+    }
+
+	clipNoise.startAll = function(time){};
+	clipNoise.stopAll = function(time)
+	{
+		setTimeout(function(){clipNoise.disconnect(0);}, (time - Soliton.context.currentTime) * 1000)
+	};
+
+	clipNoise._lichType = AUDIO;
+	ret(clipNoise);
+}
+
+_createPrimitive("clipNoise", clipNoise);
+
+// Many thanks to Stefan Gustavason for the nice Simplex implementation
+// http://staffwww.itn.liu.se/~stegu/aqsis/aqsis-newnoise/
+Soliton.simplexNoisePerm = [151,160,137,91,90,15,
+  131,13,201,95,96,53,194,233,7,225,140,36,103,30,69,142,8,99,37,240,21,10,23,
+  190, 6,148,247,120,234,75,0,26,197,62,94,252,219,203,117,35,11,32,57,177,33,
+  88,237,149,56,87,174,20,125,136,171,168, 68,175,74,165,71,134,139,48,27,166,
+  77,146,158,231,83,111,229,122,60,211,133,230,220,105,92,41,55,46,245,40,244,
+  102,143,54, 65,25,63,161, 1,216,80,73,209,76,132,187,208, 89,18,169,200,196,
+  135,130,116,188,159,86,164,100,109,198,173,186, 3,64,52,217,226,250,124,123,
+  5,202,38,147,118,126,255,82,85,212,207,206,59,227,47,16,58,17,182,189,28,42,
+  223,183,170,213,119,248,152, 2,44,154,163, 70,221,153,101,155,167, 43,172,9,
+  129,22,39,253, 19,98,108,110,79,113,224,232,178,185, 112,104,218,246,97,228,
+  251,34,242,193,238,210,144,12,191,179,162,241, 81,51,145,235,249,14,239,107,
+  49,192,214, 31,181,199,106,157,184, 84,204,176,115,121,50,45,127, 4,150,254,
+  138,236,205,93,222,114,67,29,24,72,243,141,128,195,78,66,215,61,156,180,
+  151,160,137,91,90,15,
+  131,13,201,95,96,53,194,233,7,225,140,36,103,30,69,142,8,99,37,240,21,10,23,
+  190, 6,148,247,120,234,75,0,26,197,62,94,252,219,203,117,35,11,32,57,177,33,
+  88,237,149,56,87,174,20,125,136,171,168, 68,175,74,165,71,134,139,48,27,166,
+  77,146,158,231,83,111,229,122,60,211,133,230,220,105,92,41,55,46,245,40,244,
+  102,143,54, 65,25,63,161, 1,216,80,73,209,76,132,187,208, 89,18,169,200,196,
+  135,130,116,188,159,86,164,100,109,198,173,186, 3,64,52,217,226,250,124,123,
+  5,202,38,147,118,126,255,82,85,212,207,206,59,227,47,16,58,17,182,189,28,42,
+  223,183,170,213,119,248,152, 2,44,154,163, 70,221,153,101,155,167, 43,172,9,
+  129,22,39,253, 19,98,108,110,79,113,224,232,178,185, 112,104,218,246,97,228,
+  251,34,242,193,238,210,144,12,191,179,162,241, 81,51,145,235,249,14,239,107,
+  49,192,214, 31,181,199,106,157,184, 84,204,176,115,121,50,45,127, 4,150,254,
+  138,236,205,93,222,114,67,29,24,72,243,141,128,195,78,66,215,61,156,180 
+];
+
+Soliton.simplexGrad1 = function(hash, x) 
+{
+    var h = hash & 15;
+    var grad = 1.0 + (h & 7);   // Gradient value 1.0, 2.0, ..., 8.0
+    if(h&8) grad = -grad;         // Set a random sign for the gradient
+    return (grad * x);           // Multiply the gradient with the distance
+}
+
+function simplex(freq, ret) 
+{
+	if(typeof freq !== "number")
+		throw new Error("simplex frequency must be a number.");
+
+	var simplexFunc = Soliton.context.createScriptProcessor(1024, 0, 1);
+	var x = 0;
+	var increment = freq * (1 / Soliton.context.sampleRate);
+
+	simplexFunc.onaudioprocess = function(event) 
+	{
+        var output = event.outputBuffer.getChannelData(0);
+        for (var i = 0; i < 1024; i++) 
+        {	
+        	x += increment;
+            var i0 = Math.floor(x);
+			var i1 = i0 + 1;
+			var x0 = x - i0;
+			var x1 = x0 - 1.0;
+
+			var n0, n1;
+
+			var t0 = 1.0 - x0*x0;
+			//  if(t0 < 0.0f) t0 = 0.0f;
+			t0 *= t0;
+			n0 = t0 * t0 * Soliton.simplexGrad1(Soliton.simplexNoisePerm [i0 & 0xff], x0);
+
+			var t1 = 1.0 - x1*x1;
+			//  if(t1 < 0.0f) t1 = 0.0f;
+			t1 *= t1;
+			n1 = t1 * t1 * Soliton.simplexGrad1(Soliton.simplexNoisePerm [i1 & 0xff], x1);
+			// The maximum value of this noise is 8*(3/4)^4 = 2.53125
+			// A factor of 0.395 would scale to fit exactly within [-1,1]
+			output[i] = 0.395 * (n0 + n1);
+        }
+    }
+
+	simplexFunc.startAll = function(time){};
+	simplexFunc.stopAll = function(time)
+	{
+		setTimeout(function(){simplexFunc.disconnect(0);}, (time - Soliton.context.currentTime) * 1000)
+	};
+
+	simplexFunc._lichType = AUDIO;
+	ret(simplexFunc);
+}
+
+_createPrimitive("simplex", simplex);
 
 function sin(freq, ret)
 {
@@ -7056,14 +5556,12 @@ function dc(value, ret)
 
 		dcFunc.onaudioprocess = function(event)
 		{
-			var outputArrayL = event.outputBuffer.getChannelData(0);
-			//var outputArrayR = event.outputBuffer.getChannelData(1);
+			var outputArray = event.outputBuffer.getChannelData(0);
 			var val = this.value;
 
 			for(var i = 0; i < 1024; ++i)
 			{
-				outputArrayL[i] = val;
-				//outputArrayR[i] = val;
+				outputArray[i] = val;
 			}
 		}
 
@@ -7284,6 +5782,87 @@ function auxThrough(bus, input, ret)
 
 _createPrimitive("auxThrough", auxThrough);
 
+function clip(value, input, ret)
+{
+	if(input._lichType != AUDIO)
+	{
+		throw new Error("clip must be used with at least one audio source.");
+	}
+
+	else if(value._lichType != AUDIO)
+	{
+		dc(value, function(vRes){value = vRes;});
+	}
+
+	var merger = Soliton.context.createChannelMerger(2);
+	merger.channelInterpretation = "discrete";
+	var clipNode = Soliton.context.createScriptProcessor(1024, 2, 1);
+	//clipNode.channelInterpretation = "discrete";
+
+	clipNode.onaudioprocess = function(event)
+	{
+		var inputArrayL = event.inputBuffer.getChannelData(0);
+		//var inputArrayR = event.inputBuffer.getChannelData(1);
+		var clipArray = event.inputBuffer.getChannelData(1);
+		//var clipArrayR = event.inputBuffer.getChannelData(3);
+		var outputArrayL = event.outputBuffer.getChannelData(0);
+		//var outputArrayR = event.outputBuffer.getChannelData(1);
+		var pos = 0;
+		var neg = 0;
+		//var posR = 0;
+		//var negR = 0;
+
+		for(var i = 0; i < 1024; ++i)
+		{
+			pos = Math.abs(clipArray[i]);
+			neg = -pos;
+			if(inputArrayL[i] > pos)
+				outputArrayL[i] = pos;
+			else if(inputArrayL[i] < neg)
+				outputArrayL[i] = neg;
+			else
+				outputArrayL[i] = inputArrayL[i];
+
+			/*
+			posR = Math.abs(clipArrayR[i]);
+			negR = -posR;
+			if(inputArrayR[i] > posR)
+				outputArrayR[i] = posR;
+			else if(inputArrayR[i] < negR)
+				outputArrayR[i] = negR;
+			else
+				outputArrayR[i] = inputArrayR[i];*/
+		}
+
+		//Lich.post("["+inputArrayL[0]+","+clipArray[0]+"]");
+	}
+
+
+	input.connect(merger, 0, 0);
+	//input.connect(clipNode, 1, 1);
+	value.connect(merger, 0, 1);
+	merger.connect(clipNode);
+	//value.connect(clipNode, 1, 3);
+
+	clipNode.startAll = function(time)
+	{ 
+		input.startAll(time);
+		value.startAll(time);
+	}
+
+	clipNode.stopAll = function(time)
+	{ 
+		input.stopAll(time);
+		value.stopAll(time);
+		setTimeout(function(){input.disconnect(); value.disconnect(); merger.disconnect(); clipNode.disconnect()}, (time - Soliton.context.currentTime) * 1000);
+	}
+
+	clipNode._lichType = AUDIO;
+	ret(clipNode);
+}
+
+_createPrimitive("clip", clip);
+
 function killall(ret)
 {
 	Lich.scheduler.freeScheduledEvents();
@@ -7333,7 +5912,24 @@ Soliton.PercStream = function(_events, _modifiers)
 {
 	var events = _events;
 	var modifiers = _modifiers;
-	this.nextTime = Math.floor((Soliton.context.currentTime / Lich.scheduler.tempoSeconds) + 0.5) * Lich.scheduler.tempoSeconds;
+	
+    this.collapseModifiers = function()
+    {
+	    mapCps(
+			modifiers,
+			function(modifier, i, callback)
+			{
+			    Lich.collapse(modifier, callback);
+			},
+			function(collapsedModifiers)
+			{
+			    modifiers = collapsedModifiers;
+			}
+	    );
+	}
+
+    this.collapseModifiers();
+    this.nextTime = Math.floor((Soliton.context.currentTime / Lich.scheduler.tempoSeconds) + 0.5) * Lich.scheduler.tempoSeconds;
 	var macroBeat = 0;
 	var modifierBeat = 0;
 	var hasModifiers = modifiers.length > 0;
@@ -7427,6 +6023,7 @@ Soliton.PercStream = function(_events, _modifiers)
 	{
 		events = newEvents;
 		modifiers = newModifiers;
+	        this.collapseModifiers();
 		macroBeat = macroBeat % events.length;
 
 		if(modifiers.length)
@@ -7451,6 +6048,23 @@ Soliton.SoloStream = function(_instrument, _events, _modifiers)
 	var instrument = _instrument;
 	var events = _events;
 	var modifiers = _modifiers;
+        
+    this.collapseModifiers = function()
+    {
+	    mapCps(
+			modifiers,
+			function(modifier, i, callback)
+			{
+			    Lich.collapse(modifier, callback);
+			},
+			function(collapsedModifiers)
+			{
+			    modifiers = collapsedModifiers;
+			}
+	    );
+	}
+
+    this.collapseModifiers();
 	this.nextTime = Math.floor((Soliton.context.currentTime / Lich.scheduler.tempoSeconds) + 0.5) * Lich.scheduler.tempoSeconds;
 	var macroBeat = 0;
 	var modifierBeat = 0;
@@ -7548,7 +6162,8 @@ Soliton.SoloStream = function(_instrument, _events, _modifiers)
 	{
 		events = newEvents;
 		modifiers = newModifiers;
-		macroBeat = macroBeat % events.length;
+	        this.collapseModifiers();
+	        macroBeat = macroBeat % events.length;
 
 		if(modifiers.length)
 			modifierBeat = modifierBeat % modifiers.length;
