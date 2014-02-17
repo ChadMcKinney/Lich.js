@@ -5633,7 +5633,7 @@ function perc(attack, peak, decay, input, ret)
 	Lich.collapse(input, function(input)
 	{
 		if(typeof attack !== "number" || typeof peak !== "number" || typeof decay !== "number")
-		throw new Error("perc can only use numbers for attack, peak, and decay arguments.");
+			throw new Error("perc can only use numbers for attack, peak, and decay arguments.");
 
 		if(typeof input == "number")
 		{
@@ -5659,6 +5659,45 @@ function perc(attack, peak, decay, input, ret)
 }
 
 _createPrimitive("perc", perc);
+
+// Shape can be 0 or 1, 0 for linear 1 for exponential, or "linear" or "exponential"
+function env(levels, times, shape, input, ret)
+{
+	Lich.collapse(input, function(input)
+	{
+		if(typeof input == "number")
+		{
+			dc(input, function(inRes){input = inRes});
+		}
+
+		var percGain = Soliton.context.createGain();
+		input.connect(percGain);
+		
+		percGain.startAll = function(time)
+		{
+			input.startAll(time);
+			percGain.gain.setValueAtTime(levels[0], time);
+			var finalTime = time;
+			
+			for(var i = 1; i < levels.length; ++i)
+			{
+				finalTime += times[i - 1];
+				if(shape == 0 || shape === "linear")
+					percGain.gain.linearRampToValueAtTime(levels[i], finalTime);
+				else
+					percGain.gain.exponentialRampToValueAtTime(levels[i], finalTime);
+			}
+			
+			input.stopAll(finalTime);
+		}
+
+		percGain.stopAll = input.stopAll;
+		percGain._lichType = AUDIO;
+		ret(percGain);
+	});
+}
+
+_createPrimitive("env", env);
 
 function play(synth, ret)
 {

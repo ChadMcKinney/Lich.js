@@ -1103,6 +1103,12 @@ sin (simplex 1 >> range 20 20000) >> decimate (sin 0.3 >> range 100 8000) >>  ga
 sin (simplex 1 >> exprange 1 2000) >> wrap 0.1 >> gain 3 >> play
 sin (simplex 1 >> exprange 1 2000) >> fold 0.1 >> gain 3 >> play
 
+
+-- Env takes a list of levels, and times (with times being a length of 1 less), and a shape value, 0 is linear 1 is exponential
+let s = sin (env [20, 20000, 1000, 1] times 1 1) >> env [0, 0.5, 0.125, 0] times 0 >> play
+    where times = [1, 2, 3]
+
+
 -- Graphics Notes
 Make Graphics API more like Audio API
 you should use stop instead of delete
