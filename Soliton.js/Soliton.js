@@ -6284,15 +6284,23 @@ Soliton.PercStream = function(_events, _modifiers)
 
 		else if(nevent != Lich.VM.Nothing)
 		{
-			var nextTime = this.nextTime;
-			Lich.collapse(Soliton.synthDefs[nevent], function(synth)
+			try
 			{
-				if(synth._lichType == AUDIO)
+				var nextTime = this.nextTime;
+				Lich.collapse(Soliton.synthDefs[nevent], function(synth)
 				{
-					synth.connect(Soliton.masterGain);
-					synth.startAll(nextTime + offset);
-				}
-			});
+					if(synth._lichType == AUDIO)
+					{
+						synth.connect(Soliton.masterGain);
+						synth.startAll(nextTime + offset);
+					}
+				});
+			}
+
+			catch(e)
+			{
+				Lich.post(e);
+			}
 		}
 	}
 
@@ -6310,10 +6318,18 @@ Soliton.PercStream = function(_events, _modifiers)
 
 			if(modifier != Lich.VM.Nothing)
 			{
-				modifier(Lich.scheduler.tempoSeconds, function(_beatDuration)
+				try
 				{
-					beatDuration = _beatDuration;
-				});
+					modifier(Lich.scheduler.tempoSeconds, function(_beatDuration)
+					{
+						beatDuration = _beatDuration;
+					});
+				}
+
+				catch(e)
+				{
+					Lich.post(e);
+				}
 			}
 
 			if(++modifierBeat >= modifiers.length)
@@ -6354,6 +6370,9 @@ Soliton.PercStream = function(_events, _modifiers)
 
 Soliton.SoloStream = function(_instrument, _events, _modifiers)
 {
+	if(!Soliton.synthDefs.hasOwnProperty(_instrument))
+		throw new Error("instrument undefined in solo pattern: " + _instrument);
+
 	var instrument = _instrument;
 	var events = _events;
 	var modifiers = _modifiers;
@@ -6420,28 +6439,37 @@ Soliton.SoloStream = function(_instrument, _events, _modifiers)
 
 		else if(nevent != Lich.VM.Nothing)
 		{
-			if(hasModifiers)
+			try
 			{
-				var modifier = modifiers[modifierBeat];
-
-				if(modifier != Lich.VM.Nothing)
+				if(hasModifiers)
 				{
-					modifier(nevent, function(_newEvent)
+					var modifier = modifiers[modifierBeat];
+
+					if(modifier != Lich.VM.Nothing)
 					{
-						nevent = _newEvent;
-					});
+						modifier(nevent, function(_newEvent)
+						{
+							nevent = _newEvent;
+						});
+					}
 				}
+
+				
+				var nextTime = this.nextTime;
+				Soliton.synthDefs[instrument](nevent, function(synth)
+				{
+					if(synth._lichType == AUDIO)
+					{
+						synth.connect(Soliton.masterGain);
+						synth.startAll(nextTime + offset);
+					}
+				});
 			}
 
-			var nextTime = this.nextTime;
-			Soliton.synthDefs[instrument](nevent, function(synth)
+			catch(e)
 			{
-				if(synth._lichType == AUDIO)
-				{
-					synth.connect(Soliton.masterGain);
-					synth.startAll(nextTime + offset);
-				}
-			});
+				Lich.post(e);
+			}
 		}
 	}
 
@@ -6467,8 +6495,12 @@ Soliton.SoloStream = function(_instrument, _events, _modifiers)
 		return this.nextTime;
 	}
 
-	this.update = function(newEvents, newModifiers)
+	this.update = function(newInstrument, newEvents, newModifiers)
 	{
+		if(!Soliton.synthDefs.hasOwnProperty(newInstrument))
+			throw new Error("instrument undefined in solo pattern: " + Lich.VM.PrettyPrint(newInstrument));
+
+		instrument = newInstrument;
 		events = newEvents;
 		modifiers = newModifiers;
 	        this.collapseModifiers();

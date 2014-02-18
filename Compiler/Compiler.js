@@ -2422,12 +2422,12 @@ Lich.compileSoloStream = function(ast, ret)
 			var res;
 			if(eval ("typeof "+ast.id+" !== \"undefined\""))
 			{
-				res = ast.id+".update("+list+","+modifiers+");";
+				res = ast.id+".update("+ast.synth+","+list+","+modifiers+");";
 			}
 				
 			else
 			{
-				res = ast.id+"=new Soliton.SoloStream(\""+ast.synth+"\","+list+","+modifiers+");";
+				res = ast.id+"=new Soliton.SoloStream("+ast.synth+","+list+","+modifiers+");";
 				if(Lich.parseType !== "library")
 					res += "Lich.scheduler.addScheduledEvent("+ast.id+");";
 			}

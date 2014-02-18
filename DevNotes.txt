@@ -1059,7 +1059,7 @@ square (saw 1 >> exprange 1 20000) >> add (auxIn 0 >> delay (1/6) 0) >> fir [ran
 
 -- Scale testing code
 let s freq => saw (freq) >> perc 0 0.4 0.75
-sSeq ~> s 0 1 2 3 4 5 6 7 8 9 10 11 12 14 15 | (degree2Freq koto) -- Curried functions not working in patterns, need to investigate!
+sSeq ~> s 0 1 2 3 4 5 6 7 8 9 10 11 12 14 15 | (degree2Freq koto)
 
 
 -- Noises

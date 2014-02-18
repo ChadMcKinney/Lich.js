@@ -516,8 +516,8 @@ percMod
 /////////////////
 
 soloStream
-  : varid "~>" varid soloList               {{$$ = {astType:"soloStream", id: $1, synth:$3, list:$4, modifiers: {astType:"soloMods", list:[]} };}}
-  | varid "~>" varid soloList "|" soloMods  {{$$ = {astType:"soloStream", id: $1, synth:$3, list:$4, modifiers: $6};}}
+  : varid "~>" varid soloList               {{$$ = {astType:"soloStream", id: $1, synth:"\""+$3+"\"", list:$4, modifiers: {astType:"soloMods", list:[]} };}}
+  | varid "~>" varid soloList "|" soloMods  {{$$ = {astType:"soloStream", id: $1, synth:"\""+$3+"\"", list:$4, modifiers: $6};}}
   ;
 
 soloList
@@ -527,7 +527,8 @@ soloList
 
 soloItem
   : float                           {{$$ = {astType: "float-lit", value: Number($1), pos: @$};}}
-  | "-" float                       {{$$ = {astType: "float-lit", value: -Number($2), pos: @$};}}
+  | "(" exp ")"                     {{$$ = $2;}}
+  //| "-" float                     {{$$ = {astType: "float-lit", value: -Number($2), pos: @$};}}
   | "_"                             {{$$ = {astType:"Nothing"};}}
   | "[" soloList "]"                {{$$ = $2;}}
   ;
