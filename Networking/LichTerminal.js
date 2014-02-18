@@ -24,8 +24,10 @@ function writeTextToTerminal(id,text)
 {
 	if(id != clientName)
 	{
+		//Lich.post("ID = " + id);
+		//Lich.post("CLIENT NAME + " + clientName);
 		//document.getElementById("terminal"+id).value = text;
-		editors[id].setValue(text);
+		editors[id].setValue(text, text.length);
 	}
 }
 
@@ -91,7 +93,10 @@ function createTextArea(name,num,total)
 		editor.getSession().setMode("ace/mode/haskell");
 		editor.renderer.setShowGutter(false);
 		editor.renderer.setShowPrintMargin(false);
-		editor.getSession().setUseWrapMode(true);
+		var session = editor.getSession();
+		session.setUseWrapMode(true);
+		session.setUseWorker(true);
+
 		editor.commands.addCommand({
 		    name: 'evaluateCode',
 		    bindKey: {win: 'Ctrl-Enter', mac: 'Command-Enter'},
@@ -111,7 +116,13 @@ function createTextArea(name,num,total)
 			bindKey: {win: 'Ctrl-.', mac: "Command-."},
 			exec: killall,
 			readOnly: false
-		})
+		});
+
+		editor.on('input', function()
+		{
+			if(name == clientName)
+				broadcastTyping(editor.getValue());
+		});
 
 		input = document.getElementById('terminal'+name);
 		input.style.fontSize = '1.1em';

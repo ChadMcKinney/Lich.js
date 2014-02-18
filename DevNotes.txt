@@ -1128,7 +1128,7 @@ Enforce purity: Done?!
 
 -- Audio to do
 Fix Node leaks with custom UGens -- Fixed? Need to implement disconnect via setTimeout for all inputs like in exprange
-spliceFilter? -> Adds poles according to splice string characters
+spliceFilter? -> Adds poles according to splice string characters -- Done
 Implement Limiter, writeBuf, and any other loose ends. Put in Master limiter? -- No write buffer in API. Compressor/Limiter is done.
 Buses and Effects routing -- Done!?
 Panning! -- Doneish, the API isn't responding to float panning
