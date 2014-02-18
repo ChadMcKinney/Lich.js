@@ -4716,13 +4716,23 @@ function pink(ret)
         }
     }
 
-	pinkFunc.startAll = function(time){};
-	pinkFunc.stopAll = function(time)
+    var pinkGain = Soliton.context.createGain();
+    pinkGain.gain.value = 0;
+    pinkFunc.connect(pinkGain);
+
+	pinkGain.startAll = function(time)
 	{
-		setTimeout(function(){pinkFunc.disconnect(0);}, (time - Soliton.context.currentTime) * 1000)
+		pinkGain.gain.setValueAtTime(1, time);
 	};
-	pinkFunc._lichType = AUDIO;
-	ret(pinkFunc);
+
+	pinkGain.stopAll = function(time)
+	{
+		pinkGain.gain.setValueAtTime(0, time);
+		setTimeout(function(){pinkFunc.disconnect();pinkFunc.disconnect()}, (time - Soliton.context.currentTime) * 1000)
+	};
+
+	pinkGain._lichType = AUDIO;
+	ret(pinkGain);
 }
 
 _createPrimitive("pink", pink);
@@ -4742,13 +4752,23 @@ function violet(ret)
         }
     }
 
-	violetFunc.startAll = function(time){};
-	violetFunc.stopAll = function(time)
+	var gain = Soliton.context.createGain();
+    gain.gain.value = 0;
+    violetFunc.connect(gain);
+
+	gain.startAll = function(time)
 	{
-		setTimeout(function(){violetFunc.disconnect(0);}, (time - Soliton.context.currentTime) * 1000)
+		gain.gain.setValueAtTime(1, time);
 	};
-	violetFunc._lichType = AUDIO;
-	ret(violetFunc);
+
+	gain.stopAll = function(time)
+	{
+		gain.gain.setValueAtTime(0, time);
+		setTimeout(function(){violetFunc.disconnect();gain.disconnect()}, (time - Soliton.context.currentTime) * 1000)
+	};
+
+	gain._lichType = AUDIO;
+	ret(gain);
 }
 
 _createPrimitive("violet", violet);
@@ -4768,13 +4788,23 @@ function brown(ret)
         }
     }
 
-	brownFunc.startAll = function(time){};
-	brownFunc.stopAll = function(time)
+	var gain = Soliton.context.createGain();
+    gain.gain.value = 0;
+    brownFunc.connect(gain);
+
+	gain.startAll = function(time)
 	{
-		setTimeout(function(){brownFunc.disconnect(0);}, (time - Soliton.context.currentTime) * 1000)
+		gain.gain.setValueAtTime(1, time);
 	};
-	brownFunc._lichType = AUDIO;
-	ret(brownFunc);
+
+	gain.stopAll = function(time)
+	{
+		gain.gain.setValueAtTime(0, time);
+		setTimeout(function(){gain.disconnect();brownFunc.disconnect()}, (time - Soliton.context.currentTime) * 1000)
+	};
+
+	gain._lichType = AUDIO;
+	ret(gain);
 }
 
 _createPrimitive("brown", brown);
@@ -4790,14 +4820,23 @@ function clipNoise(ret)
         }
     }
 
-	clipNoise.startAll = function(time){};
-	clipNoise.stopAll = function(time)
+	var gain = Soliton.context.createGain();
+    gain.gain.value = 0;
+    clipNoise.connect(gain);
+
+	gain.startAll = function(time)
 	{
-		setTimeout(function(){clipNoise.disconnect(0);}, (time - Soliton.context.currentTime) * 1000)
+		gain.gain.setValueAtTime(1, time);
 	};
 
-	clipNoise._lichType = AUDIO;
-	ret(clipNoise);
+	gain.stopAll = function(time)
+	{
+		gain.gain.setValueAtTime(0, time);
+		setTimeout(function(){clipNoise.disconnect();gain.disconnect()}, (time - Soliton.context.currentTime) * 1000)
+	};
+
+	gain._lichType = AUDIO;
+	ret(gain);
 }
 
 _createPrimitive("clipNoise", clipNoise);
@@ -4877,14 +4916,23 @@ function simplex(freq, ret)
         }
     }
 
-	simplexFunc.startAll = function(time){};
-	simplexFunc.stopAll = function(time)
+	var gain = Soliton.context.createGain();
+    gain.gain.value = 0;
+    simplexFunc.connect(gain);
+
+	gain.startAll = function(time)
 	{
-		setTimeout(function(){simplexFunc.disconnect(0);}, (time - Soliton.context.currentTime) * 1000)
+		gain.gain.setValueAtTime(1, time);
 	};
 
-	simplexFunc._lichType = AUDIO;
-	ret(simplexFunc);
+	gain.stopAll = function(time)
+	{
+		gain.gain.setValueAtTime(0, time);
+		setTimeout(function(){simplexFunc.disconnect();gain.disconnect()}, (time - Soliton.context.currentTime) * 1000)
+	};
+
+	gain._lichType = AUDIO;
+	ret(gain);
 }
 
 _createPrimitive("simplex", simplex);
@@ -4928,7 +4976,6 @@ function waveShape(shape, input, ret)
 {
 	var shaper = Soliton.context.createWaveShaper();
 	input.connect(shaper);
-	// Create and specify parameters for the low-pass filter.
 	shaper.curve = new Float32Array(shape);
 	shaper.startAll = input.startAll;
 	shaper.stopAll = input.stopAll;

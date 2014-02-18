@@ -1059,7 +1059,7 @@ square (saw 1 >> exprange 1 20000) >> add (auxIn 0 >> delay (1/6) 0) >> fir [ran
 
 -- Scale testing code
 let s freq => saw (freq) >> perc 0 0.4 0.75
-sSeq ~> s 0 1 2 3 4 5 6 7 8 9 10 11 12 14 15 | (degree2Freq koto)
+sSeq ~> s 0 1 2 3 4 5 6 7 8 9 10 11 12 14 15 | (degree2Freq koto)s
 
 
 -- Noises
@@ -1166,3 +1166,23 @@ let bass2 freq => osc >> dist >> filt >> env
        
 
 bassSeq2 ~> bass2 [20 42.5] [42.5 80] [160 160 160 160] [190 _ 190] | (*2) _ (*1.75) _ _ (*1.5) (*2) _ (*1.5)
+
+
+-- Gamelan improv stuff
+let sinSynth freq => saw freq >> gain (sin 4 >> range 0 1) >> lowpass (freq * 2 * (sin 4 >> range 0 1)) 1 >> perc (random 0 0.5) 0.3 (random 1 5)
+sinSeqer ~> sinSynth 1 _ _ 1 | (\x -> degree2Freq slendro (randomI -5 10))
+sinSeqer3 ~> sinSynth _ 1 1 _ | (\x -> degree2Freq slendro (randomI -5 10))
+
+stop sinSeqer
+
+let sinSynth3 freq => saw freq >> gain (sin 4 >> range 0 1) >> lowpass (freq * 2 * (sin 4 >> range 0 1)) 1 >> perc 0 0.2 0.2
+sinSeqer4 ~> sinSynth3 _ _ 1 _ | (\x -> degree2Freq slendro (randomI -5 10))
+sinSeqer5 ~> sinSynth3 1 _ _ _ | (\x -> degree2Freq slendro (randomI -5 10))
+stop sinSeqer5
+let sinSynth2 freq => square freq >> gain 4 >> clip 0.1 >> gain 10 >> perc 0 0.4 4
+sinSeqer2 ~> sinSynth2 1 _ _ _ | (\x -> degree2Freq slendro (randomI -15 -10))
+print "Is it alive there?"
+let bd => square (degree2Freq slendro (randomI -10 -5)) >> lowpass 300 1 >> perc 0 0.3 0.1
+let sd2 => sin (degree2Freq slendro 10) >> perc 0 0.2 0.1
+drumsD2 +> bd _ [bd sd2] sd2 | (*2)stop drumsD2
+play drumsD
