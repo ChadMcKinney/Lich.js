@@ -148,3 +148,5 @@ purvi = Scale justTuning [0,1,4,6,7,8,11] 12 261.6255653006
 marva = Scale justTuning [0,1,4,6,7,9,11] 12 261.6255653006
 bhairav = Scale justTuning [0,1,4,5,7,8,11] 12 261.6255653006
 ahirbhairav = Scale justTuning [0,1,4,5,7,9,10] 12 261.6255653006
+
+coleJI = Scale { tuning = [ 1, (10/9), (9/8), (8/7), (6/5), (4/3), (11/8), (3/2), (8/5), (7/4), (16/9), (9/5) ], degrees = [0,1,2,3,4,5,6,7,8,9,10,11], pitchesPerOctave = 12, rootFreq = koto::rootFreq }

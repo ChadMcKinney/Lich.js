@@ -1109,6 +1109,12 @@ let s = sin (env [20, 20000, 1000, 1] times 1 1) >> env [0, 0.5, 0.125, 0] times
     where times = [1, 2, 3]
 
 
+
+-- The tuning for pluck isn't...perfect.........at all................
+let s freq => brown >> perc2 0 1 0.01 >> pluck freq 0.99 0.9 >> perc 0 1 2
+sSeq ~> s 0 1 2 3 4 5 6 7 8 9 10 11 12 14 15 | ((/2) . (degree2Freq justMajor))
+
+
 -- Graphics Notes
 Make Graphics API more like Audio API
 you should use stop instead of delete
@@ -1181,8 +1187,210 @@ sinSeqer5 ~> sinSynth3 1 _ _ _ | (\x -> degree2Freq slendro (randomI -5 10))
 stop sinSeqer5
 let sinSynth2 freq => square freq >> gain 4 >> clip 0.1 >> gain 10 >> perc 0 0.4 4
 sinSeqer2 ~> sinSynth2 1 _ _ _ | (\x -> degree2Freq slendro (randomI -15 -10))
-print "Is it alive there?"
-let bd => square (degree2Freq slendro (randomI -10 -5)) >> lowpass 300 1 >> perc 0 0.3 0.1
-let sd2 => sin (degree2Freq slendro 10) >> perc 0 0.2 0.1
-drumsD2 +> bd _ [bd sd2] sd2 | (*2)stop drumsD2
-play drumsD
+let sinSynth3 freq => tri freq >> gain (sin 4 >> range 0 1) >> lowpass (sin 4 >> range 80 (freq * 2)) 0.0001 >> perc 0.0001 0.2 2
+sinSeqer4 ~> sinSynth3 1 4 2 4 | (\x -> (/8) $ (*x) $ degree2Freq slendro (randomI -5 10))
+stop sinSeqer4
+let bd => tri (degree2Freq slendro -10) >> add (brown >> gain 1) >> lowpass 100 1 >> perc 0 3 0.25
+let sd2 => sin (freq + (random -13 13)) >> gain 0.25 >> add (violet >> gain 30) >> bandpass freq 50 >> env [0, 1, 0.035, 0] [0, 0.05, 1] 0 >> auxThrough 0
+    where freq = (degree2Freq slendro 5)
+    
+drumsD2 +> bd [_ bd] [_ sd2] sd2 | (*2)
+
+let delayFX = auxIn 0 >> gain 1 >> lowpass 500 1 >> delay 0.5 0.6 >> play
+stop delayFX
+
+
+let bd => square (degree2Freq slendro (randomI -10 -5)) >> lowpass 300 1 >> perc 0 0.5 0.1
+let sd2 => sin (degree2Freq slendro 10) >> perc 0 0.2 0.05
+let sd2 => white >> perc 0 0.2 0.1
+drumsD2 +> bd _ [bd sd2] sd2 | (*2)
+
+pink >> gain 0.2 >> play
+
+
+
+
+
+
+---------------------------------------------------------------------------------
+-- | Lich Performance Proto-Code
+---------------------------------------------------------------------------------
+
+let sqkick => white + tri (random 148 152) >>
+    (lowpass (random 990 1100) 5) >>
+    perc 0.0 1 0.07
+    
+psqkick +> sqkick _ sqkick _ [_ sqkick] sqkick | (*1) (*1) (*2) (*3)
+stop psqkick
+
+let fmsnare => white + sin (sin (random 205 215) >> range 20 400) >>
+    (highpass (random 290 310) 40) >>
+    perc 0.0 0.7 0.05
+    
+pfmsnare +> _ [fmsnare fmsnare] _ [_ fmsnare] _ [fmsnare fmsnare] _ | (*1) (*1) (/2)
+stop pfmsnare
+
+let whitehat => white >> highpass (random 3900 4100) (random 10 15) >> perc 0.0 0.4 0.07
+
+pwhitehat +> whitehat [whitehat whitehat] [_ whitehat] | (*1) (*2) (*2) (/2)
+stop pwhitehat
+
+---
+let coleJI = Scale { tuning = [ 1, (10/9), (9/8), (8/7), (6/5), (4/3), (11/8), (3/2), (8/5), (7/4), (16/9), (9/5) ], degrees = [0,1,2,3,4,5,6,7,8,9,10,11], pitchesPerOctave = 12, rootFreq = koto::rootFreq }
+
+let lead => brown + square ((randomI 0 24) >> (degree2Freq coleJI)) >>
+    lowpass (random 600 3000) (random 5 20) >>
+    delay 0.1 0.7 >>
+    perc 0.01 (random 0.1 0.125) (random 0.2 1.2)
+
+plead +> lead _ lead _ lead lead [_ lead] lead | (*1) (*1) (/2) (*1) (*2) (/2)
+
+
+let coleJI = Scale { tuning = [ 1, (10/9), (9/8), (8/7), (6/5), (4/3), (11/8), (3/2), (8/5), (7/4), (16/9), (9/5) ], degrees = [0,1,2,3,4,5,6,7,8,9,10,11], pitchesPerOctave = 12, rootFreq = koto::rootFreq }
+
+
+let growl freqq => osc >> fold 0.125 >> filt >> gain 128 >> env
+    where
+        freq    = freqq * 0.25
+        env     = perc 0.0 0.6 1
+        osc     = (square (freq*1.05)) + (sin (freq*1)) + (square (freq*0.49) )+ (tri (freq * 2))
+        filt    = lowpass (freq * 0.25 * (pow 2 $ randomI 2 3)) 10
+
+growlTime ~> growl 0 _ _ _ 2 _ 0 _ 5 _ 4 _ | (degree2Freq coleJI)
+stop growlTime
+let spinning freqq => osc >> filt  >> gain 0.25 >> env
+    where
+        freq    = freqq * 1
+        env     = perc 0.6 0.6 0.01
+        osc     = (tri (freq*1.00)) + (saw (freq*1)) + (tri (freq*0.5) )+ (tri (freq * 2))
+        filt    = lowpass (freq * 2 * (pow 2 $ randomI 2 3)) 10
+
+spinTime ~> spinning 0 _ _ _ 2 _ 0 _ 5 _ 4 _ _ _ | (degree2Freq coleJI)
+
+let spinning2 freqq => osc >> filt >> gain 0.25 >> env
+    where
+        freq    = freqq * 0.5
+        env     = perc 0.6 0.6 0.01
+        osc     = (tri (freq*1.00)) + (saw (freq*1)) + (tri (freq*0.5) )+ (tri (freq * 2))
+        filt    = lowpass (freq * 2 * (pow 2 $ randomI 2 3)) 10
+
+let x = 5
+spinTime2 ~> spinning2 0 (x) _ _ 2 _ 0 _ 5 _ 4 _ 6 _ _ _ | ((*x) . (degree2Freq coleJI))
+    where x = 2
+
+
+let ice9 freqq => osc >> dec >> filt >> delay 0.25 0.5 >> gain 0.25 >> env
+    where
+        freq    = freqq * 2
+        env     = perc 1 0.6 4
+        dec     = decimate (freq * (randomI 1 2))
+        osc     = (tri freq) + (square (freq * 0.5)) + (saw (freq * 0.25)) + (sin (freq * 2))
+        filt    = lowpass (freq * 2 * (pow 2 $ randomI 2 5)) 20
+        
+iceChords ~> ice9 
+    0 1 _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+    0 4 _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+    0 5 _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+    0 4 _ _ _ _ _ _ _ _ _ _ _ _ _ _
+    | (degree2Freq coleJI)
+    
+let ice10 freqq => osc >> dec >> filt >> delay 0.25 0.5 >> gain 0.25 >> env
+    where
+        freq    = freqq * 2
+        env     = perc 1 0.6 4
+        dec     = decimate (freq * (randomI 1 3))
+        osc     = (tri freq) + (square (freq * 0.5)) + (saw (freq * 0.25)) + (sin (freq * 2))
+        filt    = lowpass (env $ freq * 4 * (pow 2 $ randomI 2 5)) 40
+
+iceChords2 ~> ice10
+    0 1 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+    0 4 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+    0 5 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+    | (degree2Freq coleJI)
+    
+stop iceChords2
+stop iceChords
+stop spinTime
+stop spinTime2
+stop growlTime
+
+
+--| Chad Sounds
+
+--| Section 1 stuff, combos with Cole/Curtis Sounds
+let snare => choose [violet,pink,brown,white,clipNoise>>gain 0.5] >> delay (1/(ff -14)) 0.999 >> env [0,1,1,0] [0,(random 0.02 0.15),0] 0 >> auxThrough 5
+let ss => pink >> bandpass (ff 16) 4 >> gain 16 >> delay (1/(ff (random -16 -8))) 0.999 >> env [0,0.3,0.3,0] [0,0.05,0] 0 >> auxThrough 5
+let lkick => square (ff -16) >> add (tri $ ff -24) >> perc 0 0.6 0.05 >> auxThrough 5
+lkicker2 +> [lkick ss] [snare ss] [ss lkick] [ss snare]
+
+
+
+-- Section 2 stuff, Not to be mixed with other sounds
+let bd => tri (degree2Freq coleJI -19) >> add (tri (degree2Freq coleJI -20)) >> lowpass 100 0.1 >> perc 0 1.2 0.15
+let bd2 => tri (degree2Freq coleJI -22) >> lowpass 500 0.1 >> perc 0.005 2 1
+let sd1 => sin ((freq 0) + (random -13 13)) >> gain 0.25 >> add (violet >> gain 30) >> highpass (freq 0) 30 >> env [0, 0.03, 0.0035, 0] [0, 0.0001, random 0.01 0.2] 0 >> auxThrough (randomI 0 3)
+    where freq x = degree2Freq coleJI (add 12 $ randomI -1 1)
+let sd2 => sin (freq + (random -13 13)) >> gain 0.25 >> add (violet >> gain 30) >> bandpass freq 50 >> env [0, 1, 0.035, 0] [0, 0.05, 1] 0 >> auxThrough (randomI 0 3)
+    where freq = (degree2Freq coleJI 15)
+let sd3 => violet + pink >> bandpass (degree2Freq coleJI 26) 1 >> lowshelf 200 12 >> env [0,1,0.03,0] [0,0.1,1] 0 >> auxThrough (randomI 0 3)
+    
+drumsD2 +> bd [_ bd] [_ sd2] sd2 bd [_ bd] [sd1 sd2] sd2 _ [bd _] sd2 [sd1 sd2] [bd sd2] [sd1 bd] [sd2 sd1] sd2
+drumsD3 +> _ sd3 | (*2)
+
+let delayFX = auxIn 0 >> lowpass (sin 0.1767 >> range 200 1000) 5 >> delay 0.5 0.6 >> play
+let delayFX2 = auxIn 1 >> highpass (sin 0.1 >> range 200 1000) 5 >> delay 0.75 0.5 >> play
+let delayFX3 = auxIn 2 >> gain 2 >> bandpass (sin 0.1317 >> range 200 2000) 5 >> delay 1.125 0.75 >> play
+stop delayFX
+stop delayFX2
+stop delayFX3
+stop drumsD2
+stop drumsD3
+
+
+
+let neonBass freq => (square (freq/2)) + (saw (freq*2)) + (saw (freq*(add 2 (sin 4 >> gain 0.04)))) + (pink >> lowpass freq 50) >> lowpass (sin 0.1 >> range 200 1000) 0.01 >> env [0.0,0.2,0.03,0] [0.002,1,3] 0
+let ff = degree2Freq coleJI
+neonBassSeq ~> neonBass (ff -12) _ (ff -8) _ _ _ (ff -4) _ (ff (choose [1, -1, -5])) _ _ (ff -9) _ _ (ff -5) | (/2) _ _ _ _ _ (/2) _
+stop neonBassSeq
+
+
+let neonBass2 freq => (saw (freq/2)) + (saw (freq/(add 2 (tri 4 >> gain 0.08)))) + (pink >> lowpass freq 10) >> env [0.0,0.25,0.03,0] [0.001,0.1,3] 0 >> auxThrough 3
+neonBassSeq2 ~> neonBass2 [(ff $ choose [-6, -12]) (ff $ choose [-5,-8])] [(ff $ choose [-5, -4]) (ff (choose [1, -1, -5]))] [(ff -9) (ff -5)] | (*4) (*8) (*4) (*2) (*2) _ (/2)
+stop neonBassSeq2
+
+
+let delayFX4 = auxIn 3 >> env2 [0,1] [1] 0 >> delay (sin 0.3 >> range 0.01 0.001) 0.1 >> delay 1.25 0.6 >> gain 0.25 >> play
+stop delayFX4
+
+
+
+
+
+
+
+
+---------------------------------------
+-- Archived Other shit
+---------------------------------------
+
+let snare => pink >> delay (1/(ff -8)) 0.1 >> perc 0.0 0.9 0.3 >> auxOut 5
+let ss => violet >> bandpass (ff 3) 30 >> gain 30 >> perc 0.0 0.4 0.1 >> auxOut 5
+let lkick => square (ff -12) >> add (tri 40) >> perc 0 0.3 0.1 >> auxOut 5
+lkicker2 +> [lkick lkick] [snare _ ss snare] [ss [lkick lkick]] [_ ss snare _] | (*2)
+
+let drumDecimFX = auxIn 5 >> delay 0.125 0.2 >> crunch 1 >> decimate (add 8000 (simplex 0.1 >> gain 3500)) >> gain 0.5 >> play
+stop drumDecimFX
+
+
+
+
+
+// synthesis techniques worth implementing
+Comb Filter
+Karplus-Strong
+Moog Style filter
+Pitch and Freq Shift
+Scanned Synthesis
+Better Wave Shaping, distion types of effects
+Chorus
+

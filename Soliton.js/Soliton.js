@@ -4350,15 +4350,17 @@ function iir(coeff1, coeff2, input, ret)
 
 		for(var i = 0; i < 1024; i ++)
 		{
-			outMem[0] = 0;
-			inMem[0] = inputArray[i];
+			inMem[0] = inputArray[i] * coeff1[0];
+			outMem[0] = inMem[0];
+			
 			for(var j = coeff1.length - 1; j > 0; --j)
 			{
 				outMem[0] += coeff1[j] * inMem[j];
 				inMem[j] = inMem[j - 1];
 			}
 
-			outMem[0] += coeff1[0] * inMem[0];
+			//outMem[0] += coeff1[0] * inMem[0];
+			outMem[0] *= coeff2[0];
 
 			for(var j = coeff2.length - 1; j > 0; --j)
 			{
@@ -4387,6 +4389,9 @@ _createPrimitive("iir", iir);
 
 function fir(coeff, input, ret)
 {
+	if(!(coeff instanceof Array))
+		throw new Error("fir coeff must be a list.");
+
 	var inMem = new Array();
 
 	for(var i = 0; i < coeff.length; ++i)
@@ -4403,8 +4408,8 @@ function fir(coeff, input, ret)
 
 		for(var i = 0; i < 1024; i ++)
 		{
-			inMem[0] = inputArray[i];
-			var res = 0;
+			inMem[0] = inputArray[i] * coeff[0];
+			var res = inMem[0];
 			
 			for(var j = coeff.length - 1; j > 0; --j)
 			{
@@ -4430,6 +4435,46 @@ function fir(coeff, input, ret)
 }
 
 _createPrimitive("fir", fir);
+
+function onepole(coeff, input, ret)
+{
+	if(typeof coeff !== "number")
+		throw new Error("onepole coeff must be a number.");
+
+	var inMem = new Array();
+
+	for(var i = 0; i < coeff.length; ++i)
+	{
+		inMem.push(0);
+	}
+
+	var filt = Soliton.context.createScriptProcessor(1024, 1, 1);
+	var lastSample = 0;
+
+	filt.onaudioprocess = function(event)
+	{
+		var inputArray = event.inputBuffer.getChannelData(0);
+		var outputArray = event.outputBuffer.getChannelData(0);
+
+		for(var i = 0; i < 1024; i ++)
+		{
+			lastSample = outputArray[i] = ((1 - Math.abs(coeff)) * inputArray[i]) + (coeff * lastSample);		
+		}
+	}
+
+	filt._lichType = AUDIO;
+	input.connect(filt);
+	filt.startAll = function(time){input.startAll(time)};
+	filt.stopAll = function(time)
+	{
+		input.stopAll(time);
+		setTimeout(function(){input.disconnect(); filt.disconnect()}, (time - Soliton.context.currentTime) * 1000)
+	};
+
+	ret(filt);
+}
+
+_createPrimitive("onepole", onepole);
 
 function hpz1(input, ret)
 {
@@ -4727,8 +4772,8 @@ function pink(ret)
 
 	pinkGain.stopAll = function(time)
 	{
-		pinkGain.gain.setValueAtTime(0, time);
-		setTimeout(function(){pinkFunc.disconnect();pinkFunc.disconnect()}, (time - Soliton.context.currentTime) * 1000)
+		pinkGain.gain.setValueAtTime(0, time + 0.1);
+		setTimeout(function(){pinkFunc.disconnect();pinkFunc.disconnect()}, (time - Soliton.context.currentTime) * 1100)
 	};
 
 	pinkGain._lichType = AUDIO;
@@ -4763,8 +4808,8 @@ function violet(ret)
 
 	gain.stopAll = function(time)
 	{
-		gain.gain.setValueAtTime(0, time);
-		setTimeout(function(){violetFunc.disconnect();gain.disconnect()}, (time - Soliton.context.currentTime) * 1000)
+		gain.gain.setValueAtTime(0, time + 0.1);
+		setTimeout(function(){violetFunc.disconnect();gain.disconnect()}, (time - Soliton.context.currentTime) * 1100)
 	};
 
 	gain._lichType = AUDIO;
@@ -4799,8 +4844,8 @@ function brown(ret)
 
 	gain.stopAll = function(time)
 	{
-		gain.gain.setValueAtTime(0, time);
-		setTimeout(function(){gain.disconnect();brownFunc.disconnect()}, (time - Soliton.context.currentTime) * 1000)
+		gain.gain.setValueAtTime(0, time + 0.1);
+		setTimeout(function(){gain.disconnect();brownFunc.disconnect()}, (time - Soliton.context.currentTime) * 1100)
 	};
 
 	gain._lichType = AUDIO;
@@ -4831,8 +4876,8 @@ function clipNoise(ret)
 
 	gain.stopAll = function(time)
 	{
-		gain.gain.setValueAtTime(0, time);
-		setTimeout(function(){clipNoise.disconnect();gain.disconnect()}, (time - Soliton.context.currentTime) * 1000)
+		gain.gain.setValueAtTime(0, time + 0.1);
+		setTimeout(function(){clipNoise.disconnect();gain.disconnect()}, (time - Soliton.context.currentTime) * 1100)
 	};
 
 	gain._lichType = AUDIO;
@@ -4927,8 +4972,8 @@ function simplex(freq, ret)
 
 	gain.stopAll = function(time)
 	{
-		gain.gain.setValueAtTime(0, time);
-		setTimeout(function(){simplexFunc.disconnect();gain.disconnect()}, (time - Soliton.context.currentTime) * 1000)
+		gain.gain.setValueAtTime(0, time + 0.1);
+		setTimeout(function(){simplexFunc.disconnect();gain.disconnect()}, (time - Soliton.context.currentTime) * 1100)
 	};
 
 	gain._lichType = AUDIO;
@@ -4936,6 +4981,103 @@ function simplex(freq, ret)
 }
 
 _createPrimitive("simplex", simplex);
+
+function pluck(freq, feedbackLevel, coeff, input, ret)
+{
+	var ins = [feedbackLevel, input];
+	var mix = Soliton.context.createGain();
+	var feedBack = Soliton.context.createGain();
+	var invertedFreq = null;
+
+	if(feedbackLevel._lichType == AUDIO)
+		feedbackLevel.connect(feedBack.gain)
+	else
+		feedBack.gain.value = feedbackLevel;
+	
+	var delay = Soliton.context.createDelay();
+	
+	if(freq._lichType == AUDIO)
+	{
+		dc(1, function(one)
+		{
+			_audioDivision(one, freq, function(divRes)
+			{
+				invertedFreq = divRes;
+				invertedFreq.connect(delay.delayTime);
+			});
+		});
+	}
+		
+	else
+	{
+		delay.delayTime.value = 1/freq;
+	}
+	
+	delay._lichType = AUDIO;
+
+	//input.connect(delay);
+	input.connect(mix);
+	delay.startAll = function(){}
+	delay.stopAll = function(){}
+	delay._lichType = AUDIO;
+	mix.connect(feedBack);
+	feedBack.connect(delay);
+
+	onepole(coeff, delay, function(filtRes)
+	{
+		filt = filtRes;
+	});
+
+	//filt.connect(mix);
+	delay.connect(mix);
+	//filt.connect(feedBack);
+	//mix.connect(feedBack);
+	//feedBack.connect(delay);
+	
+	mix.startAll = function(time)
+	{
+		ins.map(function(elem)
+		{
+			if(elem._lichType == AUDIO)
+				elem.startAll(time);
+		});
+
+		filt.startAll(time);
+		if(invertedFreq != null)
+			invertedFreq.startAll(time);
+	}
+
+	mix.stopAll = function(time)
+	{
+		ins.map(function(elem)
+		{
+			if(elem._lichType == AUDIO)
+				elem.stopAll(time);
+		});
+
+		filt.stopAll(time);
+		if(invertedFreq != null)
+			invertedFreq.stopAll(time);
+
+		setTimeout(function()
+		{
+			ins.map(function(elem)
+			{
+				if(elem._lichType == AUDIO)
+					elem.disconnect(0);
+
+				feedBack.disconnect(0);
+				delay.disconnect(0);
+			});
+		},
+		(time - Soliton.context.currentTime) * 1000)
+	}
+
+	mix._lichType = AUDIO;
+	ret(mix);
+}
+
+_createPrimitive("pluck", pluck);
 
 function sin(freq, ret)
 {
@@ -5707,6 +5849,38 @@ function perc(attack, peak, decay, input, ret)
 
 _createPrimitive("perc", perc);
 
+function perc2(attack, peak, decay, input, ret)
+{
+	Lich.collapse(input, function(input)
+	{
+		if(typeof attack !== "number" || typeof peak !== "number" || typeof decay !== "number")
+			throw new Error("perc can only use numbers for attack, peak, and decay arguments.");
+
+		if(typeof input == "number")
+		{
+			dc(input, function(inRes){input = inRes});
+		}
+
+		var percGain = Soliton.context.createGain();
+		input.connect(percGain);
+		
+		percGain.startAll = function(time)
+		{
+			input.startAll(time);
+			percGain.gain.setValueAtTime(0, time);
+			percGain.gain.linearRampToValueAtTime(peak, attack + time);
+			percGain.gain.linearRampToValueAtTime(0, attack + decay + time);
+			//input.stopAll(attack + decay + time);
+		}
+
+		percGain.stopAll = input.stopAll;
+		percGain._lichType = AUDIO;
+		ret(percGain);
+	});
+}
+
+_createPrimitive("perc2", perc2);
+
 // Shape can be 0 or 1, 0 for linear 1 for exponential, or "linear" or "exponential"
 function env(levels, times, shape, input, ret)
 {
@@ -5745,6 +5919,45 @@ function env(levels, times, shape, input, ret)
 }
 
 _createPrimitive("env", env);
+
+// Shape can be 0 or 1, 0 for linear 1 for exponential, or "linear" or "exponential"
+function env2(levels, times, shape, input, ret)
+{
+	Lich.collapse(input, function(input)
+	{
+		if(typeof input == "number")
+		{
+			dc(input, function(inRes){input = inRes});
+		}
+
+		var percGain = Soliton.context.createGain();
+		input.connect(percGain);
+		
+		percGain.startAll = function(time)
+		{
+			input.startAll(time);
+			percGain.gain.setValueAtTime(levels[0], time);
+			var finalTime = time;
+			
+			for(var i = 1; i < levels.length; ++i)
+			{
+				finalTime += times[i - 1];
+				if(shape == 0 || shape === "linear")
+					percGain.gain.linearRampToValueAtTime(levels[i], finalTime);
+				else
+					percGain.gain.exponentialRampToValueAtTime(levels[i], finalTime);
+			}
+			
+			//input.stopAll(finalTime);
+		}
+
+		percGain.stopAll = input.stopAll;
+		percGain._lichType = AUDIO;
+		ret(percGain);
+	});
+}
+
+_createPrimitive("env2", env2);
 
 function play(synth, ret)
 {
@@ -6300,10 +6513,13 @@ Soliton.PercStream = function(_events, _modifiers)
 	//Lich.post("events = " + Lich.VM.PrettyPrint(events));
 	//Lich.VM.Print(modifiers);
 
-	this.stop = function()
+	this.stop = function(doRemove)
 	{
+		doRemove = typeof doRemove === "undefined" ? true : doRemove;
 		playing = false;
-		Lich.scheduler.removeScheduledEvent(this);
+		
+		if(doRemove)
+			Lich.scheduler.removeScheduledEvent(this);
 	}
 
 	this.play = function()
@@ -6455,10 +6671,13 @@ Soliton.SoloStream = function(_instrument, _events, _modifiers)
 	//Lich.post("events = " + Lich.VM.PrettyPrint(events));
 	//Lich.VM.Print(modifiers);
 
-	this.stop = function()
+	this.stop = function(doRemove)
 	{
+		doRemove = typeof doRemove === "undefined" ? true : doRemove;
 		playing = false;
-		Lich.scheduler.removeScheduledEvent(this);
+		
+		if(doRemove)
+			Lich.scheduler.removeScheduledEvent(this);
 	}
 
 	this.play = function()
@@ -6601,6 +6820,9 @@ Soliton.SteadyScheduler = function()
 	this.tempo = 240; // bpm
 	this.tempoSeconds = (60 / this.tempo); 
 	this.tempoMillis = this.tempoSeconds * 1000;
+	tempo = this.tempo;
+	tempoSeconds = this.tempoSeconds;
+	tempoMillis = this.tempoMillis;
 	var playing = false;
 	var startTime = null;
 	var lookAhead = 25; // How frequently to call scheduling, in milliseconds
@@ -6696,17 +6918,17 @@ Soliton.SteadyScheduler = function()
 
 		for(var i = 0; i < currentQueue.length; ++i)
 		{
-			currentQueue[i].stop();
+			currentQueue[i].stop(false);
 		}
 		
 		for(var i = 0; i < nextQueue.length; ++i)
 		{
-			nextQueue[i].stop();
+			nextQueue[i].stop(false);
 		}
 
 		for(var i = 0; i < tempQueue.length; ++i)
 		{
-			tempQueue[i].stop();
+			tempQueue[i].stop(false);
 		}
 
 		currentQueue = [];
@@ -6721,21 +6943,21 @@ Soliton.SteadyScheduler = function()
 		{
 			var elem = currentQueue[i];
 			if(elem._lichType == IMPSTREAM || elem._lichType == SOLOSTREAM)
-				elem.stop();
+				elem.stop(false);
 		}
 		
 		for(var i = 0; i < nextQueue.length; ++i)
 		{
 			var elem = nextQueue[i];
 			if(elem._lichType == IMPSTREAM || elem._lichType == SOLOSTREAM)
-				elem.stop();
+				elem.stop(false);
 		}
 
 		for(var i = 0; i < tempQueue.length; ++i)
 		{
 			var elem = tempQueue[i];
 			if(elem._lichType == IMPSTREAM || elem._lichType == SOLOSTREAM)
-				elem.stop();
+				elem.stop(false);
 		}
 
 		currentQueue = [];
@@ -6760,5 +6982,12 @@ Soliton.SteadyScheduler = function()
 		Lich.scheduler.tempo = bpm;
 		Lich.scheduler.tempoSeconds = (60 / Lich.scheduler.tempo); 
 		Lich.scheduler.tempoMillis = Lich.scheduler.tempoSeconds * 1000;
+		tempo = bpm;
+		tempoSeconds = Lich.scheduler.tempoSeconds;
+		tempoMillis = Lich.scheduler.tempoMillis;
 	}
 }
+
+_createPrimitive("tempo", true);
+_createPrimitive("tempoSeconds", true);
+_createPrimitive("tempoMillis", true);
