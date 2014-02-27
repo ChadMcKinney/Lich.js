@@ -747,7 +747,7 @@ let testFunc = play(sin (gain 440 (sin 33)))
 stop testFunc
 
 
-let p = (playBuf (choose sampleList) 2 0 2) >> play
+let p = (playSample (choose sampleList) 2 0 2) >> play
 stop p
 
 let convolver = square 2 >> convolve "cluster" >> play
@@ -1109,10 +1109,23 @@ let s = sin (env [20, 20000, 1000, 1] times 1 1) >> env [0, 0.5, 0.125, 0] times
     where times = [1, 2, 3]
 
 
-
--- The tuning for pluck isn't...perfect.........at all................
-let s freq => brown >> perc2 0 1 0.01 >> pluck freq 0.99 0.9 >> perc 0 1 2
+let s freq => brown >> perc2 0 1 0.01 >> pluck freq 1 0.9 >> perc 0 1 2
 sSeq ~> s 0 1 2 3 4 5 6 7 8 9 10 11 12 14 15 | ((/2) . (degree2Freq justMajor))
+
+-- phaser
+white >> phaser 0.333 >> gain 0.3 >> play
+(saw 80) + (saw 160) >> gain 0.5 >> phaser 0.333 >> gain 0.3 >> play
+(saw 80) + (saw 160) >> gain 0.5 >> phaser 2 >> gain 0.3 >> play
+
+-- flanger
+white >> flanger 0.333 0.3 0.3 >> gain 0.3 >> play
+(saw 80) + (saw 160) >> gain 0.5 >> flanger 0.333 0.3 0.3 >> gain 0.3 >> play
+(saw 80) + (saw 160) >> gain 0.5 >> flanger 2 0.3 0.3 >> gain 0.3 >> play
+
+-- chorus
+white >> chorus 4 0.1 >> gain 0.3 >> play
+(saw 80) + (saw 160) >> gain 0.5 >> chorus 0.333 0.5 >> gain 0.3 >> play
+(saw 80) + (saw 160) >> gain 0.5 >> chorus 2 0.5 >> gain 0.3 >> play
 
 
 -- Graphics Notes
@@ -1208,12 +1221,93 @@ drumsD2 +> bd _ [bd sd2] sd2 | (*2)
 pink >> gain 0.2 >> play
 
 
+-- More ugen test code
+
+noiseL (sin 1 >> range 1 13) >> exprange 400 4000 >> sin >> gain 0.3 >> play
+noiseX (sin 1 >> range 1 30) >> exprange 400 4000 >> sin >> gain 0.3 >> play
+
+linexp 10 0 20 1 2000
 
 
+pink >> perc 0 1 0.06 >> play
 
+slopeX 2000 1000 20 >> sin >> gain 0.3 >> play
+slopeX 1000 2000 20 >> sin >> gain 0.3 >> play
+
+
+impulse 13 >> toggle >> gain 2000 >> add 1000 >> sin >> gain 0.3 >> play
+
+
+tri 0.1 >> exprange 400 2000 >> latch (impulse 7) >> sin >> gain 0.3 >> play
+
+sin 1 >> exprange 400 2000 >> divider (noiseN 5 >> exprange 1000 40000) >> sin >> gain 0.3 >> play
+
+square 80 >> divider (random 1 500) >> perc 0 0.5 2 >> play
+
+noiseN 40 >> toggle >> gain 2000 >> add 1000 >> sin >> gain 0.3 >> play
+
+square 5 >> gate (sin 440) >> gain 0.3 >> play
+
+dust 10 >> play
+
+dust 20 >> toggle >> gain 2000 >> add 1000 >> sin >> gain 0.3 >> play
+
+sin (noiseN 3 >> exprange 1 30) >> range 0 3 >> select [sin (slopeX 1000 4000 20), sin 2000, sin (slopeX 4000 1000 20)] >> gain 0.3 >> play 
+dust 30 >> stepper 1000 400 -100 >> sin >> gain 0.3 >> play
+
+dust 10 >> sweep (sin 0.3 >> gain 1000) >> add 1000 >> sin >> gain 0.3 >> play
+phasor 200 10000 (sin 0.3 >> gain 2) >> sin >> gain 0.3 >> play
+
+sin 666 >> poll >> gain 0.3 >> play
+
+crackle 1.95 >> sin >> gain 0.3 >> play
+
+dust 5 >> trand 400 2000 >> sin >> gain 0.3 >> play
+dust 5 >> trandX 400 2000 >> sin >> gain 0.3 >> play
+
+impulse 10 >> coinGate 0.5 >> stepper 1000 400 -100 >> sin >> gain 0.2 >> play
+
+-- Buffer UGens
+playBuf (sin 440 >> recordBuf (newBuffer 1024) 1) 1 >> play
+playBuf (fillBuffer $ map (nsin) [1..1024]) (noiseX 10 >> exprange 0.001 sampleRate) >> play
+sin 440 >> recPlayBuf (newBuffer sampleRate) (noiseX 1) (noiseX 1 >> gain 2) >> gain 0.5 >> play
+sin (noiseL 2 >> exprange 200 2000) >> recPlayBuf (newBuffer sampleRate) (noiseL 7) (sin (noiseX 1 >> exprange 1 40) >> gain (noiseL 3 >> range 0 4)) >> gain 0.5 >> play
+
+-- Filters
+square 2 >> range 400 1600 >> lag 0.1 >> sin >> gain 0.3 >> play
+square 1 >> range 400 1600 >> lag (sin 0.1 >> range 0.001 1) >> sin >> gain 0.3 >> play
+impulse 2 >> decay2 (sin 0.25 >> exprange 0.001 1) 2 >> gain (pink * 0.1) >> play
+impulse 2 >> reson 1000 1 >> gain 0.5 >> play
+impulse 2 >> reson (sin 0.3 >> exprange 400 4000) (tri 0.1 >> range 0.001 2) >> gain 0.05 >> play
+
+-- Pluck
+let kd = degree2Freq koto -- Compile this first!
+white >> perc2 0 1 0.05 >> pluck (kd (random -5 10)) 3 0.3 >> perc 0.01 0.15 1 >> play
+pink >> perc2 0.5 1 0.05 >> pluck (kd (random -5 10)) 3 0.3 >> perc 0.1 0.1 2 >> play
+brown >> perc2 1 0.3 3 >> pluck (kd (random -5 10)) 6 0.7 >> perc 1 0.5 3 >> play
+
+let kSynth freq => white >> perc2 0 1 0.05 >> pluck freq 6 0.3 >> perc 0.01 0.15 1
+kMelody ~> kSynth (kd -12) _ (kd -8) _ (kd -4) (kd (choose [1, -1, -5])) (kd -9) (kd -5) | (*2) _ _ _ _ _ (*2) _
+kMelody2 ~> kSynth (kd -12) _ (kd -8) (kd -4) _ (kd (choose [1, -1, -5])) _ (kd -9) _ (kd -5) | (*4) (*4) (*2)
+stop kMelody
+stop kMelody2
+
+--cool pluck based synth
+let kSynth freq => saw freq >> add (saw (freq*1.002)) >> perc2 0 1 1 >> pluck freq 1 0.9 >> perc 0.0001 0.4 0.2
+kBass ~> kSynth [(kd -12) (kd -8)] [(kd -4) (kd (choose [-2, -4, -5]))] [(kd -9) (kd (choose [-7, -5]))] | (/2)
+
+
+-- Cool flittery plucky melody
+let kSynth3 freq => white >> perc2 0 1 0.03 >> pluck freq (random 0.1 4) (random 0.05 1) >> perc 0.01 0.15 0.5
+kMelody3 ~> kSynth3 [(kd -12) (kd -8)] [(kd -4) (kd (choose [-2, -4, -5]))] [(kd -9) (kd (choose [-7, -5]))] | (/2) _ _ (/2) _ (*2) _ (*2) (*4) _ (/2) _ _ (/2) _ (*2) (*4) (*8) _
+
+-- Frequency shifting
+sin 440 >> freqShift (noiseX 13 >> gain 1000) >> gain 0.3 >> play
+sin 440 >> pitchShift 20 >> gain 0.3 >> play
+sin 440 >> gain 0.3 >> play
+square (noiseX 2 >> exprange 10 10000) >> freqShift (square (noiseX 1 >> exprange 3 40) >> gain 4000 >> gain (noiseX 1)) >> gain 0.3 >> play
 
 ---------------------------------------------------------------------------------
--- | Lich Performance Proto-Code
 ---------------------------------------------------------------------------------
 
 let sqkick => white + tri (random 148 152) >>
@@ -1324,7 +1418,6 @@ let lkick => square (ff -16) >> add (tri $ ff -24) >> perc 0 0.6 0.05 >> auxThro
 lkicker2 +> [lkick ss] [snare ss] [ss lkick] [ss snare]
 
 
-
 -- Section 2 stuff, Not to be mixed with other sounds
 let bd => tri (degree2Freq coleJI -19) >> add (tri (degree2Freq coleJI -20)) >> lowpass 100 0.1 >> perc 0 1.2 0.15
 let bd2 => tri (degree2Freq coleJI -22) >> lowpass 500 0.1 >> perc 0.005 2 1
@@ -1340,12 +1433,12 @@ drumsD3 +> _ sd3 | (*2)
 let delayFX = auxIn 0 >> lowpass (sin 0.1767 >> range 200 1000) 5 >> delay 0.5 0.6 >> play
 let delayFX2 = auxIn 1 >> highpass (sin 0.1 >> range 200 1000) 5 >> delay 0.75 0.5 >> play
 let delayFX3 = auxIn 2 >> gain 2 >> bandpass (sin 0.1317 >> range 200 2000) 5 >> delay 1.125 0.75 >> play
+-- Don't stop these right now, just for later
 stop delayFX
 stop delayFX2
 stop delayFX3
 stop drumsD2
 stop drumsD3
-
 
 
 let neonBass freq => (square (freq/2)) + (saw (freq*2)) + (saw (freq*(add 2 (sin 4 >> gain 0.04)))) + (pink >> lowpass freq 50) >> lowpass (sin 0.1 >> range 200 1000) 0.01 >> env [0.0,0.2,0.03,0] [0.002,1,3] 0
@@ -1356,16 +1449,22 @@ stop neonBassSeq
 
 let neonBass2 freq => (saw (freq/2)) + (saw (freq/(add 2 (tri 4 >> gain 0.08)))) + (pink >> lowpass freq 10) >> env [0.0,0.25,0.03,0] [0.001,0.1,3] 0 >> auxThrough 3
 neonBassSeq2 ~> neonBass2 [(ff $ choose [-6, -12]) (ff $ choose [-5,-8])] [(ff $ choose [-5, -4]) (ff (choose [1, -1, -5]))] [(ff -9) (ff -5)] | (*4) (*8) (*4) (*2) (*2) _ (/2)
+-- Don't stop yet, this is just for later
 stop neonBassSeq2
-
-
+-- This goes with neonBass2
 let delayFX4 = auxIn 3 >> env2 [0,1] [1] 0 >> delay (sin 0.3 >> range 0.01 0.001) 0.1 >> delay 1.25 0.6 >> gain 0.25 >> play
 stop delayFX4
 
 
 
+-- Noisey
+let snare => pink >> delay (1/(ff -8)) 0.1 >> perc 0.0 0.9 0.3 >> auxOut 5
+let ss => violet >> bandpass (ff 3) 30 >> gain 30 >> perc 0.0 0.4 0.1 >> auxOut 5
+let lkick => square (ff -12) >> add (tri 40) >> perc 0 0.3 0.1 >> auxOut 5
+lkicker2 +> [lkick lkick] [snare _ ss snare] [ss [lkick lkick]] [_ ss snare _] | (*2)
 
-
+let drumDecimFX = auxIn 5 >> delay 0.125 0.2 >> crunch 1 >> decimate (add 8000 (simplex 0.1 >> gain 3500)) >> gain 0.5 >> play
+stop drumDecimFX
 
 
 
@@ -1386,11 +1485,10 @@ stop drumDecimFX
 
 
 // synthesis techniques worth implementing
-Comb Filter
-Karplus-Strong
-Moog Style filter
-Pitch and Freq Shift
-Scanned Synthesis
-Better Wave Shaping, distion types of effects
-Chorus
-
+Comb Filter -- This is basically what delay is. Consider refactoring?
+Karplus-Strong -- Done but slow
+Moog Style filter -- maybe lator...
+Pitch and Freq Shift -- Pitch Shift doesn't work right, but Freq Shift is done. both are very expensive.
+Better Wave Shaping, distion types of effects (Need Chebyshev polynomials to good dist I think)
+Chorus, Phaser, Flanger -- Done
+Trigger UGens, Stepper -- Done

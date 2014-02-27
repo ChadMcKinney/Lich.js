@@ -538,6 +538,16 @@ function nsin(v, ret)
 
 _createPrimitive("nsin", nsin);
 
+function ncos(v, ret)
+{
+	Lich.collapse(v, function(value)
+	{
+		ret(Math.cos(v));
+	})
+}
+
+_createPrimitive("ncos", ncos);
+
 function linlin(value, inMin, inMax, outMin, outMax, ret)
 {
     if(value <= inMin)
@@ -573,6 +583,19 @@ function expexp(value, inMin, inMax, outMin, outMax, ret)
 }
 
 _createPrimitive("expexp", expexp);
+
+// Map a number from a linear range to an exponential range
+function _linexp(val, inMin, inMax, outMin, outMax)
+{
+	if(val <= inMin)
+		return outMin;
+	else if(val >= inMax)
+		return outMax;
+	else
+		return Math.pow(outMax / outMin, (val - inMin) / (inMax - inMin)) * outMin;
+}
+
+_createPrimitive("linexp", linexp);
 
 // Map a number from a linear range to an exponential range
 function linexp(val, inMin, inMax, outMin, outMax, ret)
@@ -2101,6 +2124,32 @@ _createPrimitive("setTempo", setTempo);
 
 function _wrap(value, lo, hi)
 {
+	var range;
+	if (value >= hi) 
+    {
+    	range = hi - lo;
+    	value -= range;
+    	if (value < hi) return value;
+    } 
+
+    else if (value < lo) 
+    {
+    	range = hi - lo;
+        value += range;
+        if (value >= lo) return value;
+    } 
+
+    else 
+    	return value;
+
+    if (hi == lo) 
+    	return lo;
+    
+ 	return value - range*Math.floor((value - low)/range);
+}
+
+function _mod(value, lo, hi)
+{
 	if (value >= hi) 
     {
     	value -= hi;
@@ -2125,7 +2174,7 @@ function _wrap(value, lo, hi)
 function _wrapAt(index, list)
 {
 	index = Math.floor(index);
-	return list[_wrap(index, 0, list.length)];
+	return list[_mod(index, 0, list.length)];
 }
 
 function degree2Freq(scale, degree, ret)
