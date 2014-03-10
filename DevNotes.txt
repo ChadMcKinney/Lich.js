@@ -28,7 +28,64 @@ let sums x y = if y > 0 then (sums (x + 1) (y - 1)) else if y < 0 then (sums (x 
 sums 20 100000
 
 
-add 2 $ 3
+/////////////////////
+// State Monad
+/////////////////////
+
+let testdo = do
+    x <- get
+    mprint x -- mprint is a monadic print that allows for easy printing with do syntax
+    put (x + 1)
+    y <- get
+    mprint y
+    mprint "Hello, world."
+    result (y + 1)
+
+runState testdo 0
+evalState testdo 8
+execState testdo 0
+runState (result 5 >>= \x -> mprint x >>= \_ -> mprint "Hello, world.") 0
+let m = (result 5 >>= \x -> mprint x >>= \x -> result x)
+runState m 99
+runState (m >>= \_ -> result 10) 0
+runState (mprint 5 >>= \x -> result x) 0
+
+
+-- lift
+let testdo = do
+    x <- get
+    lift play (sin x >> perc 0 0.7 2)
+    put (x + 13)
+    y <- get
+    lift play (sin y >> perc 0 0.7 2)
+    result (y + 1)
+
+let m = 440
+let m = evalState testdo m -- Continually rises on execution
+
+
+-- Stack example (borrowed from Learn You a Haskell)
+let pop = State (\(x:xs) -> Result x xs)
+let push a = State (\xs -> Result Nothing (a:xs))
+
+let stackManip = do
+    push 3
+    pop
+    pop
+    
+    
+runState stackManip [5,8,2,1]
+
+let stackStuff = do
+    a <- pop
+    if a == 5
+        then push 5
+        else do
+            push 3
+            push 8
+            
+runState stackStuff [9,0,2,1,0]
+
 
 
 //////////////////////////////////////////
@@ -278,7 +335,7 @@ zip [(add 2), (div 3), (sqrt)] [1..3]
 map (\[x,y] -> show [x,y]) $ zip [(add 2), (div 3), (sqrt)] [1..3]
 (\[x,y] -> x + y) [1,2]
 filter (\[x,y] -> y > 5) $ zip [1..5] [3,7,9,5,2]
-map (\[x,y] -> show [x * 2,y]) ("Doom" => [1,2], "Satan" => [3,"Sandwich"])
+map (\[x,y] -> show [x * 2,y]) ("Doom" = [1,2], "Satan" = [3,"Sandwich"])
 foldl (\acc [x,y] -> acc ++ [x,y]) [] $ zip [66..99] [1..9]
 foldr (\[x,y] acc -> acc : [x,y]) [] $ zip [66..99] [1..9]
 foldl (\acc x -> x : acc) [] [1..9]
@@ -322,7 +379,7 @@ myLoopTest m
 
 
 
-map (/=3) ("Doom" => "kj", "Doom2" => 2, "Doom3" => 3)
+map (/=3) ("Doom" = "kj", "Doom2" = 2, "Doom3" = 3)
 
 
 
@@ -415,7 +472,7 @@ add2 1
 let three = (addList !! 3) 0
 three
 
-let addDict = ("ADD3" => add 3, "ADD12" => add 1 2)
+let addDict = ("ADD3" = add 3, "ADD12" = add 1 2)
 (addDict !! "ADD3") 1
 
 add 1 2
@@ -656,6 +713,12 @@ let fib n
 
 fib 8
 
+let fib n = case n of
+    0 -> 0
+    1 -> 1
+    _ -> fib (n - 1) + fib (n - 2)
+
+
 setTempo 60
 setTempo 300
 
@@ -844,7 +907,7 @@ hate5 +> _ hh | (/2)
 let hh2 => sin (160 * 10) >> perc 0 0.3 0.1
 hate2 +> hh2 hh2 _
 
-let hh3 => white >> gain 10 >> bandpass (80 * 17) 455 >> gain 10 >> perc 0.0001 1 0.1
+let hh3 => white 10 >> bandpass (80 * 17) 455 >> gain 10 >> perc 0.0001 1 0.1
 hihate3 +> hh3 _ _ | (/2)
 hihate4 +> hh3 _ _ _ _ | (/2)
 
@@ -856,7 +919,7 @@ lkicker +> lkick snare [_ lkick] snare | (*2)
 let guitar => (saw (40 * (randomI 1 10))) * (sin 3) >> lowpass (80*17) 10 >> delay (1/5) 0.4 >> perc 0.1 0.3 3
 guitarer +> guitar _ guitar _ _ guitar _ _
 
-let filterer2 => square 80 >> lowpass ((saw 3 >> exprange 1 100) * (sin 0.3 >> exprange 1 100)) (sin 0.2 >> range 0.1 10) >> gain 0.3 >> play
+let filterer2 = square 80 >> lowpass ((saw 3 >> exprange 1 100) * (sin 0.3 >> exprange 1 100)) (sin 0.2 >> range 0.1 10) >> gain 0.3 >> play
 stop guitarer
 stop filterer2
 stop glitter4
@@ -872,7 +935,7 @@ clusterz2 +> _ cluster2 _ | (/2)
 let cluster3 => square 20 >> waveShape (map (nsin) [1..199]) >> perc 0 1 0.05
 clusterz3 +> _ cluster3 | (/2)
 clusterz4 +> cluster3 _  _ cluster3 | (/2)
-let cluster0 => white >> perc 0 0.4 0.5
+let cluster0 => white 1 >> perc 0 0.4 0.5
 clusterz0 +> _ cluster0 | (*2)
 
 
@@ -1048,7 +1111,7 @@ stop s3
 
 -- We can also use a localBus so as to not collide with anything else that might use a particular auxillary bus
 let s4 = feed >> exprange 40 160 >> square >> gain 0.2 >> delay 1 0.5 >> auxThrough feed >> gain 2 >> play
-    where feed = localBus/
+    where feed = localBus 1
 
 -- splice filters and feed back is cool, but they blow easily. Remember children, ctr-. is your friend!
 square (saw 1 >> exprange 1 20000) >> add (auxIn 0 >> delay (1/3) 0 >> gain 0.9) >> spliceFilter (randomString 16) >> limiter -6 >> auxThrough 0 >> play
@@ -1109,23 +1172,38 @@ let s = sin (env [20, 20000, 1000, 1] times 1 1) >> env [0, 0.5, 0.125, 0] times
     where times = [1, 2, 3]
 
 
-let s freq => brown >> perc2 0 1 0.01 >> pluck freq 1 0.9 >> perc 0 1 2
+let s freq => brown 1 >> perc2 0 1 0.01 >> pluck freq 1 0.9 >> perc 0 1 2
 sSeq ~> s 0 1 2 3 4 5 6 7 8 9 10 11 12 14 15 | ((/2) . (degree2Freq justMajor))
 
 -- phaser
-white >> phaser 0.333 >> gain 0.3 >> play
+white 1 >> phaser 0.333 >> gain 0.3 >> play
 (saw 80) + (saw 160) >> gain 0.5 >> phaser 0.333 >> gain 0.3 >> play
 (saw 80) + (saw 160) >> gain 0.5 >> phaser 2 >> gain 0.3 >> play
 
 -- flanger
-white >> flanger 0.333 0.3 0.3 >> gain 0.3 >> play
+white 1 >> flanger 0.333 0.3 0.3 >> gain 0.3 >> play
 (saw 80) + (saw 160) >> gain 0.5 >> flanger 0.333 0.3 0.3 >> gain 0.3 >> play
 (saw 80) + (saw 160) >> gain 0.5 >> flanger 2 0.3 0.3 >> gain 0.3 >> play
 
 -- chorus
-white >> chorus 4 0.1 >> gain 0.3 >> play
+white 1 >> chorus 4 0.1 >> gain 0.3 >> play
 (saw 80) + (saw 160) >> gain 0.5 >> chorus 0.333 0.5 >> gain 0.3 >> play
 (saw 80) + (saw 160) >> gain 0.5 >> chorus 2 0.5 >> gain 0.3 >> play
+
+-- Mouse UGens
+mouseX 400 20000 1 >> lag 0.1 >> sin >> add (sin (lag 0.1 $ mouseY 400 20000 1)) >> gain 0.3 >> play
+
+-- First Order and Second Order filters
+saw 200 >> fos (saw 0.5 >> range 1 0) (saw 8 >> range 0 0.4) (saw 1 >> gain 0.99) >> gain 0.3 >> play
+impulse 4 >> decay 0.5 >> fos (saw 0.5 >> range 1 0) (saw 8 >> range 0 0.4) (saw 1 >> gain 0.99) >> gain 0.3 >> play
+
+saw 200 >> sos (saw 0.5 >> range 1 0) (saw 8 >> range 0 0.4) (saw 1 >> gain 0.99) (mouseX -0.5 0.5 0) (mouseY -0.5 0.5 0) >> gain 0.3 >> play
+impulse 4 >> decay 0.5 >> sos (saw 0.5 >> range 1 0) (saw 8 >> range 0 0.4) (saw 1 >> gain 0.99) (mouseX -0.5 0.5 0) (mouseY -0.5 0.5 0) >> gain 0.3 >> play
+
+-- Simple Reverb
+impulse 1 >> decay 0.5 >> gain (white 1) >> reverb 0.5 40 2 0.3 >> gain 0.3 >> play
+saw (noiseX 1 >> exprange 20 20000) >> reverb 0.5 100 5 0.5 >> gain 0.3 >> play
+playSample "Ra1" 1 2 3 >> reverb 0.5 50 2 0.2 >> play
 
 
 -- Graphics Notes
@@ -1178,7 +1256,7 @@ setTempo 100
 
 let bass2 freq => osc >> dist >> filt >> env
    where
-       osc     = (square freq) + (square (freq*0.5) ) + white
+       osc     = (square freq) + (square (freq*0.5) ) + (white 1)
        dist    = peaking (freq * 0.25 * (pow 2 $ randomI 2 3)) 40 20
        filt    = lowpass (freq * 0.25 * (pow 2 $ randomI 2 3)) 30
        env     = perc 0.0 0.6 1
@@ -1215,10 +1293,10 @@ stop delayFX
 
 let bd => square (degree2Freq slendro (randomI -10 -5)) >> lowpass 300 1 >> perc 0 0.5 0.1
 let sd2 => sin (degree2Freq slendro 10) >> perc 0 0.2 0.05
-let sd2 => white >> perc 0 0.2 0.1
+let sd2 => white 1 >> perc 0 0.2 0.1
 drumsD2 +> bd _ [bd sd2] sd2 | (*2)
 
-pink >> gain 0.2 >> play
+pink 1 >> gain 0.2 >> play
 
 
 -- More ugen test code
@@ -1282,11 +1360,11 @@ impulse 2 >> reson (sin 0.3 >> exprange 400 4000) (tri 0.1 >> range 0.001 2) >> 
 
 -- Pluck
 let kd = degree2Freq koto -- Compile this first!
-white >> perc2 0 1 0.05 >> pluck (kd (random -5 10)) 3 0.3 >> perc 0.01 0.15 1 >> play
-pink >> perc2 0.5 1 0.05 >> pluck (kd (random -5 10)) 3 0.3 >> perc 0.1 0.1 2 >> play
-brown >> perc2 1 0.3 3 >> pluck (kd (random -5 10)) 6 0.7 >> perc 1 0.5 3 >> play
+white 1 >> perc2 0 1 0.05 >> pluck (kd (random -5 10)) 3 0.3 >> perc 0.01 0.15 1 >> play
+pink 1 >> perc2 0.5 1 0.05 >> pluck (kd (random -5 10)) 3 0.3 >> perc 0.1 0.1 2 >> play
+brown 1 >> perc2 1 0.3 3 >> pluck (kd (random -5 10)) 6 0.7 >> perc 1 0.5 3 >> play
 
-let kSynth freq => white >> perc2 0 1 0.05 >> pluck freq 6 0.3 >> perc 0.01 0.15 1
+let kSynth freq => white 1 >> perc2 0 1 0.05 >> pluck freq 6 0.3 >> perc 0.01 0.15 1
 kMelody ~> kSynth (kd -12) _ (kd -8) _ (kd -4) (kd (choose [1, -1, -5])) (kd -9) (kd -5) | (*2) _ _ _ _ _ (*2) _
 kMelody2 ~> kSynth (kd -12) _ (kd -8) (kd -4) _ (kd (choose [1, -1, -5])) _ (kd -9) _ (kd -5) | (*4) (*4) (*2)
 stop kMelody
@@ -1298,7 +1376,7 @@ kBass ~> kSynth [(kd -12) (kd -8)] [(kd -4) (kd (choose [-2, -4, -5]))] [(kd -9)
 
 
 -- Cool flittery plucky melody
-let kSynth3 freq => white >> perc2 0 1 0.03 >> pluck freq (random 0.1 4) (random 0.05 1) >> perc 0.01 0.15 0.5
+let kSynth3 freq => white 1 >> perc2 0 1 0.03 >> pluck freq (random 0.1 4) (random 0.05 1) >> perc 0.01 0.15 0.5
 kMelody3 ~> kSynth3 [(kd -12) (kd -8)] [(kd -4) (kd (choose [-2, -4, -5]))] [(kd -9) (kd (choose [-7, -5]))] | (/2) _ _ (/2) _ (*2) _ (*2) (*4) _ (/2) _ _ (/2) _ (*2) (*4) (*8) _
 
 -- Frequency shifting
@@ -1441,14 +1519,15 @@ stop drumsD2
 stop drumsD3
 
 
-let neonBass freq => (square (freq/2)) + (saw (freq*2)) + (saw (freq*(add 2 (sin 4 >> gain 0.04)))) + (pink >> lowpass freq 50) >> lowpass (sin 0.1 >> range 200 1000) 0.01 >> env [0.0,0.2,0.03,0] [0.002,1,3] 0
+let neonBass freq => (square (freq/2)) + (saw (freq*2)) + (saw (freq*(add 2 (sin 4 >> gain 0.04)))) + (pink 1 >> lowpass freq 50) >> lowpass (sin 0.1 >> range 200 1000) 0.01 >> env [0.0,0.2,0.03,0] [0.002,1,3] 0
 let ff = degree2Freq coleJI
 neonBassSeq ~> neonBass (ff -12) _ (ff -8) _ _ _ (ff -4) _ (ff (choose [1, -1, -5])) _ _ (ff -9) _ _ (ff -5) | (/2) _ _ _ _ _ (/2) _
 stop neonBassSeq
 
 
-let neonBass2 freq => (saw (freq/2)) + (saw (freq/(add 2 (tri 4 >> gain 0.08)))) + (pink >> lowpass freq 10) >> env [0.0,0.25,0.03,0] [0.001,0.1,3] 0 >> auxThrough 3
+let neonBass2 freq => (saw (freq/2)) + (saw (freq/(add 2 (tri 4 >> gain 0.08)))) + (pink 1 >> lowpass freq 10) >> env [0.0,0.25,0.03,0] [0.001,0.1,3] 0 >> auxThrough 3
 neonBassSeq2 ~> neonBass2 [(ff $ choose [-6, -12]) (ff $ choose [-5,-8])] [(ff $ choose [-5, -4]) (ff (choose [1, -1, -5]))] [(ff -9) (ff -5)] | (*4) (*8) (*4) (*2) (*2) _ (/2)
+
 -- Don't stop yet, this is just for later
 stop neonBassSeq2
 -- This goes with neonBass2
@@ -1472,13 +1551,113 @@ stop drumDecimFX
 -- Archived Other shit
 ---------------------------------------
 
-let snare => pink >> delay (1/(ff -8)) 0.1 >> perc 0.0 0.9 0.3 >> auxOut 5
-let ss => violet >> bandpass (ff 3) 30 >> gain 30 >> perc 0.0 0.4 0.1 >> auxOut 5
+let snare => pink 1 >> delay (1/(ff -8)) 0.1 >> perc 0.0 0.9 0.3 >> auxOut 5
+let ss => violet 1 >> bandpass (ff 3) 30 >> gain 30 >> perc 0.0 0.4 0.1 >> auxOut 5
 let lkick => square (ff -12) >> add (tri 40) >> perc 0 0.3 0.1 >> auxOut 5
 lkicker2 +> [lkick lkick] [snare _ ss snare] [ss [lkick lkick]] [_ ss snare _] | (*2)
 
 let drumDecimFX = auxIn 5 >> delay 0.125 0.2 >> crunch 1 >> decimate (add 8000 (simplex 0.1 >> gain 3500)) >> gain 0.5 >> play
 stop drumDecimFX
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

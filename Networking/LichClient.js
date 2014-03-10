@@ -35,22 +35,21 @@ function receivedLichCode(code)
 	try
     {
     	var ast = Lich.parse(code);
-        Lich.compileAST(ast, function(res)
-		{			
-			if(res instanceof Array)
+        var res = Lich.compileAST(ast);	
+		if(res instanceof Array)
+		{
+			for(var i = 0; i < res.length; ++i)
 			{
-				for(var i = 0; i < res.length; ++i)
-				{
-					eval(res[i]);
-				}
+				eval(res[i]);
 			}
+		}
 
-			else
-			{
-				eval(res);
-			}
-		})
+		else
+		{
+			eval(res);
+		}
     }   
+
     catch(e)
     {
 		Lich.post(e);
@@ -156,12 +155,10 @@ function compileLibFromServer(libData)
 	var ast = Lich.parseLibrary(libData);
 	try
 	{
-		Lich.compileAST(ast, function(res)
-		{ 
-			Lich.post("JS> "+res);
-			eval(res); 
-			Lich.VM.modules.push(res);
-		});	
+		var res = Lich.compileAST(ast);
+		Lich.post("JS> "+res);
+		eval(res); 
+		Lich.VM.modules.push(res);
 	}
 
 	catch(e)

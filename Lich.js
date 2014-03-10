@@ -377,24 +377,22 @@ function parseCurrentLine(editor)
 			//Lich.post(Lich.showAST(ast));
 			
 			//Lich.VM.Print(Lich.compileAST(ast));
-			Lich.compileAST(ast, function(res)
-			{
-				//Lich.VM.Print(res);
-				//Lich.post("JS Source> " + res);
+			var res = Lich.compileAST(ast);
+			//Lich.VM.Print(res);
+			Lich.post("JS Source> " + res);
 				
-				if(res instanceof Array)
+			if(res instanceof Array)
+			{
+				for(var i = 0; i < res.length; ++i)
 				{
-					for(var i = 0; i < res.length; ++i)
-					{
-						eval(res[i]);
-					}
+					eval(res[i]);
 				}
+			}
 
-				else
-				{
-					eval(res);
-				}
-			})
+			else
+			{
+				eval(res);
+			}
 		}
 	}
 	
@@ -415,6 +413,7 @@ function parseCurrentLine(editor)
 		//throw e;
 	}
 }
+
 
 /*
 
@@ -6963,11 +6962,10 @@ function compileLich()
 		if(oRequest.status == 200)
 		{
 			var ast = Lich.parseLibrary(oRequest.responseText); // For library parsing testing
-			Lich.compileAST(ast, function(res)
-			{
-				//Lich.VM.Print(res);
-				eval(res);
-			});
+			var preludeSource = Lich.compileAST(ast);
+			//Lich.post(preludeSource);
+			//Lich.VM.Print(eval(preludeSource));
+			eval(preludeSource);
 		}
 		
 		else 

@@ -411,7 +411,7 @@ CloudChamber.addShader = function(shader, amount)
 	CloudChamber.numShaders += 1;
 }
 
-function setShader(shader, ret)
+function setShader(shader)
 {
 	var pass = new THREE.ShaderPass(CloudChamber.shadersMap[shader]);
 	// pass.uniforms["amount"].value = amount;
@@ -424,12 +424,12 @@ function setShader(shader, ret)
 
 	CloudChamber.numShaders = 1;
 	CloudChamber.composer.addPass(pass);
-	ret(Lich.VM.Void);
+	return Lich.VM.Void;
 }
 
 _createPrimitive("setShader", setShader);
 
-function setNativeShader(shader, ret)
+function setNativeShader(shader)
 {
 	var pass = new THREE.ShaderPass(shader);
 	// pass.uniforms["amount"].value = amount;
@@ -442,12 +442,12 @@ function setNativeShader(shader, ret)
 
 	CloudChamber.numShaders = 1;
 	CloudChamber.composer.addPass(pass);
-	ret(Lich.VM.Void);
+	return Lich.VM.Void;
 }
 
 _createPrimitive("setNativeShader", setNativeShader);
 
-function clearShaders(ret)
+function clearShaders()
 {	
 	for(var i = 0; i < CloudChamber.numShaders; ++i)
 	{
@@ -459,12 +459,12 @@ function clearShaders(ret)
 	rgbEffect.uniforms["amount"].value = 0.0;
 	rgbEffect.renderToScreen = true;
 	CloudChamber.composer.addPass(rgbEffect);
-	ret(Lich.VM.Void);
+	return Lich.VM.Void;
 }
 
 _createPrimitive("clearShaders", clearShaders);
 
-function setShaders(shaders, ret)
+function setShaders(shaders)
 {
 	for(var i = 0; i < shaders.length; ++i)
 	{
@@ -487,7 +487,7 @@ function setShaders(shaders, ret)
 		CloudChamber.numShaders += 1;
 	}
 
-	ret(Lich.VM.Void);
+	return Lich.VM.Void;
 }
 
 _createPrimitive("setShaders", setShaders);
@@ -503,7 +503,7 @@ CloudChamber.removePointer = function(pointer)
 	CloudChamber.pointers[pointer] = null;
 }
 
-function sphere(sPosition, sRadius, sColor, ret)
+function sphere(sPosition, sRadius, sColor)
 {
 	var sphereMaterial = new THREE.MeshLambertMaterial(
 		{
@@ -525,13 +525,12 @@ function sphere(sPosition, sRadius, sColor, ret)
 	CloudChamber.scene.add(sphere);
 	CloudChamber.print("Sphere: " + sPosition);
 	CloudChamber.meshes.push(sphere);
-	ret(sphere);
-	//ret(CloudChamber.addPointer(sphere));
+	return sphere;
 }
 
 _createPrimitive("sphere", sphere);
 
-function cube(cPosition, cSize, cRotation, cColor, ret)
+function cube(cPosition, cSize, cRotation, cColor)
 {
 	var cubeMaterial = new THREE.MeshLambertMaterial(
 		{
@@ -556,8 +555,7 @@ function cube(cPosition, cSize, cRotation, cColor, ret)
 	CloudChamber.scene.add(cube);
 	CloudChamber.print("Cube: " + cPosition);
 	CloudChamber.meshes.push(cube);
-	ret(cube);
-	//return CloudChamber.addPointer(cube);
+	return cube;
 }
 
 _createPrimitive("cube", cube);
@@ -584,7 +582,7 @@ CloudChamber.allArg = function(func, arg)
 	}	
 }
 
-function deleteMesh(mesh, ret)
+function deleteMesh(mesh)
 {
 	var index = CloudChamber.meshes.indexOf(mesh);
 	
@@ -594,7 +592,7 @@ function deleteMesh(mesh, ret)
 	}
 
 	CloudChamber.scene.remove(mesh);
-	ret(Lich.VM.Void);
+	return Lich.VM.Void;
 }
 
 _createPrimitive("deleteMesh", deleteMesh);
@@ -608,181 +606,182 @@ function deleteScene()
 
 	CloudChamber.meshes = new Array();
 	//CloudChamber.all(CloudChamber.delete);
+	return Lich.VM.Void;
 }
 
 _createPrimitive("deleteScene", deleteScene);
 
-function wireframe(active, mesh, ret)
+function wireframe(active, mesh)
 {
 	mesh.material.wireframe = active;
-	ret(mesh);
+	return mesh;
 }
 
 _createPrimitive("wireframe", wireframe);
 
-function wireframeAll(active, ret)
+function wireframeAll(active)
 {
 	for(var i = 0; i < CloudChamber.meshes.length; ++i)
 	{
-		wireframe(active, CloudChamber.meshes[i], function(){});
+		wireframe(active, CloudChamber.meshes[i]);
 	}
 
-	ret(Lich.VM.Void);
+	return Lich.VM.Void;
 }
 
 _createPrimitive("wireframeAll", wireframeAll);
 
-function move(relPosition, object, ret)
+function move(relPosition, object)
 {
 	var position = object.position;
 	position.x += relPosition[0];
 	position.y += relPosition[1];
 	position.z += relPosition[2];
 	object.position = position;
-	ret(object);
+	return object;
 }
 
 _createPrimitive("move", move);
 
-function moveAll(relPosition, ret)
+function moveAll(relPosition)
 {
 	for(var i = 0; i < CloudChamber.meshes.length; ++i)
 	{
-		move(relPosition, CloudChamber.meshes[i], function(){});
+		move(relPosition, CloudChamber.meshes[i]);
 	}
 
-	ret(Lich.VM.Void);
+	return Lich.VM.Void;
 }
 
 _createPrimitive("moveAll", moveAll);
 
-function setColor(color, mesh, ret)
+function setColor(color, mesh)
 {
 	mesh.material.color = new THREE.Color(CloudChamber.packRGB(color[0], color[1], color[2]));
-	ret(mesh);
+	return mesh;
 }
 
 _createPrimitive("setColor", setColor);
 
-function setColorAll(color, ret)
+function setColorAll(color)
 {
 	for(var i = 0; i < CloudChamber.meshes.length; ++i)
 	{
-		setColor(color, CloudChamber.meshes[i], function(){});
+		setColor(color, CloudChamber.meshes[i]);
 	}
 
-	ret(Lich.VM.Void);
+	return Lich.VM.Void;
 }
 
 _createPrimitive("setColorAll", setColorAll);
 
-function rotate(relRotation, object, ret)
+function rotate(relRotation, object)
 {
 	var rotation = object.rotation;
 	rotation.x += relRotation[0];
 	rotation.y += relRotation[0];
 	rotation.z += relRotation[0];
 	object.rotation = rotation;	
-	ret(object);
+	return object;
 }
 
 _createPrimitive("rotate", rotate);
 
-function rotateAll(relRotation, ret)
+function rotateAll(relRotation)
 {
 	for(var i = 0; i < CloudChamber.meshes.length; ++i)
 	{
-		rotate(relRotation, CloudChamber.meshes[i], function(){});
+		rotate(relRotation, CloudChamber.meshes[i]);
 	}
 
-	ret(Lich.VM.Void);
+	return Lich.VM.Void;
 }
 
 _createPrimitive("rotateAll", rotateAll);
 
-function linear(linear_momentum, object, ret)
+function linear(linear_momentum, object)
 {
 	object.linear_momentum = linear_momentum;
 	object.momentum_update = true;
-	ret(object);
+	return object;
 }
 
 _createPrimitive("linear", linear);
 
-function linearAll(linear_momentum, ret)
+function linearAll(linear_momentum)
 {
 	for(var i = 0; i < CloudChamber.meshes.length; ++i)
 	{
-		linear(linear_momentum, CloudChamber.meshes[i], function(){});
+		linear(linear_momentum, CloudChamber.meshes[i]);
 	}
 
-	ret(Lich.VM.Void);
+	return Lich.VM.Void;
 }
 
 _createPrimitive("linearAll", linearAll);
 
-function angular(angular_momentum, object, ret)
+function angular(angular_momentum, object)
 {
 	object.angular_momentum = angular_momentum;
 	object.momentum_update = true;
-	ret(object);
+	return object;
 }
 
 _createPrimitive("angular", angular);
 
-function angularAll(angular_momentum, ret)
+function angularAll(angular_momentum)
 {
 	for(var i = 0; i < CloudChamber.meshes.length; ++i)
 	{
-		angular(angular_momentum, CloudChamber.meshes[i], function(){});
+		angular(angular_momentum, CloudChamber.meshes[i]);
 	}
 
-	ret(Lich.VM.Void);
+	return Lich.VM.Void;
 }
 
 _createPrimitive("angularAll", angularAll);
 
-function setPosition(position, object, ret)
+function setPosition(position, object)
 {
 	object.position = {x:position[0],y:position[1],z:position[2] };
-	ret(object);
+	return object;
 }
 
 _createPrimitive("setPosition", setPosition);
 
-function setPositionAll(position,ret)
+function setPositionAll(position)
 {
 	for(var i = 0; i < CloudChamber.meshes.length; ++i)
 	{
-		setPosition(position, CloudChamber.meshes[i], function(){});
+		setPosition(position, CloudChamber.meshes[i]);
 	}
 
-	ret(Lich.VM.Void);
+	return Lich.VM.Void;
 }
 
 _createPrimitive("setPositionAll", setPositionAll);
 
-function scale(scaleVec, object, ret)
+function scale(scaleVec, object)
 {
 	object.scale = { x: scaleVec[0], y: scaleVec[1], z: scaleVec[2] };
-	ret(object);
+	return object;
 }
 
 _createPrimitive("scale", scale);
 
-function scaleAll(scaleVec, ret)
+function scaleAll(scaleVec)
 {
 	for(var i = 0; i < CloudChamber.meshes.length; ++i)
 	{
-		scale(scaleVec, CloudChamber.meshes[i], function(){});
+		scale(scaleVec, CloudChamber.meshes[i]);
 	}
 
-	ret(Lich.VM.Void);
+	return Lich.VM.Void;
 }
 
 _createPrimitive("scaleAll", scaleAll);
 
-function cloudMesh(numTriangles, color, ret)
+function cloudMesh(numTriangles, color)
 {
 	var triangles = new Array();
 
@@ -795,11 +794,9 @@ function cloudMesh(numTriangles, color, ret)
 		triangles.push(triangle);
 	}
 
-	ret(
-		CloudChamber.mesh(
+	return CloudChamber.mesh(
 			triangles, // mesh
 			new THREE.Color(CloudChamber.packRGB(color[0], color[1], color[2])) // color
-		)
 	);
 }
 
@@ -816,7 +813,7 @@ CloudChamber.nrand = function() {
 	return x1 * c;
 }
 
-function gaussianMesh(numTriangles,color, ret)
+function gaussianMesh(numTriangles,color)
 {
 	var triangles = new Array();
 
@@ -829,17 +826,15 @@ function gaussianMesh(numTriangles,color, ret)
 		triangles.push(triangle);
 	}
 
-	ret(
-		CloudChamber.mesh(
+	return CloudChamber.mesh(
 			triangles, // mesh
 			new THREE.Color(CloudChamber.packRGB(color[0], color[1], color[2])) // color
-		)
 	);
 }
 
 _createPrimitive("gaussianMesh", gaussianMesh);
 
-function sinMesh(numTriangles, color, ret)
+function sinMesh(numTriangles, color)
 {
 	var triangles = new Array();
 	var freq1 = CloudChamber.nrand() * 0.1;
@@ -857,11 +852,9 @@ function sinMesh(numTriangles, color, ret)
 		triangles.push(triangle);
 	}
 
-	ret(
-		CloudChamber.mesh(
+	return CloudChamber.mesh(
 			triangles, // mesh
 			new THREE.Color(CloudChamber.packRGB(color[0], color[1], color[2])) // color
-		)
 	);
 }
 
@@ -950,15 +943,13 @@ CloudChamber.sineMap = function(width, depth)
 	return map;
 }
 
-function sinMapMesh(width, depth, color, ret)
+function sinMapMesh(width, depth, color)
 {
 	var triangles = CloudChamber.heightMap(CloudChamber.sineMap, width, depth);
 
-	ret(
-		CloudChamber.mesh(
+	return CloudChamber.mesh(
 			triangles, // mesh
 			new THREE.Color(CloudChamber.packRGB(color[0], color[1], color[2])) // color
-		)
 	);
 }
 
@@ -976,15 +967,13 @@ CloudChamber.noiseMap = function(width, depth)
 	return map;	
 }
 
-function noiseMapMesh(width, depth, color, ret)
+function noiseMapMesh(width, depth, color)
 {
 	var triangles = CloudChamber.heightMap(CloudChamber.noiseMap, width, depth);
 
-	ret(
-		CloudChamber.mesh(
+	return CloudChamber.mesh(
 			triangles, // mesh
 			new THREE.Color(CloudChamber.packRGB(color[0], color[1], color[2])) // color
-		)
 	);
 }
 
@@ -1002,15 +991,13 @@ CloudChamber.gaussianMap = function(width, depth)
 	return map; 
 }
 
-function gaussianMapMesh(width, depth, color, ret)
+function gaussianMapMesh(width, depth, color)
 {
 	var triangles = CloudChamber.heightMap(CloudChamber.gaussianMap, width, depth);
 
-	ret(
-		CloudChamber.mesh(
+	return CloudChamber.mesh(
 			triangles, // mesh
 			new THREE.Color(CloudChamber.packRGB(color[0], color[1], color[2])) // color
-		)
 	);
 }
 
@@ -1040,15 +1027,13 @@ CloudChamber.squareMap = function(width, depth)
 	return map;
 }
 
-function squareMapMesh(width, depth, color, ret)
+function squareMapMesh(width, depth, color)
 {
 	var triangles = CloudChamber.heightMap(CloudChamber.squareMap, width, depth);
 
-	ret(
-		CloudChamber.mesh(
+	return CloudChamber.mesh(
 			triangles, // mesh
 			new THREE.Color(CloudChamber.packRGB(color[0], color[1], color[2])) // color
-		)
 	);
 }
 
@@ -1075,15 +1060,13 @@ CloudChamber.sawMap = function(width, depth)
 	return map;
 }
 
-function sawMapMesh(width, depth, color, ret)
+function sawMapMesh(width, depth, color)
 {
 	var triangles = CloudChamber.heightMap(CloudChamber.sawMap, width, depth);
 
-	ret(
-		CloudChamber.mesh(
+	return CloudChamber.mesh(
 			triangles, // mesh
 			new THREE.Color(CloudChamber.packRGB(color[0], color[1], color[2])) // color
-		)
 	);
 }
 
@@ -1110,29 +1093,25 @@ CloudChamber.triMap = function(width, depth)
 	return map;
 }
 
-function triMapMesh(width, depth, color, ret)
+function triMapMesh(width, depth, color)
 {
 	var triangles = CloudChamber.heightMap(CloudChamber.triMap, width, depth);
 
-	ret(
-		CloudChamber.mesh(
+	return CloudChamber.mesh(
 			triangles, // mesh
 			new THREE.Color(CloudChamber.packRGB(color[0], color[1], color[2])) // color
-		)
 	);
 }
 
 _createPrimitive("triMapMesh", triMapMesh);
 
-function flatMapMesh(width, depth, color, ret)
+function flatMapMesh(width, depth, color)
 {
 	var triangles = CloudChamber.heightMap(CloudChamber.newMap, width, depth);
 
-	ret(
-		CloudChamber.mesh(
+	return CloudChamber.mesh(
 			triangles, // mesh
 			new THREE.Color(CloudChamber.packRGB(color[0], color[1], color[2])) // color
-		)
 	);
 }
 
@@ -1728,7 +1707,7 @@ CloudChamber.parsesplice = function(lang)
 	return CloudChamber.shaderTemplate(vertArray.join("\n"), fragArray.join("\n"));
 }
 
-function spliceShader(lang, ret)
+function spliceShader(lang)
 {
 	var shader = CloudChamber.parsesplice(lang);
 	CloudChamber.print(shader.vertexShader);
@@ -1744,12 +1723,12 @@ function spliceShader(lang, ret)
 
 	CloudChamber.numShaders = 1;
 	CloudChamber.composer.addPass(pass);
-	ret(Lich.VM.Void);
+	return Lich.VM.Void;
 }
 
 _createPrimitive("spliceShader", spliceShader);
 
-function randomString(length, ret) // length
+function randomString(length) // length
 {
 	var randString = new Array("");
 
@@ -1758,7 +1737,7 @@ function randomString(length, ret) // length
 		randString.push(String.fromCharCode(Math.random() * 127));
 	}
 
-	ret(randString.join(""));
+	return randString.join("");
 }
 
 _createPrimitive("randomString", randomString);
@@ -1798,10 +1777,10 @@ CloudChamber.arrayToColor = function(array)
 	return CloudChamber.packRGB(array[0], array[1], array[2]);
 }
 
-function setBackground(r, g, b, ret)
+function setBackground(r, g, b)
 {
 	CloudChamber.renderer.setClearColorHex(CloudChamber.packRGB(r,g,b), 1);
-	ret(CloudChamber.packRGB(r,g,b));
+	return CloudChamber.packRGB(r,g,b);
 }
 
 _createPrimitive("setBackground", setBackground);

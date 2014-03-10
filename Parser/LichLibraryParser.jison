@@ -35,6 +35,7 @@
 "->"                        return {val:"->",typ:"->"};
 "+>"                        return {val:"+>",typ:"+>"};
 "~>"                        return {val:"~>",typ:"~>"};
+"<-"                        return {val:"<-",typ:"<-"};
 "=="                        return {val:"==",typ:"=="};
 "/="                        return {val:"/=",typ:"/="};
 ">="                        return {val:">=",typ:">="};
@@ -228,7 +229,7 @@ topdecl // : object
     : decl                    {{$$ = {astType: "topdecl-decl", decl: $1, pos: @$};}}
     | impdecl                       {{$$ = $1;}}
     | dataexp                       {{$$ = $1;}}
-    //| synthDef                      {{$$ = $1;}}
+    | synthdef                      {{$$ = $1;}}
     ;
 
 
@@ -257,7 +258,10 @@ decl // : object
   | '(' pat varop pat ')' apats rhs
     {{$$ = {astType:"decl-fun", ident: $3, args: [$2,$4].concat($6), rhs: $8, pos: @$, orig: "infix"};}}
   | guardexp                        {{$$ = $1;}}
-  | var '=>' rhs                    {{ $$ = {astType:"synthdef", ident:$1, args:[], rhs:$3};}}
+  ;
+
+synthdef
+  : var '=>' rhs                    {{ $$ = {astType:"synthdef", ident:$1, args:[], rhs:$3};}}
   | var apats '=>' rhs              {{ $$ = {astType:"synthdef", ident:$1, args:$2, rhs:$4};}} 
   ;
 
@@ -359,6 +363,7 @@ topexp
   | impdecl             {{$$ = $1;}}
   | percStream          {{$$ = $1;}}
   | soloStream          {{$$ = $1;}}
+  | "let" synthdef      {{$$ = $2;}}
   ;
 
 topexps
@@ -413,6 +418,7 @@ exp // : object
   | exp "<<" exp        {$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
   | exp "?"  exp        {$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
   | exp ":>>" exp       {$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
+  | exp ">>=" exp       {$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
   | lexp                {{$$ = $1}}
   ;
 
@@ -437,6 +443,7 @@ binop
   | "<<"        {{$$ = $1;}}
   | "?"         {{$$ = $1;}}
   | ":>>"       {{$$ = $1;}}
+  | ">>="       {{$$ = $1;}}
   ;
 
 //  lexp OP infixexp            {{ ($3).unshift($1,$2); $$ = $3; }}
@@ -544,8 +551,13 @@ soloMod
   ;
 
 doList
-  : exp               {{$$ = [$1];}}
-  | doList ";" exp    {{$1.push($3); $$ = $1;}}
+  : doItem               {{$$ = [$1];}}
+  | doList ";" doItem    {{$1.push($3); $$ = $1;}}
+  ;
+
+doItem
+  : exp               {{$$ = {astType:"doLambda",var:"",exp:$1};}}
+  | varid "<-" exp    {{$$ = {astType:"doLambda",var:$1,exp:$3};}}
   ;
 
 // list of 1 or more 'aexp' without separator
@@ -681,7 +693,7 @@ enums
 
 
 dataupdate
-  : exp "{" datamems "}"            {{$$ = {astType:"data-update", data: $1, members: $3};}}
+  : exp "{" dataUpdates "}"         {{$$ = {astType:"data-update", data: $1, members: $3};}}
   ;
 
 datamems
@@ -690,6 +702,15 @@ datamems
   ;
 
 datamem
+  : varid                             {{$$ = {astType:"data-mem",id:$1};}}
+  ;
+
+dataUpdates
+  : dataUpdates "," dataUpdate         {{($1).push($3); $$ = $1;}}
+  | dataUpdate                         {{$$ = [$1];}}
+  ;
+
+dataUpdate
   : varid "=" exp                   {{$$ = {astType:"data-mem",id:$1, exp:$3};}}  
   ;
 

@@ -75,8 +75,11 @@ function lichData(name)
 	}
 }
 
-function _createPrimitive(name, primitive)
+function _createPrimitive(name, primitive, binOpName)
 {
+	if(typeof binOpName !== "undefined")
+		_binOps[name] = binOpName;
+
 	Lich.VM.reserved[name] = primitive;
 }
 

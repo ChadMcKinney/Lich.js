@@ -51,6 +51,13 @@ var _pow = Math.pow(10,4);
 var pi = 3.141592653589793;
 var halfPi = pi / 2;
 var twoPi = pi * 2;
+ugenList = [];
+
+_createUGen = function(name, func)
+{
+	_createPrimitive(name, func);
+	ugenList.push(name);
+}
 
 //window.addEventListener('load', Soliton.init, false);
 
@@ -75,6 +82,9 @@ Soliton.init = function()
 		Soliton.limiter.release.value = 0.003;
 		Soliton.masterGain.connect(Soliton.limiter);
 		Soliton.limiter.connect(Soliton.context.destination);
+
+		sampleRate = Soliton.context.sampleRate;
+		sampleDur = 1/Soliton.context.sampleRate;
 
 		for(var i = 0; i < (Soliton.context.sampleRate * 4); ++i) 
 		{
@@ -2296,7 +2306,7 @@ Soliton.parseSpliceOsc = function(lang)
 	return audioFuncArray;
 }
 
-function spliceOsc(lang, divider, ret)
+function spliceOsc(lang, divider)
 {
 	var oscNode = Soliton.context.createScriptProcessor(1024, 0, 1);
 	oscNode.audioFuncArray = Soliton.parseSpliceOsc(lang);
@@ -2346,7 +2356,7 @@ function spliceOsc(lang, divider, ret)
 	fadeGain.gain.linearRampToValueAtTime(1.0, Soliton.context.currentTime + 0.1);
 	fadeGain.gain.linearRampToValueAtTime(0.0, Soliton.context.currentTime + 1);
 	//return Soliton.addNode(oscNode);*/
-	ret(oscNode);
+	return oscNode;
 }
 
 //////////////////
@@ -4179,7 +4189,7 @@ Soliton.parseSpliceFX = function(lang)
 	return audioFuncArray;
 }
 
-function spliceFX(lang, divider, source, ret)
+function spliceFX(lang, divider, source)
 {
 	/*
 	var source = Soliton.nodes[nodeID];
@@ -4267,13 +4277,13 @@ function spliceFX(lang, divider, source, ret)
 	fadeGain.gain.linearRampToValueAtTime(1.0, Soliton.context.currentTime + 0.1);
 	fadeGain.gain.linearRampToValueAtTime(0.0, Soliton.context.currentTime + 1);
 	return Soliton.addNode(oscNode);*/
-	ret(oscNode);
+	return oscNode;
 }
 
-_createPrimitive("spliceFX", spliceFX);
+_createUGen("spliceFX", spliceFX);
 
 
-function spliceFilter(spliceString, input, ret)
+function spliceFilter(spliceString, input)
 {
 	if(spliceString.length == 1)
 		spliceString += spliceString;
@@ -4336,12 +4346,12 @@ function spliceFilter(spliceString, input, ret)
 		setTimeout(function(){input.disconnect(0); filt.disconnect(0)}, (time - Soliton.context.currentTime) * 1000)
 	};
 
-	ret(filt);
+	return filt;
 }
 
-_createPrimitive("spliceFilter", spliceFilter);
+_createUGen("spliceFilter", spliceFilter);
 
-function iir(coeff1, coeff2, input, ret)
+function iir(coeff1, coeff2, input)
 {
 	var inMem = new Array();
 	var outMem = new Array();
@@ -4365,8 +4375,8 @@ function iir(coeff1, coeff2, input, ret)
 
 		for(var i = 0; i < 1024; i ++)
 		{
-			inMem[0] = inputArray[i] * coeff1[0];
-			outMem[0] = inMem[0];
+			inMem[0] = inputArray[i];
+			outMem[0] = inMem[0] * coeff1[0];
 			
 			for(var j = coeff1.length - 1; j > 0; --j)
 			{
@@ -4397,12 +4407,12 @@ function iir(coeff1, coeff2, input, ret)
 		setTimeout(function(){input.disconnect(0); filt.disconnect(0)}, (time - Soliton.context.currentTime) * 1000)
 	};
 
-	ret(filt);
+	return filt;
 }
 
-_createPrimitive("iir", iir);
+_createUGen("iir", iir);
 
-function fir(coeff, input, ret)
+function fir(coeff, input)
 {
 	if(!(coeff instanceof Array))
 		throw new Error("fir coeff must be a list.");
@@ -4423,8 +4433,8 @@ function fir(coeff, input, ret)
 
 		for(var i = 0; i < 1024; i ++)
 		{
-			inMem[0] = inputArray[i] * coeff[0];
-			var res = inMem[0];
+			inMem[0] = inputArray[i];
+			var res = inMem[0] * coeff[0];
 			
 			for(var j = coeff.length - 1; j > 0; --j)
 			{
@@ -4446,12 +4456,172 @@ function fir(coeff, input, ret)
 		setTimeout(function(){input.disconnect(); filt.disconnect()}, (time - Soliton.context.currentTime) * 1000)
 	};
 
-	ret(filt);
+	return filt;
 }
 
-_createPrimitive("fir", fir);
+_createUGen("fir", fir);
 
-function onepole(coeff, input, ret)
+function fos(a0, a1, b1, input)
+{
+	if(typeof a0 === "number")
+		a0 = dc(a0);
+	if(typeof a1 === "number")
+		a1 = dc(a1);
+	if(typeof b1 === "number")
+		b1 = dc(b1);
+
+	var filt = Soliton.context.createScriptProcessor(1024, 4, 1);
+	var lastIn = 0;
+	var lastOut = 0;
+
+	filt.onaudioprocess = function(event)
+	{
+		var a0Array = event.inputBuffer.getChannelData(0);
+		var a1Array = event.inputBuffer.getChannelData(1);
+		var b1Array = event.inputBuffer.getChannelData(2);
+		var inputArray = event.inputBuffer.getChannelData(3);
+		var outputArray = event.outputBuffer.getChannelData(0);
+
+		for(var i = 0; i < 1024; i ++)
+		{
+			lastOut = outputArray[i] = (inputArray[i] * a0Array[i]) + (lastIn * a1Array[i]) + (lastOut * b1Array[i]);
+			lastIn = inputArray[i];
+		}
+	}
+
+	var merger = Soliton.context.createChannelMerger(4);
+	merger.channelInterpretation = "discrete";
+	a0.connect(merger, 0, 0);
+	a1.connect(merger, 0, 1);
+	b1.connect(merger, 0, 2);
+	input.connect(merger, 0, 3);
+	merger.connect(filt);
+
+	filt._lichType = AUDIO;
+	filt.startAll = function(time)
+	{
+		a0.startAll(time);
+		a1.startAll(time);
+		b1.startAll(time);
+		input.startAll(time)
+	};
+
+	filt.stopAll = function(time)
+	{
+		a0.stopAll(time);
+		a1.stopAll(time);
+		b1.stopAll(time);
+		input.stopAll(time);
+		setTimeout(
+			function()
+			{
+				a0.disconnect();
+				a1.disconnect();
+				b1.disconnect();
+				merger.disconnect();
+				input.disconnect(); 
+				filt.disconnect()
+			}, 
+			(time - Soliton.context.currentTime) * 1000
+		)
+	};
+
+	return filt;
+}
+
+_createUGen("fos", fos);
+
+function sos(a0, a1, a2, b1, b2, input)
+{
+	if(typeof a0 === "number")
+		a0 = dc(a0);
+	if(typeof a1 === "number")
+		a1 = dc(a1);
+	if(typeof a2 === "number")
+		a2 = dc(a2);
+	if(typeof b1 === "number")
+		b1 = dc(b1);
+	if(typeof b2 === "number")
+		b2 = dc(b2);
+
+	var filt = Soliton.context.createScriptProcessor(1024, 6, 1);
+	var n1 = 0;
+	var n2 = 0;
+	var o1 = 0;
+	var o2 = 0;
+	var tempO2 = 0;
+
+	filt.onaudioprocess = function(event)
+	{
+		var a0Array = event.inputBuffer.getChannelData(0);
+		var a1Array = event.inputBuffer.getChannelData(1);
+		var a2Array = event.inputBuffer.getChannelData(2);
+		var b1Array = event.inputBuffer.getChannelData(3);
+		var b2Array = event.inputBuffer.getChannelData(4);
+		var inputArray = event.inputBuffer.getChannelData(5);
+		var outputArray = event.outputBuffer.getChannelData(0);
+
+		for(var i = 0; i < 1024; i ++)
+		{
+			tempO2 = o1;
+			o1 = outputArray[i] = (inputArray[i] * a0Array[i]) + (n1 * a1Array[i]) + (n2 * a2Array[i]) + (o1 * b1Array[i]) + (o2 * b2Array[i]);
+			o2 = tempO2;
+			n2 = n1;
+			n1 = inputArray[i];
+		}
+	}
+
+	var merger = Soliton.context.createChannelMerger(6);
+	merger.channelInterpretation = "discrete";
+	a0.connect(merger, 0, 0);
+	a1.connect(merger, 0, 1);
+	a2.connect(merger, 0, 2);
+	b1.connect(merger, 0, 3);
+	b2.connect(merger, 0, 4);
+	input.connect(merger, 0, 5);
+	merger.connect(filt);
+
+	filt._lichType = AUDIO;
+	filt.startAll = function(time)
+	{
+		a0.startAll(time);
+		a1.startAll(time);
+		a2.startAll(time);
+		b1.startAll(time);
+		b2.startAll(time);
+		input.startAll(time)
+	};
+
+	filt.stopAll = function(time)
+	{
+		a0.stopAll(time);
+		a1.stopAll(time);
+		a2.stopAll(time);
+		b1.stopAll(time);
+		b2.stopAll(time);
+		input.stopAll(time);
+		setTimeout(
+			function()
+			{
+				a0.disconnect();
+				a1.disconnect();
+				a2.disconnect();
+				b1.disconnect();
+				b2.disconnect();
+				merger.disconnect();
+				input.disconnect(); 
+				filt.disconnect()
+			}, 
+			(time - Soliton.context.currentTime) * 1000
+		)
+	};
+
+	return filt;
+}
+
+_createUGen("sos", sos);
+
+function onepole(coeff, input)
 {
 	if(typeof coeff !== "number")
 		throw new Error("onepole coeff must be a number.");
@@ -4486,12 +4656,12 @@ function onepole(coeff, input, ret)
 		setTimeout(function(){input.disconnect(); filt.disconnect()}, (time - Soliton.context.currentTime) * 1000)
 	};
 
-	ret(filt);
+	return filt;
 }
 
-_createPrimitive("onepole", onepole);
+_createUGen("onepole", onepole);
 
-function hpz1(input, ret)
+function hpz1(input)
 {
 	var filt = Soliton.context.createScriptProcessor(1024, 1, 1);
 	var lastVal = 0.0;
@@ -4518,12 +4688,12 @@ function hpz1(input, ret)
 		setTimeout(function(){input.disconnect(); filt.disconnect()}, (time - Soliton.context.currentTime) * 1000)
 	};
 
-	ret(filt);
+	return filt;
 }
 
-_createPrimitive("hpz1", hpz1);
+_createUGen("hpz1", hpz1);
 
-function hpz2(input, ret)
+function hpz2(input)
 {
 	var filt = Soliton.context.createScriptProcessor(1024, 1, 1);
 	var lastVal1 = 0.0;
@@ -4553,12 +4723,12 @@ function hpz2(input, ret)
 		setTimeout(function(){input.disconnect(); filt.disconnect()}, (time - Soliton.context.currentTime) * 1000)
 	};
 
-	ret(filt);
+	return filt;
 }
 
-_createPrimitive("hpz2", hpz2);
+_createUGen("hpz2", hpz2);
 
-function lpz1(input, ret)
+function lpz1(input)
 {
 	var filt = Soliton.context.createScriptProcessor(1024, 1, 1);
 	var lastVal = 0.0;
@@ -4585,12 +4755,12 @@ function lpz1(input, ret)
 		setTimeout(function(){input.disconnect(); filt.disconnect()}, (time - Soliton.context.currentTime) * 1000)
 	};
 
-	ret(filt);
+	return filt;
 }
 
-_createPrimitive("lpz1", lpz1);
+_createUGen("lpz1", lpz1);
 
-function lpz2(input, ret)
+function lpz2(input)
 {
 	var filt = Soliton.context.createScriptProcessor(1024, 1, 1);
 	var lastVal1 = 0.0;
@@ -4620,12 +4790,12 @@ function lpz2(input, ret)
 		setTimeout(function(){input.disconnect(); filt.disconnect()}, (time - Soliton.context.currentTime) * 1000)
 	};
 
-	ret(filt);
+	return filt;
 }
 
-_createPrimitive("lpz2", lpz2);
+_createUGen("lpz2", lpz2);
 
-function bpz2(input, ret)
+function bpz2(input)
 {
 	var filt = Soliton.context.createScriptProcessor(1024, 1, 1);
 	var lastVal1 = 0.0;
@@ -4655,12 +4825,12 @@ function bpz2(input, ret)
 		setTimeout(function(){input.disconnect(); filt.disconnect()}, (time - Soliton.context.currentTime) * 1000)
 	};
 
-	ret(filt);
+	return filt;
 }
 
-_createPrimitive("bpz2", bpz2);
+_createUGen("bpz2", bpz2);
 
-function brz2(input, ret)
+function brz2(input)
 {
 	var filt = Soliton.context.createScriptProcessor(1024, 1, 1);
 	var lastVal1 = 0.0;
@@ -4690,10 +4860,10 @@ function brz2(input, ret)
 		setTimeout(function(){input.disconnect(); filt.disconnect()}, (time - Soliton.context.currentTime) * 1000)
 	};
 
-	ret(filt);
+	return filt;
 }
 
-_createPrimitive("brz2", brz2);
+_createUGen("brz2", brz2);
 
 Soliton.white = function(event)
 {
@@ -4709,52 +4879,56 @@ Soliton.white = function(event)
 
 Soliton.whiteTable = [];
 
-function white(ret)
+function white(amp)
 {
-	/*
-	var ugenFunc = Soliton.context.createScriptProcessor(1024, 0, 1);
+	var whiteFunc = Soliton.context.createScriptProcessor(1024, 0, 1);
 
-	ugenFunc.onaudioprocess = function(event)
+	whiteFunc.onaudioprocess = function(e) {
+        var output = e.outputBuffer.getChannelData(0);
+        for (var i = 0; i < 1024; i++) {
+            output[i] = Math.random() * 2 - 1;
+        }
+    }
+
+    var preGain = Soliton.context.createGain();
+
+    if(amp._lichType == AUDIO)
+    	amp.connect(preGain.gain);
+    else
+    	preGain.gain.value = amp;
+
+    var whiteGain = Soliton.context.createGain();
+    whiteGain.gain.value = 0;
+    whiteFunc.connect(preGain);
+    preGain.connect(whiteGain);
+
+	whiteGain.startAll = function(time)
 	{
-		var outputArrayL = event.outputBuffer.getChannelData(0);
-		//var outputArrayR = event.outputBuffer.getChannelData(1);
+		whiteGain.gain.setValueAtTime(1, time);
+	};
 
-		for(var i = 0; i < 1024; ++i)
-		{
-			outputArrayL[i] = Math.random() * 2 - 1;
-			//outputArrayR[i] = val;
-		}
-
-		if(this.stop)
-			event.disconnect();
-	}
-
-	ugenFunc.startAll = function(time){};
-	ugenFunc.stopAll = function(time){setTimeout(function(){ugenFunc.onaudioprocess = null; ugenFunc.stop = true}, time*1010)};*/
-
-	var node = Soliton.context.createBufferSource();
-	var buffer = Soliton.context.createBuffer(1, Soliton.context.sampleRate * 4, Soliton.context.sampleRate);
-	var data = buffer.getChannelData(0);
-
-	for(var i = 0; i < (Soliton.context.sampleRate * 4); ++i)
+	whiteGain.stopAll = function(time)
 	{
-		data[i] = Soliton.whiteTable[i];
-		//outputArrayR[i] = val;
-	}
+		whiteGain.gain.setValueAtTime(0, time + 0.1);
+		setTimeout(
+			function()
+			{
+				whiteFunc.disconnect();
+				preGain.disconnect();
+				if(amp._lichType == AUDIO)
+					amp.disconnect();
+			}, 
+			(time - Soliton.context.currentTime) * 1100)
+	};
 
-	node.buffer = buffer;
-	node.loop = true;
-	node.startAll = node.start;
-	node.stopAll = node.stop;
-
-	node._lichType = AUDIO;
-	ret(node);
+	whiteGain._lichType = AUDIO;
+	return whiteGain;
 }
 
-_createPrimitive("white", white);
+_createUGen("white", white);
 
 // Thanks to noise hack for the nice implementation: http://noisehack.com/generate-noise-web-audio-api/#pink-noise
-function pink(ret)
+function pink(amp)
 {
 	var pinkFunc = Soliton.context.createScriptProcessor(1024, 0, 1);
 
@@ -4776,9 +4950,17 @@ function pink(ret)
         }
     }
 
+    var preGain = Soliton.context.createGain();
+
+    if(amp._lichType == AUDIO)
+    	amp.connect(preGain.gain);
+    else
+    	preGain.gain.value = amp;
+
     var pinkGain = Soliton.context.createGain();
     pinkGain.gain.value = 0;
-    pinkFunc.connect(pinkGain);
+    pinkFunc.connect(preGain);
+    preGain.connect(pinkGain);
 
 	pinkGain.startAll = function(time)
 	{
@@ -4788,18 +4970,26 @@ function pink(ret)
 	pinkGain.stopAll = function(time)
 	{
 		pinkGain.gain.setValueAtTime(0, time + 0.1);
-		setTimeout(function(){pinkFunc.disconnect();pinkFunc.disconnect()}, (time - Soliton.context.currentTime) * 1100)
+		setTimeout(
+			function()
+			{
+				pinkFunc.disconnect();
+				preGain.disconnect();
+				if(amp._lichType == AUDIO)
+					amp.disconnect();
+			}, 
+			(time - Soliton.context.currentTime) * 1100)
 	};
 
 	pinkGain._lichType = AUDIO;
-	ret(pinkGain);
+	return pinkGain;
 }
 
-_createPrimitive("pink", pink);
+_createUGen("pink", pink);
 
 
 // Thanks to noise hack for the nice implementation: http://noisehack.com/generate-noise-web-audio-api/#pink-noise
-function violet(ret)
+function violet(amp)
 {
 	var violetFunc = Soliton.context.createScriptProcessor(1024, 0, 1);
 	var lastVal = 0.0;
@@ -4812,9 +5002,17 @@ function violet(ret)
         }
     }
 
+    var preGain = Soliton.context.createGain();
+
+    if(amp._lichType == AUDIO)
+    	amp.connect(preGain.gain);
+    else
+    	preGain.gain.value = amp;
+
 	var gain = Soliton.context.createGain();
     gain.gain.value = 0;
-    violetFunc.connect(gain);
+    violetFunc.connect(preGain);
+    preGain.connect(gain);
 
 	gain.startAll = function(time)
 	{
@@ -4824,17 +5022,26 @@ function violet(ret)
 	gain.stopAll = function(time)
 	{
 		gain.gain.setValueAtTime(0, time + 0.1);
-		setTimeout(function(){violetFunc.disconnect();gain.disconnect()}, (time - Soliton.context.currentTime) * 1100)
+		setTimeout(
+			function()
+			{
+				violetFunc.disconnect();
+				gain.disconnect();
+				preGain.disconnect();
+				if(amp._lichType == AUDIO)
+					amp.disconnect();
+			}, 
+			(time - Soliton.context.currentTime) * 1100)
 	};
 
 	gain._lichType = AUDIO;
-	ret(gain);
+	return gain;
 }
 
-_createPrimitive("violet", violet);
+_createUGen("violet", violet);
 
 // Thanks to noise hack for the nice implementation: http://noisehack.com/generate-noise-web-audio-api/#brown-noise
-function brown(ret)
+function brown(amp)
 {
 	var brownFunc = Soliton.context.createScriptProcessor(1024, 0, 1);
 	var lastOut = 0;
@@ -4848,9 +5055,17 @@ function brown(ret)
         }
     }
 
+	var preGain = Soliton.context.createGain();
+
+    if(amp._lichType == AUDIO)
+    	amp.connect(preGain.gain);
+    else
+    	preGain.gain.value = amp;
+
 	var gain = Soliton.context.createGain();
     gain.gain.value = 0;
-    brownFunc.connect(gain);
+    brownFunc.connect(preGain);
+    preGain.connect(gain);
 
 	gain.startAll = function(time)
 	{
@@ -4860,16 +5075,25 @@ function brown(ret)
 	gain.stopAll = function(time)
 	{
 		gain.gain.setValueAtTime(0, time + 0.1);
-		setTimeout(function(){gain.disconnect();brownFunc.disconnect()}, (time - Soliton.context.currentTime) * 1100)
+		setTimeout(
+			function()
+			{
+				brownFunc.disconnect();
+				gain.disconnect();
+				preGain.disconnect();
+				if(amp._lichType == AUDIO)
+					amp.disconnect();
+			}, 
+			(time - Soliton.context.currentTime) * 1100)
 	};
 
 	gain._lichType = AUDIO;
-	ret(gain);
+	return gain;
 }
 
-_createPrimitive("brown", brown);
+_createUGen("brown", brown);
 
-function clipNoise(ret)
+function clipNoise(amp)
 {
 	var clipNoise = Soliton.context.createScriptProcessor(1024, 0, 1);
 
@@ -4880,9 +5104,17 @@ function clipNoise(ret)
         }
     }
 
+	var preGain = Soliton.context.createGain();
+
+    if(amp._lichType == AUDIO)
+    	amp.connect(preGain.gain);
+    else
+    	preGain.gain.value = amp;
+
 	var gain = Soliton.context.createGain();
     gain.gain.value = 0;
-    clipNoise.connect(gain);
+    clipNoise.connect(preGain);
+    preGain.connect(gain);
 
 	gain.startAll = function(time)
 	{
@@ -4892,16 +5124,25 @@ function clipNoise(ret)
 	gain.stopAll = function(time)
 	{
 		gain.gain.setValueAtTime(0, time + 0.1);
-		setTimeout(function(){clipNoise.disconnect();gain.disconnect()}, (time - Soliton.context.currentTime) * 1100)
+		setTimeout(
+			function()
+			{
+				clipNoise.disconnect();
+				gain.disconnect();
+				preGain.disconnect();
+				if(amp._lichType == AUDIO)
+					amp.disconnect();
+			}, 
+			(time - Soliton.context.currentTime) * 1100)
 	};
 
 	gain._lichType = AUDIO;
-	ret(gain);
+	return gain;
 }
 
-_createPrimitive("clipNoise", clipNoise);
+_createUGen("clipNoise", clipNoise);
 
-function impulse(freq, ret)
+function impulse(freq)
 {
 	var inputs = freq._lichType == AUDIO ? 1 : 0;
 	var ugenFunc = Soliton.context.createScriptProcessor(1024, inputs, 1);
@@ -4980,12 +5221,12 @@ function impulse(freq, ret)
 	};
 
 	gain._lichType = AUDIO;
-	ret(gain);
+	return gain;
 }
 
-_createPrimitive("impulse", impulse);
+_createUGen("impulse", impulse);
 
-function noiseN(freq, ret)
+function noiseN(freq)
 {
 	var inputs = freq._lichType == AUDIO ? 1 : 0;
 	var ugenFunc = Soliton.context.createScriptProcessor(1024, inputs, 1);
@@ -5058,12 +5299,12 @@ function noiseN(freq, ret)
 	};
 
 	gain._lichType = AUDIO;
-	ret(gain);
+	return gain;
 }
 
-_createPrimitive("noiseN", noiseN);
+_createUGen("noiseN", noiseN);
 
-function noiseL(freq, ret)
+function noiseL(freq)
 {
 	var inputs = freq._lichType == AUDIO ? 1 : 0;
 	var ugenFunc = Soliton.context.createScriptProcessor(1024, inputs, 1);
@@ -5148,12 +5389,12 @@ function noiseL(freq, ret)
 	};
 
 	gain._lichType = AUDIO;
-	ret(gain);
+	return gain;
 }
 
-_createPrimitive("noiseL", noiseL);
+_createUGen("noiseL", noiseL);
 
-function noiseX(freq, ret)
+function noiseX(freq)
 {
 	var inputs = freq._lichType == AUDIO ? 1 : 0;
 	var ugenFunc = Soliton.context.createScriptProcessor(1024, inputs, 1);
@@ -5240,12 +5481,12 @@ function noiseX(freq, ret)
 	};
 
 	gain._lichType = AUDIO;
-	ret(gain);
+	return gain;
 }
 
-_createPrimitive("noiseX", noiseX);
+_createUGen("noiseX", noiseX);
 
-function dust(density, ret)
+function dust(density)
 {
 	var inputs = density._lichType == AUDIO ? 1 : 0;
 	var ugenFunc = Soliton.context.createScriptProcessor(1024, inputs, 1);
@@ -5322,12 +5563,12 @@ function dust(density, ret)
 	};
 
 	gain._lichType = AUDIO;
-	ret(gain);
+	return gain;
 }
 
-_createPrimitive("dust", dust);
+_createUGen("dust", dust);
 
-function slope(value1, value2, time, ret)
+function slope(value1, value2, time)
 {
 	if(typeof value1 !== "number" || typeof value2 !== "number" || typeof time !== "number")
 		throw new Error("line instantiated with a non-number argument. line can only be used with numbers.");
@@ -5374,12 +5615,12 @@ function slope(value1, value2, time, ret)
 	};
 
 	gain._lichType = AUDIO;
-	ret(gain);
+	return gain;
 }
 
-_createPrimitive("slope", slope);
+_createUGen("slope", slope);
 
-function slopeX(value1, value2, time, ret)
+function slopeX(value1, value2, time)
 {
 	if(typeof value1 !== "number" || typeof value2 !== "number" || typeof time !== "number")
 		throw new Error("line instantiated with a non-number argument. line can only be used with numbers.");
@@ -5433,12 +5674,12 @@ function slopeX(value1, value2, time, ret)
 	};
 
 	gain._lichType = AUDIO;
-	ret(gain);
+	return gain;
 }
 
-_createPrimitive("slopeX", slopeX);
+_createUGen("slopeX", slopeX);
 
-function toggle(input, ret)
+function toggle(input)
 {
 	if(input._lichType != AUDIO)
 		throw new Error("toggle can only be used with audio ugens.");
@@ -5481,12 +5722,12 @@ function toggle(input, ret)
 	};
 
 	gain._lichType = AUDIO;
-	ret(gain);
+	return gain;
 }
 
-_createPrimitive("toggle", toggle);
+_createUGen("toggle", toggle);
 
-function latch(trig, input, ret)
+function latch(trig, input)
 {
 	if(input._lichType != AUDIO || trig._lichType != AUDIO)
 		throw new Error("latch can only be used with audio ugens.");
@@ -5540,12 +5781,12 @@ function latch(trig, input, ret)
 	};
 
 	gain._lichType = AUDIO;
-	ret(gain);
+	return gain;
 }
 
-_createPrimitive("latch", latch);
+_createUGen("latch", latch);
 
-function gate(trig, input, ret)
+function gate(trig, input)
 {
 	if(input._lichType != AUDIO || trig._lichType != AUDIO)
 		throw new Error("gate can only be used with audio ugens.");
@@ -5606,12 +5847,12 @@ function gate(trig, input, ret)
 	};
 
 	gain._lichType = AUDIO;
-	ret(gain);
+	return gain;
 }
 
-_createPrimitive("gate", gate);
+_createUGen("gate", gate);
 
-function divider(div, input, ret)
+function divider(div, input)
 {
 	if(input._lichType != AUDIO)
 		throw new Error("divider can only be used with audio ugens.");
@@ -5679,12 +5920,12 @@ function divider(div, input, ret)
 	};
 
 	gain._lichType = AUDIO;
-	ret(gain);
+	return gain;
 }
 
-_createPrimitive("divider", divider);
+_createUGen("divider", divider);
 
-function trigDivider(div, input, ret)
+function trigDivider(div, input)
 {
 	if(input._lichType != AUDIO)
 		throw new Error("trigDivider can only be used with audio ugens.");
@@ -5760,12 +6001,12 @@ function trigDivider(div, input, ret)
 	};
 
 	gain._lichType = AUDIO;
-	ret(gain);
+	return gain;
 }
 
-_createPrimitive("trigDivider", trigDivider);
+_createUGen("trigDivider", trigDivider);
 
-function select(inputArray, index, ret)
+function select(inputArray, index)
 {
 	if(typeof index === "number")
 	{
@@ -5857,12 +6098,12 @@ function select(inputArray, index, ret)
 	};
 
 	gain._lichType = AUDIO;
-	ret(gain);
+	return gain;
 }
 
-_createPrimitive("select", select);
+_createUGen("select", select);
 
-function stepper(min, max, step, trig, ret)
+function stepper(min, max, step, trig)
 {
 	if(trig._lichType != AUDIO)
 		throw new Error("stepper can only be used as: stepper number number number ugen");
@@ -5919,12 +6160,12 @@ function stepper(min, max, step, trig, ret)
 	};
 
 	gain._lichType = AUDIO;
-	ret(gain);
+	return gain;
 }
 
-_createPrimitive("stepper", stepper);
+_createUGen("stepper", stepper);
 
-function timer(trig, ret)
+function timer(trig)
 {
 	if(trig._lichType != AUDIO)
 		throw new Error("timer can only be used with a ugen trigger input.");
@@ -5973,23 +6214,18 @@ function timer(trig, ret)
 	};
 
 	gain._lichType = AUDIO;
-	ret(gain);
+	return gain;
 }
 
-_createPrimitive("timer", timer);
+_createUGen("timer", timer);
 
-function sweep(sweepRate, trig, ret)
+function sweep(sweepRate, trig)
 {
 	if(trig._lichType != AUDIO)
 		throw new Error("sweep can only be used with a ugen trigger input.");
 
 	if(typeof sweepRate === "number")
-	{
-		dc(sweepRate, function(rateRes)
-		{
-			sweepRate = rateRes;
-		});
-	}
+		sweepRate = dc(sweepRate);
 
 	if(sweepRate._lichType != AUDIO)
 		throw new Error("sweep rate can only be a number or ugen.");
@@ -6048,36 +6284,21 @@ function sweep(sweepRate, trig, ret)
 	};
 
 	gain._lichType = AUDIO;
-	ret(gain);
+	return gain;
 }
 
-_createPrimitive("sweep", sweep);
+_createUGen("sweep", sweep);
 
-function phasor(min, max, rate, ret)
+function phasor(min, max, rate)
 {
 	if(typeof min === "number")
-	{
-		dc(min, function(res)
-		{
-			min = res;
-		});
-	}
+		min = dc(min);
 
 	if(typeof max === "number")
-	{
-		dc(max, function(res)
-		{
-			max = res;
-		});
-	}
+		max = dc(max);
 
 	if(typeof rate === "number")
-	{
-		dc(rate, function(rateRes)
-		{
-			rate = rateRes;
-		});
-	}
+		rate = dc(rate);
 
 	if(rate._lichType != AUDIO || min._lichType != AUDIO || max._lichType != AUDIO)
 		throw new Error("phasor can only be used with numbers or ugens.");
@@ -6137,12 +6358,12 @@ function phasor(min, max, rate, ret)
 	};
 
 	gain._lichType = AUDIO;
-	ret(gain);
+	return gain;
 }
 
-_createPrimitive("phasor", phasor);
+_createUGen("phasor", phasor);
 
-function poll(input, ret)
+function poll(input)
 {
 	if(input._lichType != AUDIO)
 		throw new Error("timer can only be used with a ugen trigger input.");
@@ -6189,20 +6410,15 @@ function poll(input, ret)
 	};
 
 	gain._lichType = AUDIO;
-	ret(gain);
+	return gain;
 }
 
-_createPrimitive("poll", poll);
+_createUGen("poll", poll);
 
-function crackle(param, ret)
+function crackle(param)
 {
 	if(typeof param === "number")
-	{
-		dc(param, function(pRes)
-		{
-			param = pRes;
-		});
-	}
+		param = dc(param);
 
 	if(param._lichType != AUDIO)
 		throw new Error("crackle can only be used with a ugens and numbers.");
@@ -6245,36 +6461,21 @@ function crackle(param, ret)
 	};
 
 	gain._lichType = AUDIO;
-	ret(gain);
+	return gain;
 }
 
-_createPrimitive("crackle", crackle);
+_createUGen("crackle", crackle);
 
-function trand(min, max, trig, ret)
+function trand(min, max, trig)
 {
 	if(typeof min === "number")
-	{
-		dc(min, function(res)
-		{
-			min = res;
-		});
-	}
+		min = dc(min);
 
 	if(typeof max === "number")
-	{
-		dc(max, function(res)
-		{
-			max = res;
-		});
-	}
+		max = dc(max);
 
 	if(typeof trig === "number")
-	{
-		dc(trig, function(rateRes)
-		{
-			trig = rateRes;
-		});
-	}
+		trig = dc(trig);
 
 	if(trig._lichType != AUDIO || min._lichType != AUDIO || max._lichType != AUDIO)
 		throw new Error("phasor can only be used with numbers or ugens.");
@@ -6336,36 +6537,21 @@ function trand(min, max, trig, ret)
 	};
 
 	gain._lichType = AUDIO;
-	ret(gain);
+	return gain;
 }
 
-_createPrimitive("trand", trand);
+_createUGen("trand", trand);
 
-function trandX(min, max, trig, ret)
+function trandX(min, max, trig)
 {
 	if(typeof min === "number")
-	{
-		dc(min, function(res)
-		{
-			min = res;
-		});
-	}
+		min = dc(min);
 
 	if(typeof max === "number")
-	{
-		dc(max, function(res)
-		{
-			max = res;
-		});
-	}
+		max = dc(max);
 
 	if(typeof trig === "number")
-	{
-		dc(trig, function(rateRes)
-		{
-			trig = rateRes;
-		});
-	}
+		trig = dc(trig);
 
 	if(trig._lichType != AUDIO || min._lichType != AUDIO || max._lichType != AUDIO)
 		throw new Error("phasor can only be used with numbers or ugens.");
@@ -6428,23 +6614,18 @@ function trandX(min, max, trig, ret)
 	};
 
 	gain._lichType = AUDIO;
-	ret(gain);
+	return gain;
 }
 
-_createPrimitive("trandX", trandX);
+_createUGen("trandX", trandX);
 
-function coinGate(probability, trig, ret)
+function coinGate(probability, trig)
 {
 	if(trig._lichType != AUDIO)
 		throw new Error("coinGate can only be used with a ugen trigger input.");
 
 	if(typeof probability === "number")
-	{
-		dc(probability, function(rateRes)
-		{
-			probability = rateRes;
-		});
-	}
+		probability = dc(probability);
 
 	if(probability._lichType != AUDIO)
 		throw new Error("coinGate probability can only be a number or ugen.");
@@ -6508,10 +6689,10 @@ function coinGate(probability, trig, ret)
 	};
 
 	gain._lichType = AUDIO;
-	ret(gain);
+	return gain;
 }
 
-_createPrimitive("coinGate", coinGate);
+_createUGen("coinGate", coinGate);
 
 // Many thanks to Stefan Gustavason for the nice Simplex implementation
 // http://staffwww.itn.liu.se/~stegu/aqsis/aqsis-newnoise/
@@ -6551,7 +6732,7 @@ Soliton.simplexGrad1 = function(hash, x)
     return (grad * x);           // Multiply the gradient with the distance
 }
 
-function simplex(freq, ret) 
+function simplex(freq) 
 {
 	if(typeof freq !== "number")
 		throw new Error("simplex frequency must be a number.");
@@ -6604,10 +6785,10 @@ function simplex(freq, ret)
 	};
 
 	gain._lichType = AUDIO;
-	ret(gain);
+	return gain;
 }
 
-_createPrimitive("simplex", simplex);
+_createUGen("simplex", simplex);
 
 var zeroBlock = new Float32Array(2048);
 var delayBlocks = [
@@ -6652,7 +6833,7 @@ function cubicinterp(x, y0, y1, y2, y3)
         return ((c3 * x + c2) * x + c1) * x + c0;
 }
 
-function calcFeedBack(delayTime, decayTime)
+function _calcFeedBack(delayTime, decayTime)
 {
 	if(delayTime == 0 || decayTime == 0)
 		return 0;
@@ -6664,7 +6845,7 @@ function calcFeedBack(delayTime, decayTime)
 }
 
 // frequencies below 20hz won't behave correctly
-function pluck(freq, decayTime, coeff, input, ret)
+function pluck(freq, decayTime, coeff, input)
 {
 	if(typeof freq !== "number" || typeof decayTime !== "number" || typeof coeff !== "number")
 		throw new Error("pluck freq, decayTime, and coeff can only be numbers.");
@@ -6699,7 +6880,7 @@ function pluck(freq, decayTime, coeff, input, ret)
 		delayTime = (1/freq) * samplerate;
 		readOffset = ~~delayTime; // Math.floor(delayTime)
 		readFrac = delayTime - readOffset;
-		feedBackLevel = calcFeedBack(delayTime, decayTime * samplerate);	
+		feedBackLevel = _calcFeedBack(delayTime, decayTime * samplerate);	
 	}
 
 	else
@@ -6765,47 +6946,47 @@ function pluck(freq, decayTime, coeff, input, ret)
 	};
 
 	gain._lichType = AUDIO;
-	ret(gain);
+	return gain;
 }
 
-_createPrimitive("pluck", pluck);
+_createUGen("pluck", pluck);
 
-function sin(freq, ret)
+function sin(freq)
 {
-	ret(Soliton.createOscillatorNode("sine",freq));
+	return Soliton.createOscillatorNode("sine",freq);
 }
 
-_createPrimitive("sin", sin);
+_createUGen("sin", sin);
 
-function tri(freq, ret)
+function tri(freq)
 {
-	ret(Soliton.createOscillatorNode("triangle",freq));
+	return Soliton.createOscillatorNode("triangle",freq);
 }
 
-_createPrimitive("tri", tri);
+_createUGen("tri", tri);
 
-function square(freq, ret)
+function square(freq)
 {
-	ret(Soliton.createOscillatorNode("square",freq));
+	return Soliton.createOscillatorNode("square",freq);
 }
 
-_createPrimitive("square", square);
+_createUGen("square", square);
 
-function saw(freq, ret)
+function saw(freq)
 {
-	ret(Soliton.createOscillatorNode("sawtooth",freq));
+	return Soliton.createOscillatorNode("sawtooth",freq);
 }
 
-_createPrimitive("saw", saw);
+_createUGen("saw", saw);
 
-function waveTable(freq, table, ret)
+function waveTable(freq, table)
 {
-	ret(Soliton.createOscillatorNode("custom",freq, new Float32Array(table)));
+	return Soliton.createOscillatorNode("custom",freq, new Float32Array(table));
 }
 
-_createPrimitive("waveTable", waveTable);
+_createUGen("waveTable", waveTable);
 
-function waveShape(shape, input, ret)
+function waveShape(shape, input)
 {
 	var shaper = Soliton.context.createWaveShaper();
 	input.connect(shaper);
@@ -6813,12 +6994,12 @@ function waveShape(shape, input, ret)
 	shaper.startAll = input.startAll;
 	shaper.stopAll = input.stopAll;
 	shaper._lichType = AUDIO;
-	ret(shaper);
+	return shaper;
 }
 
-_createPrimitive("waveShape", waveShape);
+_createUGen("waveShape", waveShape);
 
-function gain(input1, input2, ret)
+function gain(input1, input2)
 {
 	if(input2._lichType != AUDIO)
 	{
@@ -6862,33 +7043,23 @@ function gain(input1, input2, ret)
 	}
 
 	gainNode._lichType = AUDIO;
-	ret(gainNode);
+	return gainNode;
 }
 
-_createPrimitive("gain", gain);
+_createUGen("gain", gain);
 
-function _subtractMix(input1, input2, ret)
+function _subtractMix(input1, input2)
 {	
 	var resGain = Soliton.context.createGain();
 	resGain.gain.value = 1;
 	
 	if(typeof input1 === "number")
-	{
-		dc(input1, function(dc1)
-		{
-			input1 = dc1;
-		});
-	}
+		input1 = dc(input1);
 
 	input1.connect(resGain);
 
 	if(typeof input2 === "number")
-	{
-		dc(input2, function(dc2)
-		{
-			input2 = dc2;
-		});
-	}
+		input2 = dc(input2);
 
 	var subtractGain = Soliton.context.createGain();
 	subtractGain.gain.value = -1;
@@ -6909,10 +7080,10 @@ function _subtractMix(input1, input2, ret)
 		input2.stopAll(time);
 	}
 
-	ret(resGain);
+	return resGain;
 }
 
-function delay(delayTime, feedbackLevel, input, ret)
+function delay(delayTime, feedbackLevel, input)
 {
 	var ins = [delayTime, feedbackLevel, input];
 	var mix = Soliton.context.createGain();
@@ -6968,74 +7139,68 @@ function delay(delayTime, feedbackLevel, input, ret)
 	}
 
 	mix._lichType = AUDIO;
-	ret(mix);
+	return mix;
 }
 
-_createPrimitive("delay", delay);
+_createUGen("delay", delay);
 
-function compressor(threshold, knee, ratio, attack, release, input, ret)
+function compressor(threshold, knee, ratio, attack, release, input)
 {
-	Lich.collapse(input, function(input)
+	var compr = Soliton.context.createDynamicsCompressor();
+	compr.threshold.value = threshold;
+	compr.knee.value = knee;
+	compr.ratio.value = ratio;
+	compr.attack.value = attack;
+	compr.release.value = release;
+	input.connect(compr);
+	compr.startAll = input.startAll;
+	compr._lichType = AUDIO;
+	compr.stopAll = function(time)
 	{
-		var compr = Soliton.context.createDynamicsCompressor();
-		compr.threshold.value = threshold;
-		compr.knee.value = knee;
-		compr.ratio.value = ratio;
-		compr.attack.value = attack;
-		compr.release.value = release;
-		input.connect(compr);
-		compr.startAll = input.startAll;
-		compr._lichType = AUDIO;
-		compr.stopAll = function(time)
-		{
-			input.stopAll(time);
-			setTimeout(
-				function()
-				{
-					input.disconnect(0);
-				},
-				(time - Soliton.context) * 1000
-			)
-		}
+		input.stopAll(time);
+		setTimeout(
+			function()
+			{
+				input.disconnect(0);
+			},
+			(time - Soliton.context) * 1000
+		)
+	}
 
-		ret(compr);
-	});
+	return compr;
 }
 
-_createPrimitive("compressor", compressor);
+_createUGen("compressor", compressor);
 
-function limiter(threshold, input, ret)
+function limiter(threshold, input)
 {
-	Lich.collapse(input, function(input)
+	var compr = Soliton.context.createDynamicsCompressor();
+	compr.threshold.value = threshold;
+	//compr.knee.value = knee;
+	compr.ratio.value = 20;
+	Soliton.limiter.attack.value = 0.003;
+	Soliton.limiter.release.value = 0.003;
+	input.connect(compr);
+	compr.startAll = input.startAll;
+	compr._lichType = AUDIO;
+	compr.stopAll = function(time)
 	{
-		var compr = Soliton.context.createDynamicsCompressor();
-		compr.threshold.value = threshold;
-		//compr.knee.value = knee;
-		compr.ratio.value = 20;
-		Soliton.limiter.attack.value = 0.003;
-		Soliton.limiter.release.value = 0.003;
-		input.connect(compr);
-		compr.startAll = input.startAll;
-		compr._lichType = AUDIO;
-		compr.stopAll = function(time)
-		{
-			input.stopAll(time);
-			setTimeout(
-				function()
-				{
-					input.disconnect(0);
-				},
-				(time - Soliton.context) * 1000
-			)
-		}
+		input.stopAll(time);
+		setTimeout(
+			function()
+			{
+				input.disconnect(0);
+			},
+			(time - Soliton.context) * 1000
+		)
+	}
 
-		ret(compr);
-	});
+	return compr;
 }
 
-_createPrimitive("limiter", limiter);
+_createUGen("limiter", limiter);
 
-function pan(position, input, ret)
+function pan(position, input)
 {
 	if(typeof position !== "number")
 		throw new Error("Panning position can only be a number.");
@@ -7057,31 +7222,20 @@ function pan(position, input, ret)
 		input.disconnect(0);
 	}
 
-	ret(panner);
+	return panner;
 }
 
-_createPrimitive("pan", pan);
+_createUGen("pan", pan);
 
-function mix2(input1, input2, ret)
+function mix2(input1, input2)
 {
-	//if(input1._lichType != AUDIO || input2._lichType != AUDIO)
-	//	throw new Error("mix2 can only be used with audio sources.");
-
 	if(typeof input1 === "number")
-	{
-		dc(input1, function(dc1)
-		{
-			input1 = dc1;
-		});
-	}
+		input1 = dc(input1);
+
+	//input1.connect(resGain);
 
 	if(typeof input2 === "number")
-	{
-		dc(input2, function(dc2)
-		{
-			input2 = dc2;
-		});
-	}
+		input2 = dc(input2);
 
 	var mix = Soliton.context.createGain();
 	input1.connect(mix);
@@ -7094,12 +7248,12 @@ function mix2(input1, input2, ret)
 		setTimeout(function(){input1.disconnect(0); input2.disconnect(0)}, (time - Soliton.context.currentTime) * 1000);
 	}
 	mix._lichType = AUDIO;
-	ret(mix);
+	return mix;
 }
 
-_createPrimitive("mix2", mix2);
+_createUGen("mix2", mix2);
 
-function range(low, high, input,ret)
+function range(low, high, input)
 {
 	if(typeof low !== "number" || typeof high !== "number")
 		throw new Error("range low and high values can only be numbers. It is not modulatable.");
@@ -7110,13 +7264,10 @@ function range(low, high, input,ret)
 	var mulVal = (high - low) * 0.5;
 	var addVal = mulVal + low;
 
-	gain(mulVal,input,function(mulRes)
-	{
-		mix2(addVal,mulRes, ret);
-	});
+	return mix2(addVal, gain(mulVal, input));
 }
 
-_createPrimitive("range", range);
+_createUGen("range", range);
 
 Soliton.linexpUGen = function(inMin, inMax, outMin, outMax)
 {
@@ -7136,7 +7287,7 @@ Soliton.linexpUGen = function(inMin, inMax, outMin, outMax)
 	}
 }
 
-function exprange(low, high, input, ret)
+function exprange(low, high, input)
 {
 	var rangeFunc = Soliton.context.createScriptProcessor(1024, 1, 1);
 	rangeFunc.onaudioprocess = Soliton.linexpUGen(-1, 1, low, high);
@@ -7144,7 +7295,7 @@ function exprange(low, high, input, ret)
 	rangeFunc._lichType = AUDIO;
 	input.connect(rangeFunc);
 	rangeFunc.stopAll = function(time){input.stopAll(time); setTimeout(function(){input.disconnect(0)}, (time - Soliton.context.currentTime) * 1000)}
-	ret(rangeFunc);
+	return rangeFunc;
 }
 
 Soliton.divisionUGen = function(event)
@@ -7163,23 +7314,13 @@ Soliton.divisionUGen = function(event)
 	}
 }
 
-function _audioDivision(input1, input2, ret)
+function _audioDivision(input1, input2)
 {	
 	if(typeof input1 === "number")
-	{
-		dc(input1, function(dc1)
-		{
-			input1 = dc1;
-		});
-	}
+		input1 = dc(input1);
 
 	if(typeof input2 === "number")
-	{
-		dc(input2, function(dc2)
-		{
-			input2 = dc2;
-		});
-	}
+		input2 = dc(input2);
 
 	var merger = Soliton.context.createChannelMerger(2);
 	merger.channelInterpretation = "discrete";
@@ -7217,7 +7358,7 @@ function _audioDivision(input1, input2, ret)
 	input1.connect(merger, 0, 0);
 	input2.connect(merger, 0, 1);
 	merger.connect(divisionFunc);
-	ret(divisionFunc);
+	return divisionFunc;
 }
 
 /////////////////////////////////////////
@@ -7232,18 +7373,13 @@ function _calcSlope(next, prev)
 	return (next - prev) * _slopeFactor;
 }
 
-function lag(lagTime, input, ret)
+function lag(lagTime, input)
 {
 	if(input._lichType != AUDIO)
 		throw new Error("trigDivider can only be used with audio ugens.");
 
 	if(typeof lagTime === "number")
-	{
-		dc(lagTime, function(lagTimeRes)
-		{
-			lagTime = lagTimeRes;
-		});
-	}
+		lagTime = dc(lagTime);
 
 	var ugenFunc = Soliton.context.createScriptProcessor(1024, 2, 1);
 	var counter = 0;
@@ -7319,23 +7455,18 @@ function lag(lagTime, input, ret)
 	};
 
 	gain._lichType = AUDIO;
-	ret(gain);
+	return gain;
 }
 
-_createPrimitive("lag", lag);
+_createUGen("lag", lag);
 
-function integrator(coeff, input, ret)
+function integrator(coeff, input)
 {
 	if(input._lichType != AUDIO)
 		throw new Error("trigDivider can only be used with audio ugens.");
 
 	if(typeof coeff === "number")
-	{
-		dc(coeff, function(coeffRes)
-		{
-			coeff = coeffRes;
-		});
-	}
+		coeff = dc(coeff);
 
 	var ugenFunc = Soliton.context.createScriptProcessor(1024, 2, 1);
 	var lastOut = 0;
@@ -7382,23 +7513,18 @@ function integrator(coeff, input, ret)
 	};
 
 	gain._lichType = AUDIO;
-	ret(gain);
+	return gain;
 }
 
-_createPrimitive("integrator", integrator);
+_createUGen("integrator", integrator);
 
-function decay(decayTime, input, ret)
+function decay(decayTime, input)
 {
 	if(input._lichType != AUDIO)
 		throw new Error("trigDivider can only be used with audio ugens.");
 
 	if(typeof decayTime === "number")
-	{
-		dc(decayTime, function(decayTimeRes)
-		{
-			decayTime = decayTimeRes;
-		});
-	}
+		decayTime = dc(decayTime);
 
 	var ugenFunc = Soliton.context.createScriptProcessor(1024, 2, 1);
 	var lastOut = 0;
@@ -7453,31 +7579,21 @@ function decay(decayTime, input, ret)
 	};
 
 	gain._lichType = AUDIO;
-	ret(gain);
+	return gain;
 }
 
-_createPrimitive("decay", decay);
+_createUGen("decay", decay);
 
-function reson(freq, decayTime, input, ret)
+function reson(freq, decayTime, input)
 {
 	if(input._lichType != AUDIO)
 		throw new Error("trigDivider can only be used with audio ugens.");
 
 	if(typeof freq === "number")
-	{
-		dc(freq, function(freqRes)
-		{
-			freq = freqRes;
-		});
-	}
+		freq = dc(freq);
 
 	if(typeof decayTime === "number")
-	{
-		dc(decayTime, function(decayTimeRes)
-		{
-			decayTime = decayTimeRes;
-		});
-	}
+		decayTime = dc(decayTime);
 
 	var ugenFunc = Soliton.context.createScriptProcessor(1024, 3, 1);
 	var ffreq = 0;
@@ -7576,10 +7692,10 @@ function reson(freq, decayTime, input, ret)
 	};
 
 	gain._lichType = AUDIO;
-	ret(gain);
+	return gain;
 }
 
-_createPrimitive("reson", reson);
+_createUGen("reson", reson);
 
 Soliton.createFilter = function(type, freq, input, q, gain)
 {
@@ -7629,59 +7745,59 @@ Soliton.createFilter = function(type, freq, input, q, gain)
 	return filter;
  }
 
-function lowpass(freq, q, input, ret)
+function lowpass(freq, q, input)
 {
-	ret(Soliton.createFilter("lowpass", freq, input, q, Lich.VM.Nothing));
+	return Soliton.createFilter("lowpass", freq, input, q, Lich.VM.Nothing);
 }
 
-_createPrimitive("lowpass", lowpass);
+_createUGen("lowpass", lowpass);
 
-function highpass(freq, q, input, ret)
+function highpass(freq, q, input)
 {
-	ret(Soliton.createFilter("highpass", freq, input, q, Lich.VM.Nothing));
+	return Soliton.createFilter("highpass", freq, input, q, Lich.VM.Nothing);
 }
 
-_createPrimitive("highpass", highpass);
+_createUGen("highpass", highpass);
 
-function bandpass(freq, q, input, ret)
+function bandpass(freq, q, input)
 {
-	ret(Soliton.createFilter("bandpass", freq, input, q, Lich.VM.Nothing));
+	return Soliton.createFilter("bandpass", freq, input, q, Lich.VM.Nothing);
 }
 
-_createPrimitive("bandpass", bandpass);
+_createUGen("bandpass", bandpass);
 
-function lowshelf(freq, boost, input, ret)
+function lowshelf(freq, boost, input)
 {
-	ret(Soliton.createFilter("lowshelf", freq, input, Lich.VM.Nothing, boost));
+	return Soliton.createFilter("lowshelf", freq, input, Lich.VM.Nothing, boost);
 }
 
-_createPrimitive("lowshelf", lowshelf);
+_createUGen("lowshelf", lowshelf);
 
-function highshelf(freq, boost, input, ret)
+function highshelf(freq, boost, input)
 {
-	ret(Soliton.createFilter("highshelf", freq, input, Lich.VM.Nothing, boost));
+	return Soliton.createFilter("highshelf", freq, input, Lich.VM.Nothing, boost);
 }
 
-_createPrimitive("highshelf", highshelf);
+_createUGen("highshelf", highshelf);
 
-function peaking(freq, q, boost, input, ret)
+function peaking(freq, q, boost, input)
 {
-	ret(Soliton.createFilter("peaking", freq, input, q, boost));
+	return Soliton.createFilter("peaking", freq, input, q, boost);
 }
 
-function notch(freq, q, input, ret)
+function notch(freq, q, input)
 {
-	ret(Soliton.createFilter("notch", freq, input, q, Lich.VM.Nothing));
+	return Soliton.createFilter("notch", freq, input, q, Lich.VM.Nothing);
 }
 
-_createPrimitive("notch", notch);
+_createUGen("notch", notch);
 
-function allpass(freq, q, input, ret)
+function allpass(freq, q, input)
 {
-	ret(Soliton.createFilter("allpass", freq, input, q, Lich.VM.Nothing));
+	return Soliton.createFilter("allpass", freq, input, q, Lich.VM.Nothing);
 }
 
-_createPrimitive("allpass", allpass);
+_createUGen("allpass", allpass);
 
 // Buffer a url with an optional name for storage, callback on finish, 
 // and optional destination (for callback function)
@@ -7724,65 +7840,119 @@ Soliton.bufferURL = function(name, callback)
 		}
 
 		request.send();
+		return null;
 	}
 
 	else
 	{
 		//Soliton.print("Already Downloaded!");
-		if(callback != undefined)
-			callback(Soliton.buffers[name]);
+		return Soliton.buffers[name];
 	}
 }
 
 // Play a buffer into the destination
-Soliton.playSample = function(buffer, rate, loopStart, loopEnd, ret)
+Soliton.playSample = function(source, rate, loopStart, loopEnd, duration)
 {
 	//Lich.post("Playing Buffer!");
-	var source = Soliton.context.createBufferSource();
-	source.buffer = buffer;
-	source.loop = true;
+	//var source = Soliton.context.createBufferSource();
+	//if(buffer != null) source.buffer = buffer;
 	source.playbackRate.value = rate;
 	source.loopStart = loopStart;
 	source.loopEnd = loopEnd;
 	
 	source.startAll = function(time)
 	{ 
-		source.start(time, loopStart)
+		if(!source.loaded)
+			source.startTime = time;
+		else
+			source.start(time, loopStart, duration);
 	}
 	
-	source.stopAll = source.stop;
-
-	source._lichType = AUDIO;
-	ret(source);
-}
-
-function playSample(name, rate, loopStart, loopEnd, ret)
-{
-	if(typeof rate !== "number" || typeof loopStart !== "number" || typeof loopEnd !== "number")
+	source.stopAll = function(time)
 	{
-		throw new Error("playSample can only be used with numbers. playBuf arguments cannot be modulated by audio unit generators");
-		//Lich.post("playBuf can only be used with numbers. playBuf arguments cannot be modulated by audio unit generators");
+		source.stopTime = time;
 	}
 
-	Soliton.bufferURL(
+	source._lichType = AUDIO;
+	return source;
+}
+
+function playSample(name, rate, playStart, duration)
+{
+	if(typeof rate !== "number" || typeof playStart !== "number" || typeof duration !== "number")
+		throw new Error("playSample can only be used with numbers. playSample arguments cannot be modulated by audio unit generators");
+	
+	var source = Soliton.context.createBufferSource();
+	source.loaded = false;
+	source.startTime = 0;
+	source.loopStart = 0;
+	source.loop = false;
+	
+	var buf = Soliton.bufferURL(
 		name, 
 		function(buf)
 		{
-			Soliton.playSample(buf, rate, loopStart, loopEnd, ret)
+			source.buffer = buf;
+			source.loaded = true;
+			source.start(source.startTime, source.loopStart, duration); 
+			//source.stop(source.stopTime);
 		}
 	);
+
+	if(buf != null)
+	{
+		source.buffer = buf;
+		source.loaded = true;
+	}
+		
+
+	return Soliton.playSample(source, rate, playStart, playStart + duration, duration);
 }
 
-_createPrimitive("playSample", playSample);
+_createUGen("playSample", playSample);
 
-function newBuffer(numSamples, ret)
+function loopSample(name, rate, loopStart, loopEnd)
 {
-	ret(new Float32Array(numSamples));
+	if(typeof rate !== "number" || typeof loopStart !== "number" || typeof loopEnd !== "number")
+		throw new Error("loopSample can only be used with numbers. loopSample arguments cannot be modulated by audio unit generators");
+	
+	var source = Soliton.context.createBufferSource();
+	source.loaded = false;
+	source.startTime = 0;
+	source.loopStart = 0;
+	source.loop = true;
+
+	var buf = Soliton.bufferURL(
+		name, 
+		function(buf)
+		{
+			source.buffer = buf;
+			source.loaded = true;
+			source.start(source.startTime, source.loopStart); 
+			//source.stop(source.stopTime);
+		}
+	);
+
+	if(buf != null)
+	{
+		source.buffer = buf;
+		source.loaded = true;
+	}
+		
+
+	return Soliton.playSample(source, rate, loopStart, loopEnd, loopEnd - loopStart);
+}
+
+_createUGen("loopSample", loopSample);
+
+function newBuffer(numSamples)
+{
+	return new Float32Array(numSamples);
 }
 
 _createPrimitive("newBuffer", newBuffer);
 
-function fillBuffer(samples, ret)
+function fillBuffer(samples)
 {
 	if(!(samples instanceof Array))
 		throw new Error("fillBuffer passed a non-list. fillBuffer must be used with a list.");
@@ -7794,7 +7964,7 @@ function fillBuffer(samples, ret)
 		frames[i] = samples[i];	
 	}
 
-	ret(frames);
+	return frames;
 }
 
 _createPrimitive("fillBuffer", fillBuffer);
@@ -7872,18 +8042,13 @@ function recordBuf(buffer, rate, input, ret)
 
 _createPrimitive("recordBuf", recordBuf);*/
 
-function playBuf(buffer, rate, ret)
+function playBuf(buffer, rate)
 {	
 	if(!(buffer instanceof Float32Array))
 		throw new Error("playBuf requires an audio buffer. Use newBuffer to create such a buffer.");
 
 	if(typeof rate === "number")
-	{
-		dc(rate, function(pRes)
-		{
-			rate = pRes;
-		});
-	}
+		rate = dc(rate);
 
 	if(rate._lichType != AUDIO)
 		throw new Error("playBuf can only be used with a ugens and numbers.");
@@ -7933,31 +8098,21 @@ function playBuf(buffer, rate, ret)
 	};
 
 	gain._lichType = AUDIO;
-	ret(gain);
+	return gain;
 }
 
-_createPrimitive("playBuf", playBuf);
+_createUGen("playBuf", playBuf);
 
-function recPlayBuf(buffer, wrRate, rdRate, input, ret)
+function recPlayBuf(buffer, wrRate, rdRate, input)
 {	
 	if(!(buffer instanceof Float32Array))
 		throw new Error("playBuf requires an audio buffer. Use newBuffer to create such a buffer.");
 
 	if(typeof wrRate === "number")
-	{
-		dc(wrRate, function(pRes)
-		{
-			wrRate = pRes;
-		});
-	}
+		wrRate = dc(wrRate)
 
 	if(typeof rdRate === "number")
-	{
-		dc(rdRate, function(pRes)
-		{
-			rdRate = pRes;
-		});
-	}
+		rdRate = dc(rdRate);
 
 	if(wrRate._lichType != AUDIO || rdRate._lichType != AUDIO || input._lichType != AUDIO)
 		throw new Error("playBuf can only be used with a ugens and numbers.");
@@ -8023,103 +8178,78 @@ function recPlayBuf(buffer, wrRate, rdRate, input, ret)
 	};
 
 	gain._lichType = AUDIO;
-	ret(gain);
+	return gain;
 }
 
-_createPrimitive("recPlayBuf", recPlayBuf);
+_createUGen("recPlayBuf", recPlayBuf);
 
+/*
 function sampleRate(ret)
 {
 	ret(Soliton.context.sampleRate);
 }
 
-_createPrimitive("sampleRate", sampleRate);
+_createPrimitive("sampleRate", sampleRate);*/
 
+sampleRate = Soliton.context.sampleRate;
+
+/*
 function sampleDur(ret)
 {
 	ret(1/Soliton.context.sampleRate);
 }
 
-_createPrimitive("sampleDur", sampleDur);
+_createPrimitive("sampleDur", sampleDur);*/
 
-function convolve(name, input, ret)
+sampleDur = 1/Soliton.context.sampleRate;
+
+function convolve(name, input)
 {
-	Soliton.bufferURL(
-		name, 
-		function(buf)
-		{
-			var conv = Soliton.context.createConvolver();
-			conv.buffer = buf;
-			conv.normalize = true;
-			input.connect(conv);
-			conv.startAll = input.startAll;
-			conv.stopAll = input.stopAll;
-			conv._lichType = AUDIO;
-			ret(conv);
-		}
-	);
+	var conv = Soliton.context.createConvolver();
+	Soliton.bufferURL(name, function(buf){conv.buffer = buf; input.connect(conv);});
+	conv.normalize = true;
+	//input.connect(conv);
+	conv.startAll = input.startAll;
+	conv.stopAll = input.stopAll;
+	conv._lichType = AUDIO;
+	return conv;
 }
 
-_createPrimitive("convolve", convolve);
+_createUGen("convolve", convolve);
 
-function dc(value, ret)
+var _dcNothing = new Float32Array(2);
+
+function dc(value)
 {
-	Lich.collapse(value, function(value)
+	var dcFunc = Soliton.context.createScriptProcessor(256, 0, 1);
+	dcFunc.value = value;
+
+	dcFunc.onaudioprocess = function(event)
 	{
-		var dcFunc = Soliton.context.createScriptProcessor(1024, 0, 1);
-		dcFunc.value = value;
+		var outputArray = event.outputBuffer.getChannelData(0);
+		var val = this.value;
 
-		dcFunc.onaudioprocess = function(event)
+		for(var i = 0; i < 256; ++i)
 		{
-			var outputArray = event.outputBuffer.getChannelData(0);
-			var val = this.value;
-
-			for(var i = 0; i < 1024; ++i)
-			{
-				outputArray[i] = val;
-			}
+			outputArray[i] = val;
 		}
+	}
 
-		dcFunc.startAll = function(time){};
-		dcFunc.stopAll = function(time){};
-		dcFunc._lichType = AUDIO;
-		ret(dcFunc);
-	});
+	dcFunc.startAll = function(time){};
+	dcFunc.stopAll = function(time){};
+	dcFunc._lichType = AUDIO;
+	return dcFunc;
 }
 
-_createPrimitive("dc", dc);
+_createUGen("dc", dc);
 
 /*
-function set(argument, value, input, ret)
-{
-	if(typeof argument !== "string" || input._lichType != SYNTH || typeof value !== "number")
-		throw new Error("set can only be used on Synth control inputs with numbers as values. For example: set \"freq\" 33.3 mySynth");
-
-	
-	input[argument] = value;
-	ret(input);
-}
-*/
-
 function contextTime(ret)
 {
 	Lich.post(Soliton.context.currentTime);
 	ret(Soliton.context.currentTime);
 }
 
-function chain(input2, input1, ret)
-{
-	Lich.collapse(input2, function(input2)
-	{
-		Lich.collapse(input1, function(input1)
-		{
-			input2.connect(Soliton.masterGain);
-			input2.start(0);
-			input1.connect(input2);
-			ret(input2);
-		});
-	});
-}
 
 function fade(time, input, ret)
 {
@@ -8134,237 +8264,224 @@ function fade(time, input, ret)
 	input.stopAll(Soliton.context.currentTime + time);
 	ret(input);
 }
+*/
 
-function perc(attack, peak, decay, input, ret)
+function perc(attack, peak, decay, input)
 {
-	Lich.collapse(input, function(input)
+	if(typeof attack !== "number" || typeof peak !== "number" || typeof decay !== "number")
+		throw new Error("perc can only use numbers for attack, peak, and decay arguments.");
+
+	if(typeof input == "number")
+		input = dc(input);
+
+	var percGain = Soliton.context.createGain();
+	input.connect(percGain);
+	
+	percGain.startAll = function(time)
 	{
-		if(typeof attack !== "number" || typeof peak !== "number" || typeof decay !== "number")
-			throw new Error("perc can only use numbers for attack, peak, and decay arguments.");
-
-		if(typeof input == "number")
-		{
-			dc(input, function(inRes){input = inRes});
-		}
-
-		var percGain = Soliton.context.createGain();
-		input.connect(percGain);
-		
-		percGain.startAll = function(time)
-		{
-			input.startAll(time);
-			percGain.gain.setValueAtTime(0, time);
-			percGain.gain.linearRampToValueAtTime(peak, attack + time);
-			percGain.gain.linearRampToValueAtTime(0, attack + decay + time);
-			input.stopAll(attack + decay + time);
-		}
-
-		percGain.stopAll = input.stopAll;
-		percGain._lichType = AUDIO;
-		ret(percGain);
-	});
-}
-
-_createPrimitive("perc", perc);
-
-function perc2(attack, peak, decay, input, ret)
-{
-	Lich.collapse(input, function(input)
-	{
-		if(typeof attack !== "number" || typeof peak !== "number" || typeof decay !== "number")
-			throw new Error("perc can only use numbers for attack, peak, and decay arguments.");
-
-		if(typeof input == "number")
-		{
-			dc(input, function(inRes){input = inRes});
-		}
-
-		var percGain = Soliton.context.createGain();
-		input.connect(percGain);
-		
-		percGain.startAll = function(time)
-		{
-			input.startAll(time);
-			percGain.gain.setValueAtTime(0, time);
-			percGain.gain.linearRampToValueAtTime(peak, attack + time);
-			percGain.gain.linearRampToValueAtTime(0, attack + decay + time);
-			//input.stopAll(attack + decay + time);
-		}
-
-		percGain.stopAll = function(time)
-		{
-			input.stopAll(time);
-		}
-
-		percGain._lichType = AUDIO;
-		ret(percGain);
-	});
-}
-
-_createPrimitive("perc2", perc2);
-
-// Shape can be 0 or 1, 0 for linear 1 for exponential, or "linear" or "exponential"
-function env(levels, times, shape, input, ret)
-{
-	Lich.collapse(input, function(input)
-	{
-		if(typeof input == "number")
-		{
-			dc(input, function(inRes){input = inRes});
-		}
-
-		var percGain = Soliton.context.createGain();
-		input.connect(percGain);
-		
-		percGain.startAll = function(time)
-		{
-			input.startAll(time);
-			percGain.gain.setValueAtTime(levels[0], time);
-			var finalTime = time;
-			
-			for(var i = 1; i < levels.length; ++i)
-			{
-				finalTime += times[i - 1];
-				if(shape == 0 || shape === "linear")
-					percGain.gain.linearRampToValueAtTime(levels[i], finalTime);
-				else
-					percGain.gain.exponentialRampToValueAtTime(levels[i], finalTime);
-			}
-			
-			input.stopAll(finalTime);
-		}
-
-		percGain.stopAll = input.stopAll;
-		percGain._lichType = AUDIO;
-		ret(percGain);
-	});
-}
-
-_createPrimitive("env", env);
-
-// Shape can be 0 or 1, 0 for linear 1 for exponential, or "linear" or "exponential"
-function env2(levels, times, shape, input, ret)
-{
-	Lich.collapse(input, function(input)
-	{
-		if(typeof input == "number")
-		{
-			dc(input, function(inRes){input = inRes});
-		}
-
-		var percGain = Soliton.context.createGain();
-		input.connect(percGain);
-		
-		percGain.startAll = function(time)
-		{
-			input.startAll(time);
-			percGain.gain.setValueAtTime(levels[0], time);
-			var finalTime = time;
-			
-			for(var i = 1; i < levels.length; ++i)
-			{
-				finalTime += times[i - 1];
-				if(shape == 0 || shape === "linear")
-					percGain.gain.linearRampToValueAtTime(levels[i], finalTime);
-				else
-					percGain.gain.exponentialRampToValueAtTime(levels[i], finalTime);
-			}
-			
-			//input.stopAll(finalTime);
-		}
-
-		percGain.stopAll = function(time)
-		{
-			input.stopAll(time);
-		}
-
-		percGain._lichType = AUDIO;
-		ret(percGain);
-	});
-}
-
-_createPrimitive("env2", env2);
-
-function play(synth, ret)
-{
-	if(typeof synth === "string")
-	{
-		synth = Soliton.synthDefs[synth];
+		input.startAll(time);
+		percGain.gain.setValueAtTime(0, time);
+		percGain.gain.linearRampToValueAtTime(peak, attack + time);
+		percGain.gain.linearRampToValueAtTime(0, attack + decay + time);
+		input.stopAll(attack + decay + time);
 	}
 
-	Lich.collapse(synth, function(synth)
-	{
-		var type = synth._lichType;
-		if(type != AUDIO && type != IMPSTREAM && type != SOLOSTREAM)
-			throw new Error("play can only be used with synth definitions, functions, or patterns.");
+	percGain.stopAll = input.stopAll;
+	percGain._lichType = AUDIO;
+	return percGain;
+}
 
-		synth.connect(Soliton.masterGain);
-		synth.startAll(Soliton.context.currentTime);
-		synth.startAll = function(){}
-		ret(synth);
-	});
+_createUGen("perc", perc);
+
+function perc2(attack, peak, decay, input)
+{
+	if(typeof attack !== "number" || typeof peak !== "number" || typeof decay !== "number")
+		throw new Error("perc can only use numbers for attack, peak, and decay arguments.");
+
+	if(typeof input == "number")
+		input = dc(input);
+
+	var percGain = Soliton.context.createGain();
+	input.connect(percGain);
+	
+	percGain.startAll = function(time)
+	{
+		input.startAll(time);
+		percGain.gain.setValueAtTime(0, time);
+		percGain.gain.linearRampToValueAtTime(peak, attack + time);
+		percGain.gain.linearRampToValueAtTime(0, attack + decay + time);
+		//input.stopAll(attack + decay + time);
+	}
+
+	percGain.stopAll = function(time)
+	{
+		input.stopAll(time);
+	}
+
+	percGain._lichType = AUDIO;
+	return percGain;
+}
+
+_createUGen("perc2", perc2);
+
+// Shape can be 0 or 1, 0 for linear 1 for exponential, or "linear" or "exponential"
+function env(levels, times, shape, input)
+{
+	if(typeof input == "number")
+		input = dc(input);
+
+	var percGain = Soliton.context.createGain();
+	input.connect(percGain);
+	
+	percGain.startAll = function(time)
+	{
+		input.startAll(time);
+		percGain.gain.setValueAtTime(levels[0], time);
+		var finalTime = time;
+		
+		for(var i = 1; i < levels.length; ++i)
+		{
+			finalTime += times[i - 1];
+			if(shape == 0 || shape === "linear")
+				percGain.gain.linearRampToValueAtTime(levels[i], finalTime);
+			else
+				percGain.gain.exponentialRampToValueAtTime(levels[i], finalTime);
+		}
+		
+		input.stopAll(finalTime);
+	}
+
+	percGain.stopAll = input.stopAll;
+	percGain._lichType = AUDIO;
+	return percGain;
+}
+
+_createUGen("env", env);
+
+// Shape can be 0 or 1, 0 for linear 1 for exponential, or "linear" or "exponential"
+function env2(levels, times, shape, input)
+{
+	if(typeof input == "number")
+		input = dc(input);
+
+	var percGain = Soliton.context.createGain();
+	input.connect(percGain);
+	
+	percGain.startAll = function(time)
+	{
+		input.startAll(time);
+		percGain.gain.setValueAtTime(levels[0], time);
+		var finalTime = time;
+		
+		for(var i = 1; i < levels.length; ++i)
+		{
+			finalTime += times[i - 1];
+			if(shape == 0 || shape === "linear")
+				percGain.gain.linearRampToValueAtTime(levels[i], finalTime);
+			else
+				percGain.gain.exponentialRampToValueAtTime(levels[i], finalTime);
+		}
+	}
+
+	percGain.stopAll = function(time)
+	{
+		input.stopAll(time);
+	}
+
+	percGain._lichType = AUDIO;
+	return percGain;
+}
+
+_createUGen("env2", env2);
+
+function play(synth)
+{
+	var type = typeof synth;
+	if(type === "string")
+		synth = Soliton.synthDefs[synth]();
+	else if(type === "function")
+		synth = synth();
+
+	type = synth._lichType;
+	if(type != AUDIO && type != IMPSTREAM && type != SOLOSTREAM)
+		throw new Error("play can only be used with synth definitions, functions, or patterns.");
+
+	synth.connect(Soliton.masterGain);
+	synth.startAll(Soliton.context.currentTime);
+	//synth.stopAll = function(){}
+	return synth;
 }
 
 _createPrimitive("play", play);
 
-function stop(synth, ret)
+function stop(synth)
 {
-	Lich.collapse(synth, function(synth)
+	var type = synth._lichType;
+	if(type != AUDIO && type != SYNTH && type != IMPSTREAM && type != SOLOSTREAM)
+		throw new Error("stop can only be used with synth definitions, functions, or patterns.");
+
+	if(type == AUDIO)
 	{
-		var type = synth._lichType;
-		if(type != AUDIO && type != SYNTH && type != IMPSTREAM && type != SOLOSTREAM)
-			throw new Error("stop can only be used with synth definitions, functions, or patterns.");
+		synth.disconnect(Soliton.masterGain);
+		synth.stopAll(0);
+	}
 
-		if(type == AUDIO)
-		{
-			synth.disconnect(Soliton.masterGain);
-			synth.stopAll(0);
-			ret(Lich.VM.Void);
-		}
+	else if(type == SYNTH)
+	{		
+		if(audioRes._lichType != AUDIO)
+			throw new Error("play can only be used with synth definitions and audio functions.");
+		
+		audioRes.stopAll(0);
+	}
 
-		else if(type == SYNTH)
-		{		
-			Lich.collapse(synth, function(audioRes)
-			{
-				if(audioRes._lichType != AUDIO)
-					throw new Error("play can only be used with synth definitions and audio functions.");
-				
-				audioRes.stopAll(0);
-				ret(Lich.VM.Void);
-			});
-		}
+	else
+	{
+		synth.stop();
+	}
 
-		else
-		{
-			synth.stop();
-		}
-	});
+	return Lich.VM.Void;
 }
 
 _createPrimitive("stop", stop);
 
-function auxIn(num, ret)
+function auxIn(num)
 {
 	if(num >= 0 && num < Soliton.numBuses)
-		ret(Soliton.buses[num]);
+		return Soliton.buses[num];
 	else
 		throw new Error("Bus number " + num + " exceeds the number of buses: " + Soliton.numBuses);
 }
 
-_createPrimitive("auxIn", auxIn);
+_createUGen("auxIn", auxIn);
 
-function localBus(ret)
+function localBus(amp)
 {
 	var bus = Soliton.context.createGain();
-	bus.startAll = function(){};
-	bus.stopAll = function(){}
+
+	if(typeof amp === "number")
+		bus.gain.value = amp;
+	else if(amp._lichType == AUDIO)
+		amp.connect(bus.gain);
+
+	bus.startAll = function(time)
+	{
+		if(amp._lichType == AUDIO)
+			amp.startAll(time)
+	};
+
+	bus.stopAll = function(time)
+	{
+		if(amp._lichType == AUDIO)
+			amp.stopAll(time)
+	};
+
 	bus._lichType = AUDIO;
-	ret(bus);
+	return bus;
 }
 
-_createPrimitive("localBus", localBus);
+_createUGen("localBus", localBus);
 
-function auxOut(bus, input, ret)
+function auxOut(bus, input)
 {
 	if(typeof bus === "number")
 	{
@@ -8380,7 +8497,7 @@ function auxOut(bus, input, ret)
 	}
 
 	input.connect(bus);
-	ret({
+	return {
 		_lichType:AUDIO, 
 		startAll:input.startAll, 
 		stopAll:input.stopAll, 
@@ -8389,12 +8506,12 @@ function auxOut(bus, input, ret)
 		{
 			input.disconnect();
 		}
-	});
+	};
 }
 
-_createPrimitive("auxOut", auxOut);
+_createUGen("auxOut", auxOut);
 
-function auxThrough(bus, input, ret)
+function auxThrough(bus, input)
 {
 	if(typeof bus === "number")
 	{
@@ -8410,22 +8527,18 @@ function auxThrough(bus, input, ret)
 	}
 
 	input.connect(bus);
-	ret(input);
+	return input;
 }
 
-_createPrimitive("auxThrough", auxThrough);
+_createUGen("auxThrough", auxThrough);
 
-function clip(value, input, ret)
+function clip(value, input)
 {
 	if(input._lichType != AUDIO)
-	{
 		throw new Error("clip must be used with at least one audio source.");
-	}
 
 	else if(value._lichType != AUDIO)
-	{
-		dc(value, function(vRes){value = vRes;});
-	}
+		value = dc(value);
 
 	var merger = Soliton.context.createChannelMerger(2);
 	merger.channelInterpretation = "discrete";
@@ -8434,15 +8547,10 @@ function clip(value, input, ret)
 	clipNode.onaudioprocess = function(event)
 	{
 		var inputArrayL = event.inputBuffer.getChannelData(0);
-		//var inputArrayR = event.inputBuffer.getChannelData(1);
 		var clipArray = event.inputBuffer.getChannelData(1);
-		//var clipArrayR = event.inputBuffer.getChannelData(3);
 		var outputArrayL = event.outputBuffer.getChannelData(0);
-		//var outputArrayR = event.outputBuffer.getChannelData(1);
 		var pos = 0;
 		var neg = 0;
-		//var posR = 0;
-		//var negR = 0;
 
 		for(var i = 0; i < 1024; ++i)
 		{
@@ -8454,27 +8562,13 @@ function clip(value, input, ret)
 				outputArrayL[i] = neg;
 			else
 				outputArrayL[i] = inputArrayL[i];
-
-			/*
-			posR = Math.abs(clipArrayR[i]);
-			negR = -posR;
-			if(inputArrayR[i] > posR)
-				outputArrayR[i] = posR;
-			else if(inputArrayR[i] < negR)
-				outputArrayR[i] = negR;
-			else
-				outputArrayR[i] = inputArrayR[i];*/
 		}
-
-		//Lich.post("["+inputArrayL[0]+","+clipArray[0]+"]");
 	}
 
 
 	input.connect(merger, 0, 0);
-	//input.connect(clipNode, 1, 1);
 	value.connect(merger, 0, 1);
 	merger.connect(clipNode);
-	//value.connect(clipNode, 1, 3);
 
 	clipNode.startAll = function(time)
 	{ 
@@ -8490,22 +8584,18 @@ function clip(value, input, ret)
 	}
 
 	clipNode._lichType = AUDIO;
-	ret(clipNode);
+	return clipNode;
 }
 
-_createPrimitive("clip", clip);
+_createUGen("clip", clip);
 
-function wrap(value, input, ret)
+function wrap(value, input)
 {
 	if(input._lichType != AUDIO)
-	{
 		throw new Error("clip must be used with at least one audio source.");
-	}
 
 	else if(value._lichType != AUDIO)
-	{
-		dc(value, function(vRes){value = vRes;});
-	}
+		value = dc(value);
 
 	var merger = Soliton.context.createChannelMerger(2);
 	merger.channelInterpretation = "discrete";
@@ -8545,10 +8635,10 @@ function wrap(value, input, ret)
 	}
 
 	wrapNode._lichType = AUDIO;
-	ret(wrapNode);
+	return wrapNode;
 }
 
-_createPrimitive("wrap", wrap);
+_createUGen("wrap", wrap);
 
 Soliton._mod = function(value, hi)
 {
@@ -8579,17 +8669,13 @@ Soliton._fold = function(value, lo, hi)
     return c + lo;
 }
 
-function fold(value, input, ret)
+function fold(value, input)
 {
 	if(input._lichType != AUDIO)
-	{
 		throw new Error("clip must be used with at least one audio source.");
-	}
 
 	else if(value._lichType != AUDIO)
-	{
-		dc(value, function(vRes){value = vRes;});
-	}
+		value = dc(value);
 
 	var merger = Soliton.context.createChannelMerger(2);
 	merger.channelInterpretation = "discrete";
@@ -8629,22 +8715,147 @@ function fold(value, input, ret)
 	}
 
 	foldNode._lichType = AUDIO;
-	ret(foldNode);
+	return foldNode;
 }
 
-_createPrimitive("fold", fold);
+_createUGen("fold", fold);
 
-function crunch(depth, input, ret)
+_mouseX = 0;
+_mouseY = 0;
+_mouseUGens = 0;
+Soliton.onmousemove = function(mEvent)
+{
+	if(_mouseUGens > 0)
+	{
+		_mouseX = mEvent.screenX/screen.width;
+		_mouseY = mEvent.screenY/screen.height;
+
+		if(isNaN(_mouseX))
+			_mouseX = 0;
+		if(isNaN(_mouseY))
+			_mouseY = 0;
+	}
+}
+
+function mouseX(low, high, scale)
+{
+	if(typeof low !== "number" || typeof high !== "number" || typeof scale !== "number")
+		throw new Error("mouseX can only be used with numbers for inputs.");
+
+	//var merger = Soliton.context.createChannelMerger(2);
+	//merger.channelInterpretation = "discrete";
+	var fxNode = Soliton.context.createScriptProcessor(1024, 0, 1);
+	var fxGain = Soliton.context.createGain();
+	fxGain.gain.value = 0;
+	fxNode.connect(fxGain);
+
+	fxNode.onaudioprocess = function(event)
+	{
+		//var inputArray = event.inputBuffer.getChannelData(0);
+		//var crunchArray = event.inputBuffer.getChannelData(1);
+		var outputArray = event.outputBuffer.getChannelData(0);
+		var val = scale < 1 ? _linlin(_mouseX, 0, 1, low, high) : _linexp(_mouseX, 0, 1, low, high);
+		//Lich.post(_mouseX);
+
+		for(var i = 0; i < 1024; ++i)
+		{
+			outputArray[i] = val;
+		}
+	}
+
+	fxGain.startAll = function(time)
+	{
+		fxGain.gain.setValueAtTime(1, time);
+		_mouseUGens += 1;
+		document.onmousemove = Soliton.onmousemove;
+	};
+
+	fxGain.stopAll = function(time)
+	{
+		fxGain.gain.setValueAtTime(0, time);
+		setTimeout(
+			function()
+			{
+				fxNode.disconnect();
+				fxGain.disconnect();
+				_mouseUGens = Math.max(0, _mouseUGens - 1);
+				if(_mouseUGens == 0)
+					document.onmousemove = null;
+			}, 
+			(time - Soliton.context.currentTime) * 1100
+		)
+	};
+
+
+	fxGain._lichType = AUDIO;
+	return lag(0.1, fxGain);
+}
+
+_createUGen("mouseX", mouseX);
+
+function mouseY(low, high, scale)
+{
+	if(typeof low !== "number" || typeof high !== "number" || typeof scale !== "number")
+		throw new Error("mouseX can only be used with numbers for inputs.");
+
+	//var merger = Soliton.context.createChannelMerger(2);
+	//merger.channelInterpretation = "discrete";
+	var fxNode = Soliton.context.createScriptProcessor(1024, 0, 1);
+	var fxGain = Soliton.context.createGain();
+	fxGain.gain.value = 0;
+	fxNode.connect(fxGain);
+
+	fxNode.onaudioprocess = function(event)
+	{
+		//var inputArray = event.inputBuffer.getChannelData(0);
+		//var crunchArray = event.inputBuffer.getChannelData(1);
+		var outputArray = event.outputBuffer.getChannelData(0);
+		var val = scale < 1 ? _linlin(_mouseY, 0, 1, low, high) : _linexp(_mouseY, 0, 1, low, high);
+		//Lich.post(_mouseX);
+
+		for(var i = 0; i < 1024; ++i)
+		{
+			outputArray[i] = val;
+		}
+	}
+
+	fxGain.startAll = function(time)
+	{
+		fxGain.gain.setValueAtTime(1, time);
+		_mouseUGens += 1;
+		document.onmousemove = Soliton.onmousemove;
+	};
+
+	fxGain.stopAll = function(time)
+	{
+		fxGain.gain.setValueAtTime(0, time);
+		setTimeout(
+			function()
+			{
+				fxNode.disconnect();
+				fxGain.disconnect();
+				_mouseUGens = Math.max(0, _mouseUGens - 1);
+				if(_mouseUGens == 0)
+					document.onmousemove = null;
+			}, 
+			(time - Soliton.context.currentTime) * 1100
+		)
+	};
+
+
+	fxGain._lichType = AUDIO;
+	return lag(0.1,fxGain);
+}
+
+_createUGen("mouseY", mouseY);
+
+function crunch(depth, input)
 {
 	if(input._lichType != AUDIO)
-	{
 		throw new Error("clip must be used with at least one audio source.");
-	}
 
 	else if(depth._lichType != AUDIO)
-	{
-		dc(depth, function(vRes){depth = vRes;});
-	}
+		depth = dc(depth);
 
 	var merger = Soliton.context.createChannelMerger(2);
 	merger.channelInterpretation = "discrete";
@@ -8662,10 +8873,7 @@ function crunch(depth, input, ret)
 			quant = Math.pow(0.5, crunchArray[i]);
 			outputArray[i] = crunchArray[i] == 0 ? inputArray[i] : Math.floor(inputArray[i]/quant) * quant;
 		}
-
-		//Lich.post("["+inputArray[0]+","+crunchArray[0]+"]");
 	}
-
 
 	input.connect(merger, 0, 0);
 	depth.connect(merger, 0, 1);
@@ -8685,22 +8893,18 @@ function crunch(depth, input, ret)
 	}
 
 	fxNode._lichType = AUDIO;
-	ret(fxNode);
+	return fxNode;
 }
 
-_createPrimitive("crunch", crunch);
+_createUGen("crunch", crunch);
 
-function decimate(rate, input, ret)
+function decimate(rate, input)
 {
 	if(input._lichType != AUDIO)
-	{
 		throw new Error("clip must be used with at least one audio source.");
-	}
 
 	else if(rate._lichType != AUDIO)
-	{
-		dc(rate, function(vRes){rate = vRes;});
-	}
+		rate = dc(rate);
 
 	var merger = Soliton.context.createChannelMerger(2);
 	merger.channelInterpretation = "discrete";
@@ -8753,10 +8957,10 @@ function decimate(rate, input, ret)
 	}
 
 	fxNode._lichType = AUDIO;
-	ret(fxNode);
+	return fxNode;
 }
 
-_createPrimitive("decimate", decimate);
+_createUGen("decimate", decimate);
 /*
 function pitchShift(shift, input, ret)
 {
@@ -8907,17 +9111,13 @@ function pitchShift(shift, input, ret)
 
 _createPrimitive("pitchShift", pitchShift);*/
 
-function pitchShift(shift, input, ret)
+function pitchShift(shift, input)
 {
 	if(input._lichType != AUDIO)
-	{
 		throw new Error("clip must be used with at least one audio source.");
-	}
 
 	else if(shift._lichType != AUDIO)
-	{
-		dc(shift, function(vRes){shift = vRes;});
-	}
+		shift = dc(shift);
 
 	var merger = Soliton.context.createChannelMerger(2);
 	merger.channelInterpretation = "discrete";
@@ -9032,10 +9232,10 @@ function pitchShift(shift, input, ret)
 	}
 
 	fxNode._lichType = AUDIO;
-	ret(fxNode);
+	return fxNode;
 }
 
-_createPrimitive("pitchShift", pitchShift);
+_createUGen("pitchShift", pitchShift);
 
 var gammaconst = 15 * pi / 44100;
 var gamma01 = gammaconst * 0.3609;
@@ -9068,17 +9268,13 @@ var hilbertCoeffs = [
 
 
 
-function freqShift(shift, input, ret)
+function freqShift(shift, input)
 {
 	if(input._lichType != AUDIO)
-	{
 		throw new Error("freqShift must be used with an audio ugen for input.");
-	}
 
 	else if(shift._lichType != AUDIO)
-	{
-		dc(shift, function(vRes){shift = vRes;});
-	}
+		shift = dc(shift);
 
 	var merger = Soliton.context.createChannelMerger(2);
 	merger.channelInterpretation = "discrete";
@@ -9207,17 +9403,125 @@ function freqShift(shift, input, ret)
 	}
 
 	fxNode._lichType = AUDIO;
-	ret(fxNode);
+	return fxNode;
 }
 
-_createPrimitive("freqShift", freqShift);
+_createUGen("freqShift", freqShift);
 
-function phaser(speed, input, ret)
+
+function reverb(mix, roomSize, decayTime, damp, input)
 {
 	if(input._lichType != AUDIO)
-	{
 		throw new Error("phaser must be used with an audio ugen for input.");
+
+	if(typeof mix !== "number" || typeof decayTime !== "number" || typeof damp !== "number")
+		throw new Error("reverb mix, room, and damp arguments must be numbers.");
+
+	mix = Math.max(0, Math.min(1, mix)); // clip the mix to the range we expect
+	var delayTime = roomSize / 340.0;
+	var preDelay = Soliton.context.createDelay();
+	var delayMix = Soliton.context.createGain();
+	var delays = [];
+	var filters = [];
+	var damps = []
+	var filterFeedBacks = [];
+	var filterFreqs = [delayTime, delayTime/3, delayTime/5, delayTime/7];
+
+	var verbFeedGains = [
+		_calcFeedBack(filterFreqs[0], decayTime),
+		_calcFeedBack(filterFreqs[1], decayTime),
+		_calcFeedBack(filterFreqs[2], decayTime),
+		_calcFeedBack(filterFreqs[3], decayTime)
+	];
+
+	var filterMix = Soliton.context.createGain();
+	filterMix.gain.value = 0.25;
+	preDelay.delayTime.value = 0.04;
+	delayMix.gain.value = 0.2;
+	input.connect(preDelay);
+
+	for(var i = 0; i < 4; ++i)
+	{
+		var delayN = Soliton.context.createDelay();
+		delayN.delayTime.value = filterFreqs[i];
+		preDelay.connect(delayN);
+		
+		var filter = Soliton.context.createBiquadFilter();
+		delayN.connect(filter);
+		preDelay.connect(filter);
+		filter.type = "allpass";
+		filter.Q.value = 0.0;
+		filter.frequency.value = filterFreqs[i];
+		var filterFeed = Soliton.context.createGain();
+		filterFeed.gain.value = verbFeedGains[i];
+
+		var damper = Soliton.context.createBiquadFilter();
+		damper.type = "highshelf";
+		damper.frequency.value = 4000;
+		damper.gain.value = damp * -40;
+
+		filter.connect(damper);
+		damper.connect(filterMix);
+		damper.connect(filterFeed);
+		filterFeed.connect(delayN);
+
+		delays.push(delayN);
+		filters.push(filter);
+		filterFeedBacks.push(filterFeed);
+		damps.push(damper);
 	}
+
+	var fxNode = Soliton.context.createGain();
+	var flip = Soliton.context.createGain();
+	var minSqr = Soliton.context.createGain();
+	flip.gain.value = 1 - mix;
+	minSqr.gain.value = mix;
+	fxNode.gain.value = 1;
+	input.connect(flip);
+	flip.connect(fxNode);
+	filterMix.connect(minSqr);
+	minSqr.connect(fxNode);
+
+	fxNode.startAll = function(time)
+	{ 
+		input.startAll(time);
+	}
+
+	fxNode.stopAll = function(time)
+	{ 
+		input.stopAll(time);
+
+		setTimeout(
+			function()
+			{
+				input.disconnect(); 
+				fxNode.disconnect();
+				flip.disconnect();
+				minSqr.disconnect();
+				delayMix.disconnect();
+				preDelay.disconnect();
+				for(var i = 0; i < 4; ++i)
+				{
+					delays[i].disconnect();
+					filterFeedBacks[i].disconnect();
+					filters[i].disconnect();
+					damps[i].disconnect();
+				}
+			}, 
+			(time - Soliton.context.currentTime) * 1000
+		);
+	}
+
+	fxNode._lichType = AUDIO;
+	return fxNode;
+}
+
+_createUGen("reverb", reverb);
+
+function phaser(speed, input)
+{
+	if(input._lichType != AUDIO)
+		throw new Error("phaser must be used with an audio ugen for input.");
 
 	var freq = Soliton.context.createOscillator();
 	var rangedFreq = null;
@@ -9227,22 +9531,13 @@ function phaser(speed, input, ret)
 	freq.stopAll = function(time){freq.stop(time)};
 
 	if(typeof speed === "number")
-	{
 		freq.frequency.value = speed;
-	}
-
 	else if(speed._lichType == AUDIO)
-	{
 		speed.connect(freq.frequency);
-	}
-
 	else
 		throw new Error("phasor speed argument must be a number or audio ugen.");
 
-	exprange(20, 20000, freq, function(rRes)
-	{
-		rangedFreq = rRes;
-	});
+	rangedFreq = exprange(20, 20000, freq);
 
 	var filter1 = Soliton.context.createBiquadFilter();
 	input.connect(filter1);
@@ -9327,12 +9622,12 @@ function phaser(speed, input, ret)
 	}
 
 	fxNode._lichType = AUDIO;
-	ret(fxNode);
+	return fxNode;
 }
 
-_createPrimitive("phaser", phaser);
+_createUGen("phaser", phaser);
 
-function flanger(speed, depth, feedBack, input, ret)
+function flanger(speed, depth, feedBack, input)
 {
 	if(input._lichType != AUDIO)
 	{
@@ -9361,29 +9656,15 @@ function flanger(speed, depth, feedBack, input, ret)
 		throw new Error("flanger can only be used with numbers and ugens.");
 
 	if(typeof depth === "number")
-	{
-		range(0, 0.005*depth, lfo, function(dRes)
-		{
-			rangedLFO = dRes;
-		});
-	}
+		rangedLFO = range(0, 0.005*depth, lfo);
 
 	else if(depth._lichType == AUDIO)
 	{
 		// This is a completely ridiculous stream of ugens, but Web Audio sucks for simple things like multiply and subtract...so it goes.
-		_subtractMix(1, depth, function(dRes) // Flip depth from 0 to 1 into 1 to 0.
-		{
-			range(0, 1, lfo, function(rRes) // Constrain the lfo from -1 to 1 into 0 to 1
-			{
-				mul(dRes, rRes, function(mRes) // multiply the lfo by depth so it goes from 0 to 1, to 0 to Depth
-				{
-					mul(0.05, mRes, function(mRes) // multiply the result by 0.05 so it's now 0 to (0.05*depth). All at audio rate.
-					{
-						rangedLFO = mRes;
-					});
-				});
-			});	
-		});
+		var dRes = _subtractMix(1, depth); // Flip depth from 0 to 1 into 1 to 0.
+		var rRes = range(0, 1, lfo); // Constrain the lfo from -1 to 1 into 0 to 1
+		var mRes = mul(dRes, rRes); // multiply the lfo by depth so it goes from 0 to 1, to 0 to Depth
+		rangedLFO = mul(0.05, mRes); // multiply the result by 0.05 so it's now 0 to (0.05*depth). All at audio rate.
 	}
 
 	else
@@ -9451,17 +9732,15 @@ function flanger(speed, depth, feedBack, input, ret)
 	}
 
 	fxNode._lichType = AUDIO;
-	ret(fxNode);
+	return fxNode;
 }
 
-_createPrimitive("flanger", flanger);
+_createUGen("flanger", flanger);
 
-function chorus(speed, depth, input, ret)
+function chorus(speed, depth, input)
 {
 	if(input._lichType != AUDIO)
-	{
 		throw new Error("chorus must be used with an audio ugen for input.");
-	}
 
 	if(numVoices > 10)
 	{
@@ -9511,25 +9790,12 @@ function chorus(speed, depth, input, ret)
 		delayNodes[i] = delayNode;
 
 		if(i > 0) // if above 0, randomize phase multiplier
-		{
-			mul(phaseMuls[i], rangedLFO, function(mRes)
-			{
-				rangedLFO = mRes;
-			});
-		}
+			rangedLFO = mul(phaseMuls[i], rangedLFO);
 
 		if(i == 1 || i == 2)
-		{
-			add(phaseOffsets[i], rangedLFO, function(aRes)
-			{
-				rangedLFO = aRes;
-			})
-		}
+			rangedLFO = add(phaseOffsets[i], rangedLFO);
 
-		range(minRange, minRange+(0.0025*depth*((i+1)/numVoices)), rangedLFO, function(rRes)
-		{
-			rangedLFO = rRes;
-		});
+		rangedLFO = range(minRange, minRange+(0.0025*depth*((i+1)/numVoices)), rangedLFO);
 
 		rangedLFO.connect(delayNode.delayTime);
 		rangedLFOs[i] = rangedLFO;
@@ -9582,12 +9848,12 @@ function chorus(speed, depth, input, ret)
 	}
 
 	fxNode._lichType = AUDIO;
-	ret(fxNode);
+	return fxNode;
 }
 
-_createPrimitive("chorus", chorus);
+_createUGen("chorus", chorus);
 
-function killall(ret)
+function killall()
 {
 	Lich.scheduler.freeScheduledEvents();
     Soliton.masterGain.disconnect(0);
@@ -9602,6 +9868,8 @@ function killall(ret)
 	Soliton.limiter.release.value = 0.01;
 	Soliton.masterGain.connect(Soliton.limiter);
 	Soliton.limiter.connect(Soliton.context.destination);
+	_mouseUGens = 0;
+	document.onmousemove = null;
 	
 	Soliton.buses = [];
 	for(var i = 0; i < Soliton.numBuses; ++i)
@@ -9612,8 +9880,6 @@ function killall(ret)
 		bus.stopAll = function(){};
 		Soliton.buses.push(bus);
 	}
-	
-	//ret(Lich.VM.Void);
 }
 
 _createPrimitive("killall", killall);
@@ -9636,23 +9902,6 @@ Soliton.PercStream = function(_events, _modifiers)
 {
 	var events = _events;
 	var modifiers = _modifiers;
-	
-    this.collapseModifiers = function()
-    {
-	    mapCps(
-			modifiers,
-			function(modifier, i, callback)
-			{
-			    Lich.collapse(modifier, callback);
-			},
-			function(collapsedModifiers)
-			{
-			    modifiers = collapsedModifiers;
-			}
-	    );
-	}
-
-    this.collapseModifiers();
     this.nextTime = Math.floor((Soliton.context.currentTime / Lich.scheduler.tempoSeconds) + 0.5) * Lich.scheduler.tempoSeconds;
 	var macroBeat = 0;
 	var modifierBeat = 0;
@@ -9705,14 +9954,12 @@ Soliton.PercStream = function(_events, _modifiers)
 			try
 			{
 				var nextTime = this.nextTime;
-				Lich.collapse(Soliton.synthDefs[nevent], function(synth)
+				var synth = Soliton.synthDefs[nevent]();
+				if(synth._lichType == AUDIO)
 				{
-					if(synth._lichType == AUDIO)
-					{
-						synth.connect(Soliton.masterGain);
-						synth.startAll(nextTime + offset);
-					}
-				});
+					synth.connect(Soliton.masterGain);
+					synth.startAll(nextTime + offset);
+				}
 			}
 
 			catch(e)
@@ -9738,10 +9985,7 @@ Soliton.PercStream = function(_events, _modifiers)
 			{
 				try
 				{
-					modifier(Lich.scheduler.tempoSeconds, function(_beatDuration)
-					{
-						beatDuration = _beatDuration;
-					});
+					beatDuration = modifier(Lich.scheduler.tempoSeconds);
 				}
 
 				catch(e)
@@ -9766,7 +10010,6 @@ Soliton.PercStream = function(_events, _modifiers)
 	{
 		events = newEvents;
 		modifiers = newModifiers;
-	        this.collapseModifiers();
 		macroBeat = macroBeat % events.length;
 
 		if(modifiers.length)
@@ -9794,23 +10037,6 @@ Soliton.SoloStream = function(_instrument, _events, _modifiers)
 	var instrument = _instrument;
 	var events = _events;
 	var modifiers = _modifiers;
-        
-    this.collapseModifiers = function()
-    {
-	    mapCps(
-			modifiers,
-			function(modifier, i, callback)
-			{
-			    Lich.collapse(modifier, callback);
-			},
-			function(collapsedModifiers)
-			{
-			    modifiers = collapsedModifiers;
-			}
-	    );
-	}
-
-    this.collapseModifiers();
 	this.nextTime = Math.floor((Soliton.context.currentTime / Lich.scheduler.tempoSeconds) + 0.5) * Lich.scheduler.tempoSeconds;
 	var macroBeat = 0;
 	var modifierBeat = 0;
@@ -9868,23 +10094,18 @@ Soliton.SoloStream = function(_instrument, _events, _modifiers)
 
 					if(modifier != Lich.VM.Nothing)
 					{
-						modifier(nevent, function(_newEvent)
-						{
-							nevent = _newEvent;
-						});
+						nevent = modifier(nevent);
 					}
 				}
 
 				
 				var nextTime = this.nextTime;
-				Soliton.synthDefs[instrument](nevent, function(synth)
+				var synth = Soliton.synthDefs[instrument](nevent);
+				if(synth._lichType == AUDIO)
 				{
-					if(synth._lichType == AUDIO)
-					{
-						synth.connect(Soliton.masterGain);
-						synth.startAll(nextTime + offset);
-					}
-				});
+					synth.connect(Soliton.masterGain);
+					synth.startAll(nextTime + offset);
+				}
 			}
 
 			catch(e)
@@ -9924,8 +10145,7 @@ Soliton.SoloStream = function(_instrument, _events, _modifiers)
 		instrument = newInstrument;
 		events = newEvents;
 		modifiers = newModifiers;
-	        this.collapseModifiers();
-	        macroBeat = macroBeat % events.length;
+	    macroBeat = macroBeat % events.length;
 
 		if(modifiers.length)
 			modifierBeat = modifierBeat % modifiers.length;
@@ -10146,3 +10366,4 @@ Soliton.SteadyScheduler = function()
 _createPrimitive("tempo", true);
 _createPrimitive("tempoSeconds", true);
 _createPrimitive("tempoMillis", true);
+ugenList = ugenList.sort();

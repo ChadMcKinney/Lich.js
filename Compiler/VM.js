@@ -130,9 +130,9 @@ Lich.VM.printClosure = function(closure)
 	{
 		params = params[1].split(",").map(function(elem){return elem.replace(/ /g,"")});
 		if(curried)
-			string = string + params.slice(initClosure.curriedArgs.length,params.length-1).join(" ");
+			string = string + params.slice(initClosure.curriedArgs.length,params.length).join(" ");
 		else	
-			string = string + params.slice(0,params.length-1).join(" ");
+			string = string + params.slice(0,params.length).join(" ");
 	} 
 
 	//Lich.post("PRINT CLOSURE!");

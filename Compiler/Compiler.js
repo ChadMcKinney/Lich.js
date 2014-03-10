@@ -37,52 +37,7 @@
 
 Function.prototype.curriedArgs = [];
 
-Function.prototype.collapse = function(_collapseRet)
-{
-	if(typeof this.curriedFunc === "undefined")
-	{
-		if(this.length <= arguments.length)
-		{
-			return this.apply(this, arguments);
-		}
-			
-		else
-		{
-			return _collapseRet(this);
-		}
-	}
-
-	else
-	{
-		if(this.curriedFunc.length <= (this.curriedArgs.length + arguments.length))
-		{
-			this.apply(this, arguments);
-		}
-
-		else
-		{
-			_collapseRet(this);
-		}
-	}
-}
-
-Lich.collapse = function(object, _ret)
-{
-	if(object == null || typeof object === "undefined")
-		_ret(Lich.VM.Nothing);
-
-	else if(typeof object === "function")
-		object.collapse(_ret);
-	else
-		_ret(object);
-}
-
-// Error if curry is called on non-function objects
-/*Object.prototype.curry = function()
-{
-	throw new Error("Expression "+this+" cannot be used as a function for function application.");
-}*/
-
+// Function currying that allows for currying to be used multiple times.
 Function.prototype.curry = function curry() 
 {
 	if(typeof this.curriedFunc !== "undefined")
@@ -125,14 +80,6 @@ Function.prototype.curry = function curry()
 	    return newFunc;
 	}
 };
-
-Lich.apply = function(exp, context, _arguments)
-{
-	if(typeof exp === "function")
-		exp.apply(context, _arguments);
-	else
-		_arguments[0].apply(context, [exp]);
-}
 
 // Thanks to: https://gist.github.com/Gozala/1697037
 function tco(f) {
@@ -394,113 +341,95 @@ Lich.verifyDef = function(name)
 	}
 
 	if(Lich.VM.reserved.hasOwnProperty(name))
-		throw new Error("Duplication definition for reserved variable " + name + ". Use a different name.");
+		throw new Error("Duplicate definition for reserved variable " + name + ". Use a different name.");
 }
 
 // The Lich.js compiler traverse the abstract syntax tree returned by the parser and calls native JavaScript
-Lich.compileAST = function(ast, ret)
+Lich.compileAST = function(ast)
 {
 	if(ast instanceof Array)
 	{
 		var res = new Array();
 		for(var i = 0; i < ast.length; ++i)
 		{	
-			Lich.compileAST(ast[i], function(tempRes)
-			{
-				res.push(tempRes);
-			});
-
-			//if(i < ast.length - 1)
-			//	Lich.VM.Print(res);
+			res.push(Lich.compileAST(ast[i]));
 		}
 
-		//return res;
-		ret(res);
+		return res;
 	}
 
 	else if(ast instanceof Object)
 	{
-		/*
-		if (typeof ast === "function")
-		{
-			Lich.post("AST FUNCTION?!: " + ast);
-			return; // Do nothing, this is a tail end function given by the parser we don't need.
-		}*/
-
-		//Lich.post("AST name: " + ast.astType);
-		//Lich.post(ast);
-
 		switch(ast.astType)
 		{
 			case "primitive":
-				return ast(ret);
+				return ast;
 
 			case "percStream":
-				return Lich.compilePercStream(ast, ret);
+				return Lich.compilePercStream(ast);
 
 			case "percList":
-				return Lich.compilePercList(ast, ret);
+				return Lich.compilePercList(ast);
 
 			case "percMods":
-				return Lich.compilePercMods(ast, ret);
+				return Lich.compilePercMods(ast);
 
 			case "soloStream":
-				return Lich.compileSoloStream(ast, ret);
+				return Lich.compileSoloStream(ast);
 
 			case "soloList":
-				return Lich.compileSoloList(ast, ret);
+				return Lich.compileSoloList(ast);
 
 			case "soloMods":
-				return Lich.compileSoloMods(ast, ret);
+				return Lich.compileSoloMods(ast);
 
 			case "decl-fun":
-				return Lich.compileDeclFun(ast,ret);
+				return Lich.compileDeclFun(ast);
 
 			case "local-decl-fun":
-				return Lich.compileLocalDeclFun(ast,ret);
+				return Lich.compileLocalDeclFun(ast);
 				
 			case "fun-where":
-				return Lich.compileFunWhere(ast,ret);
+				return Lich.compileFunWhere(ast);
 				
 			case "ite":
-				return Lich.compileIte(ast,ret);
+				return Lich.compileIte(ast);
 				
 			case "application":
-				return Lich.compileApplication(ast,ret);
+				return Lich.compileApplication(ast);
 				
 			case "function-application-op":
-				return Lich.compileFunctionApplicationOp(ast,ret);
+				return Lich.compileFunctionApplicationOp(ast);
 
 			case "receive":
-				return Lich.compileReceive(ast,ret);
+				return Lich.compileReceive(ast);
 				
 			case "function-composition":
-				return Lich.compileFunctionComposition(ast,ret);
+				return Lich.compileFunctionComposition(ast);
 
 			case "function-stream":
-				return Lich.compileFunctionStream(ast,ret);
+				return Lich.compileFunctionStream(ast);
 
 			case "lambda":
-				return Lich.compileLambda(ast,ret);
+				return Lich.compileLambda(ast);
 				
 			case "let":
-				return Lich.compileLet(ast,ret);
+				return Lich.compileLet(ast);
 				
 			case "let-one": // ghci style let expression for global definitions
-				return Lich.compileLetOne(ast,ret);
+				return Lich.compileLetOne(ast);
 				
 			case "listexp":
-				return Lich.compileListExp(ast,ret);
+				return Lich.compileListExp(ast);
 				
 			case "qop":
-				return Lich.compileQop(ast,ret);
+				return Lich.compileQop(ast);
 				
 			case "conpat":
-				return Lich.compileConPat(ast,ret);
+				return Lich.compileConPat(ast);
 				
 			case "wildcard":
-				ret({ _lichType: WILDCARD });
-				break;
+				return { _lichType: WILDCARD };
 				
 			case "integer-lit":
 			case "char-lit":
@@ -508,105 +437,103 @@ Lich.compileAST = function(ast, ret)
 			case "float-lit":
 			case "boolean-lit":
 			case "string-lit":
-				ret(ast.value);
-				break;
+				return ast.value;
 				
 			case "varname":
-				return Lich.compileVarName(ast,ret);
+				return Lich.compileVarName(ast);
 				
 			case "dacon":
-				return Lich.compileDacon(ast,ret);
+				return Lich.compileDacon(ast);
 				
 			case "binop-exp":
-				return Lich.compileBinOpExp(ast,ret);
+				return Lich.compileBinOpExp(ast);
 
 			case "curried-binop-exp":
-				return Lich.compileCurriedBinOpExp(ast,ret);
+				return Lich.compileCurriedBinOpExp(ast);
 
 			case "left-curried-binop-exp":
-				return Lich.compileLeftCurriedBinOpExp(ast,ret);
+				return Lich.compileLeftCurriedBinOpExp(ast);
 
 			case "right-curried-binop-exp":
-				return Lich.compileRightCurriedBinOpExp(ast,ret);
+				return Lich.compileRightCurriedBinOpExp(ast);
 				
 			case "negate":
-				return Lich.compileNegate(ast,ret);
+				return Lich.compileNegate(ast);
 				
 			case "listrange":
-				return Lich.compileListRange(ast,ret);
+				return Lich.compileListRange(ast);
 				
 			case "dictionary":
-				return Lich.compileDictionary(ast,ret);
+				return Lich.compileDictionary(ast);
 				
 			case "case":
-				return Lich.compileCase(ast,ret);
+				return Lich.compileCase(ast);
 				
 			case "Nothing":
-				ret("Lich.VM.Nothing");
-				break;
+				return "Lich.VM.Nothing";
 				
 			case "list-comprehension":
-				return Lich.compileListComprehension(ast,ret);
+				return Lich.compileListComprehension(ast);
 				
 			case "module":
-				return Lich.compileModule(ast,ret);
+				return Lich.compileModule(ast);
 				
 			case "body":
-				return Lich.compileBody(ast,ret);
+				return Lich.compileBody(ast);
 				
 			case "data-decl":
-				return Lich.compileDataDecl(ast,ret);
+				return Lich.compileDataDecl(ast);
 				
 			case "data-inst":
-				return Lich.compileDataInst(ast,ret);
+				return Lich.compileDataInst(ast);
 				
 			case "data-lookup":
-				return Lich.compileDataLookup(ast,ret);
+				return Lich.compileDataLookup(ast);
 				
 			case "data-update":
-				return Lich.compileDataUpdate(ast,ret);
+				return Lich.compileDataUpdate(ast);
 				
 			case "data-enum":
-				return Lich.compileDataEnum(ast,ret);
+				return Lich.compileDataEnum(ast);
 				
 			case "data-match":
-				return Lich.compileDataMatch(ast,ret);
+				return Lich.compileDataMatch(ast);
 				
 			case "topdecl-decl":
-				return Lich.compileTopdeclDecl(ast,ret);
+				return Lich.compileTopdeclDecl(ast);
 
 			case "class-exp":
-				return Lich.compileClassExpr(ast,ret);
+				return Lich.compileClassExpr(ast);
 
 			case "class-decl":
-				return Lich.compileClassDecl(ast,ret);
+				return Lich.compileClassDecl(ast);
 					
 			case "class-binop":
-				return Lich.compileClassBinOp(ast,ret);
+				return Lich.compileClassBinOp(ast);
 
 			case "top-exp":
-				return Lich.compileTopExp(ast, ret);
+				return Lich.compileTopExp(ast);
 
 			case "do-exp":
-				return Lich.compileDoExp(ast, ret);
+				return Lich.compileDoExp(ast);
 
 			case "guard-fun":
-				return Lich.compileGuardExp(ast, ret);
+				return Lich.compileGuardExp(ast);
 
 			case "synthdef":
-				return Lich.compileSynthDef(ast,ret);
+				return Lich.compileSynthDef(ast);
 
 			case "impjs":
-				return Lich.compileImportJS(ast,ret);
+				return Lich.compileImportJS(ast);
 
 			default:
-				return Lich.unsupportedSemantics(ast,ret);
+				return Lich.unsupportedSemantics(ast);
 		}
 	}
 
 	else if(typeof ast === "undefined")
 	{
-		ret(Lich.VM.Nothing);
+		return Lich.VM.Nothing;
 	}
 
 	else
@@ -615,7 +542,7 @@ Lich.compileAST = function(ast, ret)
 	}
 }
 
-Lich.unsupportedSemantics = function(ast,ret)
+Lich.unsupportedSemantics = function(ast)
 {
 	throw new Error("Unsupported semantics for " +ast+" with type "+ ast.astType);
 }
@@ -697,7 +624,7 @@ Lich.numLambdaArgs = function(object)
 	}
 }
 
-Lich.generateMatchFunc = function(object, pat, i, throwCode, ret)
+Lich.generateMatchFunc = function(object, pat, i, throwCode)
 {
 	var matchCode = "";
 	if(pat.astType == "at-match")
@@ -710,25 +637,27 @@ Lich.generateMatchFunc = function(object, pat, i, throwCode, ret)
 	case "varname":
 	case "wildcard":
 		if(throwCode)
-			ret(matchCode);
+			return matchCode;
 		else
-			ret(matchCode+"return true");
-		break;
+			return matchCode + "true";
 
 	case "Nothing":
 		if(throwCode)
 		{
-			ret(matchCode + "if(Lich.getType("+object+") != NOTHING){throw new Error(\"Function argument does not match Nothing pattern for "
+			return (matchCode + "if(Lich.getType("+object+") != NOTHING){throw new Error(\"Function argument does not match Nothing pattern for "
 				+"argument number \"+"+i+")};");
 		}
 
 		else
 		{
-			ret(matchCode + "if(Lich.getType("+object+") == NOTHING){return true}else{return false};");
+			return matchCode + "Lich.getType("+object+") == NOTHING";
 		}
-		break;
 
 	case "data-match":
+
+		if(!throwCode)
+			matchCode += "(function(){";
+
 		matchCode = matchCode + "if(Lich.dataMatch("+object+", \""+pat.id+"\")){";
 
 		for(var j = 0; j < pat.members.length; ++j)
@@ -739,9 +668,12 @@ Lich.generateMatchFunc = function(object, pat, i, throwCode, ret)
 		if(throwCode)
 			matchCode = matchCode + "}else{throw new Error(\"Function argument does not match "+pat.id+" pattern for argument number \"+"+i+")};";
 		else
-			matchCode = matchCode + ";return true}else{return false};";
-		ret(matchCode);
-		break;
+			matchCode = matchCode + ";return true}else{return false}";
+		
+		if(!throwCode)
+			matchCode += "})()";
+
+		return matchCode;
 
 	case "literal-match":
 		var value = pat.value.value;
@@ -750,17 +682,20 @@ Lich.generateMatchFunc = function(object, pat, i, throwCode, ret)
 
 		if(throwCode)
 		{
-			ret(matchCode+"if("+object+" !== "+pat.value.value+"){Lich.VM.Print("+object+");throw new Error(\"Function argument does not match "
+			return (matchCode+"if("+object+" !== "+pat.value.value+"){Lich.VM.Print("+object+");throw new Error(\"Function argument does not match "
 				+value+" pattern for argument number \"+"+i+")};");
 		}
 
 		else
 		{
-			ret(matchCode+"if("+object+" === "+pat.value.value+"){return true}else{return false};");
+			return matchCode + object+" === "+pat.value.value;
 		}
-		break;
 
 	case "head-tail-match":
+
+		if(!throwCode)
+			matchCode += "(function(){";
+
 		matchCode = matchCode + "if(Lich.getType("+object+") == LIST){if("+object+".length < 1){";
 
 		if(throwCode)
@@ -795,10 +730,16 @@ Lich.generateMatchFunc = function(object, pat, i, throwCode, ret)
 			matchCode = matchCode + ";return true}}else{return false};";
 		}
 		
-		ret(matchCode);
-		break;
+		if(!throwCode)
+			matchCode += "})()";
+		
+		return matchCode;
 
 	case "list-match":
+
+		if(!throwCode)
+			matchCode += "(function(){";
+
 		matchCode = matchCode + "if(Lich.getType("+object+") == LIST){if("+object+".length == "+pat.list.length+"){";
 				
 		for(var j = 0; j < pat.list.length; ++j)
@@ -812,14 +753,11 @@ Lich.generateMatchFunc = function(object, pat, i, throwCode, ret)
 
 				else
 				{
-					Lich.generateMatchFunc(object+"["+j+"]", pat.list[j], i, throwCode, function(tempCode)
-					{
-						if(throwCode)
-							matchCode = matchCode + tempCode;
-						else
-							matchCode = matchCode + "var _bool=(function(){" + tempCode + "})();if(!(_bool)){return false};";
-						
-					});
+					var tempCode = Lich.generateMatchFunc(object+"["+j+"]", pat.list[j], i, throwCode);
+					if(throwCode)
+						matchCode = matchCode + tempCode;
+					else
+						matchCode = matchCode + "var _bool=(function(){" + tempCode + "})();if(!(_bool)){return false};";
 				}
 			}
 		}
@@ -834,29 +772,27 @@ Lich.generateMatchFunc = function(object, pat, i, throwCode, ret)
 			matchCode = matchCode + ";return true}else{return false}}else{return false};";	
 		}
 		
-		ret(matchCode);
-		break;
+		if(!throwCode)
+			matchCode += "})()";
+		
+		return matchCode;
 
 	case "lambda-pat":
+
 		if(throwCode)
 		{
-			matchCode = matchCode + "if((typeof "+ object + " !== \"function\")||(Lich.numLambdaArgs("+object+") != " + (pat.numArgs+1)+")){"
+			matchCode = matchCode + "if((typeof "+ object + " !== \"function\")||(Lich.numLambdaArgs("+object+") != " + pat.numArgs+")){"
 				+"throw new Error(\"Function argument does not match "+Lich.lambdaPatternPrint(pat.numArgs)+" pattern for argument number \"+"+i+")};";	
+			return matchCode;
 		}
 
 		else
 		{
-			matchCode = matchCode + "if((typeof "+ object + " !== \"function\")||(Lich.numLambdaArgs("+object+") != " + (pat.numArgs+1)+")){"
-				+"return false}else{return true};";	
+			matchCode = matchCode + "(typeof "+ object + " === \"function\")&&(Lich.numLambdaArgs("+object+") == " + pat.numArgs+")";	
 		}
 		
-		
-		ret(matchCode);
-		break;
-
 	default:
-		ret(matchCode);
-		break;
+		return matchCode;
 	}
 }
 
@@ -864,18 +800,18 @@ Lich.generateMatchFunc = function(object, pat, i, throwCode, ret)
 // Used to create local scope variables before generating the actual matching code.
 // Every match must generate an argument name for the pattern, and can optionally create extra variables as needed.
 // The i argument is used to prevent namespace clashes in name generation. All non-user generated names must start with an underscore
-Lich.generateOneArgNameAndMatchVars = function(pat, i, ret)
+Lich.generateOneArgNameAndMatchVars = function(pat, i)
 {
 	var argName = "_";
 	var matchVars = "";
 	if(pat.astType == "at-match")
 	{
 		argName = pat.id;
-		Lich.generateOneArgNameAndMatchVars(pat.pat, i, function(tempName, tempVars)
-		{
-			matchVars = matchVars + tempVars;
-			ret(argName, matchVars);
-		});
+		var arr = Lich.generateOneArgNameAndMatchVars(pat.pat, i);
+		var tempName = arr[0];
+		var tempVars = arr[1];
+		matchVars = matchVars + tempVars;
+		return [argName, matchVars];
 	}
 
 	else
@@ -885,13 +821,11 @@ Lich.generateOneArgNameAndMatchVars = function(pat, i, ret)
 		case "varname":
 		case "wildcard":
 			argName = pat.id;
-			ret(argName, matchVars);
-			break;
+			return [argName, matchVars];
 
 		case "Nothing":
 			argName = "_nothing"+i;
-			ret(argName, matchVars);
-			break;
+			return [argName, matchVars];
 
 		case "data-match":
 			argName = "_"+pat.id+i;
@@ -899,13 +833,11 @@ Lich.generateOneArgNameAndMatchVars = function(pat, i, ret)
 			{	
 				matchVars = matchVars + "var "+pat.members[i]+";";
 			}
-			ret(argName, matchVars);
-			break;
+			return [argName, matchVars];
 
 		case "literal-match":
 			argName = "_"+pat.astType.replace(/-/g,"_")+i;
-			ret(argName, matchVars);
-			break;
+			return [argName, matchVars];
 
 		case "head-tail-match":
 			argName = "_headTail"+i;
@@ -918,201 +850,105 @@ Lich.generateOneArgNameAndMatchVars = function(pat, i, ret)
 			{
 				matchVars = matchVars + "var "+pat.tail+";";	
 			}
-			ret(argName, matchVars);
-			break;
+			return [argName, matchVars];
 
 		case "list-match":
 			argName = "_list"+i;
-			forEachCps(
-				pat.list,
-				function(elem, j, next)
+			for(var j = 0; j < pat.list.length; ++j)
+			{
+				var elem = pat.list[j];
+				if(elem.astType !== "wildcard")
 				{
-					if(elem.astType !== "wildcard")
+					if(elem.astType == "varname")
 					{
-						if(elem.astType == "varname")
-						{
-							matchVars = matchVars + "var "+elem.id+";";
-							next();
-						}
-
-						else
-						{
-							Lich.generateOneArgNameAndMatchVars(elem, i, function(argName, itemMatchVars)
-							{
-								matchVars = matchVars + itemMatchVars;
-								next();
-							});
-						}
+						matchVars = matchVars + "var "+elem.id+";";
 					}
-
+	
 					else
 					{
-						next();
+						matchVars += Lich.generateOneArgNameAndMatchVars(elem, i)[1];
 					}
-				},
-				function()
-				{
-					ret(argName,matchVars);
 				}
-			);
-			break;
+			}
+
+			return [argName, matchVars];
 
 		case "lambda-pat":
 			argName = "_lambda"+i;
-			ret(argName,matchVars);
-			break;
+			return [argName,matchVars];
 
 		default:
-			ret(argName,matchVars);
-			break;
+			return [argName,matchVars];
 		}
 	}
 }
 
-Lich.generateArgNamesAndMatchVars = function(args, ret)
+Lich.generateArgNamesAndMatchVars = function(args)
 {
 	var argNames = new Array();
 	var matchVars = "";
-	forEachCps(
-		args,
-		function(arg, i, next)
-		{
-			Lich.generateOneArgNameAndMatchVars(arg, i, function(tempArgName, tempMatchVars)
-			{
-				argNames.push(tempArgName);
-				matchVars = matchVars + tempMatchVars;
-				next();
-			});
-		},
-		function()
-		{
-			ret(argNames, matchVars);
-		}
-	);
+	
+	for(var i = 0; i < args.length; ++i)
+	{
+		var arr = Lich.generateOneArgNameAndMatchVars(args[i], i);
+		argNames.push(arr[0]);
+		matchVars += arr[1];
+	}
+
+	return [argNames, matchVars];
 }
 
-Lich.checkFunctionArgMatches = function(argNames, pats, ret)
+Lich.checkFunctionArgMatches = function(argNames, pats)
 {
 	var matchCode = "";
 	for(var i = 0; i < argNames.length; ++i)
 	{
-		Lich.generateMatchFunc(argNames[i], pats[i], i, true, function(tempCode)
-		{
-			matchCode = matchCode + tempCode;
-		});
+		matchCode += Lich.generateMatchFunc(argNames[i], pats[i], i, true);
 	}
 
-	ret(matchCode);
+	return matchCode;
+
 }
 
-Lich.compileModule = function(ast,ret)
+Lich.compileModule = function(ast)
 {
 	Lich.post("Compiling module: " + ast.modid);
-	
-	Lich.compileAST(ast.body, function(res)
-	{
-		ret(res);
-		Lich.post("Done compiling module: " + ast.modid);
-	});
+	var res = Lich.compileAST(ast.body);
+	Lich.post("Done compiling module: " + ast.modid);
+	return res;
 }
 
-Lich.compileBody = function(ast,ret)
+Lich.compileBody = function(ast)
 {
 	var body = "";
-
-	forEachCps(
-		ast.topdecls, 
-		function(elem,index,next)
-		{
-			Lich.compileAST(elem, function(res)
-			{
-				body = body + ";" + res;
-				next();
-			});
-		},
-		function(){ret(body);}
-	);
-}
-
-Lich.compileTopdeclDecl = function(ast,ret)
-{
-	Lich.compileAST(ast.decl, ret);
-}
-
-Lich.compileTopdeclData = function(ast,ret)
-{
-	Lich.unsupportedSemantics(ast, ret);
-}
-
-Lich.generatePatternMatching = function(patterns, ret)
-{
-	var matchCode = "";
-	forEachCps(
-		patterns,
-		function(pat, i, next)
-		{
-			matchCode = matchCode+Lich.generateMatchVars(pat);
-		},
-		function()
-		{
-			ret(matchCode);
-		}
-	);
-}
-
-// Collapses all the arguments passed to a function, using CPS, so that the body can use them unboxed.
-Lich.generateCollapseArguments = function(argNames)
-{
-	var collapseCode = "(function(_argRet){";
-
-	for(var i = 0; i < argNames.length; ++i)
+	for(var i = 0; i < ast.topdecls.length; ++i)
 	{
-		var arg = argNames[i];
-		collapseCode = collapseCode + "Lich.collapse(" + arg + ",function("+arg+"Res){"+arg+"="+arg+"Res;";
+		body += Lich.compileAST(ast.topdecls[i]) + ";";
 	}
 
-	for(var j = 0; j < argNames.length; ++j)
-	{
-		if(j < argNames.length - 1)
-			collapseCode = collapseCode + "})";
-		else
-			collapseCode = collapseCode + ";_argRet()})";
-	}
-
-	collapseCode = collapseCode + "})"; // Final }) for original function
-	return collapseCode;
+	return body;
 }
 
-Lich.collapseArguments = function(_arguments, _ret)
+Lich.compileTopdeclDecl = function(ast)
 {
-	mapCps(
-		_arguments,
-		function(elem, i, callback)
-		{
-			Lich.collapse(elem, function(collapsedElem)
-			{
-				callback(collapsedElem);
-			})
-		},
-		function(collapsedArgs)
-		{
-			_ret(collapsedArgs);
-		}
-	)
+	return Lich.compileAST(ast.decl);
 }
 
-Lich.compileLocalDeclFun = function(ast,ret)
+Lich.compileTopdeclData = function(ast)
+{
+	return Lich.unsupportedSemantics(ast);
+}
+
+Lich.compileLocalDeclFun = function(ast)
 {
 	if(ast.args.length == 0)
 	{
-		Lich.compileAST(ast.rhs, function(rhs)
-		{
-			ret("var "+ast.ident.id + "=" + rhs + ";Lich.collapse("+ast.ident.id+",function(res){"+ast.ident.id+"=res});");
-		});
+		return "var "+ast.ident.id + "=" + Lich.compileAST(ast.rhs);
 	}
 
 	else
 	{
+		
 		var localArgNames = [];
 
 		for(var i = 0; i < ast.args.length; ++i)
@@ -1126,20 +962,12 @@ Lich.compileLocalDeclFun = function(ast,ret)
 			}
 		}
 
-		Lich.compileAST(ast.rhs, function(rhs)
-		{
-			Lich.generateArgNamesAndMatchVars(ast.args, function(argNames, matchVars)
-			{
-				Lich.checkFunctionArgMatches(argNames, ast.args, function(matchCode)
-				{
-					var collapseCode = Lich.generateCollapseArguments(argNames);
-					ret("var " + ast.ident.id + "=function (" + [].concat(argNames).concat("_ret").join(",") + "){"+collapseCode+"(function(){"+matchVars
-						+matchCode+";Lich.collapse("+rhs+",_ret)})};");
-					//ret("var "+ast.ident.id + "=function (" + [].concat(argNames).concat("_ret").join(",") + "){"+collapseCode+"(function(){"+matchVars
-					//	+matchCode+";Lich.collapse("+rhs+",_ret)})};");
-				});
-			});
-		});
+		var rhs = Lich.compileAST(ast.rhs);
+		var arr = Lich.generateArgNamesAndMatchVars(ast.args);
+		var argNames = arr[0];
+		var matchVars = arr[1];
+		var matchCode = Lich.checkFunctionArgMatches(argNames, ast.args);
+		return "var " + ast.ident.id + "=function (" + argNames.join(",") + "){"+matchVars+matchCode+"return "+rhs+"}";
 	}
 }
 
@@ -1151,22 +979,13 @@ Lich.printAll = function(arr)
 	}
 }
 
-Lich.compileDeclFun = function(ast,ret)
+Lich.compileDeclFun = function(ast)
 {
 	Lich.verifyDef(ast.ident.id);
 
-	if(ast.args.length == 0)
+	if(ast.args.length == 0 && typeof ast.noCollapse == "undefined")
 	{
-		Lich.compileAST(ast.rhs, function(rhs)
-		{
-			//ret(ast.ident.id + "=" + rhs + ";");
-
-			var res = ast.ident.id + "="+rhs+";";
-			if(typeof ast.noCollapse == "undefined")
-				res += "Lich.collapse("+ast.ident.id+",function(_res){"+ast.ident.id+"=_res;});";
-
-			ret(res);
-		});
+		return  ast.ident.id + "="+Lich.compileAST(ast.rhs)+";";
 	}
 
 	else
@@ -1184,22 +1003,16 @@ Lich.compileDeclFun = function(ast,ret)
 			}
 		}
 
-		Lich.compileAST(ast.rhs, function(rhs)
-		{
-			Lich.generateArgNamesAndMatchVars(ast.args, function(argNames, matchVars)
-			{
-				Lich.checkFunctionArgMatches(argNames, ast.args, function(matchCode)
-				{
-					var collapseCode = Lich.generateCollapseArguments(argNames);
-					ret(ast.ident.id+"=function "+ast.ident.id+"(" + [].concat(argNames).concat("_ret").join(",") + "){"+collapseCode+"(function(){"+matchVars
-						+matchCode+";Lich.collapse("+rhs+",_ret)})};");
-				});
-			});
-		});
+		var rhs = Lich.compileAST(ast.rhs);
+		var arr = Lich.generateArgNamesAndMatchVars(ast.args);
+		var argNames = arr[0];
+		var matchVars = arr[1];
+		var matchCode = Lich.checkFunctionArgMatches(argNames, ast.args);
+		return ast.ident.id+"=function "+ast.ident.id+"(" + argNames.join(",") + "){"+matchVars+matchCode+"return "+rhs+"}";
 	}
 }
 
-Lich.compileFunWhere = function(ast,ret)
+Lich.compileFunWhere = function(ast)
 {
 	var declNames = [];
 
@@ -1211,230 +1024,103 @@ Lich.compileFunWhere = function(ast,ret)
 			declNames.push(ast.decls[i].ident.id);
 	}
 
-	var func = "((function(){";
-
-	mapCps(
-		ast.decls,
-		function(elem,i,callback)
-		{
-			if(elem.astType == "decl-fun")
-				elem.astType = "local-decl-fun";
-			else if(elem.astType == "guard-fun")
-				elem.local = true;
-
-			Lich.compileAST(elem,function(decl)
-			{
-				callback(decl);
-			});
-		},
-		function(decls)
-		{
-			Lich.compileAST(ast.exp, function(exp)
-			{
-				ret(func + decls.join("")+"return "+exp+"})())"/* + "Lich.apply(" + exp +", this, arguments)}"*/);
-			});
-		}
-	);
-}
-
-Lich.compileConstr = function(ast,ret)
-{
-	Lich.unsupportedSemantics(ast,ret);
-}
-
-Lich.compileIte = function(ast,ret)
-{
-	Lich.compileAST(ast.e1, function(expRes1)
+	var decls = [];
+	for(var i = 0; i < ast.decls.length; ++i)
 	{
-		Lich.compileAST(ast.e2, function(expRes2)
-		{
-			Lich.compileAST(ast.e3, function(expRes3)
-			{
-				var func = "(function(_ret){Lich.collapse(("+expRes1+"),(function(cond){if(cond){";
-				func = func + "Lich.collapse(("+expRes2+"),_ret)}else{Lich.collapse(("+ expRes3 +"),_ret)}}))})";
-				ret(func);
-			});
-		});
-	});
+		var elem = ast.decls[i];
+
+		if(elem.astType == "decl-fun")
+			elem.astType = "local-decl-fun";
+		else if(elem.astType == "guard-fun")
+			elem.local = true;
+
+		decls.push(Lich.compileAST(elem));
+	}
+
+	var exp = Lich.compileAST(ast.exp);
+	return "(function(){"+decls.join(";")+";return "+exp+"})();";
 }
 
-Lich.application = function(func, args, _ret)
+Lich.compileConstr = function(ast)
 {
-	//Lich.post("Applicaion func = " + func);
-	//Lich.post("Lich.application args = " + Lich.VM.PrettyPrint(args));
+	Lich.unsupportedSemantics(ast);
+}
 
+Lich.compileIte = function(ast)
+{
+	var expRes1 = Lich.compileAST(ast.e1);
+	var expRes2 = Lich.compileAST(ast.e2);
+	var expRes3 = Lich.compileAST(ast.e3);
+	return "(function(){if("+expRes1+"){return "+expRes2+"}else{return "+expRes3+"}})()";
+}
+
+Lich.application = function(func, args)
+{
 	if(typeof func !=="function")
 		throw new Error("Expression " + Lich.VM.PrettyPrint(func) + " cannot be used as a function for function application.");
 
-	var collapsedArgs = new Array();
-	forEachCps(
-		args,
-		function(arg, _, next)
-		{
-			Lich.collapse(arg, function(collapsedArg)
-			{
-				collapsedArgs.push(collapsedArg);
-				next();
-			});
-		},
-		function()
-		{
-			//Lich.post("Application collapsed args = " + Lich.VM.PrettyPrint(collapsedArgs));
-			//ich.collapse(func.curry.apply(func, collapsedArgs), _ret);
-			Lich.collapse(func, function(collapsedFunc)
-			{
-				Lich.collapse(collapsedFunc.curry.apply(collapsedFunc, collapsedArgs), _ret)
-			});
-		}
-	);
+	return func.curry.apply(func, args);
 }
 
-Lich.compileApplication = function(ast,ret)
+Lich.compileApplication = function(ast)
 {
-	mapCps(
-		ast.exps,
-		function(elem, i, callback)
-		{
-			Lich.compileAST(elem, function(exp)
-			{
-				callback(exp);
-			});
-		},
-		function(exps)
-		{
-			var func = "Lich.application.curry("+exps[0]+",["+exps.slice(1, exps.length).join(",")+"])";
-			// var func = exps[0]+".curry("+exps.slice(1, exps.length).join(",")+")";
-			ret(func);	
-		}
-	);
-}
-
-Lich.compileFunctionApplicationOp = function(ast,ret)
-{
-	Lich.compileAST(ast.lhs, function(exp1)
+	var exps = [];
+	for(var i = 0; i < ast.exps.length; ++i)
 	{
-		Lich.compileAST(ast.rhs, function(exp2)
-		{
-			//ret(exp1 + ".curry("+ exp2 + ")");
-			ret("Lich.application.curry("+exp1+",["+exp2+"])");
-		});
-	});	
+		exps.push(Lich.compileAST(ast.exps[i]));
+	}
+
+	return "Lich.application(" + exps[0]+",["+exps.slice(1, exps.length).join(",")+"])";
 }
 
-Lich.functionCompositionWrapper = function(funcs)
+Lich.compileFunctionApplicationOp = function(ast)
 {
-	return function(a,_fcompRet)
+	return "Lich.application("+Lich.compileAST(ast.lhs)+",["+Lich.compileAST(ast.rhs)+"])";
+}
+
+Lich.compileFunctionComposition = function(ast)
+{
+	var funcs = [];
+	for(var i = 0; i < ast.exps.length; ++i)
 	{
-		Lich.collapse(a,function(arg)
-		{
-			var compRes = arg;
-			forEachReverseCps(
-				funcs,
-				function(func, i, next)
-				{
-					Lich.collapse(func,function(funcRes)
-					{
-						//compRes = function(_ret) { _ret(newRes) };
-						funcRes(compRes, function(res)
-						{
-							compRes = res;
-							next();
-						});
-					});
+		funcs.push(Lich.compileAST(ast.exps[i]));
+	}
 
-				},
-				function()
-				{
-					Lich.collapse(compRes, _fcompRet);
-				}
-			);
-		});
-	};
+	return "function(a){var funcs=["+funcs.join(",")+"];var res = a;for(var i = funcs.length - 1; i >= 0; --i){res = funcs[i](res);};return res;}";
 }
 
-Lich.compileFunctionComposition = function(ast,ret)
+Lich.compileFunctionStream = function(ast)
 {
-	mapCps(
-		ast.exps,
-		function(elem,i,callback)
+	var funcs = "";
+	var end = "";
+	for(var i = ast.exps.length - 1; i >= 0; --i)
+	{
+		if(i > 0)
+			funcs += "Lich.application(";
+
+		funcs += "("+Lich.compileAST(ast.exps[i])+")";
+
+		if(i > 0)
 		{
-			Lich.compileAST(elem, function(func)
-			{
-				callback(func);
-			})
-		},
-		function(funcs)
-		{
-			ret("Lich.functionCompositionWrapper(["+funcs.join(",")+"])");
+			funcs += ",[";
+			end += "])";
 		}
-	);
+	}
+
+	return funcs + end;
 }
 
-Lich.functionStreamWrapper = function(funcs)
+Lich.compileLambda = function(ast)
 {
-	return function(_fcompRet)
-	{
-		Lich.collapse(funcs[0], function(compRes)
-		{
-			forEachCps(
-				funcs.slice(1, funcs.length),
-				function(func, i, next)
-				{
-					Lich.collapse(func,function(funcRes)
-					{
-						//compRes = function(_ret) { _ret(newRes) };
-						funcRes(compRes, function(res)
-						{
-							compRes = res;
-							next();
-						});
-					});
-
-				},
-				function()
-				{
-					Lich.collapse(compRes, _fcompRet);
-				}
-			);
-		});	
-	};
+	var rhs = Lich.compileAST(ast.rhs);
+	var arr = Lich.generateArgNamesAndMatchVars(ast.args);
+	var argNames = arr[0];
+	var matchVars = arr[1];
+	var matchCode = Lich.checkFunctionArgMatches(argNames, ast.args);
+	return "(function (" + argNames.join(",") + "){"+matchVars+matchCode+"return "+rhs+"})"; 			
 }
 
-Lich.compileFunctionStream = function(ast,ret)
-{
-	mapCps(
-		ast.exps,
-		function(elem,i,callback)
-		{
-			Lich.compileAST(elem, function(func)
-			{
-				callback(func);
-			})
-		},
-		function(funcs)
-		{
-			ret("Lich.functionStreamWrapper(["+funcs.join(",")+"])");
-		}
-	);
-}
-
-Lich.compileLambda = function(ast,ret)
-{
-	Lich.compileAST(ast.rhs, function(rhs)
-	{
-		Lich.generateArgNamesAndMatchVars(ast.args, function(argNames, matchVars)
-		{
-			Lich.checkFunctionArgMatches(argNames, ast.args, function(matchCode)
-			{
-				var collapseCode = Lich.generateCollapseArguments(argNames);
-				ret("(function (" + [].concat(argNames).concat("_ret").join(",") + "){"+collapseCode+"(function(){"+matchVars
-					+matchCode+";Lich.collapse("+rhs+",_ret)})})");
-			});
-		});
-	});
-}
-
-Lich.compileLet = function(ast,ret)
+Lich.compileLet = function(ast)
 {
 	var declNames = [];
 
@@ -1446,335 +1132,217 @@ Lich.compileLet = function(ast,ret)
 			declNames.push(ast.decls[i].ident.id);
 	}
 
-	var func = "((function(){";
-
-	mapCps(
-		ast.decls,
-		function(elem,i,callback)
-		{
-			elem.astType = "local-decl-fun";
-			Lich.compileAST(elem,function(decl)
-			{
-				callback(decl);
-			});
-		},
-		function(decls)
-		{
-			Lich.compileAST(ast.exp, function(exp)
-			{
-				ret(func + decls.join("")+"return "+exp+"})())"/* + "Lich.apply(" + exp +", this, arguments)}"*/);
-			});
-		}
-	);
-}
-
-Lich.compileLetOne = function(ast,ret)
-{
-	Lich.compileAST(ast.decl, function(res)
+	var decls = [];
+	for(var i = 0; i < ast.decls.length; ++i)
 	{
-		//ret(res+";Lich.collapse("+ast.decl.ident.id+",function(res){Lich.post(\"Lich> \"+Lich.VM.PrettyPrint(res))});");
-		ret(res+";Lich.post(\"Lich> \"+Lich.VM.PrettyPrint("+ast.decl.ident.id+"))");
-	});
+		var elem = ast.decls[i];
+
+		if(elem.astType == "decl-fun")
+			elem.astType = "local-decl-fun";
+		else if(elem.astType == "guard-fun")
+			elem.local = true;
+
+		decls.push(Lich.compileAST(elem));
+	}
+
+	var exp = Lich.compileAST(ast.exp);
+	return "(function(){"+decls.join(";")+";return "+exp+"})();";
 }
 
-Lich.listExp = function(elems, _ret)
+Lich.compileLetOne = function(ast)
 {
-	var collapsedElems = new Array();
-	forEachCps(
-		elems,
-		function(elem, i, next)
-		{
-			Lich.collapse(elem, function(collapsedElem)
-			{
-				collapsedElems.push(collapsedElem);
-				next();
-			});
-		},
-		function()
-		{
-			_ret(collapsedElems);
-		}
-	);
+	return Lich.compileAST(ast.decl)+";Lich.post(\"Lich> \"+Lich.VM.PrettyPrint("+ast.decl.ident.id+"))";
 }
 
-Lich.compileListExp = function(ast,ret)
+Lich.compileListExp = function(ast)
 {
-	mapCps(
-		ast.members,
-		function(elem,i,callback)
-		{
-			Lich.compileAST(elem, function(elemRes)
-			{
-				callback(elemRes);
-			})
-		},
-		function(res)
-		{
-			ret("Lich.listExp.curry(["+res.join(",")+"])");
-			//ret("["+res.join(",")+"]");
-		}
-	);
+	var res = [];
+	for(var i = 0; i < ast.members.length; ++i)
+	{
+		res.push(Lich.compileAST(ast.members[i]));
+	}
+
+	return "["+res.join(",")+"]";
 }
 
-Lich.compileQop = function(ast,ret)
+Lich.compileQop = function(ast)
 {
-	Lich.unsupportedSemantics(ast);
+	return Lich.unsupportedSemantics(ast);
 }
 
-Lich.compileConPat = function(ast,ret)
+Lich.compileConPat = function(ast)
 {
-	Lich.unsupportedSemantics(ast);
+	return Lich.unsupportedSemantics(ast);
 }
 
-Lich.compileWildCard = function(ast,ret)
+Lich.compileWildCard = function(ast)
 {
-	Lich.unsupportedSemantics(ast);
+	return Lich.unsupportedSemantics(ast);
 }
 
-Lich.compileVarName = function(ast,ret)
+Lich.compileVarName = function(ast)
 {
-	ret(ast.id);
+	return ast.id;
 }
 
-Lich.compileDacon = function(ast,ret)
+Lich.compileDacon = function(ast)
 {
 	if(ast == "Nothing")
-		ret("function(_ret){_ret(null)}");
+		return "null";
 	else
-		Lich.unsupportedSemantics({astType:ast});
+		return Lich.unsupportedSemantics({astType:ast});
 }
 
-Lich.collapseDataConstructor = function(dict, members)
-{
-	forEachDictCps(
-		members,
-		function(n, i, next)
-		{
-			Lich.collapse(members[n], function(memberRes)
-			{
-				dict[n] = memberRes;
-				next();
-			});
-		},
-		function(){}
-	);
-
-	return dict; // One of the few times we don't enforce CPS. Data declarations are always global.
-}
-
-Lich.compileDataDecl = function(ast,ret)
+Lich.compileDataDecl = function(ast)
 {
 	Lich.verifyDef(ast.id);
 
 	var argNames = [];
 	var initialData = [];
-	mapCps(
-		ast.members,
-		function(elem,i,callback)
-		{
-			Lich.compileAST(elem.exp, function(elemRes)
-			{
-				argNames.push("\""+elem.id+"\"");
-				callback(elem.id+":"+elemRes);
-			});
-		},
-		function(dataPairs)
-		{
-			initialData.push("_lichType:DATA");
-			initialData.push("_datatype:\""+ast.id+"\"");
-			initialData.push("_argNames:["+argNames.join(",")+"]");
-			ret(ast.id+"=Lich.collapseDataConstructor({"+initialData.join(",")+"},{"+dataPairs.join(",")+"})");
-		}
-	);
+	var args = [];
+	var dataPairs = [];
+	for(var i = 0; i < ast.members.length; ++i)
+	{
+		//var elemRes = Lich.compileAST(ast.members[i].exp);
+		argNames.push("\""+ast.members[i].id+"\"");
+		args.push(ast.members[i].id);
+		dataPairs.push(ast.members[i].id+":"+ast.members[i].id);
+	}
+
+	initialData.push("_lichType:DATA");
+	initialData.push("_datatype:\""+ast.id+"\"");
+	initialData.push("_argNames:["+argNames.join(",")+"]");
+
+	return ast.id+"=function("+args.join(",")+"){return {"+initialData.concat(dataPairs).join(",")+"}}";
 }
 
-Lich.newData = function(constructor,members, _dataRet)
+Lich.newData = function(constructor, members)
 {
 	if(constructor == null) throw new Error("Unable to find data constructor for " + constructor);
 	var data = _deepCopy(constructor);
-	forEachCps(
-		members, 
-		function(elem,i,next)
-		{
-			Lich.collapse(elem, function(elemRes)
-			{
-				data[constructor._argNames[i]] = elemRes;
-				next();
-			});
-		},
-		function()
-		{
-			_dataRet(data);
-		}
-	);
-}
-
-Lich.compileDataInst = function(ast,ret)
-{
-	mapCps(
-		ast.members, 
-		function(elem,i,callback)
-		{
-			Lich.compileAST(elem, function(res)
-			{
-				callback(res);
-			})			
-		},
-		function(members)
-		{
-			ret("(function(_ret){Lich.newData("+ast.id+",["+members.join(",")+"],_ret)})");
-			//ret(ast.id+".curry("+members.join(",")+")");
-		}
-	);
-}
-
-Lich.compileDataLookup = function(ast,ret)
-{
-	Lich.compileAST(ast.data, function(res)
+	
+	for(var i = 0; i < members.length; ++i)
 	{
-		ret("(function(_lookRet){Lich.collapse("+res+",function(_lookRes){_lookRet(_lookRes[\""+ast.member+"\"])})})");
-	});
+		data[constructor._argNames[i]] = members[i];
+	}
+
+	return data;
 }
 
-Lich.dataUpdate = function(data,members, _dataRet)
+Lich.compileDataInst = function(ast)
+{
+	var members = [];
+	for(var i = 0; i < ast.members.length; ++i)
+	{
+		members.push(Lich.compileAST(ast.members[i]));
+	}
+
+	if(members.length > 0)
+		return "Lich.application("+ast.id+",["+members.join(",")+"])";
+	else
+		return ast.id;
+}
+
+Lich.compileDataLookup = function(ast)
+{
+	return "("+Lich.compileAST(ast.data)+"[\""+ast.member+"\"])";
+}
+
+Lich.dataUpdate = function(data,members)
 {
 	var newData = _deepCopy(data);
-	forEachCps(
-		members, 
-		function(elem,i,next)
-		{
-			Lich.collapse(elem.exp, function(elemRes)
-			{
-				newData[members[i].id] = elemRes;
-				next();
-			});
-		},
-		function()
-		{
-			_dataRet(newData);
-		}
-	);
-}
-
-Lich.compileDataUpdate = function(ast,ret)
-{
-	Lich.compileAST(ast.data, function(dataCon)
+	for(var i = 0; i < members.length; ++i)
 	{
-		mapCps(
-			ast.members, 
-			function(elem,i,callback)
-			{
-				Lich.compileAST(elem.exp, function(elemRes)
-				{
-					var newMember = "{id:\""+ast.members[i].id+"\", exp:"+elemRes+"}";
-					callback(newMember);
-				});
-			},
-			function(members)
-			{
-				ret("(function(_ret){Lich.dataUpdate("+dataCon+",["+members.join(",")+"],_ret)})");
-			}
-		);
-	});
+		newData[members[i].id] = members[i].exp;
+	}
+
+	return newData;
 }
 
-Lich.compileDataEnum = function(ast,ret)
+Lich.compileDataUpdate = function(ast)
+{
+	var dataCon = Lich.compileAST(ast.data);
+	var members = [];
+	for(var i = 0; i < ast.members.length; ++i)
+	{
+		members.push("{id:\""+ast.members[i].id+"\", exp:"+Lich.compileAST(ast.members[i].exp)+"}")
+	}
+
+	return "Lich.dataUpdate("+dataCon+",["+members.join(",")+"])";
+}
+
+Lich.compileDataEnum = function(ast)
 {
 	Lich.verifyDef(ast.id);
+	dataPairs = new Array();
+	var res = "";
 
-	mapCps(
-		ast.members,
-		function(elem,i,callback)
-		{
-			callback(elem);
-		},
-		function(argNames)
-		{
-			dataPairs = new Array();
-			var res = "";
-
-			for(var i = 0; i < argNames.length; ++i)
-			{
-				res = res + argNames[i] + "={_lichType:DATA,_argNames:[],_datatype:\""+argNames[i]+"\"};"
-				dataPairs.push(argNames[i] + ":" + argNames[i]);
-			}
-
-			dataPairs.push("_lichType:DATA");
-			dataPairs.push("_argNames:["+argNames.join(",")+"]");
-			dataPairs.push("_datatype:\""+ast.id+"\"");
-			ret(res+ast.id+"={"+dataPairs.join(",")+"};");
-		}
-	);
-}
-
-Lich.compileBinOpExp = function(ast,ret)
-{
-	Lich.compileAST(ast.lhs, function(lhs)
+	for(var i = 0; i < ast.members.length; ++i)
 	{
-		Lich.compileAST(ast.rhs, function(rhs)
-		{
-			if(Lich.VM.reserved.hasOwnProperty(ast.op))
-				ret("Lich.application.curry(Lich.VM.reserved[\""+ast.op+"\"],["+lhs+","+rhs+"])");
-				//ret("Lich.VM.reserved[\""+ast.op+"\"].curry("+lhs+","+rhs+")");
-			else if((ast.lhs.astType == "float-lit" || ast.lhs.astType == "string-lit") && (ast.rhs.astType == "float-lit" || ast.rhs.astType == "string-lit"))
-				ret("(function(_opRet){_opRet("+lhs+""+ast.op+""+rhs+")})");
-			else
-				ret("function(_opRet){Lich.collapse("+lhs+",(function(resL){Lich.collapse("+rhs+",(function(resR){_opRet(resL"+ast.op+"resR)}))}))}");
-		});
-	});
+		res = res + ast.members[i] + "={_lichType:DATA,_argNames:[],_datatype:\""+ast.members[i]+"\"};"
+		dataPairs.push("\""+ast.members[i] + "\"" + ":" + ast.members[i]);
+	}
+
+	var argNames = ast.members.map(function(elem){return "\""+elem+"\"";});
+
+	dataPairs.push("_lichType:DATA");
+	dataPairs.push("_argNames:["+argNames.join(",")+"]");
+	dataPairs.push("_datatype:\""+ast.id+"\"");
+	return res+ast.id+"={"+dataPairs.join(",")+"};";
 }
 
+var _literalBinOps = ["+","-","/","*","%",">","<",">=","<=","=="];
+_binOps = {};
 
-Lich.compileCurriedBinOpExp = function(ast,ret)
+Lich.compileBinOpExp = function(ast)
 {
-	if(Lich.VM.reserved.hasOwnProperty(ast.op))
-		ret("Lich.VM.reserved[\""+ast.op+"\"]");
+	var lhs = Lich.compileAST(ast.lhs);
+	var rhs = Lich.compileAST(ast.rhs);
+	
+	if(((ast.lhs.astType == "float-lit" || ast.lhs.astType == "string-lit") && (ast.rhs.astType == "float-lit" || ast.rhs.astType == "string-lit"))
+		&& _literalBinOps.indexOf(ast.op) != -1)
+		return lhs+ast.op+" "+rhs; // space added for negative numbers
+	else if(Lich.VM.reserved.hasOwnProperty(ast.op))
+		return _binOps[ast.op]+"("+lhs+","+rhs+")";
 	else
 		throw new Error("Unrecongized binary operator: " + ast.op);
 }
 
-Lich.compileLeftCurriedBinOpExp = function(ast,ret)
+
+Lich.compileCurriedBinOpExp = function(ast)
 {
-	Lich.compileAST(ast.lhs, function(lhs)
-	{
-		if(Lich.VM.reserved.hasOwnProperty(ast.op))
-			ret("Lich.VM.reserved[\""+ast.op+"\"].curry("+lhs+")");
-		else
-			throw new Error("Unrecongized binary operator: " + ast.op);
-	});
+	if(Lich.VM.reserved.hasOwnProperty(ast.op))
+		return "Lich.VM.reserved[\""+ast.op+"\"]";
+	else
+		throw new Error("Unrecongized binary operator: " + ast.op);
 }
 
-Lich.compileRightCurriedBinOpExp = function(ast,ret)
+Lich.compileLeftCurriedBinOpExp = function(ast)
 {
-	Lich.compileAST(ast.rhs, function(rhs)
-	{
-		if(Lich.VM.reserved.hasOwnProperty(ast.op))
-			ret("(function(lhs,_ret){Lich.application(Lich.VM.reserved[\""+ast.op+"\"],[lhs,"+rhs+"],_ret)})");
-		else
-			throw new Error("Unrecongized binary operator: " + ast.op);
-	});
+	if(Lich.VM.reserved.hasOwnProperty(ast.op))
+		return "Lich.VM.reserved[\""+ast.op+"\"].curry("+Lich.compileAST(ast.lhs)+")";
+	else
+		throw new Error("Unrecongized binary operator: " + ast.op);
 }
 
-Lich.compileNegate = function(ast,ret)
+Lich.compileRightCurriedBinOpExp = function(ast)
+{
+	if(Lich.VM.reserved.hasOwnProperty(ast.op))
+		return "(function(lhs){return Lich.application(Lich.VM.reserved[\""+ast.op+"\"],[lhs,"+Lich.compileAST(ast.rhs)+"])})";
+	else
+		throw new Error("Unrecongized binary operator: " + ast.op);
+}
+
+Lich.compileNegate = function(ast)
 { 
-	Lich.compileAST(ast.rhs, function(rhs)
-	{
-		ret("function(_ret){_ret(-"+rhs+")}");
-	});
+	return "(-"+Lich.compileAST(ast.rhs)+")"
 }
 
-Lich.listRange = function(l,u,n,_rangeRet)
+Lich.listRange = function(lower, upper, next)
 {
-	Lich.collapse(l, function(lower)
-	{
-		Lich.collapse(u, function(upper)
-		{
-			Lich.collapse(n, function(next)
-			{
-	var next;
 	var skip = 0;
 
-	if(Lich.getType(n) == NOTHING)
+	if(Lich.getType(next) == NOTHING)
 	{
 		if(lower < upper)
 			skip = 1;
@@ -1789,17 +1357,8 @@ Lich.listRange = function(l,u,n,_rangeRet)
 
 	if(typeof lower !== "number" || typeof skip !== "number" || typeof upper !== "number")
 	{
-		if(typeof ast.skip === "undefined")
-		{
-			throw new Error("List range syntax can only be used with numbers. failed with: " 
-				+ Lich.VM.PrettyPrint(lower) + ".." + Lich.VM.PrettyPrint(upper));
-		}
-
-		else
-		{
-			throw new Error("List range syntax can only be used with numbers. failed with: " 
-				+ Lich.VM.PrettyPrint(lower) + "," + Lich.VM.PrettyPrint(next) + ".." + Lich.VM.PrettyPrint(upper));
-		}
+		throw new Error("List range syntax can only be used with numbers. failed with: " 
+			+ Lich.VM.PrettyPrint(lower) + "," + Lich.VM.PrettyPrint(next) + ".." + Lich.VM.PrettyPrint(upper));
 	}
 
 	var array = new Array();
@@ -1811,7 +1370,7 @@ Lich.listRange = function(l,u,n,_rangeRet)
 			array.push(i);
 		}
 
-		_rangeRet(array);
+		return array;
 	}
 
 	else
@@ -1821,162 +1380,127 @@ Lich.listRange = function(l,u,n,_rangeRet)
 			array.push(i);
 		}
 
-		_rangeRet(array);
+		return array;
 	}
-			}); // next
-		}); // upper
-	}); // lower
 }
 
-Lich.compileListRange = function(ast,ret)
+Lich.compileListRange = function(ast)
 {
-	Lich.compileAST(ast.lower, function(lower)
+	var lower = Lich.compileAST(ast.lower);
+	var upper = Lich.compileAST(ast.upper);
+	
+	if(typeof ast.skip !== "undefined")
 	{
-		Lich.compileAST(ast.upper, function(upper)
-		{
-			if(typeof ast.skip !== "undefined")
-			{
-				Lich.compileAST(ast.skip, function(skipRes)
-				{
-					ret("Lich.listRange.curry("+lower+","+upper+","+skipRes+")");
-				});
-			}
-			else
-			{
-				ret("Lich.listRange.curry("+lower+","+upper+", Lich.VM.Nothing)");
-			}
-		});
-	});
+		return "Lich.listRange("+lower+","+upper+","+Lich.compileAST(ast.skip)+")";
+	}
+	
+	else
+	{
+		return "Lich.listRange("+lower+","+upper+", Lich.VM.Nothing)";
+	}
 }
 
-Lich.newDictionary = function(pairs, _ret)
+Lich.newDictionary = function(pairs)
 {
 	res = {_lichType:DICTIONARY};
-	forEachCps(
-		pairs,
-		function(pair, i, next)
-		{
-			Lich.collapse(pair[0], function(key)
-			{
-				Lich.collapse(pair[1], function(value)
-				{
-					res[key] = value;
-					next();
-				});
-			});
-		},
-		function()
-		{
-			_ret(res);
-		}
-	);
+
+	for(var i = 0; i < pairs.length; ++i)
+	{
+		res[pair[0]] = pair[1];
+	}
+
+	return res;
 }
 
-Lich.compileDictionary = function(ast,ret)
+Lich.compileDictionary = function(ast)
 {
 	var pairs = new Array();
+	pairs.push("_lichType:DICTIONARY");
 
-	forEachPairsCps(
-		ast.pairs, 
-
-		function(elem,i,next)
-		{
-			Lich.compileAST(elem,function(dictKey)
-			{
-				Lich.compileAST(ast.pairs[i + 1], function(dictRes)
-				{
-					pairs.push("["+dictKey+","+dictRes+"]");
-					next();
-				});
-			});
-		},
-
-		function()
-		{
-			ret("Lich.newDictionary.curry(["+pairs.join(",")+"])");
-		}
-	);
-}
-
-Lich.compileCase = function(ast,ret)
-{
-	var caseCode = "function(_ret){Lich.collapse(";
-	Lich.compileAST(ast.exp, function(exp)
+	for(var i = 0; i < ast.pairs.length; i += 2)
 	{
-		caseCode += exp+",function(_object){ var _bool=false;";
-		var matchCode = "";
-		forEachCps(
-			ast.alts, 
+		var dictKey = Lich.compileAST(ast.pairs[i]);
+		var dictRes = Lich.compileAST(ast.pairs[i+1]);
+		pairs.push(dictKey+":"+dictRes);
+	}
 
-			function(elem,i,next)
-			{
-				var pat = elem.pat;
-				Lich.generateOneArgNameAndMatchVars(pat, i, function(argName, matchVars)
-				{
-					if(pat.astType == "at-match")
-						caseCode += "var "+argName+"=_object;";
-
-					caseCode += matchVars;
-					Lich.generateMatchFunc("_object", pat, i, false, function(tempMatchCode)
-					{
-						Lich.compileAST(elem.exp, function(altExp)
-						{
-							matchCode += "_bool = (function(){" + tempMatchCode + "})();if(_bool){return Lich.collapse("+ altExp + ", _ret)};";
-							next();
-						});
-					})
-				});
-			},
-
-			function()
-			{
-				caseCode += matchCode + "throw new Error(\"case statement found no matching patterns.\")})}";
-				ret(caseCode);
-			}
-		);
-	});
+	return "{" + pairs.join(",") + "}";
 }
 
-Lich.generateListComprehensionCode = function(exp,generators,filters,_listRet)
+Lich.compileCase = function(ast)
 {
-	var code = "(function(_listRet){var _listRes = new Array();";
+	var caseCode = "(function(_object){";
+	var matchCode = "";
+
+	for(var i = 0; i < ast.alts.length; ++i)
+	{
+		var elem = ast.alts[i];
+		var pat = elem.pat;
+		var arr = Lich.generateOneArgNameAndMatchVars(pat, i);
+		var argName = arr[0];
+		var matchVars = arr[1];
+
+		if(pat.astType == "at-match")
+			caseCode += "var "+argName+"=_object;";
+
+		caseCode += matchVars;
+
+		var tempMatchCode = Lich.generateMatchFunc("_object", pat, i, false);
+		var altExp = Lich.compileAST(elem.exp);
+
+		if(i > 0)
+			matchCode += "else ";
+
+		matchCode += "if("+tempMatchCode+"){return "+altExp+"}";
+	}
+
+	return caseCode + matchCode + "else throw new Error(\"case statement found no matching patterns.\")})("+Lich.compileAST(ast.exp)+")";
+}
+
+Lich.generateListComprehensionCode = function(exp,generators,filters)
+{
+	var code = "(function(){var _listRes = new Array();";
 
 	for(var i = 0; i < generators.length; ++i)
 	{
-		code += "Lich.collapse("+generators[i][1]+",function(_list"+i+"){forEachCpsTco(_list"+i+",function("+generators[i][0]+",_,_next"+i+"){";
+		var varName = "_list"+i;
+		var iName = "i"+i;
+		code += "var "+varName+"="+generators[i][1]+";for(var "+iName+"=0;"+iName+"<"+varName+".length;++"+iName+"){"+generators[i][0]+"="
+			+varName+"[i"+i+"];"
 	}
+
+	var doFilters = filters.length > 0;
+
+	if(doFilters)
+		code += "if(";
 
 	for(var i = 0; i < filters.length; ++i)
 	{
-		code += "Lich.collapse("+filters[i]+",function(_bool"+i+"){";
+		if(i > 0)
+			code += "&&(";
+		else
+			code += "(";
+
+		code += filters[i]+")";
 	}
+	
+	if(doFilters)
+		code += "){";
 
-	code += "if(true";
+	code += "_listRes.push("+exp+");";
 
-	for(var i = 0; i < filters.length; ++i)
-	{
-		code += "&&_bool"+i;
-	}
-
-	code += "){Lich.collapse("+exp+",function(_expRes){_listRes.push(_expRes)})};_next"+(generators.length-1)+"();";
-
-	for(var i = 0; i < filters.length; ++i)
-	{
-		code += "})";
-	}
+	if(doFilters)
+		code += "}";
 
 	for(var i = generators.length-1; i >= 0; --i)
 	{
-		if(i > 0)
-			code += "},function(){_next"+(i-1)+"();})})";
-		else
-			code += "},function(){_listRet(_listRes)})})})";
+		code += "}";
 	}
 
-	_listRet(code);
+	return code+"; return _listRes})()";
 }
 
-Lich.compileListComprehension = function(ast,ret)
+Lich.compileListComprehension = function(ast)
 {
 	var filters = new Array();
 	var generators = new Array();
@@ -1986,10 +1510,7 @@ Lich.compileListComprehension = function(ast,ret)
 	{
 		if(ast.generators[i].astType != "decl-fun")
 		{
-			Lich.compileAST(ast.generators[i], function(filterRes)
-			{
-				filters.push(filterRes);
-			});
+			filters.push(Lich.compileAST(ast.generators[i]));
 		}	
 	}
 
@@ -1998,17 +1519,11 @@ Lich.compileListComprehension = function(ast,ret)
 	{
 		if(ast.generators[i].astType == "decl-fun")
 		{
-			Lich.compileAST(ast.generators[i].rhs, function(list)
-			{
-				generators.push([ast.generators[i].ident,list]);
-			});
+			generators.push([ast.generators[i].ident, Lich.compileAST(ast.generators[i].rhs)]);
 		}
 	}
 
-	Lich.compileAST(ast.exp, function(expRes)
-	{
-		Lich.generateListComprehensionCode(expRes,generators,filters,ret);
-	});
+	return Lich.generateListComprehensionCode(Lich.compileAST(ast.exp), generators, filters);
 }
 
 function postProcessJSON(object)
@@ -2104,7 +1619,7 @@ Lich.stringify = function(object)
 
 	return string;
 }
-
+/*
 Lich.receive = function(patternFunc, ret)
 {
 	if(Lich.VM.currentThread === "main")
@@ -2209,282 +1724,156 @@ Lich.compileReceive = function(ast, ret)
 			}
 		);
 	});
+}*/
+
+Lich.compileTopExp = function(ast)
+{
+	return "Lich.post(Lich.VM.PrettyPrint("+Lich.compileAST(ast.exp)+"));";
 }
 
-Lich.compileTopExp = function(ast, ret)
+Lich.compileImportJS = function(ast)
 {
-	Lich.compileAST(ast.exp, function(exp)
-	{
-		ret("function _lich(_ret){Lich.collapse("+exp+",_ret)};_lich(function(res) { Lich.post(\"Lich> \"+Lich.VM.PrettyPrint(res)); });");
-	});
-}
-
-Lich.compileImportJS = function(ast,ret)
-{
-	ret("importjs("+ast.imports+")");
-}
-
-Lich.doExp = function(exps, ret)
-{
-	var res = exps[0];
-	forEachCps(
-		exps,
-		function(exp, i, next)
-		{
-			Lich.collapse(exp, function(expRes)
-			{
-				res = expRes;
-				next();
-			})
-		},
-		function()
-		{
-			ret(res);
-		}
-	);
+	return "importjs("+ast.imports+")";
 }
 
 Lich.compileDoExp = function(ast, ret)
 {
 	var res = "";
-	forEachCps(
-		ast.exps,
-		function(exp, i, next)
-		{
-			Lich.compileAST(exp, function(expRes)
-			{
-				res += expRes + ",";
-				next();
-			});
-		},
-		function()
-		{
-			ret("Lich.doExp.curry(["+res+"])");
-		}
-	);
-}
+	var first = ast.exps.length - 1;
 
-Lich.guard = function(guards,ret)
-{
-	var match = false;
-	var exp;
+	for(var i = first; i >= 0; --i)
+	{
 
-	forEachWithBreakCps(
-		guards,
-		function(guard, i, next)
-		{
-			Lich.collapse(guard[0], function(guardRes)
-			{
-				if(guardRes)
-				{
-					match = true;
-					exp = guard[1];
-					next(true); // break
-				}
+		if(i == first)
+			res = Lich.compileAST(ast.exps[i].exp);
+		else
+			res = "bind("+Lich.compileAST(ast.exps[i].exp)+",function("+ast.exps[i].var+"){return "+res+"})";
+	}
 
-				else
-				{
-					next(false); // continue
-				}
-			})
-		},
-		function()
-		{
-			if(match)
-			{
-				Lich.collapse(exp, function(expRes)
-				{
-					ret(expRes);
-				});
-			}
-
-			else
-			{
-				throw new Error("Non-exhaustive patterns in guard function.");
-			}
-		}
-	);
+	return res; 
 }
 
 Lich.compileGuardExp = function(ast, ret)
 {
-	Lich.generateArgNamesAndMatchVars(ast.args, function(argNames, matchVars)
-	{
-		Lich.checkFunctionArgMatches(argNames, ast.args, function(matchCode)
-		{
-			var guards = new Array();
-			forEachCps(
-				ast.guards,
-				function(guard, i, next)
-				{
-					Lich.compileAST(guard.e1, function(exp1)
-					{
-						Lich.compileAST(guard.e2, function(exp2)
-						{
-							guards.push("["+exp1+","+exp2+"]");
-							next();
-						});
-					});
-				},
-				function()
-				{
-					var guardCode = "Lich.guard(["+guards.join(",")+"],_ret)";
-					var collapseCode = Lich.generateCollapseArguments(argNames);
-					var prefix = ast.ident.id+"=function "+ast.ident.id;
+	var arr = Lich.generateArgNamesAndMatchVars(ast.args);
+	var argNames = arr[0];
+	var matchVars = arr[1];
+	var matchCode = Lich.checkFunctionArgMatches(argNames, ast.args);
+	var prefix = ast.ident.id+"=function "+ast.ident.id;
 					
-					if(ast.local)
-						prefix = "var " + ast.ident.id + "=function";			
+	if(ast.local)
+		prefix = "var " + ast.ident.id + "=function";
 
-					ret(prefix+"(" + [].concat(argNames).concat("_ret").join(",") + "){"+collapseCode+"(function(){"+matchVars
-						+matchCode+";"+guardCode+"})};");
-				}
-			);
-		});
-	});
+	var gaurdCode = prefix +"(" + [].concat(argNames).join(",") + "){"+matchVars+matchCode;
+
+	for(var i = 0; i < ast.guards.length; ++i)
+	{
+		if(i > 0)
+			gaurdCode += "else ";
+		gaurdCode += "if("+Lich.compileAST(ast.guards[i].e1)+"){return "+Lich.compileAST(ast.guards[i].e2)+"}";
+	}
+
+	return gaurdCode + "else throw new Error(\"Non-exhaustive patterns in guard function.\")}";
 }
 
-Lich.compilePercStream = function(ast, ret)
+Lich.compilePercStream = function(ast)
 {
 	Lich.verifyDef(ast.id);
-	Lich.compileAST(ast.list, function(list)
+	var list = Lich.compileAST(ast.list);
+	var modifiers = Lich.compileAST(ast.modifiers);
+	var res;
+	if(eval ("typeof "+ast.id+" !== \"undefined\""))
 	{
-		Lich.compileAST(ast.modifiers, function(modifiers)
-		{
-			var res;
-			if(eval ("typeof "+ast.id+" !== \"undefined\""))
-			{
-				res = ast.id+".update("+list+","+modifiers+");";
-			}
+		res = ast.id+".update("+list+","+modifiers+");";
+	}
 				
-			else
-			{
-				res = ast.id+"=new Soliton.PercStream("+list+","+modifiers+");";
-				if(Lich.parseType !== "library")
-					res += "Lich.scheduler.addScheduledEvent("+ast.id+");";
-			}
+	else
+	{
+		res = ast.id+"=new Soliton.PercStream("+list+","+modifiers+");";
+		if(Lich.parseType !== "library")
+			res += "Lich.scheduler.addScheduledEvent("+ast.id+");";
+	}
 
-			ret(res);
-		});
-	});
+	return res;
 }
 
-Lich.compilePercList = function(ast, ret)
+Lich.compilePercList = function(ast)
 {
 	var res = [];
-	forEachCps(
-		ast.list,
-		function(listItem, i, next)
-		{
-			Lich.compileAST(listItem, function(listRes)
-			{
-				if(listItem.astType == "Nothing" || listItem.astType === "percList")
-					res.push(listRes);
-				else
-					res.push("\""+listItem.id+"\"");
-				next();
-			});
-		},
-		function()
-		{
-			ret("["+res.join(",")+"]");
-		}
-	)
+
+	for(var i = 0; i < ast.list.length; ++i)
+	{
+		var listItem = ast.list[i];
+		if(listItem.astType == "Nothing" || listItem.astType === "percList")
+			res.push(Lich.compileAST(listItem));
+		else
+			res.push("\""+listItem.id+"\"");
+	}
+
+	return "["+res.join(",")+"]";
 }
 
-Lich.compilePercMods = function(ast, ret)
+Lich.compilePercMods = function(ast)
 {
 	var res = [];
-	forEachCps(
-		ast.list,
-		function(listItem, i, next)
-		{
-			Lich.compileAST(listItem, function(listRes)
-			{
-				res.push(listRes);
-				next();
-			});
-		},
-		function()
-		{
-			ret("["+res.join(",")+"]");
-		}
-	)	
+
+	for(var i = 0; i < ast.list.length; ++i)
+	{
+		res.push(Lich.compileAST(ast.list[i]));
+	}
+
+	return "["+res.join(",")+"]"; 	
 }
 
-Lich.compileSoloStream = function(ast, ret)
+Lich.compileSoloStream = function(ast)
 {
 	Lich.verifyDef(ast.id);
 
-	Lich.compileAST(ast.list, function(list)
+	var list = Lich.compileAST(ast.list)
+	var modifiers = Lich.compileAST(ast.modifiers);
+	var res;
+	if(eval ("typeof "+ast.id+" !== \"undefined\""))
 	{
-		Lich.compileAST(ast.modifiers, function(modifiers)
-		{
-			var res;
-			if(eval ("typeof "+ast.id+" !== \"undefined\""))
-			{
-				res = ast.id+".update("+ast.synth+","+list+","+modifiers+");";
-			}
+		res = ast.id+".update("+ast.synth+","+list+","+modifiers+");";
+	}
 				
-			else
-			{
-				res = ast.id+"=new Soliton.SoloStream("+ast.synth+","+list+","+modifiers+");";
-				if(Lich.parseType !== "library")
-					res += "Lich.scheduler.addScheduledEvent("+ast.id+");";
-			}
+	else
+	{
+		res = ast.id+"=new Soliton.SoloStream("+ast.synth+","+list+","+modifiers+");";
+		if(Lich.parseType !== "library")
+			res += "Lich.scheduler.addScheduledEvent("+ast.id+");";
+	}
 
-			ret(res);
-		});
-	});
+	return res;
 }
 
-Lich.compileSoloList = function(ast, ret)
+Lich.compileSoloList = function(ast)
 {
 	var res = [];
-	forEachCps(
-		ast.list,
-		function(listItem, i, next)
-		{
-			Lich.compileAST(listItem, function(listRes)
-			{
-				res.push(listRes);
-				next();
-			});
-		},
-		function()
-		{
-			ret("["+res.join(",")+"]");
-		}
-	)
+
+	for(var i = 0; i < ast.list.length; ++i)
+	{
+		res.push(Lich.compileAST(ast.list[i]));
+	}
+
+	return "["+res.join(",")+"]"; 
 }
 
-Lich.compileSoloMods = function(ast, ret)
+Lich.compileSoloMods = function(ast)
 {
 	var res = [];
-	forEachCps(
-		ast.list,
-		function(listItem, i, next)
-		{
-			Lich.compileAST(listItem, function(listRes)
-			{
-				res.push(listRes);
-				next();
-			});
-		},
-		function()
-		{
-			ret("["+res.join(",")+"]");
-		}
-	)	
+
+	for(var i = 0; i < ast.list.length; ++i)
+	{
+		res.push(Lich.compileAST(ast.list[i]));
+	}	
+
+	return "["+res.join(",")+"]";
 }
 
-Lich.compileSynthDef = function(ast,ret)
+Lich.compileSynthDef = function(ast)
 {
 	ast.astType = "decl-fun";
 	ast.noCollapse = true;
-	Lich.compileAST(ast, function(declRes)
-	{
-		ret(
-			declRes+"Soliton.synthDefs[\""+ast.ident.id+"\"]="+ast.ident.id+";"
-		);
-	});
+	return Lich.compileAST(ast)+";Soliton.synthDefs[\""+ast.ident.id+"\"]="+ast.ident.id+";";
 }
