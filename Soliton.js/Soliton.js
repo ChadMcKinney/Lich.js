@@ -51,7 +51,7 @@ var _pow = Math.pow(10,4);
 var pi = 3.141592653589793;
 var halfPi = pi / 2;
 var twoPi = pi * 2;
-ugenList = [];
+ugenList = ["distortion3","distortion4"]; // created in Prelude.lich, but can't reach _createUGen from Lich proper, so added here instead.
 
 _createUGen = function(name, func)
 {
@@ -6986,9 +6986,10 @@ function waveTable(freq, table)
 
 _createUGen("waveTable", waveTable);
 
-function waveShape(shape, input)
+function shaper(shape, input)
 {
 	var shaper = Soliton.context.createWaveShaper();
+	shaper.oversample = "2x";
 	input.connect(shaper);
 	shaper.curve = new Float32Array(shape);
 	shaper.startAll = input.startAll;
@@ -6997,41 +6998,204 @@ function waveShape(shape, input)
 	return shaper;
 }
 
-_createUGen("waveShape", waveShape);
+_createUGen("shaper", shaper);
 
-function gain(input1, input2)
+function chebyshev(size, amplitudes)
 {
-	if(input2._lichType != AUDIO)
+	size = Math.floor(size);
+	var buf = [];
+	for(var i = 0; i < size; ++i)
 	{
-		if(input1._lichType == AUDIO)
-		{
-			// swap inputs if input2 isn't an audio source so that we're using .connect on an actual audio source.
-			var temp = input2;
-			input2 = input1;
-			input1 = temp;
-		}
+		buf.push(0);
+	}
 
-		else
+	// Generate polynomials
+	for(var i = 0; i < amplitudes.length; ++i)
+	{
+		var amp = amplitudes[i];
+		if(amp == 0)
+			continue;
+
+		var w = 2 / size;
+		var phase = -1;
+		var partial = i + 1;
+		var offset = -amp * Math.cos(partial * twoPi);
+		
+		for(var j = 0; j < size; ++j)
 		{
-			throw new Error("gain must be used with at least one audio source.");
+			buf[j] += amp * Math.cos(partial * Math.acos(phase)) - offset;
+			phase += w;
 		}
 	}
 
+	// Normalize
+	var max = 0;
+	for(var i = 0; i < buf.length; ++i)
+	{
+		var absa = Math.abs(buf[i]);
+		if(absa > max)
+			max = absa;
+	}
+
+	if(max != 0 && max != 1)
+	{
+		var ampf = 1 / max;
+		for(var i = 0; i < buf.length; ++i)
+		{
+			buf[i] *= ampf;
+		}
+	}
+
+	return buf;
+}
+
+function distortion2(amt, input)
+{
+	if(input._lichType != AUDIO)
+		throw new Error("distortion2 can only be used with audio ugens.");
+
+	if(typeof amt === "number")
+		amt = dc(amt);
+
+	var ugenFunc = Soliton.context.createScriptProcessor(1024, 2, 1);
+
+	ugenFunc.onaudioprocess = function(e) 
+	{
+        var output = e.outputBuffer.getChannelData(0);
+        var inputArray = e.inputBuffer.getChannelData(0);
+        var amtArray = e.inputBuffer.getChannelData(1);
+
+    	for(var i = 0; i < 1024; ++i)
+    	{
+    		output[i] = Math.sin(inputArray[i] * (1 + amtArray[i] * 100));
+    	}
+    }
+
+	var gain = Soliton.context.createGain();
+    gain.gain.value = 0;
+    ugenFunc.connect(gain);
+    
+    var merger = Soliton.context.createChannelMerger(2);
+	merger.channelInterpretation = "discrete";
+	input.connect(merger, 0, 0);
+	amt.connect(merger, 0, 1);
+	merger.connect(ugenFunc);
+
+	gain.startAll = function(time)
+	{
+		gain.gain.setValueAtTime(1, time);
+		input.startAll(time);
+		amt.startAll(time);
+	};
+
+	gain.stopAll = function(time)
+	{
+		gain.gain.setValueAtTime(0, time + 0.1);
+		input.stopAll(time);
+		amt.stopAll(time);
+		setTimeout(
+			function(){ugenFunc.disconnect();gain.disconnect();merger.disconnect();input.disconnect();amt.disconnect()}, 
+			(time - Soliton.context.currentTime) * 1100
+		)
+	};
+
+	gain._lichType = AUDIO;
+	return gain;
+}
+
+_createUGen("distortion2", distortion2);
+
+function distortion(amt, input)
+{
+	if(input._lichType != AUDIO)
+		throw new Error("distortion2 can only be used with audio ugens.");
+
+	if(typeof amt === "number")
+		amt = dc(amt);
+
+	var ugenFunc = Soliton.context.createScriptProcessor(1024, 2, 1);
+
+	ugenFunc.onaudioprocess = function(e) 
+	{
+        var output = e.outputBuffer.getChannelData(0);
+        var inputArray = e.inputBuffer.getChannelData(0);
+        var amtArray = e.inputBuffer.getChannelData(1);
+
+    	for(var i = 0; i < 1024; ++i)
+    	{
+    		var sample = inputArray[i] * (1 + amtArray[i] * 300);
+    		output[i] = sample / (1 + Math.abs(sample));
+    	}
+    }
+
+	var gain = Soliton.context.createGain();
+    gain.gain.value = 0;
+    ugenFunc.connect(gain);
+    
+    var merger = Soliton.context.createChannelMerger(2);
+	merger.channelInterpretation = "discrete";
+	input.connect(merger, 0, 0);
+	amt.connect(merger, 0, 1);
+	merger.connect(ugenFunc);
+
+	gain.startAll = function(time)
+	{
+		gain.gain.setValueAtTime(1, time);
+		input.startAll(time);
+		amt.startAll(time);
+	};
+
+	gain.stopAll = function(time)
+	{
+		gain.gain.setValueAtTime(0, time + 0.1);
+		input.stopAll(time);
+		amt.stopAll(time);
+		setTimeout(
+			function(){ugenFunc.disconnect();gain.disconnect();merger.disconnect();input.disconnect();amt.disconnect()}, 
+			(time - Soliton.context.currentTime) * 1100
+		)
+	};
+
+	gain._lichType = AUDIO;
+	return gain;
+}
+
+_createUGen("distortion", distortion);
+
+function gain(input1, input2)
+{
+	var isAudio1 = input1._lichType == AUDIO;
+	var isAudio2 = input2._lichType == AUDIO;
 	var gainNode = Soliton.context.createGain();
 
-	if(input1._lichType == AUDIO)
+	if(isAudio1 && isAudio2)
+	{
 		input1.connect(gainNode.gain);
-	else
-		gainNode.gain.value = input1;
+		input2.connect(gainNode);
+	}
 
-	input2.connect(gainNode);
+	else if(isAudio1 && !isAudio2)
+	{
+		gainNode.gain.value = input2;
+		input1.connect(gainNode);
+	}
+
+	else if(!isAudio1 && isAudio2)
+	{
+		gainNode.gain.value = input1;
+		input2.connect(gainNode);
+	}
+
+	else
+		throw new Error("gain can only be used with at least one audio source.");
 	
 	gainNode.startAll = function(time)
 	{ 
 		if(input1._lichType == AUDIO)
 			input1.startAll(time);
 
-		input2.startAll(time);
+		if(input2._lichType == AUDIO)
+			input2.startAll(time);
 	}
 
 	gainNode.stopAll = function(time)
@@ -7039,7 +7203,8 @@ function gain(input1, input2)
 		if(input1._lichType == AUDIO)
 			input1.stopAll(time);
 
-		input2.stopAll(time);
+		if(input2._lichType == AUDIO)
+			input2.stopAll(time);
 	}
 
 	gainNode._lichType = AUDIO;
@@ -8221,17 +8386,15 @@ var _dcNothing = new Float32Array(2);
 
 function dc(value)
 {
-	var dcFunc = Soliton.context.createScriptProcessor(256, 0, 1);
-	dcFunc.value = value;
+	var dcFunc = Soliton.context.createScriptProcessor(1024, 0, 1);
 
 	dcFunc.onaudioprocess = function(event)
 	{
 		var outputArray = event.outputBuffer.getChannelData(0);
-		var val = this.value;
 
-		for(var i = 0; i < 256; ++i)
+		for(var i = 0; i < 1024; ++i)
 		{
-			outputArray[i] = val;
+			outputArray[i] = value;
 		}
 	}
 
@@ -8849,7 +9012,7 @@ function mouseY(low, high, scale)
 
 _createUGen("mouseY", mouseY);
 
-function crunch(depth, input)
+function crush(depth, input)
 {
 	if(input._lichType != AUDIO)
 		throw new Error("clip must be used with at least one audio source.");
@@ -8864,14 +9027,14 @@ function crunch(depth, input)
 	fxNode.onaudioprocess = function(event)
 	{
 		var inputArray = event.inputBuffer.getChannelData(0);
-		var crunchArray = event.inputBuffer.getChannelData(1);
+		var crushArray = event.inputBuffer.getChannelData(1);
 		var outputArray = event.outputBuffer.getChannelData(0);
 		var quant = 0;
 
 		for(var i = 0; i < 1024; ++i)
 		{
-			quant = Math.pow(0.5, crunchArray[i]);
-			outputArray[i] = crunchArray[i] == 0 ? inputArray[i] : Math.floor(inputArray[i]/quant) * quant;
+			quant = Math.pow(0.5, crushArray[i]);
+			outputArray[i] = crushArray[i] == 0 ? inputArray[i] : Math.floor(inputArray[i]/quant) * quant;
 		}
 	}
 
@@ -8896,7 +9059,7 @@ function crunch(depth, input)
 	return fxNode;
 }
 
-_createUGen("crunch", crunch);
+_createUGen("crush", crush);
 
 function decimate(rate, input)
 {

@@ -1499,6 +1499,17 @@ function choose(list)
 
 _createPrimitive("choose", choose);
 
+floor = Math.floor;
+_createPrimitive("floor", floor);
+round = Math.round;
+_createPrimitive("round", round);
+ceil = Math.ceil;
+_createPrimitive("ceil", ceil);
+max = Math.max;
+_createPrimitive("max", max);
+min = Math.min;
+_createPrimitive("min", min);
+
 function odd(num)
 {
 	if(typeof num === "number")

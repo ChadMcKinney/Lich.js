@@ -58,6 +58,11 @@ deepMap f list@(x:xs) = map (deepFunc) list
 			subList@(z:zs)	-> deepMap f subList
 			_ 				-> f y 
 
+
+distAmps = [0.25, 0.5, 0.25]
+distortion3 amt input = input >> gain (1 + (linexp amt 0 1 0.1 10000)) >> clip 1
+distortion4 color = shaper (chebyshev (pow 2 . floor $ mul color 10) [0.25, 0.5, 0.25])
+
 ------------------------------------
 -- | Monads types and functions
 ------------------------------------
@@ -65,10 +70,8 @@ deepMap f list@(x:xs) = map (deepFunc) list
 -- State data type. s is the current state, a is for results
 data Result { a, s }
 data State { a }
--- runState (State f) b = f b
 -- wrap a result in a State container
 result a = State (\s -> Result a s)
---bind (State h) f = State (\s -> let res = h s in runState (f (res::a)) (res::s))
 
 
 put newState = State (\_ -> Result Nothing newState)

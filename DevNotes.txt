@@ -1158,7 +1158,7 @@ square 40 >> clip (delay (1.6) 0 (auxIn 0) >> range 0.01 1) >> auxThrough 0 >> g
 sin (simplex 1 >> exprange 1 20000) >> delay (1/(simplex 0.79 >> exprange 2 100)) 0.9 >> gain 0.2 >> play
 
 -- Bit Crunching and Decimation
-sin 440 >> crunch (sin 0.3 >> range 0.01 4) >> gain 0.25 >> play
+sin 440 >> crush (sin 0.3 >> range 0.01 4) >> gain 0.25 >> play
 sin 440 >> decimate (sin 0.3 >> range 100 8000) >>  gain 0.3 >> play
 sin (simplex 1 >> range 20 20000) >> decimate (sin 0.3 >> range 100 8000) >>  gain 0.3 >> play
 
@@ -1497,7 +1497,7 @@ lkicker2 +> [lkick ss] [snare ss] [ss lkick] [ss snare]
 
 
 -- Section 2 stuff, Not to be mixed with other sounds
-let bd => tri (degree2Freq coleJI -19) >> add (tri (degree2Freq coleJI -20)) >> lowpass 100 0.1 >> perc 0 1.2 0.15
+let bd => tri (degree2Freq coleJI -32) >> add (tri (degree2Freq coleJI -20)) >> lowpass 100 0.1 >> perc 0 1.2 0.15
 let bd2 => tri (degree2Freq coleJI -22) >> lowpass 500 0.1 >> perc 0.005 2 1
 let sd1 => sin ((freq 0) + (random -13 13)) >> gain 0.25 >> add (violet >> gain 30) >> highpass (freq 0) 30 >> env [0, 0.03, 0.0035, 0] [0, 0.0001, random 0.01 0.2] 0 >> auxThrough (randomI 0 3)
     where freq x = degree2Freq coleJI (add 12 $ randomI -1 1)
@@ -1542,7 +1542,7 @@ let ss => violet >> bandpass (ff 3) 30 >> gain 30 >> perc 0.0 0.4 0.1 >> auxOut 
 let lkick => square (ff -12) >> add (tri 40) >> perc 0 0.3 0.1 >> auxOut 5
 lkicker2 +> [lkick lkick] [snare _ ss snare] [ss [lkick lkick]] [_ ss snare _] | (*2)
 
-let drumDecimFX = auxIn 5 >> delay 0.125 0.2 >> crunch 1 >> decimate (add 8000 (simplex 0.1 >> gain 3500)) >> gain 0.5 >> play
+let drumDecimFX = auxIn 5 >> delay 0.125 0.2 >> crush 1 >> decimate (add 8000 (simplex 0.1 >> gain 3500)) >> gain 0.5 >> play
 stop drumDecimFX
 
 
@@ -1551,12 +1551,13 @@ stop drumDecimFX
 -- Archived Other shit
 ---------------------------------------
 
+let ff = degree2Freq coleJI
 let snare => pink 1 >> delay (1/(ff -8)) 0.1 >> perc 0.0 0.9 0.3 >> auxOut 5
 let ss => violet 1 >> bandpass (ff 3) 30 >> gain 30 >> perc 0.0 0.4 0.1 >> auxOut 5
 let lkick => square (ff -12) >> add (tri 40) >> perc 0 0.3 0.1 >> auxOut 5
 lkicker2 +> [lkick lkick] [snare _ ss snare] [ss [lkick lkick]] [_ ss snare _] | (*2)
 
-let drumDecimFX = auxIn 5 >> delay 0.125 0.2 >> crunch 1 >> decimate (add 8000 (simplex 0.1 >> gain 3500)) >> gain 0.5 >> play
+let drumDecimFX = auxIn 5 >> delay 0.125 0.2 >> crush 1 >> decimate (add 8000 (simplex 0.1 >> gain 3500)) >> gain 0.5 >> play
 stop drumDecimFX
 
 
