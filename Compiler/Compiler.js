@@ -1245,7 +1245,7 @@ Lich.compileDataInst = function(ast)
 
 Lich.compileDataLookup = function(ast)
 {
-	return "("+Lich.compileAST(ast.data)+"[\""+ast.member+"\"])";
+	return Lich.compileAST(ast.data)+"."+ast.member;
 }
 
 Lich.dataUpdate = function(data,members)
@@ -1804,7 +1804,7 @@ Lich.compilePercList = function(ast)
 	for(var i = 0; i < ast.list.length; ++i)
 	{
 		var listItem = ast.list[i];
-		if(listItem.astType == "Nothing" || listItem.astType === "percList")
+		if(listItem.astType != "varname")
 			res.push(Lich.compileAST(listItem));
 		else
 			res.push("\""+listItem.id+"\"");
@@ -1830,16 +1830,17 @@ Lich.compileSoloStream = function(ast)
 	Lich.verifyDef(ast.id);
 
 	var list = Lich.compileAST(ast.list)
-	var modifiers = Lich.compileAST(ast.modifiers);
+	var mods = Lich.compileAST(ast.mods);
+	var rmods = Lich.compileAST(ast.rmods);
 	var res;
 	if(eval ("typeof "+ast.id+" !== \"undefined\""))
 	{
-		res = ast.id+".update("+ast.synth+","+list+","+modifiers+");";
+		res = ast.id+".update("+ast.synth+","+list+","+mods+","+rmods+");";
 	}
 				
 	else
 	{
-		res = ast.id+"=new Soliton.SoloStream("+ast.synth+","+list+","+modifiers+");";
+		res = ast.id+"=new Soliton.SoloStream("+ast.synth+","+list+","+mods+","+rmods+");";
 		if(Lich.parseType !== "library")
 			res += "Lich.scheduler.addScheduledEvent("+ast.id+");";
 	}

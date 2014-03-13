@@ -29,6 +29,10 @@
 "True"|"true"               return {val:"true",typ:"True"};
 "&&"                        return {val:"&&",typ:"&&"};
 "||"                        return {val:"||",typ:"||"};
+".>>"                       return {val:".>>",typ:".>>"};
+".<<"                       return {val:".<<",typ:".<<"};
+".|"                       return {val:".|",typ:".|"};
+".&"                       return {val:".&",typ:".&"};
 ":>>"                       return {val:":>>",typ:":>>"};
 "<<:"                       return {val:"<<:",typ:"<<:"};
 "=>"                        return {val:"=>",typ:"=>"};
@@ -394,7 +398,7 @@ exp // : object
   // : infixexp %prec NOSIGNATURE  {{$$ = $1;}}
   : funccomp            {{$$ = $1;}}
   | funcstream          {{$$ = $1;}}
-  | datalookup          {{$$ = $1;}}
+  //| datalookup          {{$$ = $1;}}
   | datainst            {{$$ = $1;}}
   | dataupdate          {{$$ = $1;}}
   | classexp            {{$$ = $1;}}
@@ -419,6 +423,10 @@ exp // : object
   | exp "?"  exp        {$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
   | exp ":>>" exp       {$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
   | exp ">>=" exp       {$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
+  | exp ".>>" exp       {$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
+  | exp ".<<" exp       {$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
+  | exp ".|" exp        {$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
+  | exp ".&" exp        {$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
   | lexp                {{$$ = $1}}
   ;
 
@@ -444,6 +452,10 @@ binop
   | "?"         {{$$ = $1;}}
   | ":>>"       {{$$ = $1;}}
   | ">>="       {{$$ = $1;}}
+  | ".>>"       {{$$ = $1;}}
+  | ".<<"       {{$$ = $1;}}
+  | ".|"        {{$$ = $1;}}
+  | ".&"        {{$$ = $1;}}
   ;
 
 //  lexp OP infixexp            {{ ($3).unshift($1,$2); $$ = $3; }}
@@ -504,6 +516,7 @@ percList
 percItem
   : varid                           {{$$ = {astType:"varname", id:$1};}}
   | conid                           {{$$ = {astType:"varname", id:$1};}}
+  | "(" exp ")"                     {{$$ = $2;}}
   | "_"                             {{$$ = {astType:"Nothing"};}}
   | "[" percList "]"                {{$$ = $2;}}
   ;
@@ -523,8 +536,9 @@ percMod
 /////////////////
 
 soloStream
-  : varid "~>" varid soloList               {{$$ = {astType:"soloStream", id: $1, synth:"\""+$3+"\"", list:$4, modifiers: {astType:"soloMods", list:[]} };}}
-  | varid "~>" varid soloList "|" soloMods  {{$$ = {astType:"soloStream", id: $1, synth:"\""+$3+"\"", list:$4, modifiers: $6};}}
+  : varid "~>" varid soloList {{$$ = {astType:"soloStream",id:$1,synth:"\""+$3+"\"",list:$4,mods:{astType:"soloMods", list:[]},rmods: {astType:"soloMods", list:[]} };}}
+  | varid "~>" varid soloList "|" soloMods  {{$$ = {astType:"soloStream", id: $1, synth:"\""+$3+"\"", list:$4, mods: $6,rmods:{astType:"soloMods", list:[]} };}}
+  | varid "~>" varid soloList "|" soloMods  "|" soloMods {{$$ = {astType:"soloStream", id: $1, synth:"\""+$3+"\"", list:$4, mods: $6,rmods: $8}; }}
   ;
 
 soloList
@@ -636,6 +650,7 @@ aexp // : object
   | gcon                    {{$$ = $1;}}
   | literal                 {{$$ = $1;}}
   | "(" exp ")"             {{$$ = $2;}}
+  | datalookup              {{$$ = $1;}}
   //| '-' exp %prec UMINUS    {{$$ = {astType:"negate",rhs:$2};}}
   | dictexp                 {{$$ = $1;}}
   | listexp                 {{$$ = $1;}}

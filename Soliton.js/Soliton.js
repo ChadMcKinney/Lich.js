@@ -44,13 +44,15 @@ Soliton.spliceFuncBlockSize = 64; // block size for splice generated osc node fu
 Soliton.spliceFuncBlockRatio = Soliton.blockSize / Soliton.spliceFuncBlockSize; // Ratio use for sample generation in splice osc nodes
 Soliton.buffers = {}; // Soliton.buffers namespace
 Soliton.synthDefs = {};
+Soliton.pbinds = {};
 Soliton.buses = [];
 Soliton.numBuses = 10;
 var _sinTable = [];
 var _pow = Math.pow(10,4);
-var pi = 3.141592653589793;
+var pi = Math.PI;
 var halfPi = pi / 2;
 var twoPi = pi * 2;
+context = null;
 ugenList = ["distortion3","distortion4"]; // created in Prelude.lich, but can't reach _createUGen from Lich proper, so added here instead.
 
 _createUGen = function(name, func)
@@ -109,6 +111,9 @@ Soliton.init = function()
 			_sinTable[i] = Math.sin(theta);
 			theta += round;
 		}
+
+		context = Soliton.context;
+		_createPrimitive("context", context);
 	}
 
 	catch(e)
@@ -7372,8 +7377,19 @@ function pan(position, input)
 
 	var panner = Soliton.context.createPanner();
 	panner.panningModel = "equalpower";
+	//panner.distanceModel = "linear";
 	panner._lichType = AUDIO;
-	panner.setPosition(position, 0, 0); // This seems to be broken or a bug. Just hard pans -1, 0, or 1. Can't do 0.5 or -0.1 for instance.
+
+	var xd = position * 90;
+	var zd = xd + 90;
+	if(zd > 90)
+		zd = 180 - zd;
+
+	var x = Math.sin(xd * Math.PI / 180);
+	var z = Math.sin(zd * Math.PI / 180);
+
+
+	panner.setPosition(x, 0, z); // This seems to be broken or a bug. Just hard pans -1, 0, or 1. Can't do 0.5 or -0.1 for instance.
 	input.connect(panner);
 	
 	panner.startAll = function(time)
@@ -7384,7 +7400,7 @@ function pan(position, input)
 	panner.stopAll = function(time)
 	{
 		input.stopAll(time);
-		input.disconnect(0);
+		setTimeout(function(){input.disconnect(0)}, (time - Soliton.context.currentTime) * 1000);
 	}
 
 	return panner;
@@ -10047,30 +10063,19 @@ function killall()
 
 _createPrimitive("killall", killall);
 
-Soliton.testMetrognome = function()
-{
-	return new Soliton.AudioEvent(
-		function(){ return Soliton.createOscillator(Soliton.masterGain, "triangle", 440) }, 
-		Soliton.context.currentTime, 
-		Soliton.context.currentTime + 0.1, 
-		function(currentTime)
-		{
-			//Lich.post("Metrognome nextTime = " + (Lich.scheduler.tempoSeconds));
-			return [currentTime + Lich.scheduler.tempoSeconds, currentTime + Lich.scheduler.tempoSeconds + 0.1];
-		}
-	);
-}
-
 Soliton.PercStream = function(_events, _modifiers)
 {
 	var events = _events;
 	var modifiers = _modifiers;
     this.nextTime = Math.floor((Soliton.context.currentTime / Lich.scheduler.tempoSeconds) + 0.5) * Lich.scheduler.tempoSeconds;
 	var macroBeat = 0;
+	var infiniteBeat = 0;
 	var modifierBeat = 0;
 	var hasModifiers = modifiers.length > 0;
 	this._lichType = IMPSTREAM;
 	var playing = true;
+	var ll = events.length;
+	var lm = 1 / ll;
 
 	// Push to the next metric down beat
 	this.nextTime += ((this.nextTime / Lich.scheduler.tempoSeconds) % _events.length) * Lich.scheduler.tempoSeconds;
@@ -10116,12 +10121,23 @@ Soliton.PercStream = function(_events, _modifiers)
 		{
 			try
 			{
-				var nextTime = this.nextTime;
-				var synth = Soliton.synthDefs[nevent]();
+				var synth;
+
+				if(typeof nevent === "function")
+				{
+					var wt = wrapRange(0, ll, infiniteBeat);
+					nevent = nevent((infiniteBeat - wt) * lm);
+				}
+
+				if(typeof nevent === "string")
+					synth = Soliton.synthDefs[nevent]();
+				else
+					synth = nevent();
+
 				if(synth._lichType == AUDIO)
 				{
 					synth.connect(Soliton.masterGain);
-					synth.startAll(nextTime + offset);
+					synth.startAll(this.nextTime + offset);
 				}
 			}
 
@@ -10139,6 +10155,8 @@ Soliton.PercStream = function(_events, _modifiers)
 		
 		if(++macroBeat >= events.length)
 				macroBeat = 0;
+
+		++infiniteBeat;
 
 		if(hasModifiers)
 		{
@@ -10174,6 +10192,8 @@ Soliton.PercStream = function(_events, _modifiers)
 		events = newEvents;
 		modifiers = newModifiers;
 		macroBeat = macroBeat % events.length;
+		ll = events.length;
+		lm = 1 / ll;
 
 		if(modifiers.length)
 			modifierBeat = modifierBeat % modifiers.length;
@@ -10192,7 +10212,7 @@ Soliton.PercStream = function(_events, _modifiers)
 	}
 }
 
-Soliton.SoloStream = function(_instrument, _events, _modifiers)
+Soliton.SoloStream = function(_instrument, _events, _modifiers, _rmodifiers)
 {
 	if(!Soliton.synthDefs.hasOwnProperty(_instrument))
 		throw new Error("instrument undefined in solo pattern: " + _instrument);
@@ -10200,12 +10220,16 @@ Soliton.SoloStream = function(_instrument, _events, _modifiers)
 	var instrument = _instrument;
 	var events = _events;
 	var modifiers = _modifiers;
+	var rmodifiers = _rmodifiers;
 	this.nextTime = Math.floor((Soliton.context.currentTime / Lich.scheduler.tempoSeconds) + 0.5) * Lich.scheduler.tempoSeconds;
 	var macroBeat = 0;
+	var infiniteBeat = 0;
 	var modifierBeat = 0;
 	var hasModifiers = modifiers.length > 0;
 	this._lichType = SOLOSTREAM;
 	var playing = true;
+	var ll = events.length;
+	var lm = 1 / ll;
 
 	// Push to the next metric down beat
 	this.nextTime += ((this.nextTime / Lich.scheduler.tempoSeconds) % _events.length) * Lich.scheduler.tempoSeconds;
@@ -10251,6 +10275,12 @@ Soliton.SoloStream = function(_instrument, _events, _modifiers)
 		{
 			try
 			{
+				if(typeof nevent === "function")
+				{
+					var wt = wrapRange(0, ll, infiniteBeat);
+					nevent = nevent((infiniteBeat - wt) * lm);
+				}
+
 				if(hasModifiers)
 				{
 					var modifier = modifiers[modifierBeat];
@@ -10262,12 +10292,11 @@ Soliton.SoloStream = function(_instrument, _events, _modifiers)
 				}
 
 				
-				var nextTime = this.nextTime;
 				var synth = Soliton.synthDefs[instrument](nevent);
 				if(synth._lichType == AUDIO)
 				{
 					synth.connect(Soliton.masterGain);
-					synth.startAll(nextTime + offset);
+					synth.startAll(this.nextTime + offset);
 				}
 			}
 
@@ -10285,9 +10314,30 @@ Soliton.SoloStream = function(_instrument, _events, _modifiers)
 		
 		if(++macroBeat >= events.length)
 				macroBeat = 0;
+
+		
+
+		if(rmodifiers.length > 0)
+		{
+			var rmodifier = rmodifiers[infiniteBeat % rmodifiers.length];
+
+			if(rmodifier != Lich.VM.Nothing)
+			{
+				try
+				{
+					beatDuration = rmodifier(Lich.scheduler.tempoSeconds);
+				}
+
+				catch(e)
+				{
+					Lich.post(e);
+				}
+			}
+		}
 		
 		this.subSchedulePlay(event, beatDuration, 0); // recursively schedule beat, adjusting for tuple nesting
 		this.nextTime += beatDuration;
+		++infiniteBeat;
 
 		if(hasModifiers)
 		{
@@ -10300,7 +10350,7 @@ Soliton.SoloStream = function(_instrument, _events, _modifiers)
 		return this.nextTime;
 	}
 
-	this.update = function(newInstrument, newEvents, newModifiers)
+	this.update = function(newInstrument, newEvents, newModifiers, newRModifers)
 	{
 		if(!Soliton.synthDefs.hasOwnProperty(newInstrument))
 			throw new Error("instrument undefined in solo pattern: " + Lich.VM.PrettyPrint(newInstrument));
@@ -10308,7 +10358,10 @@ Soliton.SoloStream = function(_instrument, _events, _modifiers)
 		instrument = newInstrument;
 		events = newEvents;
 		modifiers = newModifiers;
+		rmodifiers = newRModifers;
 	    macroBeat = macroBeat % events.length;
+	    ll = events.length;
+		lm = 1 / ll;
 
 		if(modifiers.length)
 			modifierBeat = modifierBeat % modifiers.length;
@@ -10327,30 +10380,134 @@ Soliton.SoloStream = function(_instrument, _events, _modifiers)
 	}
 }
 
-Soliton.AudioEvent = function(_nodeFunc, _startTime, _stopTime, _calcFunc)
+Soliton.pbind = function(patternName, func, arguments, duration)
 {
-	var nodeFunc = _nodeFunc;
-	var node = null;
-	this.nextTime = _startTime;
-	var stopTime = _stopTime;
-	var calcFunc = _calcFunc;
-	var calcArray = [];
+	this.patternName = patternName;
+	this.func = func;
+	this.args = arguments;
+	this.duration = duration;
+	var beatDuration = 0;
+	this.value = null;
+	this.nextTime = Math.floor((Soliton.context.currentTime / Lich.scheduler.tempoSeconds) + 0.5) * Lich.scheduler.tempoSeconds;
+	var infiniteBeat = 0;
+	this._lichType = SOLOSTREAM;
+	var playing = false;
+
+	this.stop = function(doRemove)
+	{
+		doRemove = typeof doRemove === "undefined" ? true : doRemove;
+		playing = false;
+		
+		if(doRemove)
+			Lich.scheduler.removeScheduledEvent(this);
+	}
+
+	this.play = function()
+	{
+		if(!playing)
+		{
+			playing = true;
+			Lich.scheduler.addScheduledEvent(this);
+		}
+	}
 
 	this.schedulePlay = function()
 	{
-		node = nodeFunc();
-		node.start(this.nextTime);
-		node.gainNode.gain.setValueAtTime(0, this.nextTime);
-		node.gainNode.gain.linearRampToValueAtTime(1, this.nextTime + 0.001);
-		node.gainNode.gain.linearRampToValueAtTime(0, stopTime);
-		node.stop(stopTime);
+		try
+		{
+			beatDuration = this.duration;
 
-		calcArray = calcFunc(this.nextTime);
-		this.nextTime = calcArray[0];
-		stopTime = calcArray[1];
+			if(typeof beatDuration === "function")
+				beatDuration = Lich.scheduler.tempoSeconds * beatDuration(infiniteBeat);
+			else
+				beatDuration *= Lich.scheduler.tempoSeconds;
 
+			var currentValue = this.func;
+
+			if(typeof currentValue === "function")
+				currentValue = currentValue(infiniteBeat);
+
+			var args = null;
+			if(this.args instanceof Array)
+			{
+				args = [];
+				for(var i = 0; i < this.args.length; ++i)
+				{
+					var arg = this.args[i];
+
+					if(typeof arg === "function")
+						arg = arg(infiniteBeat);
+
+					args.push(arg);
+				}
+			}
+
+			else
+			{
+				args = [this.args];
+			}
+			
+			var synth = currentValue;
+			
+			if(typeof synth === "string")		
+				synth = Soliton.synthDefs[currentValue];
+
+			if(typeof synth === "function")
+				synth = synth.curry.apply(synth, args);
+
+			this.value = synth;
+			if(synth._lichType == AUDIO)
+			{
+				synth.connect(Soliton.masterGain);
+				synth.startAll(this.nextTime);
+			}
+
+			++infiniteBeat;
+		}
+
+		catch(e)
+		{
+			Lich.post(e);
+		}
+		
+		this.nextTime += beatDuration;
 		return this.nextTime;
 	}
+
+	this.update = function(func, arguments, duration)
+	{
+		this.func = func;
+		this.args = arguments;
+		this.duration = duration;
+
+		if(!playing)
+		{
+			this.nextTime = Math.floor((Soliton.context.currentTime / Lich.scheduler.tempoSeconds) + 0.5) * Lich.scheduler.tempoSeconds;
+			//this.nextTime += (this.nextTime / Lich.scheduler.tempoSeconds) * Lich.scheduler.tempoSeconds;
+		}
+
+		this.play();
+	}
+}
+
+function pbind(patternName, func, arguments, duration)
+{
+	var p = null;
+
+	if(Soliton.pbinds.hasOwnProperty(patternName))
+	{
+		Soliton.pbinds[patternName].update(func, arguments, duration);
+		p = Soliton.pbinds[patternName];
+	}
+
+	else
+	{
+		p = new Soliton.pbind(patternName, func, arguments, duration);
+		Soliton.pbinds[patternName] = p;
+		p.play();
+	}
+
+	return p;
 }
 
 Soliton.SteadyScheduler = function()
@@ -10524,6 +10681,11 @@ Soliton.SteadyScheduler = function()
 		tempoSeconds = Lich.scheduler.tempoSeconds;
 		tempoMillis = Lich.scheduler.tempoMillis;
 	}
+}
+
+function currentBeat()
+{
+	return Math.floor((Soliton.context.currentTime / Lich.scheduler.tempoSeconds) + 0.5);
 }
 
 _createPrimitive("tempo", true);

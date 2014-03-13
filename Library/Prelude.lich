@@ -58,7 +58,33 @@ deepMap f list@(x:xs) = map (deepFunc) list
 			subList@(z:zs)	-> deepMap f subList
 			_ 				-> f y 
 
+wchoose prob list = if (length prob) /= (length list)
+	then error "wchoose prob and list must be the same length"
+	else if sum prob /= 1
+	then error "wchoose prob must sum to 1."
+	else index
+		where
+			p = lookup 1 $ foldl (\[l,acc] x -> let n = l + x in [n, acc ++ n]) [0,[]] prob
+			r = random 0 1
+			index = lookup 1 $ foldl (\[l,i,j] x -> if (r > l) && (r <= x) then [x,j,j+1] else [x,i,j+1]) [0,0,0] p 
 
+
+splitAt n list = [slice 0 n list, slice n (length list) list] 
+
+rotateList n list = (res !! 1) ++ (res !! 0) 
+	where 
+		n2 = wrapRange (neg $ length list) (length list) (neg n)
+		res = splitAt n2 list
+
+-- wrap lookup, supports negative numbers
+wlookup index list = lookup (wrapRange 0 (length list) index) list
+
+-- float based nested list lookup (no interpolation), for example: flookup 3.8 [0,1,[2,2.5],[3,[3.5,3.75]],4,5] -- returns 3.75
+flookup i l = let item = wlookup (floor i) l in case item of
+    (x:xs)  -> flookup (mul (length item) (i - (floor i))) item
+    _       -> item
+
+-- | UGen funcs
 distAmps = [0.25, 0.5, 0.25]
 distortion3 amt input = input >> gain (1 + (linexp amt 0 1 0.1 10000)) >> clip 1
 distortion4 color = shaper (chebyshev (pow 2 . floor $ mul color 10) [0.25, 0.5, 0.25])
@@ -72,7 +98,6 @@ data Result { a, s }
 data State { a }
 -- wrap a result in a State container
 result a = State (\s -> Result a s)
-
 
 put newState = State (\_ -> Result Nothing newState)
 get = State (\s -> Result s s)
@@ -174,3 +199,115 @@ ahirbhairav = Scale justTuning [0,1,4,5,7,9,10] 12 261.6255653006
 
 -- Cole Ingraham's Just intonated scale
 coleJI = Scale [1,10/9,9/8,8/7,6/5,4/3,11/8,3/2,8/5,7/4,16/9,9/5] [0,1,2,3,4,5,6,7,8,9,10,11] 12 261.6255653006
+
+
+----------------
+-- | Patterns
+----------------
+
+data NoteTypes = Repeat | Rest
+
+-- pattern match a value, if a function then request the value at n, otherwise return the value itself. This allows for nested patterns to return a value at n.
+collapse n p = case p of
+	(\_ ->) -> p n
+	_		-> p
+
+pseq list = (\t -> let wt = wi t in collapse ((t - wt) * lm) $ lookup wt list)
+	where
+		ll = length list
+		lm = 1 / ll
+		wi x = wrapRange 0 ll x
+
+tseq list = (pseq list) (currentBeat 0)
+
+prand list = (\t -> collapse t $ choose list)
+
+pwrand prob list = if (length prob) /= (length list) then error "wchoose prob and list must be the same length"
+	else if sum prob /= 1 then error "wchoose prob must sum to 1."
+	else (\t -> collapse t $ lookup (index $ random 0 1) list)
+		where
+			p = lookup 1 $ foldl (\[l,acc] x -> let n = l + x in [n, acc ++ n]) [0,[]] prob
+			index = (\r -> lookup 1 $ foldl (\[l,i,j] x -> if (r > l) && (r <= x) then [x,j,j+1] else [x,i,j+1]) [0,0,0] p)
+
+pshuf list = pseq (shuffle list)
+tshuf list = (pshuf list) (currentBeat 0)
+
+pfunc func = (\t -> collapse t $ func t)
+pwhite low high = (\t -> random low high)
+pstutter n p = (\t -> collapse (floor $ t / (s t)) p)
+	where
+		s t = collapse t n
+
+tstutter n p = (pstutter n p) (currentBeat 0)
+
+pwrap low high p = (\t -> wrapRange low high (collapse t $ p t))
+twrap low high p = (pwrap low high p) (currentBeat 0)
+
+pseries start step = (\t -> start + (t * step))
+tseries start step = (pseries start step) (currentBeat 0)
+
+pgeom start grow = (\t -> start * (pow grow t))
+tgeom start grow = (pgeom start grow) (currentBeat 0)
+
+preverse p = (\t -> collapse (neg t) p)
+treverse p = collapse (neg $ currentBeat 0) p
+pwarp a p = (\t -> collapse (floor $ (s t) * t) p)
+	where s t = collapse t a
+twarp a p = (pwarp a p) (currentBeat 0)
+
+pbright l r = (\t -> (s t) .>> (u t))
+	where 
+		s t = collapse t l
+		u t = collapse t r
+
+tbright l r = (pbright l r) (currentBeat 0)
+
+pbleft l r = (\t -> (s t) .<< (u t))
+	where 
+		s t = collapse t l
+		u t = collapse t r
+
+tbleft l r = (pbleft l r) (currentBeat 0)
+
+pbor l r = (\t -> (s t) .| (u t))
+	where 
+		s t = collapse t l
+		u t = collapse t r
+
+tbor l r = (pbor l r) (currentBeat 0)
+
+pband l r = (\t -> (s t) .& (u t))
+	where 
+		s t = collapse t l
+		u t = collapse t r
+
+tband l r = (pband l r) (currentBeat 0)
+
+ptright r p = (\t -> collapse (floor $ t .>> (s t)) p)
+	where s t = collapse t r
+
+ttright l r = (ttright l r) (currentBeat 0)
+
+ptleft r p = (\t -> collapse (floor $ t .<< (s t)) p)
+	where s t = collapse t r
+
+ttleft l r = (ttleft l r) (currentBeat 0)
+
+ptor r p = (\t -> collapse (floor $ t .| (s t)) p)
+	where s t = collapse t r
+
+ttor l r = (ttor l r) (currentBeat 0)
+
+ptand r p = (\t -> collapse (floor $ t .& (s t)) p)
+	where s t = collapse t r
+
+ttand l r = (ttand l r) (currentBeat 0)
+
+psmooth p = (\t -> let v = max 0.00001 $ collapse t $ p t in (pow v 2) * (nsin (1/v)))
+tsmooth p = (plisp p) (currentBeat 0)
+
+pprime i = (\t -> wlookup (collapse t $ i t) primes)
+tprime i = (pprime i) (currentBeat 0)
+
+psigmoid p = (\t -> let x = collapse t $ p t in 1 / (1 + (Math::E ^ (neg x))))
+tsigmoid p = (psigmoid p) (currentBeat 0)

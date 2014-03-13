@@ -27,6 +27,125 @@ fac 100
 let sums x y = if y > 0 then (sums (x + 1) (y - 1)) else if y < 0 then (sums (x - 1) (y + 1)) else x
 sums 20 100000
 
+//////////////////////
+// Patterns
+//////////////////////
+
+"p" functions are pattern functions. These functions return lambdas that when given a beat will return a value.
+
+let s = pseq [0,1,2]
+foldl (\acc t -> print $ s t) 0 [0..12]
+
+let s = pseq [pseq [0,pseq [0.5, 666]], pseq [1,10], pseq [2,20]]
+foldl (\acc t -> print $ s t) 0 [0..12]
+
+let sh = prand [pseq [555,666,777], 1, 2]
+foldl (\acc t -> print $ sh t) 0 [0..12]
+
+let ws = pwrand [0.5, 0.25, 0.25] [pseq [555,666,777], 1, 2]
+foldl (\acc t -> print $ ws t) 0 [0..12]
+
+let ps = pshuf [0..4]
+foldl (\acc t -> print $ ps t) 0 [0..12]
+
+let st = pstutter 3 $ pseq [0..5]
+foldl (\acc t -> print $ st t) 0 [0..12]
+
+let pw = pwrap 3 6 (pseq [0..7])
+foldl (\acc t -> print $ pw t) 0 [0..12]
+
+let ps = pseries 2 5
+foldl (\acc t -> print $ ps t) 0 [0..12]
+
+let ps = pwrap 0 13 $ pseries 0 2
+foldl (\acc t -> print $ ps t) 0 [0..12]
+
+let pg = pgeom 1 2
+foldl (\acc t -> print $ pg t) 0 [0..12]
+
+let pg = pwrap 0 13 $ pgeom 1 2
+foldl (\acc t -> print $ pg t) 0 [0..12]
+
+let pr = preverse $ pseq [0..4]
+foldl (\acc t -> print $ pr t) 0 [0..12]
+treverse pr
+
+-- nested patterns
+let pgs = pseq [pgeom 1 2, 0.666]
+foldl (\acc t -> print $ pgs t) 0 [0..12]
+
+-- pwarp and twarp
+let si freq => sin freq >> perc 0 0.3 0.15
+siner ~> si (pwarp -1 $ pseq [444,555,666,777]) -- acts like reverse
+stop siner
+
+let si freq => sin freq >> perc 0 0.3 0.15
+siner ~> si (pwarp (1/3) $ pseq [444,555,666,777]) -- acts like pstutter 3
+stop siner
+
+let si freq => sin freq >> perc 0 0.3 0.15
+siner ~> si (pwarp (pseq [13.5,pseq [-5.3, 1]]) $ pseq [444,555,666,777]) -- you can use patterns for the warp amount
+stop siner
+
+let si2 => sin (twarp (1/3) (pseq [444,555,666,777])) >> perc 0 0.3 0.2 -- used as a "t" pattern in a synthdef
+siner2 +> si2 si2 [si2 si2] si2 -- interlocking pattern between rhythmand t pattern
+
+let s => sin 440 >> perc 0 0.3 0.3
+let s2 => sin 666 >> perc 0 0.3 0.3
+let s3 => sin 777 >> perc 0 0.3 0.3
+siner2 +> (pseq [s2,s3,s]) (pwarp (pseq [(1/3),(1/4)]) $ pseq [s,s3,s2]) | (/2)
+stop siner2
+
+
+context::currentTime -- get the current time of the audio context
+currentBeat 0 -- get the current beat, given the global tempo
+
+-- "t" functions are mirrored after their "p" pattern counter parts, but are based on the current global beat
+tseq [pseq [666,777,888],1,2] -- evaluate multiple times to see the different values
+tshuf [0..5]
+tstutter 3 (pseq [0..4])
+twrap 1 7 $ pseries 1 5
+
+-- This is really useful for synths, especially if you want to use a synth in an impulse stream
+sin (tstutter 2 $ pshuf [555, 666, 777]) >> perc 0 0.3 0.3 >> play
+sin (twrap 440 777 $ pseries 440 88) >> perc 0 0.3 0.3 >> play
+
+-- we want to declare the shuffled pattern ahead of time otherwise it will get generated anew each time. You can re-evaluate to generate a new seq.
+let shuffled = pseq [preverse ps, ps] where ps = pshuf [3..8]  
+let si => degree2Freq slendro (mul (tseq [1,2,3,2]) $ tstutter 2 shuffled) >> sin >> perc 0 0.2 0.25
+siner +> si
+siner2 +> si [_ si] [_ si] si | (*3)
+stop siner
+stop siner2
+
+
+let si freq => sin freq >> perc 0 0.3 0.3
+siner ~> si (pseq [444,555,666,777]) 999
+stop siner
+
+let s => sin 440 >> perc 0 0.3 0.3
+let s2 => sin 666 >> perc 0 0.3 0.3
+let s3 => sin 777 >> perc 0 0.3 0.3
+siner2 +> (pseq [s2,s3,s]) (pseq [s,s3,s2,s]) | (/2)
+stop siner2
+
+
+-- pbind is similar to the SuperCollider Pbind. 
+-- It takes a pattern name (used to store in a global dict), a func (can be a pattern), an array of arguments (each can be a pattern), and a duration (can be pattern)
+-- pbind name func arguments duration
+let t f q => sin (f / q) >> pan -1 >> perc 0 0.5 0.3
+let u f q => sin (f * q) >> pan 1 >> perc 0 0.5 0.3
+let testp = pbind "test" (pseq [t,u,t,t,u,u,u]) [pshuf [666,777,888,999], pseq [1,1/2,2]] (pshuf [1/2,1/2,1,1/2,1/2])
+
+
+-- You can get the current value of a pbind pattern using myPbind::value.
+testp::value -- updates with the pattern. Be careful, this is a mutating value!! IMPURE!
+
+
+-- Finally, Solo Streams can now have modifiers for rhythm.
+let sa freq => saw (freq + (sin 3 >> gain 5)) >> add (saw (freq/2)) >> lowpass (freq * 2) 5 >> perc 0.0 0.2 (tseq [0.3,1])
+sawer ~> sa 1 [2 2] 3 4 [3 3] | (*444) (*555) (*333) | _ _ (*2) (*2)
+
 
 /////////////////////
 // State Monad
@@ -1225,10 +1344,10 @@ Enforce purity: Done?!
 
 -- Audio to do
 Fix Node leaks with custom UGens -- Fixed? Need to implement disconnect via setTimeout for all inputs like in exprange
-spliceFilter? -> Adds poles according to splice string characters -- Done
-Implement Limiter, writeBuf, and any other loose ends. Put in Master limiter? -- No write buffer in API. Compressor/Limiter is done.
+spliceFilter? -> Adds poles according to splice string characters -- Done, may take out though because it's so much code to load
+Implement Limiter, writeBuf, and any other loose ends. Put in Master limiter? Done
 Buses and Effects routing -- Done!?
-Panning! -- Doneish, the API isn't responding to float panning
+Panning! -- Done, but can't modulate
 
 
 
@@ -1376,7 +1495,7 @@ kBass ~> kSynth [(kd -12) (kd -8)] [(kd -4) (kd (choose [-2, -4, -5]))] [(kd -9)
 
 
 -- Cool flittery plucky melody
-let kSynth3 freq => white 1 >> perc2 0 1 0.03 >> pluck freq (random 0.1 4) (random 0.05 1) >> perc 0.01 0.15 0.5
+let kSynth3 freq => white 1 >> perc2 0 1 0.03 >> pluck freq (random 0.1 4) (random 0.05 1) >> perc 0.0 0.15 0.5
 kMelody3 ~> kSynth3 [(kd -12) (kd -8)] [(kd -4) (kd (choose [-2, -4, -5]))] [(kd -9) (kd (choose [-7, -5]))] | (/2) _ _ (/2) _ (*2) _ (*2) (*4) _ (/2) _ _ (/2) _ (*2) (*4) (*8) _
 
 -- Frequency shifting
@@ -1548,7 +1667,7 @@ stop drumDecimFX
 
 
 ---------------------------------------
--- Archived Other shit
+-- Crunchy Drums
 ---------------------------------------
 
 let ff = degree2Freq coleJI
@@ -1571,104 +1690,11 @@ stop drumDecimFX
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // synthesis techniques worth implementing
 Comb Filter -- This is basically what delay is. Consider refactoring?
 Karplus-Strong -- Done but slow
 Moog Style filter -- maybe lator...
 Pitch and Freq Shift -- Pitch Shift doesn't work right, but Freq Shift is done. both are very expensive.
-Better Wave Shaping, distion types of effects (Need Chebyshev polynomials to good dist I think)
+Better Wave Shaping, distion types of effects (Need Chebyshev polynomials to good dist I think) >> done, but shaper is buggy
 Chorus, Phaser, Flanger -- Done
 Trigger UGens, Stepper -- Done
