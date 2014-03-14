@@ -216,7 +216,7 @@ pseq list = (\t -> let wt = wi t in collapse ((t - wt) * lm) $ lookup wt list)
 	where
 		ll = length list
 		lm = 1 / ll
-		wi x = wrapRange 0 ll x
+		wi x = wrapRange 0 ll $ floor x
 
 tseq list = (pseq list) (currentBeat 0)
 
@@ -233,20 +233,20 @@ pshuf list = pseq (shuffle list)
 tshuf list = (pshuf list) (currentBeat 0)
 
 pfunc func = (\t -> collapse t $ func t)
-pwhite low high = (\t -> random low high)
+pwhite low high = (\t -> random (collapse t low) (collapse t high))
 pstutter n p = (\t -> collapse (floor $ t / (s t)) p)
 	where
 		s t = collapse t n
 
 tstutter n p = (pstutter n p) (currentBeat 0)
 
-pwrap low high p = (\t -> wrapRange low high (collapse t $ p t))
+pwrap low high p = (\t -> wrapRange (collapse t low) (collapse t high) (collapse t p))
 twrap low high p = (pwrap low high p) (currentBeat 0)
 
-pseries start step = (\t -> start + (t * step))
+pseries start step = (\t -> (collpse t start) + (t * (collapse t step)))
 tseries start step = (pseries start step) (currentBeat 0)
 
-pgeom start grow = (\t -> start * (pow grow t))
+pgeom start grow = (\t -> (collapse t start) * (pow (collapse t grow) t))
 tgeom start grow = (pgeom start grow) (currentBeat 0)
 
 preverse p = (\t -> collapse (neg t) p)
@@ -311,3 +311,108 @@ tprime i = (pprime i) (currentBeat 0)
 
 psigmoid p = (\t -> let x = collapse t $ p t in 1 / (1 + (Math::E ^ (neg x))))
 tsigmoid p = (psigmoid p) (currentBeat 0)
+
+nsimplex x = 0.395 * (n0 + n1)
+	where
+		sqr n = n * n
+		i0 = floor x
+		i1 = i0 + 1
+		x0 = x - i0
+		x1 = x0 - 1.0
+		t0 = sqr (1.0 - x0*x0)
+		n0 = t0 * t0 * (Soliton::simplexGrad1 (Soliton::simplexNoisePerm !! (i0 .& 255)) x0)
+		t1 = sqr (1.0 - x1*x1)
+		n1 = t1 * t1 * (Soliton::simplexGrad1 (Soliton::simplexNoisePerm !! (i1 .& 255)) x1)
+
+psimplex speed = (\t -> nsimplex $ t * (collapse t speed) * 0.001)
+tsimplex speed = (psimplex p) (currentBeat 0)
+
+pselect which list = (\t -> collapse t $ wlookup (collapse t which) list)
+tselect which list = (pselect which list) (currentBeat 0)
+
+pclip low high p = (\t -> collapse t $ max (collapse t low) $ min (collapse t high) (collapse t p))
+tclip low high p = (pclip low high p) (currentBeat 0)
+
+pfold low high p = (\t -> foldRange (collapse t low) (collapse t high) (collapse t $ p))
+tfold low high p = (pwrap low high p) (currentBeat 0)
+
+pmul l r = (\t -> (collapse t l) * (collapse t r))
+tmul l r = (pmul l r) (currentBeat 0)
+
+pdiv l r = (\t -> (collapse t l) / (collapse t r))
+tdiv l r = (pmdiv l r) (currentBeat 0)
+
+padd l r = (\t -> (collapse t l) + (collapse t r))
+tadd l r = (padd l r) (currentBeat 0)
+
+pminus l r = (\t -> (collapse t l) - (collapse t r))
+tminus l r = (pmius l r) (currentBeat 0)
+
+pmod l r = (\t -> (collapse t l) % (collapse t r))
+tmod l r = (pmul l r) (currentBeat 0)
+
+ppow l r = (\t -> pow (collapse t l) (collapse t r))
+tpow l r = (ppow l r) (currentBeat 0)
+
+psin freq = (\t -> nsin ((collapse t freq) * twoPi * t))
+tsin freq = (psin freq) (currentBeat 0)
+
+psaw freq = (\t -> wrapRange -1 1 $ (collapse t freq) * t)
+tsaw freq = (psaw freq) (currentBeat 0)
+
+ptri freq = (\t -> s2t (wrapRange -1 1 $ (collapse t freq) * t)) 
+	where s2t s = if s > 0 then 0 - (s * 2) + 1 else s * 2 + 1
+
+ttri freq = (ptri freq) (currentBeat 0)
+
+psquare freq = (\t -> s2q (wrapRange -1 1 $ (collapse t freq) * t)) 
+	where s2q s = if s >= 0 then 1 else -1
+
+tsquare freq = (psquare freq) (currentBeat 0)
+
+pdelay d p = (\t -> collapse (add t $ collapse t d) p)
+tdelay d p = (pdelay d p) (currentBeat 0)
+
+pcomb d p = (\t -> (add (collapse (add t $ collapse t d) p) $ collapse t p))
+tcombd d p = (pdelay d p) (currentBeat 0)
+
+
+ptcrush b p = (\t -> collapse (timecrush t) p)
+	where 
+		timecrush t = if c == 0 then t else (floor (t/q)) * q
+			where 
+				c = collapse t b
+				q = pow 0.5 c
+
+ttcrush b p = (ptcrush b p) (currentBeat 0)
+
+pcrush b p = (\t -> bcrush t (collapse t p))
+	where 
+		bcrush t o = if c == 0 then o else (floor (o/q)) * q
+			where 
+				c = collapse t b
+				q = pow 0.5 c
+
+tcrush b p = (pcrush b p) (currentBeat 0)
+
+pdust d = (\t -> dd t)
+	where 
+		dd t = if n > d2 then n * scale - 1 else 0
+			where
+				d2 = collapse t d
+				scale = if d2 > 0 then 2 / d2 else 0
+				n = random 0 1
+
+pfir coeffs p = (\t -> lookup 0 $ foldl (\[acc,i] x -> [acc + (x * (collapse (t - i) p)),i+1]) [0,0] coeffs)
+tfir coeffs p = (pfir coeffs p) (currentBeat 0)
+
+prange low high p = (\t -> r t (collapse t p))
+	where r t i = (i * mulVal) + addVal
+		where
+			ht = collapse t high
+			lt = collapse t low
+			mulVal = (ht - lt) * 0.5
+			addVal = mulVal + lt
+
+pexprange low high p = (\t -> linexp (collapse t p) -1 1 (collapse t low) (collapse t high))
+

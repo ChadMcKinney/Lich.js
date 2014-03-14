@@ -1725,6 +1725,11 @@ function wrapRange(lo, hi, value)
 	return _wrap(value, lo, hi);
 }
 
+function foldRange(lo, hi, value)
+{
+	return Soliton._fold(value, lo, hi);
+}
+
 function _mod(value, lo, hi)
 {
 	if (value >= hi) 
