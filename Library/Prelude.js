@@ -353,6 +353,8 @@ function add(l, r)
 {
 	if(l._lichType == AUDIO || r._lichType == AUDIO)
 		return mix2(l,r);
+	else if(l._datatype === "Pattern" || r._datatype === "Pattern")
+		return padd(l, r);
 
 	_checkNumStringOpError(l, "+", r);
 	return l + r;
@@ -365,6 +367,8 @@ function minus(l, r)
 {
 	if(l._lichType == AUDIO || r._lichType == AUDIO)
 		return _subtractMix(l, r);
+	else if(l._datatype === "Pattern" || r._datatype === "Pattern")
+		return pminus(l, r);
 			
 	_checkNumOpError(l, "-", r);
 	return l - r;
@@ -377,7 +381,9 @@ function subtract(r, l)
 {
 	if(l._lichType == AUDIO || r._lichType == AUDIO)
 		return _subtractMix(l, r);
-			
+	else if(l._datatype === "Pattern" || r._datatype === "Pattern")
+		return pminus(l, r);
+
 	_checkNumOpError(l, "-", r);
 	return l - r;
 }
@@ -388,6 +394,8 @@ function mul(l, r)
 {
 	if(l._lichType == AUDIO || r._lichType == AUDIO)
 		return gain(l, r);
+	else if(l._datatype === "Pattern" || r._datatype === "Pattern")
+		return pmul(l, r);
 
 	_checkNumOpError(l, "*", r);
 	return l * r;
@@ -400,6 +408,8 @@ function div(l, r)
 {	
 	if(l._lichType == AUDIO || r._lichType == AUDIO)
 		return _audioDivision(l, r);
+	else if(l._datatype === "Pattern" || r._datatype === "Pattern")
+		return pdiv(l, r);
 
 	_checkNumOpError(l, "/", r);
 	return l / r;
@@ -410,6 +420,9 @@ _createPrimitive("div", div);
 
 function pow(l, r)
 {
+	if(l._datatype === "Pattern" || r._datatype === "Pattern")
+		return ppow(l, r);
+	
 	_checkNumOpError(l, "^", r);
 	return Math.pow(l,r);
 }
@@ -420,6 +433,8 @@ _createPrimitive("pow", pow);
 
 function mod(l, r)
 {
+	if(l._datatype === "Pattern" || r._datatype === "Pattern")
+		return pmod(l, r);
 	_checkNumOpError(l, "%", r);
 	return l % r;
 }
@@ -1607,6 +1622,8 @@ _createPrimitive("<<", _streamLeft, "_streamLeft");
 
 function _bitShiftRight(l,r)
 {
+	if(l._datatype === "Pattern" || r._datatype === "Pattern")
+		return pbright(l, r);
 	_checkNumOpError(l, ".>>", r);
 	return l >> r;
 }
@@ -1615,6 +1632,8 @@ _createPrimitive(".>>", _bitShiftRight, "_bitShiftRight");
 
 function _bitShiftLeft(l,r)
 {
+	if(l._datatype === "Pattern" || r._datatype === "Pattern")
+		return pbleft(l, r);
 	_checkNumOpError(l, ".<<", r);
 	return l << r;
 }
@@ -1623,15 +1642,29 @@ _createPrimitive(".<<", _bitShiftLeft, "_bitShiftLeft");
 
 function _bitOr(l,r)
 {
+	if(l._datatype === "Pattern" || r._datatype === "Pattern")
+		return pbor(l, r);
 	_checkNumOpError(l, ".|", r);
 	return l | r;
 }
 
 _createPrimitive(".|", _bitOr, "_bitOr");
 
+function _bitXOr(l,r)
+{
+	if(l._datatype === "Pattern" || r._datatype === "Pattern")
+		return pbor(l, r);
+	_checkNumOpError(l, ".^", r);
+	return l ^ r;
+}
+
+_createPrimitive(".^", _bitOr, "_bitOr");
+
 
 function _bitAnd(l,r)
 {
+	if(l._datatype === "Pattern" || r._datatype === "Pattern")
+		return pband(l, r);
 	_checkNumOpError(l, ".&", r);
 	return l & r;
 }

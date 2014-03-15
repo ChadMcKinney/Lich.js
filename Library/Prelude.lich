@@ -207,110 +207,125 @@ coleJI = Scale [1,10/9,9/8,8/7,6/5,4/3,11/8,3/2,8/5,7/4,16/9,9/5] [0,1,2,3,4,5,6
 
 data NoteTypes = Repeat | Rest
 
+-- Data type for patterns, a simple wrapper that allows for pattern matching
+data Pattern { p }
+
 -- pattern match a value, if a function then request the value at n, otherwise return the value itself. This allows for nested patterns to return a value at n.
 collapse n p = case p of
-	(\_ ->) -> p n
-	_		-> p
+	(Pattern f) -> f n
+	_			-> p
 
-pseq list = (\t -> let wt = wi t in collapse ((t - wt) * lm) $ lookup wt list)
+pseq list = Pattern (\t -> let wt = wi t in collapse ((t - wt) * lm) $ lookup wt list)
 	where
 		ll = length list
 		lm = 1 / ll
 		wi x = wrapRange 0 ll $ floor x
 
-tseq list = (pseq list) (currentBeat 0)
+tseq list = (pseq list)::p (currentBeat 0)
 
-prand list = (\t -> collapse t $ choose list)
+prand list = Pattern (\t -> collapse t $ choose list)
 
 pwrand prob list = if (length prob) /= (length list) then error "wchoose prob and list must be the same length"
 	else if sum prob /= 1 then error "wchoose prob must sum to 1."
-	else (\t -> collapse t $ lookup (index $ random 0 1) list)
+	else Pattern (\t -> collapse t $ lookup (index $ random 0 1) list)
 		where
 			p = lookup 1 $ foldl (\[l,acc] x -> let n = l + x in [n, acc ++ n]) [0,[]] prob
 			index = (\r -> lookup 1 $ foldl (\[l,i,j] x -> if (r > l) && (r <= x) then [x,j,j+1] else [x,i,j+1]) [0,0,0] p)
 
 pshuf list = pseq (shuffle list)
-tshuf list = (pshuf list) (currentBeat 0)
+tshuf list = (pshuf list)::p (currentBeat 0)
 
-pfunc func = (\t -> collapse t $ func t)
-pwhite low high = (\t -> random (collapse t low) (collapse t high))
-pstutter n p = (\t -> collapse (floor $ t / (s t)) p)
+pfunc func = Pattern (\t -> collapse t $ func t)
+pwhite low high = Pattern (\t -> random (collapse t low) (collapse t high))
+pstutter n p = Pattern (\t -> collapse (floor $ t / (s t)) p)
 	where
 		s t = collapse t n
 
-tstutter n p = (pstutter n p) (currentBeat 0)
+tstutter n p = (pstutter n p)::p (currentBeat 0)
 
-pwrap low high p = (\t -> wrapRange (collapse t low) (collapse t high) (collapse t p))
-twrap low high p = (pwrap low high p) (currentBeat 0)
+pwrap low high p = Pattern (\t -> wrapRange (collapse t low) (collapse t high) (collapse t p))
+twrap low high p = (pwrap low high p)::p (currentBeat 0)
 
-pseries start step = (\t -> (collpse t start) + (t * (collapse t step)))
-tseries start step = (pseries start step) (currentBeat 0)
+pseries start step = Pattern (\t -> (collapse t start) + (t * (collapse t step)))
+tseries start step = (pseries start step)::p (currentBeat 0)
 
-pgeom start grow = (\t -> (collapse t start) * (pow (collapse t grow) t))
-tgeom start grow = (pgeom start grow) (currentBeat 0)
+pgeom start grow = Pattern (\t -> (collapse t start) * (pow (collapse t grow) t))
+tgeom start grow = (pgeom start grow)::p (currentBeat 0)
 
-preverse p = (\t -> collapse (neg t) p)
+preverse p = Pattern (\t -> collapse (neg t) p)
 treverse p = collapse (neg $ currentBeat 0) p
-pwarp a p = (\t -> collapse (floor $ (s t) * t) p)
+pwarp a p = Pattern (\t -> collapse (floor $ (s t) * t) p)
 	where s t = collapse t a
-twarp a p = (pwarp a p) (currentBeat 0)
+twarp a p = (pwarp a p)::p (currentBeat 0)
 
-pbright l r = (\t -> (s t) .>> (u t))
+pbright l r = Pattern (\t -> (s t) .>> (u t))
 	where 
 		s t = collapse t l
 		u t = collapse t r
 
-tbright l r = (pbright l r) (currentBeat 0)
+tbright l r = (pbright l r)::p (currentBeat 0)
 
-pbleft l r = (\t -> (s t) .<< (u t))
+pbleft l r = Pattern (\t -> (s t) .<< (u t))
 	where 
 		s t = collapse t l
 		u t = collapse t r
 
-tbleft l r = (pbleft l r) (currentBeat 0)
+tbleft l r = (pbleft l r)::p (currentBeat 0)
 
-pbor l r = (\t -> (s t) .| (u t))
+pbor l r = Pattern (\t -> (s t) .| (u t))
 	where 
 		s t = collapse t l
 		u t = collapse t r
 
-tbor l r = (pbor l r) (currentBeat 0)
+tbor l r = (pbor l r)::p (currentBeat 0)
 
-pband l r = (\t -> (s t) .& (u t))
+pbxor l r = Pattern (\t -> (s t) .^ (u t))
 	where 
 		s t = collapse t l
 		u t = collapse t r
 
-tband l r = (pband l r) (currentBeat 0)
+tbxor l r = (pbxor l r)::p (currentBeat 0)
 
-ptright r p = (\t -> collapse (floor $ t .>> (s t)) p)
+pband l r = Pattern (\t -> (s t) .& (u t))
+	where 
+		s t = collapse t l
+		u t = collapse t r
+
+tband l r = (pband l r)::p (currentBeat 0)
+
+ptright r p = Pattern (\t -> collapse (floor $ t .>> (s t)) p)
 	where s t = collapse t r
 
-ttright l r = (ttright l r) (currentBeat 0)
+ttright l r = (ttright l r)::p (currentBeat 0)
 
-ptleft r p = (\t -> collapse (floor $ t .<< (s t)) p)
+ptleft r p = Pattern (\t -> collapse (floor $ t .<< (s t)) p)
 	where s t = collapse t r
 
-ttleft l r = (ttleft l r) (currentBeat 0)
+ttleft l r = (ttleft l r)::p (currentBeat 0)
 
-ptor r p = (\t -> collapse (floor $ t .| (s t)) p)
+ptor r p = Pattern (\t -> collapse (floor $ t .| (s t)) p)
 	where s t = collapse t r
 
-ttor l r = (ttor l r) (currentBeat 0)
+ttor l r = (ttor l r)::p (currentBeat 0)
 
-ptand r p = (\t -> collapse (floor $ t .& (s t)) p)
+ptxor r p = Pattern (\t -> collapse (floor $ t .^ (s t)) p)
 	where s t = collapse t r
 
-ttand l r = (ttand l r) (currentBeat 0)
+ttxor l r = (ttxor l r)::p (currentBeat 0)
 
-psmooth p = (\t -> let v = max 0.00001 $ collapse t $ p t in (pow v 2) * (nsin (1/v)))
-tsmooth p = (plisp p) (currentBeat 0)
+ptand r p = Pattern (\t -> collapse (floor $ t .& (s t)) p)
+	where s t = collapse t r
 
-pprime i = (\t -> wlookup (collapse t $ i t) primes)
-tprime i = (pprime i) (currentBeat 0)
+ttand l r = (ttand l r)::p (currentBeat 0)
 
-psigmoid p = (\t -> let x = collapse t $ p t in 1 / (1 + (Math::E ^ (neg x))))
-tsigmoid p = (psigmoid p) (currentBeat 0)
+psmooth p = Pattern (\t -> let v = max 0.00001 $ collapse t $ p t in (pow v 2) * (nsin (1/v)))
+tsmooth p = (plisp p)::p (currentBeat 0)
+
+pprime i = Pattern (\t -> wlookup (collapse t $ i t) primes)
+tprime i = (pprime i)::p (currentBeat 0)
+
+psigmoid p = Pattern (\t -> let x = collapse t $ p t in 1 / (1 + (Math::E ^ (neg x))))
+tsigmoid p = (psigmoid p)::p (currentBeat 0)
 
 nsimplex x = 0.395 * (n0 + n1)
 	where
@@ -324,78 +339,78 @@ nsimplex x = 0.395 * (n0 + n1)
 		t1 = sqr (1.0 - x1*x1)
 		n1 = t1 * t1 * (Soliton::simplexGrad1 (Soliton::simplexNoisePerm !! (i1 .& 255)) x1)
 
-psimplex speed = (\t -> nsimplex $ t * (collapse t speed) * 0.001)
-tsimplex speed = (psimplex p) (currentBeat 0)
+psimplex speed = Pattern (\t -> nsimplex $ t * (collapse t speed) * 0.001)
+tsimplex speed = (psimplex p)::p (currentBeat 0)
 
-pselect which list = (\t -> collapse t $ wlookup (collapse t which) list)
-tselect which list = (pselect which list) (currentBeat 0)
+pselect which list = Pattern (\t -> collapse t $ wlookup (collapse t which) list)
+tselect which list = (pselect which list)::p (currentBeat 0)
 
-pclip low high p = (\t -> collapse t $ max (collapse t low) $ min (collapse t high) (collapse t p))
-tclip low high p = (pclip low high p) (currentBeat 0)
+pclip low high p = Pattern (\t -> collapse t $ max (collapse t low) $ min (collapse t high) (collapse t p))
+tclip low high p = (pclip low high p)::p (currentBeat 0)
 
-pfold low high p = (\t -> foldRange (collapse t low) (collapse t high) (collapse t $ p))
-tfold low high p = (pwrap low high p) (currentBeat 0)
+pfold low high p = Pattern (\t -> foldRange (collapse t low) (collapse t high) (collapse t $ p))
+tfold low high p = (pwrap low high p)::p (currentBeat 0)
 
-pmul l r = (\t -> (collapse t l) * (collapse t r))
-tmul l r = (pmul l r) (currentBeat 0)
+pmul l r = Pattern (\t -> (collapse t l) * (collapse t r))
+tmul l r = (pmul l r)::p (currentBeat 0)
 
-pdiv l r = (\t -> (collapse t l) / (collapse t r))
-tdiv l r = (pmdiv l r) (currentBeat 0)
+pdiv l r = Pattern (\t -> (collapse t l) / (collapse t r))
+tdiv l r = (pmdiv l r)::p (currentBeat 0)
 
-padd l r = (\t -> (collapse t l) + (collapse t r))
-tadd l r = (padd l r) (currentBeat 0)
+padd l r = Pattern (\t -> (collapse t l) + (collapse t r))
+tadd l r = (padd l r)::p (currentBeat 0)
 
-pminus l r = (\t -> (collapse t l) - (collapse t r))
-tminus l r = (pmius l r) (currentBeat 0)
+pminus l r = Pattern (\t -> (collapse t l) - (collapse t r))
+tminus l r = (pmius l r)::p (currentBeat 0)
 
-pmod l r = (\t -> (collapse t l) % (collapse t r))
-tmod l r = (pmul l r) (currentBeat 0)
+pmod l r = Pattern (\t -> (collapse t l) % (collapse t r))
+tmod l r = (pmul l r)::p (currentBeat 0)
 
-ppow l r = (\t -> pow (collapse t l) (collapse t r))
-tpow l r = (ppow l r) (currentBeat 0)
+ppow l r = Pattern (\t -> pow (collapse t l) (collapse t r))
+tpow l r = (ppow l r)::p (currentBeat 0)
 
-psin freq = (\t -> nsin ((collapse t freq) * twoPi * t))
-tsin freq = (psin freq) (currentBeat 0)
+psin freq = Pattern (\t -> nsin ((collapse t freq) * twoPi * t))
+tsin freq = (psin freq)::p (currentBeat 0)
 
-psaw freq = (\t -> wrapRange -1 1 $ (collapse t freq) * t)
-tsaw freq = (psaw freq) (currentBeat 0)
+psaw freq = Pattern (\t -> wrapRange -1 1 $ (collapse t freq) * t)
+tsaw freq = (psaw freq)::p (currentBeat 0)
 
-ptri freq = (\t -> s2t (wrapRange -1 1 $ (collapse t freq) * t)) 
+ptri freq = Pattern (\t -> s2t (wrapRange -1 1 $ (collapse t freq) * t)) 
 	where s2t s = if s > 0 then 0 - (s * 2) + 1 else s * 2 + 1
 
-ttri freq = (ptri freq) (currentBeat 0)
+ttri freq = (ptri freq)::p (currentBeat 0)
 
-psquare freq = (\t -> s2q (wrapRange -1 1 $ (collapse t freq) * t)) 
+psquare freq = Pattern (\t -> s2q (wrapRange -1 1 $ (collapse t freq) * t)) 
 	where s2q s = if s >= 0 then 1 else -1
 
-tsquare freq = (psquare freq) (currentBeat 0)
+tsquare freq = (psquare freq)::p (currentBeat 0)
 
-pdelay d p = (\t -> collapse (add t $ collapse t d) p)
-tdelay d p = (pdelay d p) (currentBeat 0)
+pdelay d p = Pattern (\t -> collapse (add t $ collapse t d) p)
+tdelay d p = (pdelay d p)::p (currentBeat 0)
 
-pcomb d p = (\t -> (add (collapse (add t $ collapse t d) p) $ collapse t p))
-tcombd d p = (pdelay d p) (currentBeat 0)
+pcomb d p = Pattern (\t -> (add (collapse (add t $ collapse t d) p) $ collapse t p))
+tcombd d p = (pdelay d p)::p (currentBeat 0)
 
 
-ptcrush b p = (\t -> collapse (timecrush t) p)
+ptcrush b p = Pattern (\t -> collapse (timecrush t) p)
 	where 
 		timecrush t = if c == 0 then t else (floor (t/q)) * q
 			where 
 				c = collapse t b
 				q = pow 0.5 c
 
-ttcrush b p = (ptcrush b p) (currentBeat 0)
+ttcrush b p = (ptcrush b p)::p (currentBeat 0)
 
-pcrush b p = (\t -> bcrush t (collapse t p))
+pcrush b p = Pattern (\t -> bcrush t (collapse t p))
 	where 
 		bcrush t o = if c == 0 then o else (floor (o/q)) * q
 			where 
 				c = collapse t b
 				q = pow 0.5 c
 
-tcrush b p = (pcrush b p) (currentBeat 0)
+tcrush b p = (pcrush b p)::p (currentBeat 0)
 
-pdust d = (\t -> dd t)
+pdust d = Pattern (\t -> dd t)
 	where 
 		dd t = if n > d2 then n * scale - 1 else 0
 			where
@@ -403,10 +418,10 @@ pdust d = (\t -> dd t)
 				scale = if d2 > 0 then 2 / d2 else 0
 				n = random 0 1
 
-pfir coeffs p = (\t -> lookup 0 $ foldl (\[acc,i] x -> [acc + (x * (collapse (t - i) p)),i+1]) [0,0] coeffs)
-tfir coeffs p = (pfir coeffs p) (currentBeat 0)
+pfir coeffs p = Pattern (\t -> lookup 0 $ foldl (\[acc,i] x -> [acc + (x * (collapse (t - i) p)),i+1]) [0,0] coeffs)
+tfir coeffs p = (pfir coeffs p)::p (currentBeat 0)
 
-prange low high p = (\t -> r t (collapse t p))
+prange low high p = Pattern (\t -> r t (collapse t p))
 	where r t i = (i * mulVal) + addVal
 		where
 			ht = collapse t high
@@ -414,5 +429,5 @@ prange low high p = (\t -> r t (collapse t p))
 			mulVal = (ht - lt) * 0.5
 			addVal = mulVal + lt
 
-pexprange low high p = (\t -> linexp (collapse t p) -1 1 (collapse t low) (collapse t high))
+pexprange low high p = Pattern (\t -> linexp (collapse t p) -1 1 (collapse t low) (collapse t high))
 

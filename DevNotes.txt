@@ -33,41 +33,38 @@ sums 20 100000
 
 "p" functions are pattern functions. These functions return lambdas that when given a beat will return a value.
 
-let s = pseq [0,1,2]
-foldl (\acc t -> print $ s t) 0 [0..12]
-
 let s = pseq [pseq [0,pseq [0.5, 666]], pseq [1,10], pseq [2,20]]
-foldl (\acc t -> print $ s t) 0 [0..12]
+foldl (\acc t -> print $ s::p t) 0 [0..12]
 
 let sh = prand [pseq [555,666,777], 1, 2]
-foldl (\acc t -> print $ sh t) 0 [0..12]
+foldl (\acc t -> print $ sh::p t) 0 [0..12]
 
 let ws = pwrand [0.5, 0.25, 0.25] [pseq [555,666,777], 1, 2]
-foldl (\acc t -> print $ ws t) 0 [0..12]
+foldl (\acc t -> print $ ws::p t) 0 [0..12]
 
 let ps = pshuf [0..4]
-foldl (\acc t -> print $ ps t) 0 [0..12]
+foldl (\acc t -> print $ ps::p t) 0 [0..12]
 
 let st = pstutter 3 $ pseq [0..5]
-foldl (\acc t -> print $ st t) 0 [0..12]
+foldl (\acc t -> print $ st::p t) 0 [0..12]
 
 let pw = pwrap 3 6 (pseq [0..7])
-foldl (\acc t -> print $ pw t) 0 [0..12]
+foldl (\acc t -> print $ pw::p t) 0 [0..12]
 
 let ps = pseries 2 5
-foldl (\acc t -> print $ ps t) 0 [0..12]
+foldl (\acc t -> print $ ps::p t) 0 [0..12]
 
 let ps = pwrap 0 13 $ pseries 0 2
-foldl (\acc t -> print $ ps t) 0 [0..12]
+foldl (\acc t -> print $ ps::p t) 0 [0..12]
 
 let pg = pgeom 1 2
-foldl (\acc t -> print $ pg t) 0 [0..12]
+foldl (\acc t -> print $ pg::p t) 0 [0..12]
 
 let pg = pwrap 0 13 $ pgeom 1 2
-foldl (\acc t -> print $ pg t) 0 [0..12]
+foldl (\acc t -> print $ pg::p t) 0 [0..12]
 
 let pr = preverse $ pseq [0..4]
-foldl (\acc t -> print $ pr t) 0 [0..12]
+foldl (\acc t -> print $ pr::p t) 0 [0..12]
 treverse pr
 
 -- nested patterns
@@ -217,6 +214,38 @@ siner ~> s (psaw 0.1 >> prange 400 4000)
 
 -- pexprange, to be used with -1 to 1 patterns, namely psin, psaw, ptri, psquare, and pdust
 siner ~> s (psaw 0.1 >> pexprange 400 4000)
+
+-- Binary operators and patterns
+let si freq => sin freq >> perc 0 0.3 0.15
+siner ~> si (pseq [444,555,666,777] + pseq [111,222,333])
+siner ~> si (pseq [444,555,666,777] - pseq [111,222,333])
+siner ~> si (pseq [444,555,666,777] * pseq [1,2,3])
+siner ~> si (pseq [444,555,666,777] / pseq [1,2,3])
+siner ~> si (pseq [444,555,666,777] % pseq [555,666,777])
+siner ~> si (pseq [15,16,17] ^ pseq [2,3])
+siner ~> si (pseq [444,555,666,777] .>> pseq [1,2,3])
+siner ~> si (pseq [444,555,666,777] .<< pseq [1,2,3])
+siner ~> si (pseq [444,555,666,777] .| pseq [200,500,1000])
+siner ~> si (pseq [444,555,666,777] .& pseq [11111,22222,33333])
+siner ~> si (pseq [444,555,666,777] .^ pseq [200,512,1000])
+
+
+-- Patterns as modifiers (Play these together as a mini piece) ---------------------------------------------------------------
+let bd => square 78.487 >> perc 0 0.3 0.1
+let sn => white 1 >> perc 0 0.3 0.1
+let hh => violet 1 >> bandpass 1569.75339 100 >> perc 0 15 0.125
+hat +> hh | (*2)
+drums +> bd sn bd [sn sn] | (pwarp (ptri 0.1) $ pseq [(*1),(*1),(/2),(/2)])
+
+
+let m freq => saw freq + saw (freq/(choose [2,4,8])) >> perc 0 0.2 (exprandom 0.075 1)
+mel ~> m 1 2 3 4 5 6 | (degree2Freq kumoi) | (pwarp (ptri 0.1) $ pseq [(*1),(*1),(/2),(/2)])
+
+let m2 freq => saw (freq/2) + saw (freq/(choose [1,8])) >> perc 0 0.2 (exprandom 0.1 0.5)
+mel2 ~> m2 (pseq [7,7,5,6,6] >> pstutter 14) | (degree2Freq kumoi) | (pwarp (ptri 0.1) $ pseq [(*1),(*1),(*1.5),(/2),(/2)])
+------------------------------------------------------------------------------------------------------------------------------
+
+
 
 /////////////////////
 // State Monad

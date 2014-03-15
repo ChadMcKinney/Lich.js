@@ -10123,10 +10123,10 @@ Soliton.PercStream = function(_events, _modifiers)
 			{
 				var synth;
 
-				if(typeof nevent === "function")
+				if(nevent._datatype === "Pattern")
 				{
 					var wt = wrapRange(0, ll, infiniteBeat);
-					nevent = nevent((infiniteBeat - wt) * lm);
+					nevent = nevent.p((infiniteBeat - wt) * lm);
 				}
 
 				if(typeof nevent === "string")
@@ -10166,7 +10166,10 @@ Soliton.PercStream = function(_events, _modifiers)
 			{
 				try
 				{
-					beatDuration = modifier(Lich.scheduler.tempoSeconds);
+					if(modifier._datatype === "Pattern")
+						beatDuration = modifier.p(infiniteBeat)(Lich.scheduler.tempoSeconds);
+					else
+						beatDuration = modifier(Lich.scheduler.tempoSeconds);
 				}
 
 				catch(e)
@@ -10275,10 +10278,10 @@ Soliton.SoloStream = function(_instrument, _events, _modifiers, _rmodifiers)
 		{
 			try
 			{
-				if(typeof nevent === "function")
+				if(nevent._datatype === "Pattern")
 				{
 					var wt = wrapRange(0, ll, infiniteBeat);
-					nevent = nevent((infiniteBeat - wt) * lm);
+					nevent = nevent.p((infiniteBeat - wt) * lm);
 				}
 
 				if(hasModifiers)
@@ -10287,7 +10290,10 @@ Soliton.SoloStream = function(_instrument, _events, _modifiers, _rmodifiers)
 
 					if(modifier != Lich.VM.Nothing)
 					{
-						nevent = modifier(nevent);
+						if(modifier._datatype === "Pattern")
+							nevent = modifier.p(infiniteBeat)(nevent);
+						else
+							nevent = modifier(nevent);
 					}
 				}
 
@@ -10325,7 +10331,10 @@ Soliton.SoloStream = function(_instrument, _events, _modifiers, _rmodifiers)
 			{
 				try
 				{
-					beatDuration = rmodifier(Lich.scheduler.tempoSeconds);
+					if(rmodifier._datatype === "Pattern")
+						beatDuration = rmodifier.p(infiniteBeat)(Lich.scheduler.tempoSeconds);
+					else
+						beatDuration = rmodifier(Lich.scheduler.tempoSeconds);
 				}
 
 				catch(e)
@@ -10417,15 +10426,15 @@ Soliton.pbind = function(patternName, func, arguments, duration)
 		{
 			beatDuration = this.duration;
 
-			if(typeof beatDuration === "function")
-				beatDuration = Lich.scheduler.tempoSeconds * beatDuration(infiniteBeat);
+			if(beatDuration._datatype === "Pattern")
+				beatDuration = Lich.scheduler.tempoSeconds * beatDuration.p(infiniteBeat);
 			else
 				beatDuration *= Lich.scheduler.tempoSeconds;
 
 			var currentValue = this.func;
 
-			if(typeof currentValue === "function")
-				currentValue = currentValue(infiniteBeat);
+			if(currentValue._datatype === "Pattern")
+				currentValue = currentValue.p(infiniteBeat);
 
 			var args = null;
 			if(this.args instanceof Array)
@@ -10435,8 +10444,8 @@ Soliton.pbind = function(patternName, func, arguments, duration)
 				{
 					var arg = this.args[i];
 
-					if(typeof arg === "function")
-						arg = arg(infiniteBeat);
+					if(arg._datatype === "Pattern")
+						arg = arg.p(infiniteBeat);
 
 					args.push(arg);
 				}
@@ -10444,7 +10453,10 @@ Soliton.pbind = function(patternName, func, arguments, duration)
 
 			else
 			{
-				args = [this.args];
+				if(this.args._datatype === "Pattern")
+					args = [this.args.p(infiniteBeat)];
+				else
+					args = [this.args];
 			}
 			
 			var synth = currentValue;

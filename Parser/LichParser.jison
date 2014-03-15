@@ -33,6 +33,7 @@
 ".<<"                       return {val:".<<",typ:".<<"};
 ".|"                       return {val:".|",typ:".|"};
 ".&"                       return {val:".&",typ:".&"};
+".^"                       return {val:".^",typ:".^"};
 ":>>"                       return {val:":>>",typ:":>>"};
 "<<:"                       return {val:"<<:",typ:"<<:"};
 "=>"                        return {val:"=>",typ:"=>"};
@@ -427,6 +428,7 @@ exp // : object
   | exp ".<<" exp       {$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
   | exp ".|" exp        {$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
   | exp ".&" exp        {$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
+  | exp ".^" exp        {$$ = {astType:"binop-exp",op:$2,lhs:$1,rhs:$3,pos:@$};}}
   | lexp                {{$$ = $1}}
   ;
 
@@ -456,6 +458,7 @@ binop
   | ".<<"       {{$$ = $1;}}
   | ".|"        {{$$ = $1;}}
   | ".&"        {{$$ = $1;}}
+  | ".^"        {{$$ = $1;}}
   ;
 
 //  lexp OP infixexp            {{ ($3).unshift($1,$2); $$ = $3; }}
