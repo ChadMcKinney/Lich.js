@@ -1,5 +1,6 @@
-// Lich.js Node based compiler for local files.
+#!/usr/bin/node
 
+// Lich.js Node based compiler for local files.
 var fs = require('fs');
 
 // jison adds node.js code to compile files, but we're going to use our own below, so we strip out theirs

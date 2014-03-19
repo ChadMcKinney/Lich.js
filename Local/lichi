@@ -1,8 +1,8 @@
-// Lich.js Node based interactive compiler for the command line or embedding
+#!/usr/bin/node
 
+// Lich.js Node based interactive compiler for the command line or embedding
 var fs = require('fs');
 var readline = require('readline');
-
 
 // jison adds node.js code to compile files, but we don't need this in interactive mode, so we're going to strip it out.
 var fileCompileString = "if (typeof require !== \'undefined\' && typeof exports !== \'undefined\') {";
