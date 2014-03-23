@@ -32,7 +32,11 @@ function initChat()
 function chatEntryFromWindow()
 {
 	var chatString = prompt("Enter Chat","");
-	sendChat(chatString);
+
+	if(chatString != null)
+	{
+		sendChat(chatString);
+	}
 }
 
 
