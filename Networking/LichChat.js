@@ -1,7 +1,7 @@
 //Chat
 
 var _chat;
-
+var chatInput;
 function initChat()
 {
 	var div = document.getElementById("textdiv");	
@@ -19,6 +19,7 @@ function initChat()
 
 	_chat.rows = 1;	
 	_chat.style.width = "25%";
+	_chat.style.height = "45%";
 	_chat.style.top = "0px";
 	_chat.style.opacity = "0.0";
 	_chat.style.left = "75%";
@@ -26,17 +27,47 @@ function initChat()
 	_chat.style.height = (document.documentElement.clientHeight * 0.5) + "px";
 	_chat.style.textAlign = "right";
 	_chat.style.overflow = "hidden";
-	hideChat();
+	
+
+	chatInput = document.getElementById("chatInput");
+	chatInput.spellcheck = true;
+	chatInput.readOnly = false;
+	chatInput.style.zIndex = 22;
+	chatInput.style.top = "45%";
+	chatInput.onkeydown = handleChatInput;
+	chatInput.onfocus = function() {chatInput.value = ""; };
+}
+
+function handleChatInput(e)
+{
+	var keycode;
+    if (window.event)
+        keycode = window.event.keyCode;
+    else if (e)
+        keycode = e.which;
+
+    if(keycode==13)
+    {
+    	sendChat(chatInput.value)
+    	chatInput.value = "Chat...";
+    	editors[clientName].focus();
+    	return false;
+    }
+    else
+    {
+    	return true;
+    }
 }
 
 function chatEntryFromWindow()
 {
-	var chatString = prompt("Enter Chat","");
+	chatInput.focus();
+	//var chatString = prompt("Enter Chat","");
 
-	if(chatString != null)
-	{
-		sendChat(chatString);
-	}
+	//if(chatString != null)
+	//{
+	//	sendChat(chatString);
+	//}
 }
 
 
@@ -63,7 +94,7 @@ var fadeOut;
 function showChat2()
 {
 	_chat.style.opacity = "1.0";
-	_chat.style.zIndex = 40;
+	//_chat.style.zIndex = 21;
 	_chat.style.overFlow = "hidden";
 	chatScroll();
 

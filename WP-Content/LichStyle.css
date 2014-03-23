@@ -51,7 +51,7 @@ body {
     font-family: Ubuntu Mono, DejaVu Sans Mono, Liberation Mono,Menlo,Bitstream Vera Sans Mono,Consolas,Monaco,Lucida Console,Courier New, monospace;
 }
 
-.terminal, .chat, #post {
+.terminal, .chat, #post, #chatInput {
 	background-color: transparent;
 	color: white;
 	overflow: auto;
@@ -152,7 +152,7 @@ textarea::selection {
 	font-size: 500%;
 	position: absolute;
 	width: 100%;
-	height: 50%;
+	height: 45%;
 	top: 0px;
 	overflow: hidden;
 	text-align: right;
@@ -288,6 +288,27 @@ textarea::selection {
 
 	-webkit-transition: height 2s,top 2s, opacity 2s;
 			transition: height 2s,top 2s, opacity 2s;
+}
+
+#chatInput {
+	width: 25%;
+	left: 75%;
+	top: 45%;
+	/*
+	height: 10%;
+	position: relative;
+	width: 69.9%;
+	height: 100%;
+	border: 1px dotted red;
+	float: left;*/
+	padding-left: 0.2em;
+	-moz-box-sizing:border-box;
+    -webkit-box-sizing:border-box;
+    box-sizing:border-box;
+    resize:vertical;
+    position: absolute;
+    zIndex: 22;
+    font-family: Ubuntu Mono, DejaVu Sans Mono, Liberation Mono,Menlo,Bitstream Vera Sans Mono,Consolas,Monaco,Lucida Console,Courier New, monospace;
 }
 
 #editor { 
