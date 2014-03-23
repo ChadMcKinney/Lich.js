@@ -177,10 +177,10 @@ _createPrimitive("load", load);
 
 function chat(chatString)
 {
-	if(!(typeof chatString === "string"))
-		throw new Error("chat can only be applied to strings!");
-
-	sendChat(chatString);
+	Lich.post("The chat primitive has been removed: Use ctrl-` instead");
+	//if(!(typeof chatString === "string"))
+	//	throw new Error("chat can only be applied to strings!");
+	//sendChat(chatString);
 	return Lich.VM.Void;
 }
 
