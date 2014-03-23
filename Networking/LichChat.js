@@ -49,7 +49,7 @@ function handleChatInput(e)
     if(keycode==13)
     {
     	sendChat(chatInput.value)
-    	chatInput.value = "Chat...";
+    	chatInput.value = "...";
     	editors[clientName].focus();
     	return false;
     }

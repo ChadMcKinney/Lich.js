@@ -114,7 +114,7 @@ function createTextArea(name,num,total)
 
 		editor.commands.addCommand({
 		    name: 'chatInputWindow',
-		    bindKey: {win: 'Ctrl-`', mac: 'Command-`'},
+		    bindKey: {win: 'Alt-c', mac: 'Alt-c'},
 		    exec: chatEntryFromWindow,
 		    readOnly: false // false if this command should not apply in readOnly mode
 		});
