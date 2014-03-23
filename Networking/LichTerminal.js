@@ -112,6 +112,13 @@ function createTextArea(name,num,total)
 		});
 
 		editor.commands.addCommand({
+		    name: 'chatInputWindow',
+		    bindKey: {win: 'Ctrl-`', mac: 'Command-`'},
+		    exec: chatEntryFromWindow,
+		    readOnly: false // false if this command should not apply in readOnly mode
+		});
+
+		editor.commands.addCommand({
 			name: "killall",
 			bindKey: {win: 'Ctrl-.', mac: "Command-."},
 			exec: killall,
@@ -158,10 +165,23 @@ function createTextArea(name,num,total)
 		}
 		
 	}
-	
+
 	input.style.opacity = getShowingOpacity();
-	input.style.top = (document.documentElement.clientHeight * 0.78 * (num/total)) + "px";
-	input.style.height = (document.documentElement.clientHeight * 0.78 * (1/total)) + "px";
+
+	if(name == clientName)
+	{
+		input.style.top = "0px";
+		input.style.height = (document.documentElement.clientHeight * 0.5 * 1) + "px";
+	}
+	else
+	{
+		var half = document.documentElement.clientHeight * 0.5;
+		input.style.top = (half + (document.documentElement.clientHeight * 0.5 * ((num-1)/(total-1)))) + "px";
+		input.style.height = (document.documentElement.clientHeight * 0.5* (1/(total-1))) + "px";
+	}
+
+	
+	input.style.width = (document.documentElement.clientWidth * 0.75) + "px";
 
 	/*
 	var editor = document.getElementById('terminalEditor'+name);
@@ -191,7 +211,17 @@ function createTextArea(name,num,total)
 	//mirrors[name].refresh();
 
 	nameTag.style.opacity = getShowingOpacity();
-	nameTag.style.top = (document.documentElement.clientHeight * 0.8 * (num/total)) + "px";
+
+	if(name == clientName)
+	{
+		nameTag.style.top = (document.documentElement.clientHeight * 1.0 * (num/total)) + "px";
+	}
+	else
+	{
+		var half = document.documentElement.clientHeight * 0.5;
+		nameTag.style.top = (half + (document.documentElement.clientHeight * 0.5 * ((num-1)/(total-1)))) + "px";
+	}
+
 	//nameTag.style.height = (document.documentElement.clientHeight * 0.8 * (1/total)) + "px";
 }
 

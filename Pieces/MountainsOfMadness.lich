@@ -185,6 +185,18 @@ getSomething name game = player ? monster ? location
 		monster 	= getMonster name game
 		location 	= getLocation name game
 
+--isMonster :: Player | Monster -> Bool
+isMonster player =
+	case player of
+		Monster	-> True
+		_		-> False
+
+--isPlayer :: Player | Monster -> Bool
+isPlayer player =
+	case player of
+		Player	-> True
+		_		-> False
+
 -- |updatePlayer Player -> Game -> Game
 updatePlayer player game = game{players = newPlayers}
 	where
@@ -620,27 +632,14 @@ underMurals 	= Location "UnderMurals" n s e w u d desc fDesc items mov
 
 gameLocations 	= ("Camp"=camp,"Mound"=mound,"Mound2"=mound2,"Mound3"=mound3,"Mountains"=mountains,"Ruins"=ruins,"UnderRuins"=underRuins,"Murals"=murals,"UnderMurals"=underMurals,"Nowhere"=Location)
 initGame 		= Game () () gameLocations
+testGame 		= Game (player::name=player) (monster::name=monster) gameLocations
+	where
+		player 	= Player "casiosk1" 100 "Camp"
+		monster = Monster "octopian" 100 "Mound"
 
 ---------------------------------------------------------------------------------------------------------------------
 -- IO Functions
 ---------------------------------------------------------------------------------------------------------------------
-
-
---
--- Start the game
---
-startGame message playerName = send
-	where
-		player 				= Player playerName 100 "Camp"
-		createMonster name 	= Monster name 100 "Mound"
-		insertMonster m d	= insert (m::name = m) d
-		monsters 			= remove playerName $ foldr (insertMonster) () $ map (createMonster) lichUsers
-		game 				= Game (playerName = player) monsters gameLocations
-		actor 				= spawn "madnessLoop" madnessLoop [game]
-		send =
-			case message of
-				Intro 	-> [message,clientName,clientName] :>> actor
-				Start 	-> [message,clientName,clientName] :>> actor
 
 --
 -- Controls
@@ -665,10 +664,29 @@ narrateGame game = do
 	postNarration (game::narration) 
 	game{narration = ""}
 
+
+--narrateOthers :: String -> String -> Game -> Game
+narrateOthers playerName myName game = newGame blankGame
+	where
+		other			= getSomething playerName game
+		myself			= getSomething myName game
+		sameLocation 	= (other::location) == (myself::location)
+		blankGame		= game{narration=""}
+		newGame game
+			| sameLocation && (isMonster other) && (isPlayer myself)	= narrateGame $ addNarration ("A dark force (" + playerName + ") has entered your presence") game
+			| sameLocation && (isPlayer other) && (isMonster myself)	= narrateGame $ addNarration ("Your prey (" + playerName + ") is near") game
+			| otherwise													= game
+			
+postNames game = game{narration = text}
+	where
+		listNames d = foldr (\p s -> (p::name) + " " + s) "" d
+		text		= (listNames (game::players)) + (listNames (game::monsters))
+
+--loop :: String -> String -> Game -> Game
 loop playerName myName game
 	| playerName == myName 	= madnessLoop $ narrateGame game
-	| otherwise				= madnessLoop game{narration=""}
-
+	| otherwise				= madnessLoop $ narrateOthers playerName myName game
+		
 --
 -- Main Game loop
 --
@@ -685,3 +703,19 @@ madnessLoop game =
 		[Status,pName,myName]			-> loop pName myName $ narrateStatus (getSomething pName game) game
 		[Talk,text,pName,myName]		-> madnessLoop . narrateGame $ addNarration (pName + ": " + text) game
 		Finish							-> game
+
+--
+-- Start the game
+--
+startGame message playerName = send
+	where
+		player 				= Player playerName 100 "Camp"
+		createMonster name 	= Monster name 100 "Mound"
+		insertMonster m d	= insert (m::name = m) d
+		monsters 			= remove playerName $ foldr (insertMonster) () $ map (createMonster) lichUsers
+		game 				= Game (playerName = player) monsters gameLocations
+		actor 				= spawn "madnessLoop" madnessLoop [game]
+		send =
+			case message of
+				Intro 	-> [message,clientName,clientName] :>> actor
+				Start 	-> [message,clientName,clientName] :>> actor

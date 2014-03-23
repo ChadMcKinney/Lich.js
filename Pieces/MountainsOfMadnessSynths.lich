@@ -1,6 +1,6 @@
 --MountainsOfMadnessSynths.lich
 
-let bass2 freq => pulse >> filt >> env
+bass freq => pulse >> filt >> env
 	where
 		pulse	= square freq
 		env		= perc 0.01 0.5 1.0
