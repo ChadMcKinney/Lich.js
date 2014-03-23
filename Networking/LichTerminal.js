@@ -171,7 +171,14 @@ function createTextArea(name,num,total)
 	if(name == clientName)
 	{
 		input.style.top = "0px";
-		input.style.height = (document.documentElement.clientHeight * 0.5 * 1) + "px";
+		if(total > 1)
+		{
+			input.style.height = (document.documentElement.clientHeight * 0.5 * 1) + "px";
+		}
+		else
+		{
+			input.style.height = (document.documentElement.clientHeight * 1) + "px";
+		}
 	}
 	else
 	{
