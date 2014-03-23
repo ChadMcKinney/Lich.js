@@ -96,6 +96,7 @@ function createTextArea(name,num,total)
 		var session = editor.getSession();
 		session.setUseWrapMode(true);
 		session.setUseWorker(true);
+		//session.selection.on('changeCursor', higlightFullFunction);
 
 		editor.commands.addCommand({
 		    name: 'evaluateCode',
@@ -316,3 +317,12 @@ function showTextAreas()
 	postArea.style.opacity = getShowingOpacity();
 }
 
+function higlightFullFunction()
+{
+	var myEditor = editors[clientName];
+
+	var previousBlankLine = myEditor.findPrevious("\n\n");
+	var nextBlankLine = myEditor.findNext("\n\n");
+
+	console.log("nextBlankLine: " + previousBlankLine);
+}

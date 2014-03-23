@@ -8,7 +8,7 @@ let growl freqq => osc >> fold 0.125 >> filt >> gain 128 >> pan 0.15 >> myenv
 		myenv   = perc 0.05 0.6 1
 		osc     = (square (freq*1.05)) + (sin (freq*1)) + (square (freq*0.49) )+ (tri (freq * 2))
 		filt    = lowpass (freq * 0.25 * (pow 2 $ randomI 2 3)) 1
-		
+
 growlTime ~> growl
 	0 _ _ _ 2 _ 0 _ 5 _ 4 _
 	0 _ _ _ 2 _ 0 _ 5 _ 4 _
