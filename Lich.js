@@ -356,7 +356,8 @@ function parseCurrentLine(editor)
 
 	if(selectionRange.isEmpty())
 	{
-		str = editor.session.getLine(editor.selection.getCursor().row);
+		str = getCurrentFunctionBlock(editor);
+		//str = editor.session.getLine(editor.selection.getCursor().row);
 	}
 
 	else
@@ -414,7 +415,54 @@ function parseCurrentLine(editor)
 	}
 }
 
+function getCurrentFunctionBlock(editor)
+{
+	var currentRow = editor.selection.getCursor().row;
+	var startingRow = findStartingRow(editor,currentRow);
+	var endingRow = findEndingRow(editor,currentRow+1);
 
+	var str = "";
+
+	for(var i=startingRow;i<endingRow;++i)
+	{
+		if(i>startingRow && i<endingRow)
+			str = str + "\n" + editor.session.getLine(i);
+		else
+			str = str + editor.session.getLine(i);
+	}
+	return str;
+}
+
+function findStartingRow(editor,currentRow)
+{
+	var line = editor.session.getLine(currentRow);
+
+	if(currentRow <= 0)
+		return currentRow;
+	else if(line == NaN || line == null || line == "" || line == "\n")
+		return currentRow+1;
+	else if(indentionLevel(line) == 0)
+		return currentRow;
+	else
+		return findStartingRow(editor,currentRow-1);
+}
+
+function findEndingRow(editor,currentRow)
+{
+	var line = editor.session.getLine(currentRow);
+
+	if(line == NaN || line == null || line == "" || line == "\n")
+		return currentRow;
+	else if(indentionLevel(line) == 0)
+		return currentRow;
+	else
+		return findEndingRow(editor,currentRow+1);
+}
+
+function indentionLevel(text)
+{
+	return text.match(/^\s{0,2}/)[0].length;
+}
 /*
 
 function lichVirtualMachine() {

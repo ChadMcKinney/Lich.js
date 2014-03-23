@@ -51,7 +51,7 @@ body {
     font-family: Ubuntu Mono, DejaVu Sans Mono, Liberation Mono,Menlo,Bitstream Vera Sans Mono,Consolas,Monaco,Lucida Console,Courier New, monospace;
 }
 
-.terminal, .chat, #post {
+.terminal, .chat, #post, #chatInput {
 	background-color: transparent;
 	color: white;
 	overflow: auto;
@@ -101,15 +101,15 @@ textarea::selection {
 
 #pageDiv,{
 	height: 100%;
-	width: 100%;
+	width: 75%;
 	left: 0px;
 	top: 0px;
 }
 
 #textdiv,{
 	
-	height: 80%;
-	width: 100%;
+	height: 100%;
+	width: 75%;
 	left: 0px;
 	top: 0px;
 	/*
@@ -128,7 +128,7 @@ textarea::selection {
 
 .terminal{
 	position: absolute;
-	width: 100%;
+	width: 75%;
 	height: 0%;
 	top: 0px;
 	font-size: 100%;
@@ -152,7 +152,7 @@ textarea::selection {
 	font-size: 500%;
 	position: absolute;
 	width: 100%;
-	height: 0%;
+	height: 45%;
 	top: 0px;
 	overflow: hidden;
 	text-align: right;
@@ -213,10 +213,10 @@ textarea::selection {
 
 #post {
 	position: absolute;
-	top: 80%;
-	left: 0px;
-	width: 100%;
-	height: 20%;
+	top: 50%;
+	left: 75%;
+	width: 25%;
+	height: 50%;
 	/*width: 29.9%;
 	float: right;*/
 	padding-top: 0em;
@@ -271,7 +271,7 @@ textarea::selection {
 	opacity: 0.0;
 	height: 0%;
 	top: 0px;
-	left: 90%;
+	left: 65%;
 	width:10%;
 	color: rgb(48,144,144);
 	border: none;
@@ -288,6 +288,27 @@ textarea::selection {
 
 	-webkit-transition: height 2s,top 2s, opacity 2s;
 			transition: height 2s,top 2s, opacity 2s;
+}
+
+#chatInput {
+	width: 25%;
+	left: 75%;
+	top: 45%;
+	/*
+	height: 10%;
+	position: relative;
+	width: 69.9%;
+	height: 100%;
+	border: 1px dotted red;
+	float: left;*/
+	padding-left: 0.2em;
+	-moz-box-sizing:border-box;
+    -webkit-box-sizing:border-box;
+    box-sizing:border-box;
+    resize:none;
+    position: absolute;
+    zIndex: 22;
+    font-family: Ubuntu Mono, DejaVu Sans Mono, Liberation Mono,Menlo,Bitstream Vera Sans Mono,Consolas,Monaco,Lucida Console,Courier New, monospace;
 }
 
 #editor { 

@@ -96,6 +96,7 @@ function createTextArea(name,num,total)
 		var session = editor.getSession();
 		session.setUseWrapMode(true);
 		session.setUseWorker(true);
+		//session.selection.on('changeCursor', higlightFullFunction);
 
 		editor.commands.addCommand({
 		    name: 'evaluateCode',
@@ -108,6 +109,13 @@ function createTextArea(name,num,total)
 		    name: 'evaluateCode2',
 		    bindKey: {win: 'Shift-Enter', mac: 'Shift-Enter'},
 		    exec: parseCurrentLine,
+		    readOnly: false // false if this command should not apply in readOnly mode
+		});
+
+		editor.commands.addCommand({
+		    name: 'chatInputWindow',
+		    bindKey: {win: 'Alt-c', mac: 'Alt-c'},
+		    exec: chatEntryFromWindow,
 		    readOnly: false // false if this command should not apply in readOnly mode
 		});
 
@@ -158,10 +166,30 @@ function createTextArea(name,num,total)
 		}
 		
 	}
-	
+
 	input.style.opacity = getShowingOpacity();
-	input.style.top = (document.documentElement.clientHeight * 0.78 * (num/total)) + "px";
-	input.style.height = (document.documentElement.clientHeight * 0.78 * (1/total)) + "px";
+
+	if(name == clientName)
+	{
+		input.style.top = "0px";
+		if(total > 1)
+		{
+			input.style.height = (document.documentElement.clientHeight * 0.5 * 1) + "px";
+		}
+		else
+		{
+			input.style.height = (document.documentElement.clientHeight * 1) + "px";
+		}
+	}
+	else
+	{
+		var half = document.documentElement.clientHeight * 0.5;
+		input.style.top = (half + (document.documentElement.clientHeight * 0.5 * ((num-1)/(total-1)))) + "px";
+		input.style.height = (document.documentElement.clientHeight * 0.5* (1/(total-1))) + "px";
+	}
+
+	
+	input.style.width = (document.documentElement.clientWidth * 0.75) + "px";
 
 	/*
 	var editor = document.getElementById('terminalEditor'+name);
@@ -191,7 +219,17 @@ function createTextArea(name,num,total)
 	//mirrors[name].refresh();
 
 	nameTag.style.opacity = getShowingOpacity();
-	nameTag.style.top = (document.documentElement.clientHeight * 0.8 * (num/total)) + "px";
+
+	if(name == clientName)
+	{
+		nameTag.style.top = (document.documentElement.clientHeight * 1.0 * (num/total)) + "px";
+	}
+	else
+	{
+		var half = document.documentElement.clientHeight * 0.5;
+		nameTag.style.top = (half + (document.documentElement.clientHeight * 0.5 * ((num-1)/(total-1)))) + "px";
+	}
+
 	//nameTag.style.height = (document.documentElement.clientHeight * 0.8 * (1/total)) + "px";
 }
 
@@ -279,3 +317,12 @@ function showTextAreas()
 	postArea.style.opacity = getShowingOpacity();
 }
 
+function higlightFullFunction()
+{
+	var myEditor = editors[clientName];
+
+	var previousBlankLine = myEditor.findPrevious("\n\n");
+	var nextBlankLine = myEditor.findNext("\n\n");
+
+	console.log("nextBlankLine: " + previousBlankLine);
+}
