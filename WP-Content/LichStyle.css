@@ -305,7 +305,7 @@ textarea::selection {
 	-moz-box-sizing:border-box;
     -webkit-box-sizing:border-box;
     box-sizing:border-box;
-    resize:vertical;
+    resize:none;
     position: absolute;
     zIndex: 22;
     font-family: Ubuntu Mono, DejaVu Sans Mono, Liberation Mono,Menlo,Bitstream Vera Sans Mono,Consolas,Monaco,Lucida Console,Courier New, monospace;

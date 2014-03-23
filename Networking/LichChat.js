@@ -34,6 +34,7 @@ function initChat()
 	chatInput.readOnly = false;
 	chatInput.style.zIndex = 22;
 	chatInput.style.top = "45%";
+	chatInput.style.resize = "none";
 	chatInput.onkeydown = handleChatInput;
 	chatInput.onfocus = function() {chatInput.value = ""; };
 }
