@@ -10524,7 +10524,7 @@ function pbind(patternName, func, arguments, duration)
 
 Soliton.SteadyScheduler = function()
 {
-	this.tempo = 240; // bpm
+	this.tempo = 260; // bpm
 	this.tempoSeconds = (60 / this.tempo); 
 	this.tempoMillis = this.tempoSeconds * 1000;
 	tempo = this.tempo;

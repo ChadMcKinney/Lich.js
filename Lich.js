@@ -249,8 +249,6 @@ function currentLineCodeMirror(cm)
 			line: cm.getSelection()
 		}
 	}
-	
-	
 }
 
 function keyDown(thisEvent)
