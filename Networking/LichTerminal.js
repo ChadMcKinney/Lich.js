@@ -97,8 +97,12 @@ function createTextArea(name,num,total)
 		var session = editor.getSession();
 		session.setUseWrapMode(true);
 		session.setUseWorker(true);
-		session.selection.on('changeCursor', networkCursor);
 
+		if(name == clientName)
+		{
+			session.selection.on('changeCursor', networkCursor);
+		}
+		
 		editor.commands.addCommand({
 		    name: 'evaluateCode',
 		    bindKey: {win: 'Ctrl-Enter', mac: 'Command-Enter'},
