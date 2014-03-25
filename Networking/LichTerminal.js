@@ -3,7 +3,6 @@
 ////////////////////////////////////////////////////////////////////////
 
 editors = {};
-var myEditor;
 
 // NEED TO MAKE IDE STYLE NEW/OPEN/SAVE functions for the text editor
 function newDocument()
@@ -91,11 +90,6 @@ function createTextArea(name,num,total)
 		//document.body.appendChild(input);
 		var editor = ace.edit("terminal"+name);
 
-		if(name==clientName)
-		{
-			myEditor = editor;
-		}
-		
 		editor.setTheme("ace/theme/lich");
 		editor.getSession().setMode("ace/mode/haskell");
 		editor.renderer.setShowGutter(false);
@@ -326,6 +320,7 @@ function showTextAreas()
 
 function networkCursor()
 {
+	var myEditor = editors[clientName];
 	var session = myEditor.getSession();
 
 	broadcastCursor(editor.getCursorPosition().row,editor.getCursorPosition().column); 
