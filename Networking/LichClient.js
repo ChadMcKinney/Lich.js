@@ -43,7 +43,7 @@ function receiveCursorPos(name,x,y)
 {
 	if(name != clientName)
 	{
-		//console.log("receiveCursorPos: " + name + "," + x + "," + y);
+		console.log("receiveCursorPos: " + name + "," + x + "," + y);
 		editors[name].moveCursorTo(x,y);
 	}
 }

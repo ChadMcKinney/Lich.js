@@ -59,7 +59,7 @@ io.sockets.on('connection', function (socket) {
     console.log("New connection from " + address.address + ":" + address.port);
 
     socket.on('Typing', function (id, text) {
-        socket.broadcast.emit('TypingClient',id, text);
+		socket.broadcast.emit('TypingClient',id, text);
     });
 
     socket.on('BroadcastCode', function (data) {

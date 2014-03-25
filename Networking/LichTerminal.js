@@ -97,11 +97,7 @@ function createTextArea(name,num,total)
 		var session = editor.getSession();
 		session.setUseWrapMode(true);
 		session.setUseWorker(true);
-
-		if(name == clientName)
-		{
-			session.selection.on('changeCursor', networkCursor);
-		}
+		session.selection.on('changeCursor', networkCursor);
 		
 		editor.commands.addCommand({
 		    name: 'evaluateCode',
@@ -327,5 +323,5 @@ function networkCursor()
 	var editor = editors[clientName];
 
 	broadcastCursor(editor.getCursorPosition().row,editor.getCursorPosition().column); 
-	//console.log(".getCursorPosition(): " + editor .sshgetCursorPosition().row + "," + editor.getCursorPosition().column);
+	//console.log(".getCursorPosition(): " + editor.getCursorPosition().row + "," + editor.getCursorPosition().column);
 }
