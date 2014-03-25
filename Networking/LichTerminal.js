@@ -90,7 +90,12 @@ function createTextArea(name,num,total)
 
 		//document.body.appendChild(input);
 		var editor = ace.edit("terminal"+name);
-		myEditor = editor;
+
+		if(name==clientName)
+		{
+			myEditor = editor;
+		}
+		
 		editor.setTheme("ace/theme/lich");
 		editor.getSession().setMode("ace/mode/haskell");
 		editor.renderer.setShowGutter(false);
@@ -324,5 +329,5 @@ function networkCursor()
 	var session = myEditor.getSession();
 
 	broadcastCursor(editor.getCursorPosition().row,editor.getCursorPosition().column); 
-	//console.log(".getCursorPosition(): " + editor .getCursorPosition().row + "," + editor.getCursorPosition().column);
+	//console.log(".getCursorPosition(): " + editor .sshgetCursorPosition().row + "," + editor.getCursorPosition().column);
 }
