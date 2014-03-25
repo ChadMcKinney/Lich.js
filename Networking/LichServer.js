@@ -82,6 +82,10 @@ io.sockets.on('connection', function (socket) {
         socket.emit('LoginClient');
     });
 
+	socket.on('CursorPos',function(name,x,y){
+		io.sockets.emit('CursorPosClient',name,x,y);
+	});
+
     socket.on('LoginInfo', function(name)
     {
         loginInfo(name,address,socket);

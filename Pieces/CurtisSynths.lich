@@ -105,7 +105,6 @@ iceChords3 ~> ice10
 	12 17 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 	| (degree2Freq justIntonation)
 
-   
 stop iceChords2
 stop iceChords
 stop spinTime

@@ -3,6 +3,7 @@
 ////////////////////////////////////////////////////////////////////////
 
 editors = {};
+var myEditor;
 
 // NEED TO MAKE IDE STYLE NEW/OPEN/SAVE functions for the text editor
 function newDocument()
@@ -89,6 +90,7 @@ function createTextArea(name,num,total)
 
 		//document.body.appendChild(input);
 		var editor = ace.edit("terminal"+name);
+		myEditor = editor;
 		editor.setTheme("ace/theme/lich");
 		editor.getSession().setMode("ace/mode/haskell");
 		editor.renderer.setShowGutter(false);
@@ -96,7 +98,7 @@ function createTextArea(name,num,total)
 		var session = editor.getSession();
 		session.setUseWrapMode(true);
 		session.setUseWorker(true);
-		//session.selection.on('changeCursor', higlightFullFunction);
+		session.selection.on('changeCursor', networkCursor);
 
 		editor.commands.addCommand({
 		    name: 'evaluateCode',
@@ -317,12 +319,10 @@ function showTextAreas()
 	postArea.style.opacity = getShowingOpacity();
 }
 
-function higlightFullFunction()
+function networkCursor()
 {
-	var myEditor = editors[clientName];
+	var session = myEditor.getSession();
 
-	var previousBlankLine = myEditor.findPrevious("\n\n");
-	var nextBlankLine = myEditor.findNext("\n\n");
-
-	console.log("nextBlankLine: " + previousBlankLine);
+	broadcastCursor(editor.getCursorPosition().row,editor.getCursorPosition().column); 
+	//console.log(".getCursorPosition(): " + editor .getCursorPosition().row + "," + editor.getCursorPosition().column);
 }
