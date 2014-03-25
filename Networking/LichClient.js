@@ -26,7 +26,11 @@ function broadcastTyping(text)
 function receivedTyping(id,text)
 {
 	//console.log("Received Typing:" + text);
-	writeTextToTerminal(id,text);
+	if(id!=clientName)
+	{
+		writeTextToTerminal(id,text);
+
+	}
 }
 
 function broadcastCursor(x,y)
@@ -40,7 +44,7 @@ function receiveCursorPos(name,x,y)
 	if(name != clientName)
 	{
 		//console.log("receiveCursorPos: " + name + "," + x + "," + y);
-		//editors[name].moveCursorTo(x,y);
+		editors[name].moveCursorTo(x,y);
 	}
 }
 

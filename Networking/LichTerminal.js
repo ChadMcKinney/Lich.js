@@ -324,8 +324,7 @@ function showTextAreas()
 
 function networkCursor()
 {
-	var myEditor = editors[clientName];
-	var session = myEditor.getSession();
+	var editor = editors[clientName];
 
 	broadcastCursor(editor.getCursorPosition().row,editor.getCursorPosition().column); 
 	//console.log(".getCursorPosition(): " + editor .sshgetCursorPosition().row + "," + editor.getCursorPosition().column);
