@@ -1798,3 +1798,22 @@ Pitch and Freq Shift -- Pitch Shift doesn't work right, but Freq Shift is done. 
 Better Wave Shaping, distion types of effects (Need Chebyshev polynomials to good dist I think) >> done, but shaper is buggy
 Chorus, Phaser, Flanger -- Done
 Trigger UGens, Stepper -- Done
+
+
+
+
+
+
+--| Chord progression example code
+
+-- curried function for creating minor chords. Octave 4 is where middle C is ona piano.
+let mc = Chord minor 4
+
+-- chordProgression returns a pbind that just sequences through the chords. They can be queried using ::value
+let doom = chordProgression "doom" [mc [0,2,4], mc [1,3,5], mc [2,4,6], mc [3,5,7], mc [4,6,8], mc [5,7,9]] [8] 
+
+let synth freq => saw freq >> lowpass (freq * 4) 1 >> perc 0 0.6 0.5
+
+-- We can use the progression similar to a scale, with c2f instead of d2f. c2f takes a scale and a chord degree.
+-- The chord degree can be any integer including negative numbers and will scale octaves appropriately
+bass ~> synth (pseries 0 (pseq [-2,5]) >> pfold -2 6) | (c2f doom)
