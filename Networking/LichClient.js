@@ -26,7 +26,26 @@ function broadcastTyping(text)
 function receivedTyping(id,text)
 {
 	//console.log("Received Typing:" + text);
-	writeTextToTerminal(id,text);
+	if(id!=clientName)
+	{
+		writeTextToTerminal(id,text);
+
+	}
+}
+
+function broadcastCursor(x,y)
+{
+	//console.log("Sending Typing: " + text);
+	socket.emit('CursorPos',clientName, x,y);
+}
+
+function receiveCursorPos(name,x,y)
+{
+	if(name != clientName)
+	{
+		console.log("receiveCursorPos: " + name + "," + x + "," + y);
+		editors[name].moveCursorTo(x,y);
+	}
 }
 
 function receivedLichCode(code)
@@ -181,6 +200,7 @@ function connectToWebSocketServer()
 	socket.on('ReadFileClient',readFileDataFromServer);
 	socket.on('CompileLibClient',compileLibFromServer);
 	socket.on('StateSyncClient',receiveStateSync);
+	socket.on('CursorPosClient',receiveCursorPos);
 	socket.emit('Login');
 	initChat();
 

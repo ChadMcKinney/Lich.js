@@ -132,6 +132,7 @@ textarea::selection {
 	height: 0%;
 	top: 0px;
 	font-size: 100%;
+	overflow: hidden;
 	
 	opacity: 0.0;
 	
@@ -172,7 +173,7 @@ textarea::selection {
 .terminalName{
 	background-color: transparent;
 	color: white;
-	overflow: auto;
+	overflow: hidden;
 	resize: none;
 	border: none;
 	outline: 0;
