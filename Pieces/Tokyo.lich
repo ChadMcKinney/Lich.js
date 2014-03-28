@@ -1,0 +1,82 @@
+{-
+    Glitch Lich -- Tokyo Algorave 
+
+    notes: each member should use prefixes for their variables. 
+    h = Chad
+    o = Cole
+    u = curtis
+
+    for example:
+    uSnare => ...
+    hDrums +> ...
+    oMel1 ~> ...
+-}
+
+
+
+
+-------------------------------------------------------------------------------------------------------------------------
+-- | Chad
+-------------------------------------------------------------------------------------------------------------------------
+
+ff = degree2Freq coleJI
+
+-- section 1 stuff
+hsnare => choose [violet 1,pink 1,brown 1,white 1,clipNoise 0.5] >> delay (1/(ff -14)) 0.999 >> env [0,1,1,0] [0,(random 0.02 0.15),0] 0 >> auxThrough 5
+hss => pink 1 >> bandpass (ff 16) 4 >> gain 16 >> delay (1/(ff (random -16 -8))) 0.999 >> env [0,0.3,0.3,0] [0,0.05,0] 0 >> auxThrough 5
+hlkick => square (ff -16) >> add (tri $ ff -24) >> perc 0 0.6 0.05 >> auxThrough 5
+hlkicker +> [hlkick hss] [hsnare hss] [hss hlkick] [hss hsnare]
+
+
+-- Section 2 stuff, Not to be mixed with other sounds
+hbd => tri (degree2Freq coleJI -32) >> add (tri (degree2Freq coleJI -20)) >> lowpass 100 0.1 >> perc 0 1.2 0.15
+hbd2 => tri (degree2Freq coleJI -22) >> lowpass 500 0.1 >> perc 0.005 2 1
+hsd1 => sin ((freq 0) + (random -13 13)) >> gain 0.25 >> add (violet 1 >> gain 30) >> highpass (freq 0) 30 >> env [0, 0.03, 0.0035, 0] [0, 0.0001, random 0.01 0.2] 0 >> auxThrough (randomI 0 3)
+    where freq x = degree2Freq coleJI (add 12 $ randomI -1 1)
+hsd2 => sin (freq + (random -13 13)) >> gain 0.25 >> add (violet 1 >> gain 30) >> bandpass freq 50 >> env [0, 1, 0.035, 0] [0, 0.05, 1] 0 >> auxThrough (randomI 0 3)
+    where freq = (degree2Freq coleJI 15)
+hsd3 => violet 1 + pink 1 >> bandpass (degree2Freq coleJI 26) 1 >> lowshelf 200 12 >> env [0,1,0.03,0] [0,0.1,1] 0 >> auxThrough (randomI 0 3)
+    
+hdrumsD2 +> hbd [_ hbd] [_ hsd2] hsd2 hbd [_ hbd] [hsd1 hsd2] hsd2 _ [hbd _] hsd2 [hsd1 hsd2] [hbd hsd2] [hsd1 hbd] [hsd2 hsd1] hsd2
+hdrumsD3 +> _ hsd3 | (*2)
+
+hdelayFX => auxIn 0 >> lowpass (sin 0.1767 >> range 200 1000) 5 >> delay tempoSeconds 0.6
+hdelayFX2 => auxIn 1 >> highpass (sin 0.1 >> range 200 1000) 5 >> delay (tempoSeconds * 1.5) 0.5
+hdelayFX3 => auxIn 2 >> gain 2 >> bandpass (sin 0.1317 >> range 200 2000) 5 >> delay (tempoSeconds * 2.5) 0.75
+
+hneonBass freq => (square (freq/2)) + (saw (freq*2)) + (saw (freq*(add 2 (sin 4 >> gain 0.04)))) + (pink 1 >> lowpass freq 50) >> lowpass (sin 0.1 >> range 200 1000) 0.01 >> env [0.0,0.2,0.03,0] [0.002,1,3] 0
+hneonBassSeq ~> hneonBass (ff -12) _ (ff -8) _ _ _ (ff -4) _ (ff (choose [1, -1, -5])) _ _ (ff -9) _ _ (ff -5) | (/2) _ _ _ _ _ (/2) _
+
+hneonBass2 freq => (saw (freq/2)) + (saw (freq/(add 2 (tri 4 >> gain 0.08)))) + (pink 1 >> lowpass freq 10) >> env [0.0,0.25,0.03,0] [0.001,0.1,3] 0 >> auxThrough 3
+hneonBassSeq2 ~> hneonBass2 [(ff $ choose [-6, -12]) (ff $ choose [-5,-8])] [(ff $ choose [-5, -4]) (ff (choose [1, -1, -5]))] [(ff -9) (ff -5)] | (*4) (*8) (*4) (*2) (*2) _ (/2)
+
+-- This goes with neonBass2
+hdelayFX4 => auxIn 3 >> env2 [0,1] [1] 0 >> delay (sin 0.3 >> range 0.01 0.001) 0.1 >> delay 1.25 0.6 >> gain 0.25
+
+
+
+
+
+
+
+
+
+
+
+-------------------------------------------------------------------------------------------------------------------------
+-- | Cole
+-------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+-------------------------------------------------------------------------------------------------------------------------
+-- | Curtis
+-------------------------------------------------------------------------------------------------------------------------

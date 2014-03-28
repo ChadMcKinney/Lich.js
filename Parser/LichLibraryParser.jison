@@ -232,10 +232,12 @@ topdecls_nonempty // : [topdecl]
 
 topdecl // : object
     : decl                    {{$$ = {astType: "topdecl-decl", decl: $1, pos: @$};}}
-    | impdecl                       {{$$ = $1;}}
-    | dataexp                       {{$$ = $1;}}
-    | synthdef                      {{$$ = $1;}}
-    ;
+    | impdecl                 {{$$ = $1;}}
+    | dataexp                 {{$$ = $1;}}
+    | synthdef                {{$$ = $1;}}
+	| percStream          	  {{$$ = $1;}}
+  	| soloStream          	  {{$$ = $1;}}
+	;
 
 
 decls // : [decl]

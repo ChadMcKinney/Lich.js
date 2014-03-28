@@ -8577,9 +8577,20 @@ function play(synth)
 {
 	var type = typeof synth;
 	if(type === "string")
+	{
 		synth = Soliton.synthDefs[synth]();
+	}
+
 	else if(type === "function")
+	{
 		synth = synth();
+	}
+
+	else if(synth._lichType == IMPSTREAM || synth._lichType == SOLOSTREAM)
+	{
+		synth.play();
+		return synth;
+	}
 
 	type = synth._lichType;
 	if(type != AUDIO && type != IMPSTREAM && type != SOLOSTREAM)
@@ -10067,18 +10078,19 @@ Soliton.PercStream = function(_events, _modifiers)
 {
 	var events = _events;
 	var modifiers = _modifiers;
-    this.nextTime = Math.floor((Soliton.context.currentTime / Lich.scheduler.tempoSeconds) + 0.5) * Lich.scheduler.tempoSeconds;
+	this.nextTime = 0;
+	// this.nextTime = Math.floor((Soliton.context.currentTime / Lich.scheduler.tempoSeconds) + 0.5) * Lich.scheduler.tempoSeconds;
 	var macroBeat = 0;
 	var infiniteBeat = 0;
 	var modifierBeat = 0;
 	var hasModifiers = modifiers.length > 0;
 	this._lichType = IMPSTREAM;
-	var playing = true;
+	var playing = false;
 	var ll = events.length;
 	var lm = 1 / ll;
 
 	// Push to the next metric down beat
-	this.nextTime += ((this.nextTime / Lich.scheduler.tempoSeconds) % _events.length) * Lich.scheduler.tempoSeconds;
+	// this.nextTime += ((this.nextTime / Lich.scheduler.tempoSeconds) % _events.length) * Lich.scheduler.tempoSeconds;
 
 	
 	//Lich.post("NextTime = " + this.nextTime);
@@ -10098,6 +10110,9 @@ Soliton.PercStream = function(_events, _modifiers)
 	{
 		if(!playing)
 		{
+			this.nextTime = Math.floor((Soliton.context.currentTime / Lich.scheduler.tempoSeconds) + 0.5) * Lich.scheduler.tempoSeconds;
+			// Push to the next metric down beat
+			this.nextTime += ((this.nextTime / Lich.scheduler.tempoSeconds) % _events.length) * Lich.scheduler.tempoSeconds;
 			playing = true;
 			Lich.scheduler.addScheduledEvent(this);
 		}
@@ -10224,18 +10239,19 @@ Soliton.SoloStream = function(_instrument, _events, _modifiers, _rmodifiers)
 	var events = _events;
 	var modifiers = _modifiers;
 	var rmodifiers = _rmodifiers;
-	this.nextTime = Math.floor((Soliton.context.currentTime / Lich.scheduler.tempoSeconds) + 0.5) * Lich.scheduler.tempoSeconds;
+	this.nextTime = 0;
+	//this.nextTime = Math.floor((Soliton.context.currentTime / Lich.scheduler.tempoSeconds) + 0.5) * Lich.scheduler.tempoSeconds;
 	var macroBeat = 0;
 	var infiniteBeat = 0;
 	var modifierBeat = 0;
 	var hasModifiers = modifiers.length > 0;
 	this._lichType = SOLOSTREAM;
-	var playing = true;
+	var playing = false;
 	var ll = events.length;
 	var lm = 1 / ll;
 
 	// Push to the next metric down beat
-	this.nextTime += ((this.nextTime / Lich.scheduler.tempoSeconds) % _events.length) * Lich.scheduler.tempoSeconds;
+	//this.nextTime += ((this.nextTime / Lich.scheduler.tempoSeconds) % _events.length) * Lich.scheduler.tempoSeconds;
 
 	
 	//Lich.post("NextTime = " + this.nextTime);
@@ -10255,6 +10271,9 @@ Soliton.SoloStream = function(_instrument, _events, _modifiers, _rmodifiers)
 	{
 		if(!playing)
 		{
+			this.nextTime = Math.floor((Soliton.context.currentTime / Lich.scheduler.tempoSeconds) + 0.5) * Lich.scheduler.tempoSeconds;
+			// Push to the next metric down beat
+			this.nextTime += ((this.nextTime / Lich.scheduler.tempoSeconds) % _events.length) * Lich.scheduler.tempoSeconds;
 			playing = true;
 			Lich.scheduler.addScheduledEvent(this);
 		}
@@ -10397,7 +10416,7 @@ Soliton.pbind = function(patternName, func, arguments, duration)
 	this.duration = duration;
 	var beatDuration = 0;
 	this.value = null;
-	this.nextTime = Math.floor((Soliton.context.currentTime / Lich.scheduler.tempoSeconds) + 0.5) * Lich.scheduler.tempoSeconds;
+	// this.nextTime = Math.floor((Soliton.context.currentTime / Lich.scheduler.tempoSeconds) + 0.5) * Lich.scheduler.tempoSeconds;
 	var infiniteBeat = 0;
 	this._lichType = SOLOSTREAM;
 	var playing = false;
@@ -10415,6 +10434,7 @@ Soliton.pbind = function(patternName, func, arguments, duration)
 	{
 		if(!playing)
 		{
+			this.nextTime = Math.floor((Soliton.context.currentTime / Lich.scheduler.tempoSeconds) + 0.5) * Lich.scheduler.tempoSeconds;
 			playing = true;
 			Lich.scheduler.addScheduledEvent(this);
 		}

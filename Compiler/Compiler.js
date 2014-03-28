@@ -1791,7 +1791,8 @@ Lich.compilePercStream = function(ast)
 	{
 		res = ast.id+"=new Soliton.PercStream("+list+","+modifiers+");";
 		if(Lich.parseType !== "library")
-			res += "Lich.scheduler.addScheduledEvent("+ast.id+");";
+			res += ast.id + ".play();";
+			//res += "Lich.scheduler.addScheduledEvent("+ast.id+");";
 	}
 
 	return res;
@@ -1842,7 +1843,8 @@ Lich.compileSoloStream = function(ast)
 	{
 		res = ast.id+"=new Soliton.SoloStream("+ast.synth+","+list+","+mods+","+rmods+");";
 		if(Lich.parseType !== "library")
-			res += "Lich.scheduler.addScheduledEvent("+ast.id+");";
+			res += ast.id + ".play();";
+			//res += "Lich.scheduler.addScheduledEvent("+ast.id+");";
 	}
 
 	return res;

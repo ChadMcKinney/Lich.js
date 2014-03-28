@@ -49,7 +49,10 @@ zipFlat l r = foldl (\acc [x,y] -> acc ++ [x,y]) [] $ zip l r -- zip then flatte
 replicateN dimensions@(x:xs) value = foldl (\acc x -> replicate x acc) value $ reverse dimensions
 negate n = 0 - n
 neg n = 0 - n
-testSynth => (square 40) + (square 80) >> highpass (1000 >> perc 0.1 1 1) 1 >> perc 0 1 1
+testSynth => (square 40) + (square 80) >> highpass (1000 >> perc 0.1 1 1) 1 >> perc 0 0.3 0.3
+testSynth2 freq => (square (freq/2)) + (square freq) >> lowpass (freq * 8 >> perc 0.1 1 1) 1 >> perc 0 0.3 0.3
+testSeq +> testSynth 
+testSeq2 ~> testSynth2 1 2 3 4 5 6 7 8 9 10 | (*80)
 
 -- Recursive map over multidimensional list
 deepMap f list@(x:xs) = map (deepFunc) list

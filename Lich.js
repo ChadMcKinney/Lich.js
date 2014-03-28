@@ -6996,6 +6996,12 @@ function compileLich()
 {
 	try
 	{
+		Soliton.print = Lich.post; // Set Soliton.print to our Lich.post function
+		Soliton.printError = Lich.post; // Set Soliton.print to our Lich.post function
+		Soliton.init();
+		Lich.scheduler = new Soliton.SteadyScheduler();
+		Lich.scheduler.start();
+		
 		var oRequest = new XMLHttpRequest();
 		var sURL = "http://"
 		         + self.location.hostname
@@ -7025,12 +7031,6 @@ function compileLich()
 		Lich.post(e);
 		throw e;
 	}
-
-	Soliton.print = Lich.post; // Set Soliton.print to our Lich.post function
-	Soliton.printError = Lich.post; // Set Soliton.print to our Lich.post function
-	Soliton.init();
-	Lich.scheduler = new Soliton.SteadyScheduler();
-	Lich.scheduler.start();
 	
 	/*
 	CloudChamber.setup(document.getElementById("canvas"), 24, undefined, Lich.post); // Create the CloudChamber instance
