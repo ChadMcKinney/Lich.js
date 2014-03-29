@@ -206,7 +206,7 @@ function connectToWebSocketServer()
 
 	document.addEventListener("keydown", function(e) {
   		if (e.keyCode == 27) {
-    		toggleFullScreen();
+			toggleFullScreen();
   		}
 	}, false);
 }
