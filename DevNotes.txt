@@ -1198,7 +1198,7 @@ spliceOsc "someString!" 5
 // GRAPHICS TEST CODE
 ///////////////////////////////////
 
-initGraphics -- MUST DO THIS FIRST!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+initGraphics 0 -- MUST DO THIS FIRST!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 setBackground (random 0 255) (random 0 255) (random 0 255)
 let s = sphere [random -100 100, random -100 100, random -10 10] 50 [random 0 255, random 0 255, random 0 255]
 let c = cube [random -100 100, random -100 100, random -100 100] [25, 25, 25] [random 0 (2*pi), random 0 (2*pi), random 0 (2*pi)] [0,200,150] 

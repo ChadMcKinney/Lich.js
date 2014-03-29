@@ -371,7 +371,7 @@ characters are translated to WebGL function calls via a simple switch
 
 */
 
-
+/*
 // READ/WRITE vars for splice synthesis
 Soliton.var_a = 1;
 Soliton.var_b = 1;
@@ -447,7 +447,7 @@ for(var i = 0; i < Soliton.blockSize; ++i)
 	Soliton.buffer_b[i] = 0;
 	Soliton.buffer_c[i] = 0;
 }
-
+*/
 
 Soliton.clip = function(value)
 {
@@ -486,7 +486,7 @@ Soliton.wrap = function(value)
 //////////////////////
 // spliceOsc
 //////////////////////
-
+/*
 Soliton.parseSpliceOscChar = function(character)
 {
 	switch(character)
@@ -2353,14 +2353,6 @@ function spliceOsc(lang, divider)
 	oscNode._lichType = AUDIO;
 	oscNode.startAll = function(time){}
 	oscNode.stopAll = function(time){setTimeout(function(){oscNode.disconnect(0)}, (time - Soliton.context.currentTime) * 1000)}
-	/*
-	var fadeGain = Soliton.context.createGain();
-	oscNode.connect(fadeGain);
-	fadeGain.connect(Soliton.masterGain);
-	fadeGain.gain.value = 1.0;
-	fadeGain.gain.linearRampToValueAtTime(1.0, Soliton.context.currentTime + 0.1);
-	fadeGain.gain.linearRampToValueAtTime(0.0, Soliton.context.currentTime + 1);
-	//return Soliton.addNode(oscNode);*/
 	return oscNode;
 }
 
@@ -4196,29 +4188,7 @@ Soliton.parseSpliceFX = function(lang)
 
 function spliceFX(lang, divider, source)
 {
-	/*
-	var source = Soliton.nodes[nodeID];
-
-	if(source != null)
-	{
-		source.disconnect(0);
-		var mix = Soliton.context.createGain();
-		var feedBack = Soliton.context.createGain();
-		feedBack.gain.value = feedLevel;
-		var delay = Soliton.context.createDelay();
-		delay.delayTime.value = delayTime;
-		source.connect(delay);
-		source.connect(mix);
-		delay.connect(mix);
-		delay.connect(feedBack);
-		feedBack.connect(delay);
-		mix.connect(Soliton.masterGain);
-		return Soliton.addNode(mix);
-	}
-
-	return null;*/
-
-	//var source = Soliton.nodes[nodeID];
+//var source = Soliton.nodes[nodeID];
 
 	//if(source == null)
 	//	return null;
@@ -4236,7 +4206,7 @@ function spliceFX(lang, divider, source)
 		//var inputArrayR = event.inputBuffer.getChannelData(1);
 		var output;
 
-		for(var i = 0; i < 1024; /*i += (1024 * this.divider)*/ ++i)
+		for(var i = 0; i < 1024;  ++i)
 		{
 			output = this.audioFuncArray[this.currentFunc](inputArrayL, inputArrayL, i);
 
@@ -4252,12 +4222,6 @@ function spliceFX(lang, divider, source)
 					else if(outputArrayL[i] > 1 || outputArrayL[i] < -1)
 						outputArrayL[i] = 1/outputArrayL[i];
 
-					/*outputArrayR[i] += output[j];
-
-					if(isNaN(outputArrayR[i]))
-						outputArrayR[i] = inputArrayR[i];
-					else if(outputArrayR[i] > 1 || outputArrayR[i] < -1)
-						outputArrayR[i] = 1/outputArrayR[i];*/
 				//}  
 			}
 
@@ -4272,16 +4236,6 @@ function spliceFX(lang, divider, source)
 	oscNode.startAll = function(time){source.startAll(time)}
 	oscNode.stopAll = function(time){source.stopAll(time)}
 	source.connect(oscNode);
-	/*
-	var fadeGain = Soliton.context.createGain();
-	source.disconnect(0);
-	source.connect(oscNode);
-	oscNode.connect(fadeGain);
-	fadeGain.connect(Soliton.masterGain);
-	fadeGain.gain.value = 1.0;
-	fadeGain.gain.linearRampToValueAtTime(1.0, Soliton.context.currentTime + 0.1);
-	fadeGain.gain.linearRampToValueAtTime(0.0, Soliton.context.currentTime + 1);
-	return Soliton.addNode(oscNode);*/
 	return oscNode;
 }
 
@@ -4355,6 +4309,7 @@ function spliceFilter(spliceString, input)
 }
 
 _createUGen("spliceFilter", spliceFilter);
+*/
 
 function iir(coeff1, coeff2, input)
 {
@@ -10408,11 +10363,11 @@ Soliton.SoloStream = function(_instrument, _events, _modifiers, _rmodifiers)
 	}
 }
 
-Soliton.pbind = function(patternName, func, arguments, duration)
+Soliton.pbind = function(patternName, func, _arguments, duration)
 {
 	this.patternName = patternName;
 	this.func = func;
-	this.args = arguments;
+	this.args = _arguments;
 	this.duration = duration;
 	var beatDuration = 0;
 	this.value = null;
@@ -10506,10 +10461,10 @@ Soliton.pbind = function(patternName, func, arguments, duration)
 		return this.nextTime;
 	}
 
-	this.update = function(func, arguments, duration)
+	this.update = function(func, _arguments, duration)
 	{
 		this.func = func;
-		this.args = arguments;
+		this.args = _arguments;
 		this.duration = duration;
 
 		if(!playing)
@@ -10522,19 +10477,19 @@ Soliton.pbind = function(patternName, func, arguments, duration)
 	}
 }
 
-function pbind(patternName, func, arguments, duration)
+function pbind(patternName, func, args, duration)
 {
 	var p = null;
 
 	if(Soliton.pbinds.hasOwnProperty(patternName))
 	{
-		Soliton.pbinds[patternName].update(func, arguments, duration);
+		Soliton.pbinds[patternName].update(func, args, duration);
 		p = Soliton.pbinds[patternName];
 	}
 
 	else
 	{
-		p = new Soliton.pbind(patternName, func, arguments, duration);
+		p = new Soliton.pbind(patternName, func, args, duration);
 		Soliton.pbinds[patternName] = p;
 		p.play();
 	}

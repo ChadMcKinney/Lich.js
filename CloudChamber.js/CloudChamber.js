@@ -296,7 +296,7 @@ CloudChamber.setup = function(canvas, framerate, drawCallback, printCallback)
 	CloudChamber.composer.addPass(rgbEffect);
 
 	CloudChamber.numShaders = 1;
-
+	
 	CloudChamber.shadersMap = {
 		"BasicShader" : THREE.BasicShader,
 		"BleachBypassShader" : THREE.BleachBypassShader,
@@ -1650,7 +1650,7 @@ CloudChamber.shaderTemplate = function(vert, frag)
 {
 	return {
 		uniforms: { 
-			"tDiffuse": { type: "t", value: null },
+			"tDiffuse": { type: "t", value: null }
 		},
 
 		vertexShader: [

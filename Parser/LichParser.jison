@@ -575,8 +575,8 @@ doList
   ;
 
 doItem
-  : exp               {{$$ = {astType:"doLambda",var:"",exp:$1};}}
-  | varid "<-" exp    {{$$ = {astType:"doLambda",var:$1,exp:$3};}}
+  : exp               {{$$ = {astType:"doLambda",arg:"",exp:$1};}}
+  | varid "<-" exp    {{$$ = {astType:"doLambda",arg:$1,exp:$3};}}
   ;
 
 // list of 1 or more 'aexp' without separator
@@ -739,6 +739,7 @@ datainst
   | conid                           {{$$ = {astType:"data-inst", id: $1, members: []};}}
   ;
 
+  /*
 ////////////////////////
 // Class
 ////////////////////////
@@ -759,7 +760,8 @@ classmem
   | varid binop varid       {{$$ = {astType:"class-binop", left:$1, binop:$2, right:$3};}}
   | varid varsym varid      {{$$ = {astType:"class-binop", left:$1, binop:$2, right:$3};}}
   ;
-
+*/
+  
 ///////////////
 // List
 ///////////////
