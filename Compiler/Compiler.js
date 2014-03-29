@@ -502,15 +502,6 @@ Lich.compileAST = function(ast)
 			case "topdecl-decl":
 				return Lich.compileTopdeclDecl(ast);
 
-			case "class-exp":
-				return Lich.compileClassExpr(ast);
-
-			case "class-decl":
-				return Lich.compileClassDecl(ast);
-					
-			case "class-binop":
-				return Lich.compileClassBinOp(ast);
-
 			case "top-exp":
 				return Lich.compileTopExp(ast);
 
@@ -1747,7 +1738,7 @@ Lich.compileDoExp = function(ast, ret)
 		if(i == first)
 			res = Lich.compileAST(ast.exps[i].exp);
 		else
-			res = "bind("+Lich.compileAST(ast.exps[i].exp)+",function("+ast.exps[i].var+"){return "+res+"})";
+			res = "bind("+Lich.compileAST(ast.exps[i].exp)+",function(" + ast.exps[i].arg + "){return "+res+"})";
 	}
 
 	return res; 
@@ -1785,14 +1776,18 @@ Lich.compilePercStream = function(ast)
 	if(eval ("typeof "+ast.id+" !== \"undefined\""))
 	{
 		res = ast.id+".update("+list+","+modifiers+");";
+		res += "Lich.post(\"" + ast.id + " \"+ Lich.VM.PrettyPrint(" + ast.id + "));";
 	}
 				
 	else
 	{
 		res = ast.id+"=new Soliton.PercStream("+list+","+modifiers+");";
 		if(Lich.parseType !== "library")
+		{
 			res += ast.id + ".play();";
 			//res += "Lich.scheduler.addScheduledEvent("+ast.id+");";
+			res += "Lich.post(\"" + ast.id + " \"+ Lich.VM.PrettyPrint(" + ast.id + "));";
+		}
 	}
 
 	return res;
@@ -1837,14 +1832,18 @@ Lich.compileSoloStream = function(ast)
 	if(eval ("typeof "+ast.id+" !== \"undefined\""))
 	{
 		res = ast.id+".update("+ast.synth+","+list+","+mods+","+rmods+");";
+		res += "Lich.post(\"" + ast.id + " \"+ Lich.VM.PrettyPrint(" + ast.id + "));";
 	}
 				
 	else
 	{
 		res = ast.id+"=new Soliton.SoloStream("+ast.synth+","+list+","+mods+","+rmods+");";
 		if(Lich.parseType !== "library")
+		{
 			res += ast.id + ".play();";
 			//res += "Lich.scheduler.addScheduledEvent("+ast.id+");";
+			res += "Lich.post(\"" + ast.id + " \"+ Lich.VM.PrettyPrint(" + ast.id + "));";
+		}
 	}
 
 	return res;
@@ -1878,5 +1877,5 @@ Lich.compileSynthDef = function(ast)
 {
 	ast.astType = "decl-fun";
 	ast.noCollapse = true;
-	return Lich.compileAST(ast)+";Soliton.synthDefs[\""+ast.ident.id+"\"]="+ast.ident.id+";";
+	return Lich.compileAST(ast)+";Soliton.synthDefs[\""+ast.ident.id+"\"]="+ast.ident.id+";Lich.VM.Print("+ast.ident.id+");";
 }

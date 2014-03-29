@@ -139,6 +139,11 @@ Lich.VM.printClosure = function(closure)
 	return string.concat(" ->)");
 }
 
+Lich.VM.printPercStream = function(object)
+{
+	return "(\\ +>)";
+}
+
 Lich.VM.printAST = function(object)
 {
 	switch(object.astType)
@@ -203,12 +208,13 @@ Lich.post = function(text)
 
 Lich.VM.PrettyPrint = function(object)
 {
+	var lichType = object._lichType;
 	//Lich.post(Lich.VM.printData(object));
 	if(object == null || typeof object === "undefined")
 		return "Nothing"; // undefined == Nothing
-	else if(object._lichType == SYNTH)
+	else if(lichType == SYNTH)
 		return Lich.VM.printSynthDef(object);
-	else if(object._lichType == DATA)
+	else if(lichType == DATA)
 		return Lich.VM.printData(object);
 	else if(typeof object === "string")
 		return "\"" + object + "\"";
@@ -218,17 +224,21 @@ Lich.VM.PrettyPrint = function(object)
 		return Lich.VM.printArray(object);
 	else if(typeof object === "function")
 		return Lich.VM.printClosure(object);
-	else if(object._lichType == CLOSURE || object._lichType == THUNK)
+	else if(lichType == IMPSTREAM)
+		return "+>";
+	else if(lichType == SOLOSTREAM)
+		return "~>";
+	else if(lichType == CLOSURE || lichType == THUNK)
 		return Lich.VM.printClosure(object);
-	else if(object._lichType == DICTIONARY)
+	else if(lichType == DICTIONARY)
 		return Lich.VM.printDictionary(object);
-	else if (object._lichType == ACTOR)
+	else if (lichType == ACTOR)
 		return "Actor";
 	else if(object == Lich.VM.Nothing)
 		return "Nothing";
-	else if(object._lichType == NOTHING)
+	else if(lichType == NOTHING)
 		return "Nothing";
-	else if(object._lichType == VOID)
+	else if(lichType == VOID)
 		return "";
 	else
 		return object;

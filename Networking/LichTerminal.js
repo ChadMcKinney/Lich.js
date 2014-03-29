@@ -296,9 +296,10 @@ function hideTextAreas()
 
 function getShowingOpacity()
 {
+	/*
 	if(playingMadness)
 		return "0.0";
-	else
+	else*/
 		return "1.0";
 }
 

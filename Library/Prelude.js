@@ -2122,5 +2122,5 @@ irList = [
 "WangenheimRareBooksRoom",
 "WarrenLectureHall2005",
 "WaterplacePark",
-"WoodruffLane",
+"WoodruffLane"
 ]
