@@ -4864,31 +4864,40 @@ function white(amp)
 	}
 		
 	whiteFunc.connect(whiteGain);
+
+	var gain = Soliton.context.createGain();
+	gain.gain.value = 0;
+	whiteGain.connect(gain);
 	
-	whiteGain.startAll = function(time)
+	gain.startAll = function(time)
 	{
 		if(amp._lichType == AUDIO)
 			amp.startAll(time);
+
+		gain.gain.setValueAtTime(1, time);
 	};
 
-	whiteGain.stopAll = function(time)
+	gain.stopAll = function(time)
 	{
 		if(amp._lichType == AUDIO)
 			amp.stopAll(time);
+
+		gain.gain.setValueAtTime(0, time);
 		
 		setTimeout(
 			function()
 			{
 				whiteFunc.disconnect();
 				whiteGain.disconnect();
+				gain.disconnect();
 				if(amp._lichType == AUDIO)
 					amp.disconnect();
 			}, 
 			(time - Soliton.context.currentTime) * 1000)
 	};
 
-	whiteGain._lichType = AUDIO;
-	return whiteGain;
+	gain._lichType = AUDIO;
+	return gain;
 }
 
 _createUGen("white", white);
@@ -4926,30 +4935,39 @@ function pink(amp)
 
 	pinkFunc.connect(pinkGain);
     
-	pinkGain.startAll = function(time)
+	var gain = Soliton.context.createGain();
+	gain.gain.value = 0;
+	pinkGain.connect(gain);
+	
+	gain.startAll = function(time)
 	{
 		if(amp._lichType == AUDIO)
 			amp.startAll(time);
+
+		gain.gain.setValueAtTime(1, time);
 	};
 
-	pinkGain.stopAll = function(time)
+	gain.stopAll = function(time)
 	{
 		if(amp._lichType == AUDIO)
 			amp.stopAll(time);
+
+		gain.gain.setValueAtTime(0, time);
 		
 		setTimeout(
 			function()
 			{
 				pinkFunc.disconnect();
 				pinkGain.disconnect();
+				gain.disconnect();
 				if(amp._lichType == AUDIO)
 					amp.disconnect();
 			}, 
-			(time - Soliton.context.currentTime) * 1100)
+			(time - Soliton.context.currentTime) * 1000)
 	};
 
-	pinkGain._lichType = AUDIO;
-	return pinkGain;
+	gain._lichType = AUDIO;
+	return gain;
 }
 
 _createUGen("pink", pink);
@@ -4969,32 +4987,41 @@ function violet(amp)
         }
     }
 
-    var gain = Soliton.context.createGain();
-	gain.gain.value = 0;
+    var preGain = Soliton.context.createGain();
+	preGain.gain.value = 0;
 	
     if(amp._lichType == AUDIO)
-    	amp.connect(gain.gain);
+    	amp.connect(preGain.gain);
     else
-    	gain.gain.value = amp;
+    	preGain.gain.value = amp;
 
-    violetFunc.connect(gain);
+    violetFunc.connect(preGain);
 
+	var gain = Soliton.context.createGain();
+	gain.gain.value = 0;
+	preGain.connect(gain);
+	
 	gain.startAll = function(time)
 	{
 		if(amp._lichType == AUDIO)
 			amp.startAll(time);
+
+		gain.gain.setValueAtTime(1, time);
 	};
 
 	gain.stopAll = function(time)
 	{
 		if(amp._lichType == AUDIO)
 			amp.stopAll(time);
+
+		gain.gain.setValueAtTime(0, time);
 		
 		setTimeout(
 			function()
 			{
 				violetFunc.disconnect();
 				gain.disconnect();
+				preGain.disconnect();
 				if(amp._lichType == AUDIO)
 					amp.disconnect();
 			}, 
@@ -5022,32 +5049,41 @@ function brown(amp)
         }
     }
 
-	var gain = Soliton.context.createGain();
-	gain.gain.value = 0;
+	var preGain = Soliton.context.createGain();
+	preGain.gain.value = 0;
 	
     if(amp._lichType == AUDIO)
-    	amp.connect(gain.gain);
+    	amp.connect(preGain.gain);
     else
-    	gain.gain.value = amp;
+    	preGain.gain.value = amp;
 
-    brownFunc.connect(gain);
+    brownFunc.connect(preGain);
 
+	var gain = Soliton.context.createGain();
+	gain.gain.value = 0;
+	preGain.connect(gain);
+	
 	gain.startAll = function(time)
 	{
 		if(amp._lichType == AUDIO)
 			amp.startAll(time);
+
+		gain.gain.setValueAtTime(1, time);
 	};
 
 	gain.stopAll = function(time)
 	{
 		if(amp._lichType == AUDIO)
 			amp.stopAll(time);
+
+		gain.gain.setValueAtTime(0, time);
 		
 		setTimeout(
 			function()
 			{
 				brownFunc.disconnect();
 				gain.disconnect();
+				preGain.disconnect();
 				if(amp._lichType == AUDIO)
 					amp.disconnect();
 			}, 
@@ -5071,32 +5107,41 @@ function clipNoise(amp)
         }
     }
 
-	var gain = Soliton.context.createGain();
-	gain.gain.value = 0;
+	var preGain = Soliton.context.createGain();
+	preGain.gain.value = 0;
 	
     if(amp._lichType == AUDIO)
-    	amp.connect(gain.gain);
+    	amp.connect(preGain.gain);
     else
-    	gain.gain.value = amp;
+    	preGain.gain.value = amp;
 
-    clipFunc.connect(gain);
+    clipFunc.connect(preGain);
 
+	var gain = Soliton.context.createGain();
+	gain.gain.value = 0;
+	preGain.connect(gain);
+	
 	gain.startAll = function(time)
 	{
 		if(amp._lichType == AUDIO)
 			amp.startAll(time);
+
+		gain.gain.setValueAtTime(1, time);
 	};
 
 	gain.stopAll = function(time)
 	{
 		if(amp._lichType == AUDIO)
 			amp.stopAll(time);
+
+		gain.gain.setValueAtTime(0, time);
 		
 		setTimeout(
 			function()
 			{
 				clipFunc.disconnect();
 				gain.disconnect();
+				preGain.disconnect();
 				if(amp._lichType == AUDIO)
 					amp.disconnect();
 			}, 

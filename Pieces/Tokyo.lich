@@ -22,7 +22,7 @@
 ff = degree2Freq coleJI
 
 -- section 1 stuff
-hsnare => choose [violet 1,pink 1,brown 1,white 1,clipNoise 0.5] >> delay (1/(ff -14)) 0.999 >> env [0,1,1,0] [0,(random 0.02 0.15),0] 0 >> auxThrough 5
+hsnare => choose [violet 1,pink 1,brown 1,white 1,clipNoise 0.3] >> delay (1/(ff -14)) 0.999 >> env [0,1,1,0] [0,(random 0.02 0.15),0] 0 >> auxThrough 5
 hss => pink 1 >> bandpass (ff 16) 4 >> gain 16 >> delay (1/(ff (random -16 -8))) 0.999 >> env [0,0.3,0.3,0] [0,0.05,0] 0 >> auxThrough 5
 hlkick => square (ff -16) >> add (tri $ ff -24) >> perc 0 0.6 0.05 >> auxThrough 5
 hlkicker +> [hlkick hss] [hsnare hss] [hss hlkick] [hss hsnare]
