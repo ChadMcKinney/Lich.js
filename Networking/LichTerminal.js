@@ -90,7 +90,11 @@ function createTextArea(name,num,total)
 		//document.body.appendChild(input);
 		var editor = ace.edit("terminal"+name);
 
-		editor.setTheme("ace/theme/lich");
+		//if(name == clientName)
+			editor.setTheme("ace/theme/lich");
+		//else
+		//	editor.setTheme("ace/theme/twilight");
+
 		editor.getSession().setMode("ace/mode/haskell");
 		editor.renderer.setShowGutter(false);
 		editor.renderer.setShowPrintMargin(false);
@@ -126,6 +130,20 @@ function createTextArea(name,num,total)
 			readOnly: false
 		});
 
+		if(name == clientName)
+		{
+			session.selection.on('changeCursor', networkCursor);
+			editor.on('input', function()
+					  {
+						  broadcastTyping(editor.getValue());
+					  });
+		}
+		else
+		{
+			editor.setReadOnly(true);
+			editor.setHighlightActiveLine(true);
+		}
+
 		input = document.getElementById('terminal'+name);
 		input.style.fontSize = '1.1em';
 		input.style.overflow = "hidden";
@@ -150,17 +168,10 @@ function createTextArea(name,num,total)
 		if(name == clientName)
 		{
 			editor.focus();
-			session.selection.on('changeCursor', networkCursor);
-			editor.on('input', function()
-					  {
-						  broadcastTyping(editor.getValue());
-					  });
 		}
 		else
 		{
 			nameTag.style.color = "#902550";
-			editor.setReadOnly(true);
-			editor.setHighlightActiveLine(true);
 		}
 	}
 
