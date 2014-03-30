@@ -29,7 +29,6 @@ function receivedTyping(id,text)
 	if(id!=clientName)
 	{
 		writeTextToTerminal(id,text);
-
 	}
 }
 
@@ -44,7 +43,9 @@ function receiveCursorPos(name,x,y)
 	if(name != clientName)
 	{
 		console.log("receiveCursorPos: " + name + "," + x + "," + y);
+		editors[name].clearSelection();
 		editors[name].moveCursorTo(x,y);
+		editors[name].clearSelection();
 	}
 }
 
@@ -206,7 +207,7 @@ function connectToWebSocketServer()
 
 	document.addEventListener("keydown", function(e) {
   		if (e.keyCode == 27) {
-    		toggleFullScreen();
+			toggleFullScreen();
   		}
 	}, false);
 }
