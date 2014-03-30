@@ -4,10 +4,10 @@ let ff = degree2Freq justIntonation
 
 let growl freqq => osc >> fold 0.125 >> filt >> gain 128 >> pan 0.15 >> myenv
     where
-        freq    = freqq * 0.25
-        myenv   = perc 0.05 0.6 1
-        osc     = (square (freq*1.05)) + (sin (freq*1)) + (square (freq*0.49) )+ (tri (freq * 2))
-        filt    = lowpass (freq * 0.25 * (pow 2 $ randomI 2 3)) 1
+        freq	= freqq * 0.25
+        myenv	= perc 0.05 0.6 1
+        osc	= (square (freq*1.05)) + (sin (freq*1)) + (square (freq*0.49) )+ (tri (freq * 2))
+        filt	= lowpass (freq * 0.25 * (pow 2 $ randomI 2 3)) 1
 
 growlTime ~> growl
     0 _ _ _ 2 _ 0 _ 5 _ 4 _
@@ -24,15 +24,15 @@ growlTime ~> growl
     | (degree2Freq coleJI)
 
 
-let spinning freqq => osc >> filt  >> gain 0.25 >> myenv >>  panner >> del >> env2
+let spinning freqq => osc >> filt >> gain 0.25 >> myenv >> panner >> del >> env2
     where
-        freq    = freqq * 1
+        freq	= freqq * 1
         myenv   = perc2 0.6 0.6 0.01
-        osc     = (tri (freq*1.00)) + (saw (freq*1)) + (tri (freq*0.5) )+ (tri (freq * 2))
-        filt    = lowpass (freq * 2 * (pow 2 $ randomI 2 3)) 10
-        del     = delay ((randomI 1 4) * (0.25)) 0.5
-        env2    = env [1,1,0] [3,1] "linear"
-        panner  = pan $ random (-1) 1
+        osc	= (tri (freq*1.00)) + (saw (freq*1)) + (tri (freq*0.5) )+ (tri (freq * 2))
+        filt	= lowpass (freq * 2 * (pow 2 $ randomI 2 3)) 10
+        del	= delay ((randomI 1 4) * (0.25)) 0.5
+        env2	= env [1,1,0] [3,1] "linear"
+        panner	= pan $ random (-1) 1
 
 spinTime ~> spinning
     0 _ _ _ 2 _ 0 _ 5 _ 4 _ _ _ 
@@ -43,36 +43,42 @@ spinTime ~> spinning
 
 let spinning2 freqq => osc >> filt >> gain 0.25 >> myenv >> panner >> del >> env2
     where
-        freq = freqq * 0.5
-        myenv= perc2 0.6 0.6 0.01
-        osc  = (tri (freq*1.00)) + (saw (freq*1)) + (tri (freq*0.5) )+ (tri (freq * 2))
-        filt = lowpass (freq * 2 * (pow 2 $ randomI 2 3)) 10
-        del  = delay ((randomI 1 4) * (0.25)) 0.5
-        env2 = env [1,1,0] [3,1] "linear"
-        panner = pan $ random (-1) 1
+        freq	= freqq * 0.5
+        myenv	= perc2 0.6 0.6 0.01
+        osc	= (tri (freq*1.00)) + (saw (freq*1)) + (tri (freq*0.5) )+ (tri (freq * 2))
+        filt 	= lowpass (freq * 2 * (pow 2 $ randomI 2 3)) 10
+        del  	= delay ((randomI 1 4) * (0.25)) 0.5
+        env2 	= env [1,1,0] [3,1] "linear"
+        panner 	= pan $ random (-1) 1
 
 spinTime2 ~> spinning2 
     0 _ _ _ 2 _ 0 _ 5 _ 4 _ 6 _ _ _ 
     0 _ _ _ 2 _ 0 _ 5 _ 4 _ 6 _ _ _
     0 _ _ _ 2 _ 0 _ 5 _ 4 _ 6 _ 7 _
-    | (degree2Freq justIntonation)
+    | (degree2Freq coleJI)
 
-spinTime ~> spinning 0 _ _ _ (-2) _ ((random 1 4) * 4) _ (-5) _ (-4) _ (-6) _ _ _ _ _| (degree2Freq coleJI)
-spinTime2 ~> spinning2 12 _ _ _ (12 - 2) _ ((random 1 4) * 4) _ (12 - 5) _ (12 - 4) _ (12 - 6) _ _ _ _ _| (degree2Freq coleJI)
+spinTime ~> spinning
+    0 _ _ _ (-2) _ ((random 1 4) * 4) _ (-5) _ (-4) _ (-6) _ _ _ _ _
+    | (degree2Freq coleJI)
+spinTime2 ~> spinning2
+    12 _ _ _ (12 - 2) _ ((random 1 4) * 4) _ (12 - 5) _ (12 - 4) _ (12 - 6) _ _ _ _ _
+    | (degree2Freq coleJI)
 
-spinTime ~> spinning 0 _ _ _ (-2) _ ((random 1 4) * 4) _ (-5) _ (-4) _ (-6) _ _ _ _ _| ((*2) . (degree2Freq coleJI) )
-spinTime2 ~> spinning2 12 _ _ _ (12 - 2) _ ((random 1 4) * 4) _ (12 - 5) _ (12 - 4) _ (12 - 6) _ _ _ _ _| ((*2) . (degree2Freq coleJI) )
-
-
+spinTime ~> spinning
+    0 _ _ _ (-2) _ ((random 1 4) * 4) _ (-5) _ (-4) _ (-6) _ _ _ _ _
+    | ((*2) . (degree2Freq coleJI) )
+spinTime2 ~> spinning2
+    12 _ _ _ (12 - 2) _ ((random 1 4) * 4) _ (12 - 5) _ (12 - 4) _ (12 - 6) _ _ _ _ _
+    | ((*2) . (degree2Freq coleJI) )
 
 let ice9 freqq => osc >> dec >> filt >> panner >> delay 0.25 0.5 >> gain 0.25 >> myenv
     where
-        freq    = freqq * 2
+        freq	= freqq * 2
         myenv	= perc 1 0.6 4
-        dec     = decimate (freq * (randomI 1 2))
-        osc     = (tri freq) + (square (freq * 0.5)) + (saw (freq * 0.25)) + (sin (freq * 2))
-        filt    = lowpass (freq * 2 * (pow 2 $ randomI 2 5)) 20
-        panner  = pan $ random (-0.5) 0.5
+        dec	= decimate (freq * (randomI 1 2))
+        osc	= (tri freq) + (square (freq * 0.5)) + (saw (freq * 0.25)) + (sin (freq * 2))
+        filt	= lowpass (freq * 2 * (pow 2 $ randomI 2 5)) 20
+        panner	= pan $ random (-0.5) 0.5
 		
 iceChords ~> ice9 
     0 1 _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
@@ -83,12 +89,12 @@ iceChords ~> ice9
 	
 let ice10 freqq => osc >> dec >> filt >> panner >> delay 0.25 0.5 >> gain 0.1 >> myenv
     where
-        freq    = freqq * 2
-        myenv   = perc 1 0.6 4
-        dec     = decimate (freq * (randomI 1 3))
-        osc     = (tri freq) + (square (freq * 0.5)) + (saw (freq * 0.25)) + (sin (freq * 2))
-        filt    = lowpass (myenv $ freq * 4 * (pow 2 $ randomI 2 5)) 40
-        panner  = pan $ random (-0.5) 0.5
+        freq	= freqq * 2
+        myenv	= perc 1 0.6 4
+        dec	= decimate (freq * (randomI 1 3))
+        osc	= (tri freq) + (square (freq * 0.5)) + (saw (freq * 0.25)) + (sin (freq * 2))
+        filt	= lowpass (myenv $ freq * 4 * (pow 2 $ randomI 2 5)) 40
+        panner	= pan $ random (-0.5) 0.5
 
 iceChords2 ~> ice10
     0 1 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
