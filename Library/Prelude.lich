@@ -224,12 +224,12 @@ data Chord { scale, octave, degrees }
 octave2Mul o =  pow 2 (o - 4)
 chordProgression name chords durations = pbind name (\chord -> chord) (pseq chords) (pseq durations)
 chordDegree2Freq progression chordDegree = mul mult $ d2f scale degree
-                                      where
-                                        chord = progression::value
-                                        scale = chord::scale
-                                        chordMult = pow 2 (chordDegree / (chord::degrees >> length) >> floor)
-                                        degree = chord::degrees >> wlookup chordDegree
-                                        mult = octave2Mul (chord::octave) >> mul chordMult
+                                           where
+                                               chord = progression::value
+                                               scale = chord::scale
+                                               chordMult = pow 2 (chordDegree / (chord::degrees >> length) >> floor)
+                                               degree = chord::degrees >> wlookup chordDegree
+                                               mult = octave2Mul (chord::octave) >> mul chordMult
 c2f = chordDegree2Freq
 chord2Bass progression = chordDegree2Freq progression 0 
 c2b = chord2Bass
