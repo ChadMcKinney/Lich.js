@@ -90,10 +90,10 @@ function createTextArea(name,num,total)
 		//document.body.appendChild(input);
 		var editor = ace.edit("terminal"+name);
 
-		//if(name == clientName)
+		if(name == clientName)
 			editor.setTheme("ace/theme/lich");
-		//else
-		//	editor.setTheme("ace/theme/twilight");
+		else
+			editor.setTheme("ace/theme/lich2");
 
 		editor.getSession().setMode("ace/mode/haskell");
 		editor.renderer.setShowGutter(false);
