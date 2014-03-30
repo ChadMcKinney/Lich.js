@@ -7134,7 +7134,8 @@ function gain(input1, input2)
 	var isAudio1 = input1._lichType == AUDIO;
 	var isAudio2 = input2._lichType == AUDIO;
 	var gainNode = Soliton.context.createGain();
-
+	gainNode.gain.value = 0;
+	
 	if(isAudio1 && isAudio2)
 	{
 		input1.connect(gainNode.gain);
