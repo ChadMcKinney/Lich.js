@@ -29,7 +29,6 @@ function receivedTyping(id,text)
 	if(id!=clientName)
 	{
 		writeTextToTerminal(id,text);
-
 	}
 }
 
@@ -46,6 +45,7 @@ function receiveCursorPos(name,x,y)
 		//console.log("receiveCursorPos: " + name + "," + x + "," + y);
 		editors[name].clearSelection();
 		editors[name].moveCursorTo(x,y);
+		editors[name].clearSelection();
 	}
 }
 

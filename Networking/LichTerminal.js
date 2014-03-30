@@ -59,30 +59,30 @@ function createTextArea(name,num,total)
 		input.position = "relative";
 
 		/*
-		var subDiv = document.createElement("div");
-		subDiv.id = "terminalEditor"+name;
-		subDiv.style.opacity = getShowingOpacity();
-		input.appendChild(subDiv);*/
+		  var subDiv = document.createElement("div");
+		  subDiv.id = "terminalEditor"+name;
+		  subDiv.style.opacity = getShowingOpacity();
+		  input.appendChild(subDiv);*/
 
 		//Terminal text area
 
 		/*
-		input = document.createElement("textarea");
+		  input = document.createElement("textarea");
 
-		input.className = "terminal";
-		input.id = "terminal"+name;
-		input.name = "terminal"+name;
-		input.addEventListener('keydown', keyDown);
-		input.addEventListener('keyup', keyUp);
-		input.spellcheck = false;
-		input.value = "";
-		input.readOnly = name != clientName;
-		
-		input.style.zIndex = 10;
-		input.rows = 1;	
-		input.style.width = "100%";
-		
-		input.style.opacity = getShowingOpacity();*/
+		  input.className = "terminal";
+		  input.id = "terminal"+name;
+		  input.name = "terminal"+name;
+		  input.addEventListener('keydown', keyDown);
+		  input.addEventListener('keyup', keyUp);
+		  input.spellcheck = false;
+		  input.value = "";
+		  input.readOnly = name != clientName;
+		  
+		  input.style.zIndex = 10;
+		  input.rows = 1;	
+		  input.style.width = "100%";
+		  
+		  input.style.opacity = getShowingOpacity();*/
 		
 		
 		div.appendChild(input);
@@ -97,29 +97,26 @@ function createTextArea(name,num,total)
 		var session = editor.getSession();
 		session.setUseWrapMode(true);
 		session.setUseWorker(true);
-
-		if(name == clientName)
-			session.selection.on('changeCursor', networkCursor);
 		
 		editor.commands.addCommand({
-		    name: 'evaluateCode',
-		    bindKey: {win: 'Ctrl-Enter', mac: 'Command-Enter'},
-		    exec: parseCurrentLine,
-		    readOnly: false // false if this command should not apply in readOnly mode
+			name: 'evaluateCode',
+			bindKey: {win: 'Ctrl-Enter', mac: 'Command-Enter'},
+			exec: parseCurrentLine,
+			readOnly: false // false if this command should not apply in readOnly mode
 		});
 
 		editor.commands.addCommand({
-		    name: 'evaluateCode2',
-		    bindKey: {win: 'Shift-Enter', mac: 'Shift-Enter'},
-		    exec: parseCurrentLine,
-		    readOnly: false // false if this command should not apply in readOnly mode
+			name: 'evaluateCode2',
+			bindKey: {win: 'Shift-Enter', mac: 'Shift-Enter'},
+			exec: parseCurrentLine,
+			readOnly: false // false if this command should not apply in readOnly mode
 		});
 
 		editor.commands.addCommand({
-		    name: 'chatInputWindow',
-		    bindKey: {win: 'Alt-c', mac: 'Alt-c'},
-		    exec: chatEntryFromWindow,
-		    readOnly: false // false if this command should not apply in readOnly mode
+			name: 'chatInputWindow',
+			bindKey: {win: 'Alt-c', mac: 'Alt-c'},
+			exec: chatEntryFromWindow,
+			readOnly: false // false if this command should not apply in readOnly mode
 		});
 
 		editor.commands.addCommand({
@@ -127,12 +124,6 @@ function createTextArea(name,num,total)
 			bindKey: {win: 'Ctrl-.', mac: "Command-."},
 			exec: killall,
 			readOnly: false
-		});
-
-		editor.on('input', function()
-		{
-			if(name == clientName)
-				broadcastTyping(editor.getValue());
 		});
 
 		input = document.getElementById('terminal'+name);
@@ -156,18 +147,21 @@ function createTextArea(name,num,total)
 		nameTag.style.height = "3%";
 		div.appendChild(nameTag);
 
-		if(name != clientName)
+		if(name == clientName)
+		{
+			editor.focus();
+			session.selection.on('changeCursor', networkCursor);
+			editor.on('input', function()
+					  {
+						  broadcastTyping(editor.getValue());
+					  });
+		}
+		else
 		{
 			nameTag.style.color = "#902550";
 			editor.setReadOnly(true);
-			editor.setHighlightActiveLine(false);
+			editor.setHighlightActiveLine(true);
 		}
-
-		else
-		{
-			editor.focus();
-		}
-		
 	}
 
 	input.style.opacity = getShowingOpacity();
@@ -195,27 +189,27 @@ function createTextArea(name,num,total)
 	input.style.width = (document.documentElement.clientWidth * 0.75) + "px";
 
 	/*
-	var editor = document.getElementById('terminalEditor'+name);
-	editor.style.opacity = getShowingOpacity();
-	editor.style.top = (document.documentElement.clientHeight * 0.78 * (num/total)) + "px";
-	editor.style.height = (document.documentElement.clientHeight * 0.78 * (1/total)) + "px";*/
+	  var editor = document.getElementById('terminalEditor'+name);
+	  editor.style.opacity = getShowingOpacity();
+	  editor.style.top = (document.documentElement.clientHeight * 0.78 * (num/total)) + "px";
+	  editor.style.height = (document.documentElement.clientHeight * 0.78 * (1/total)) + "px";*/
 	setTimeout(function(){editors[name].resize(true)}, 2100); // waits till animation is done to resize
 
 	/*
-	var mirror = CodeMirror.fromTextArea(input, {
-		extraKeys: {
-			"Shift-Enter": parseCurrentLine,
-			"Ctrl-Enter": parseCurrentLine,
-			"Cmd-Enter": parseCurrentLine
-		},
-		readOnly: name != clientName,
-		lineNumbers: false,
-		showCursorWhenSelecting: true,
-		autofocus: name == clientName,
-		mode: "haskell"
-	});
+	  var mirror = CodeMirror.fromTextArea(input, {
+	  extraKeys: {
+	  "Shift-Enter": parseCurrentLine,
+	  "Ctrl-Enter": parseCurrentLine,
+	  "Cmd-Enter": parseCurrentLine
+	  },
+	  readOnly: name != clientName,
+	  lineNumbers: false,
+	  showCursorWhenSelecting: true,
+	  autofocus: name == clientName,
+	  mode: "haskell"
+	  });
 
-	mirrors[name] = mirror;*/
+	  mirrors[name] = mirror;*/
 
 	//mirrors[name].getDoc().style.top = (document.documentElement.clientHeight * 0.78 * (num/total));
 	//mirrors[name].setSize(null, (document.documentElement.clientHeight * 0.78 * (1/total)));
@@ -299,10 +293,10 @@ function hideTextAreas()
 function getShowingOpacity()
 {
 	/*
-	if(playingMadness)
-		return "0.0";
-	else*/
-		return "1.0";
+	  if(playingMadness)
+	  return "0.0";
+	  else*/
+	return "1.0";
 }
 
 function showTextAreas()
