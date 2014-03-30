@@ -1877,5 +1877,10 @@ Lich.compileSynthDef = function(ast)
 {
 	ast.astType = "decl-fun";
 	ast.noCollapse = true;
-	return Lich.compileAST(ast)+";Soliton.synthDefs[\""+ast.ident.id+"\"]="+ast.ident.id+";Lich.VM.Print("+ast.ident.id+");";
+	var res = Lich.compileAST(ast)+";Soliton.synthDefs[\""+ast.ident.id+"\"]="+ast.ident.id;
+
+	if(Lich.parseType !== "library")
+		res += ";Lich.VM.Print("+ast.ident.id+");";
+
+	return res;
 }
