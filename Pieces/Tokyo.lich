@@ -40,6 +40,7 @@ hsd3 => violet 1 + pink 1 >> bandpass (degree2Freq coleJI 26) 1 >> lowshelf 200 
 hdrumsD2 +> hbd [_ hbd] [_ hsd2] hsd2 hbd [_ hbd] [hsd1 hsd2] hsd2 _ [hbd _] hsd2 [hsd1 hsd2] [hbd hsd2] [hsd1 hbd] [hsd2 hsd1] hsd2
 hdrumsD3 +> _ hsd3 | (*2)
 
+-- Don't forget to play these!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
 hdelayFX => auxIn 0 >> lowpass (sin 0.1767 >> range 200 1000) 5 >> delay tempoSeconds 0.6
 hdelayFX2 => auxIn 1 >> highpass (sin 0.1 >> range 200 1000) 5 >> delay (tempoSeconds * 1.5) 0.5
 hdelayFX3 => auxIn 2 >> gain 2 >> bandpass (sin 0.1317 >> range 200 2000) 5 >> delay (tempoSeconds * 2.5) 0.75
@@ -57,7 +58,20 @@ hdelayFX4 => auxIn 3 >> env2 [0,1] [1] 0 >> delay (sin 0.3 >> range 0.01 0.001) 
 
 
 
+-- Just some random thing right now
+let hdb => sin (env2 [80,20] [0.15] 0 1) >> perc 0 1 0.5
+let hsn => sin (env [1000, 200] [0.07] 0 1) >> perc2 0 1 0.07 >> add (pink 0.25) >> pan 0.25 >> perc 0.001 1 0.1
+let hhh => square (pow 2 $ tstutter 3 $ pseq [1..14]) >> pink >> pan -0.25 >> perc 0 0.3 0.07
 
+hdrums +> (pseq [hdb, hhh, hhh, hhh, hhh, hsn] >> pwarp (psin 0.75)) | (/2)
+
+
+-- Cool bass bubble glitchy
+let hres freq => brown 1 >> perc2 0.0 0.3 0.001 >> reson freq 1.5 >> distortion2 0.1 >> d >> perc 0 0.5 (exprandom 0.15 1)
+    where
+        d = delay (noiseX 1 >> range 0.001 0.7) (noiseX 1 >> range 0.1 0.9)
+        
+hreseq ~> hres (pseq [1..15] >> pwarp (psin 0.7)) | ((/16) . (d2f prometheus)) | (pseq [(/2), (*1), (/2)] >> pwarp (psin 0.7))
 
 
 
