@@ -326,3 +326,24 @@ textarea::selection {
     -webkit-transition: height 2s,top 2s, opacity 2s;
 			transition: height 2s,top 2s, opacity 2s;
 }
+
+#connectionStatus {
+	position: absolute;
+	background-color: transparent;
+	padding-left: 0.2em;
+	-moz-box-sizing:border-box;
+    -webkit-box-sizing:border-box;
+    box-sizing:border-box;
+	border: none;
+	outline: 0;
+	outline: none;
+    resize:none;
+	top: 95%;
+	left: 90%;
+	width: 10%;
+	height: 5%;
+	 zIndex: 30;
+	font-family: Ubuntu Mono, DejaVu Sans Mono, Liberation Mono,Menlo,Bitstream Vera Sans Mono,Consolas,Monaco,Lucida Console,Courier New, monospace;
+    overflow-x: hidden;
+	color: rgb(0,155,0);
+}

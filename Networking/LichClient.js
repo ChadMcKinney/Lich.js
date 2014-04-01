@@ -187,8 +187,13 @@ function compileLibFromServer(libData)
 	}
 }
 
+var connectionStatus;
+var connected;
+
 function connectToWebSocketServer()
 {
+	connectionStatus = document.getElementById("connectionStatus");
+	
 	//socket = io.connect('ws://173.203.102.166:80');	
 	//socket = io.connect('ws://127.0.0.1');
 	socket = io.connect(location.host);
@@ -202,14 +207,53 @@ function connectToWebSocketServer()
 	socket.on('CompileLibClient',compileLibFromServer);
 	socket.on('StateSyncClient',receiveStateSync);
 	socket.on('CursorPosClient',receiveCursorPos);
+
+	//socket.on('connect',clientConnected);
+	socket.on('disconnect',clientDisconnected);
+
 	socket.emit('Login');
 	initChat();
+
+	checkConnection();
 
 	document.addEventListener("keydown", function(e) {
   		if (e.keyCode == 27) {
 			toggleFullScreen();
   		}
 	}, false);
+}
+
+function checkConnection()
+{
+	if(socket.socket.connected)
+		clientConnected();
+	else
+		clientDisconnected();
+
+	setTimeout(checkConnection,1000);
+}
+
+function clientConnected()
+{
+	if(!connected)
+	{
+		console.log("Connected to server.");
+		connectionStatus.style.color = "rgb(0,150,0)";
+		connectionStatus.value = "Connected";
+	}
+	connected = true;
+}
+
+function clientDisconnected()
+{
+	if(!connected)
+	{
+		console.log("Disconnected from server.");
+		connectionStatus.style.color = "rgb(150,0,0)";
+		connectionStatus.value = "Disconnected";
+	}
+	socket.socket.reconnect();
+	connected = false;
 }
 
 function sendStateSync(state)
