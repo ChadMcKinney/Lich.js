@@ -41,6 +41,8 @@ module Prelude where
 data Primitive = StringT | NumberT | ListT | DictionaryT | ActorT | FunctionT | NothingT | UnknownT
 
 --| Utility
+snd (a,b) = b
+fst (a,b) = a
 flip f a b = f b a
 id a = a
 zipFlat l r = foldl (\acc [x,y] -> acc ++ [x,y]) [] $ zip l r -- zip then flatten two lists into one
@@ -253,6 +255,20 @@ pseq list = Pattern (\t -> let wt = wi t in collapse ((t - wt) * lm) $ lookup wt
 		ll = length list
 		lm = 1 / ll
 		wi x = wrapRange 0 ll $ floor x
+
+--finish up
+-- ([0,1,2,3],2),
+-- ([0,1,2,3],3),
+-- ([0,1,2,3],4),
+-- ([0,1,2,3],5)
+psection pairList = Pattern (\t -> collapse ((t - wt) * lm) $ lookup wt list)
+    where
+        section b plist
+            | b == 0 = fst $ head plist
+            
+        totalLength = foldl (\(a,r) (b,r2) -> ((length a) * r) + ((length b) * r2)) ([],0) pairList
+        wrappedBeat b = wrapRange 0 totalLength $ floor b
+        
 
 tseq list = (pseq list)::p (currentBeat 0)
 
