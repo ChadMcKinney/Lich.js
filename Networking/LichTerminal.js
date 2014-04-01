@@ -96,6 +96,7 @@ function createTextArea(name,num,total)
 			editor.setTheme("ace/theme/lich2");
 
 		editor.getSession().setMode("ace/mode/haskell");
+		//editor.$highlightBrackets = function(){};
 		editor.renderer.setShowGutter(false);
 		editor.renderer.setShowPrintMargin(false);
 		var session = editor.getSession();
@@ -132,7 +133,7 @@ function createTextArea(name,num,total)
 
 		if(name == clientName)
 		{
-			session.selection.on('changeCursor', networkCursor);
+			//session.selection.on('changeCursor', networkCursor);
 			editor.on('input', function()
 					  {
 						  broadcastTyping(editor.getValue());
