@@ -133,7 +133,7 @@ function createTextArea(name,num,total)
 
 		if(name == clientName)
 		{
-			//session.selection.on('changeCursor', networkCursor);
+			session.selection.on('changeCursor', networkCursor);
 			editor.on('input', function()
 					  {
 						  broadcastTyping(editor.getValue());
