@@ -40,6 +40,7 @@ hsd3 => violet 1 + pink 1 >> bandpass (degree2Freq coleJI 26) 1 >> lowshelf 200 
 hdrumsD2 +> hbd [_ hbd] [_ hsd2] hsd2 hbd [_ hbd] [hsd1 hsd2] hsd2 _ [hbd _] hsd2 [hsd1 hsd2] [hbd hsd2] [hsd1 hbd] [hsd2 hsd1] hsd2
 hdrumsD3 +> _ hsd3 | (*2)
 
+-- Don't forget to play these!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
 hdelayFX => auxIn 0 >> lowpass (sin 0.1767 >> range 200 1000) 5 >> delay tempoSeconds 0.6
 hdelayFX2 => auxIn 1 >> highpass (sin 0.1 >> range 200 1000) 5 >> delay (tempoSeconds * 1.5) 0.5
 hdelayFX3 => auxIn 2 >> gain 2 >> bandpass (sin 0.1317 >> range 200 2000) 5 >> delay (tempoSeconds * 2.5) 0.75
@@ -57,7 +58,20 @@ hdelayFX4 => auxIn 3 >> env2 [0,1] [1] 0 >> delay (sin 0.3 >> range 0.01 0.001) 
 
 
 
+-- Just some random thing right now
+let hdb => sin (env2 [80,20] [0.15] 0 1) >> perc 0 1 0.5
+let hsn => sin (env [1000, 200] [0.07] 0 1) >> perc2 0 1 0.07 >> add (pink 0.25) >> pan 0.25 >> perc 0.001 1 0.1
+let hhh => square (pow 2 $ tstutter 3 $ pseq [1..14]) >> pink >> pan -0.25 >> perc 0 0.3 0.07
 
+hdrums +> (pseq [hdb, hhh, hhh, hhh, hhh, hsn] >> pwarp (psin 0.75)) | (/2)
+
+
+-- Cool bass bubble glitchy
+let hres freq => brown 1 >> perc2 0.0 0.3 0.001 >> reson freq 1.5 >> distortion2 0.1 >> d >> perc 0 0.5 (exprandom 0.15 1)
+    where
+        d = delay (noiseX 1 >> range 0.001 0.7) (noiseX 1 >> range 0.1 0.9)
+        
+hreseq ~> hres (pseq [1..15] >> pwarp (psin 0.7)) | ((/16) . (d2f prometheus)) | (pseq [(/2), (*1), (/2)] >> pwarp (psin 0.7))
 
 
 
@@ -67,7 +81,118 @@ hdelayFX4 => auxIn 3 >> env2 [0,1] [1] 0 >> delay (sin 0.3 >> range 0.01 0.001) 
 -- | Cole
 -------------------------------------------------------------------------------------------------------------------------
 
+-- Cole's drum FX bus
+let oDrumFX = auxIn 9 >> compressor -16.0 40 12 0.001 0.02 >> limiter -2 >> play
+stop oDrumFX
 
+-- Red Noise "snare"
+let oLfn => noiseX f >> dist >> filt >> pan -0.75 >> perc 0 0.35 0.12 >> auxOut 9
+    where
+        f = (random 1000 5000)
+        amt = (random 0.01 0.1)
+        dist = distortion2 amt
+        filt = highpass 1000 10
+
+oLfner +> oLfn _ _ oLfn [oLfn oLfn] _ _ oLfn
+oLfner +> oLfn _ _ oLfn _ _ _ _
+oLfner +> oLfn _ _ oLfn _ _ [_ oLfn] oLfn
+stop oLfner
+
+-- Crunchy hihat
+let oHfn => brown 4 >> dist >> highpass f q >> pan 0.75 >> perc 0 0.35 0.12 >> auxOut 9
+    where
+        f = (random 3000 8000)
+        q = (random 15 30)
+        amt = (random 0.001 0.05)
+        dist = distortion2 amt
+        
+oHfner +> _ oHfn [_ oHfn] _
+oHfner +> _ oHfn [_ oHfn] _ oHfn _ oHfn _
+oHfner +> _ oHfn [_ oHfn] _ oHfn _ oHfn [_ oHfn]
+oHfner +> oHfn oHfn [_ oHfn] oHfn [oHfn oHfn] [_ oHfn] oHfn oHfn
+stop oHfner
+
+-- Kick
+let oKk => (osc + bass + noise) >> perc 0.025 1 0.25 >> auxOut 9
+   where
+       osc = sin (env2 [800,30] [0.06] 0 1)
+       bass = sin 27.5
+       noise = brown 0.05 >> lowpass 600 3 >> perc2 0.02 1 0.075
+
+oKker +> oKk _
+oKker +> oKk _ [oKk oKk] _ oKk _ oKk _
+oKker +> oKk _ oKk _ oKk [oKk oKk] oKk [_ oKk]
+oKker +> oKk _
+oKker +> oKk _ _ _  oKk _ _ _  oKk _ _ _ oKk [_ oKk] _ _
+oKker +> oKk _ _ _  oKk _ _ oKk  oKk _ _ _ oKk [_ oKk] _ _
+oKker +> oKk _ oKk _ oKk _ oKk _ oKk _ oKk _ oKk [_ oKk] _ oKk
+oKker +> oKk _ oKk _ oKk [_ oKk] _ oKk
+stop oKker
+
+-- Snare (still needs work)
+let oSnr => (noise + osc) >> filt >> distortion2 0.05 >> pan -0.5 >> perc 0.01 1.5 0.25 >> auxOut 9
+    where
+        n = brown 0.125 >> perc2 0 0.5 0.15
+        noise = n >> highpass (random 2500 2800) 15 >> lowpass 4000 10
+        m = ((sin (random 130 135)) * (random 40 60)) + (env2 [600,200] [0.125] 1 1)
+        osc = sin m >> highpass 400 10
+        filt = highpass (random 900 1100) 3
+
+oSnrer +> _ _ oSnr _
+oSnrer +> _ _ oSnr _ [_ oSnr] oSnr oSnr [_ oSnr]
+oSnrer +> [_ oSnr] oSnr oSnr [_ oSnr]
+oSnrer +> _ _ oSnr _  _ _ oSnr [_ oSnr]
+oSnrer +> oSnr _ [_ oSnr] _
+stop oSnrer
+
+-- Hihat
+let oHht => n >> hf >> lf >> pan 0.5 >> perc 0 0.9 0.1 >> auxOut 9
+    where
+        n = (choose [(white 1), (brown 1), (pink 1), (violet 1)])
+        hf = highpass (random 3800 4800) (random 10 20)
+        lf = lowpass (random 7000 7500) 15
+
+oHhter +> oHht [oHht oHht]
+oHhter +> oHht oHht oHht [oHht oHht]
+oHhter +> oHht [oHht oHht] oHht [oHht oHht] oHht oHht
+stop oHhter
+
+-- Echo clap
+let oDh => noise >> del >> hf >> lf >> distortion2 0.2 >> perc 0.005 0.075 dur >> auxOut 9
+    where
+        dur = (tempoSeconds * 4)
+        noise = brown 1 >> perc2 0 1 0.1
+        del = delay (tempoSeconds * 0.25) 0.35
+        line = env2 [500,1000] [dur] 0 1
+        hf = highpass line (random 10 20)
+        lf = highpass (line + 1500) (random 10 20)
+
+oDher +> oDh _ _ _  _ oDh _ _
+oDher +> oDh _ _ _  oDh _ [_ oDh] _
+oDher +> oDh _ _ _  oDh _ [_ oDh] oDh
+oDher +> oDh [oDh oDh] _ _  oDh _ [_ oDh] oDh
+oDher +> oDh [oDh oDh] _ oDh  oDh _ [_ oDh] oDh
+oDher +> oDh [oDh oDh] _ oDh  oDh [_ oDh] [_ oDh] oDh
+oDher +> oDh [_ oDh] _ _  _ oDh [_ oDh] oDh
+oDher +> oDh _ oDh _  [oDh _ _] [_ oDh _] [_ _ oDh] _
+stop oDher
+
+-- Chirpy hihat thing
+let oCrp => n >> hf >> lf >> filt >> distortion2 0.02 >> pan -0.2 >> perc 0 1.5 0.1 >> auxOut 9
+    where
+        n = pink 1
+        hf = highpass (random 3800 4800) (random 10 20)
+        lf = lowpass (random 7000 7500) 15
+        line = env2 [600,6000] [0.1] 1 1
+        filt = bandpass line 3
+
+oCrper +> oCrp [oCrp oCrp]
+oCrper +> oCrp oCrp oCrp [oCrp oCrp]
+oCrper +> oCrp [oCrp oCrp] oCrp [oCrp oCrp] oCrp oCrp
+oCrper +> oCrp oCrp oCrp [oCrp oCrp] oCrp oCrp oCrp [oCrp oCrp oCrp oCrp]
+oCrper +> _ oCrp _ _  _ oCrp _ [oCrp oCrp]
+oCrper +> _ oCrp _ _  _ oCrp [oCrp _ oCrp] [_ oCrp _]  _ oCrp _ _  _ oCrp _ [oCrp oCrp oCrp]  
+stop oCrper
 
 
 

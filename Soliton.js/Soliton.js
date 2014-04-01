@@ -88,10 +88,11 @@ Soliton.init = function()
 		sampleRate = Soliton.context.sampleRate;
 		sampleDur = 1/Soliton.context.sampleRate;
 
+		/*
 		for(var i = 0; i < (Soliton.context.sampleRate * 4); ++i) 
 		{
 			Soliton.whiteTable.push(Math.random() * 2 - 1);
-		}
+		}*/
 
 		for(var i = 0; i < Soliton.numBuses; ++i)
 		{
@@ -102,6 +103,7 @@ Soliton.init = function()
 			Soliton.buses.push(bus);
 		}
 
+		/*
 		// Initialize sin table
 		var tableLength = 1 + twoPi * _pow;
 		var theta = 0;
@@ -110,7 +112,7 @@ Soliton.init = function()
 		{
 			_sinTable[i] = Math.sin(theta);
 			theta += round;
-		}
+		}*/
 
 		context = Soliton.context;
 		_createPrimitive("context", context);
@@ -7322,8 +7324,66 @@ function delay(delayTime, feedbackLevel, input)
 
 _createUGen("delay", delay);
 
+function channelExpand(target, input)
+{
+	Lich.post("CHANNEL EXPAND!!!!!!!!!!");
+	var channels = [];
+	var merger = Soliton.context.createChannelMerger(input.channelCount);
+	var connections = [];
+
+	merger._lichType = AUDIO;
+	
+	merger.startAll = function(time)
+	{
+		input.startAll(time);
+	}
+
+	merger.stopAll = function(time)
+	{
+		input.stopAll(time);
+
+		setTimeout(function()
+		{
+			input.disconnect();
+			merger.disconnect();
+
+			for(var i = 0; i < connections.length; ++i)
+			{
+				channels[i].disconnect();
+				connections[i].stopAll(time);
+				connections[i].disconnect();
+			}
+		},
+		(time - Soliton.context.currentTime) * 1000)
+	}
+	
+	for(var i = 0; i < input.channelCount; ++i)
+	{
+		var channel = Soliton.context.createGain();
+		channel.startAll = function() {};
+		channel.stopAll = function() {};
+		channel._lichType = AUDIO;
+		input.connect(channel, i, 0);
+		channels.push(channel);
+		Lich.post("channel.channelCount: " + channel.channelCount);
+		var connection = target.curry(channel);
+		connection.connect(merger, 0, i);
+	}
+
+	return merger;
+}
+
 function compressor(threshold, knee, ratio, attack, release, input)
 {
+	if(input._lichType != AUDIO)
+		throw new Error("compressor can only be used with audio ugens.");
+
+	/* Example for how to expand, but we actually don't need it with compressor
+	if(input.channelCount > 1)
+		return channelExpand(compressor.curry(threshold, knee, ratio, attack, release), input);
+	else
+		Lich.post("channelCount: " + input.channelCount);*/
+	
 	var compr = Soliton.context.createDynamicsCompressor();
 	compr.threshold.value = threshold;
 	compr.knee.value = knee;
@@ -7331,7 +7391,7 @@ function compressor(threshold, knee, ratio, attack, release, input)
 	compr.attack.value = attack;
 	compr.release.value = release;
 	input.connect(compr);
-	compr.startAll = input.startAll;
+	compr.startAll = function(time){ input.startAll(time); }
 	compr._lichType = AUDIO;
 	compr.stopAll = function(time)
 	{
@@ -7341,7 +7401,7 @@ function compressor(threshold, knee, ratio, attack, release, input)
 			{
 				input.disconnect(0);
 			},
-			(time - Soliton.context) * 1000
+			(time - Soliton.context.currentTime) * 1000
 		)
 	}
 
@@ -7359,7 +7419,7 @@ function limiter(threshold, input)
 	Soliton.limiter.attack.value = 0.003;
 	Soliton.limiter.release.value = 0.003;
 	input.connect(compr);
-	compr.startAll = input.startAll;
+	compr.startAll = function(time){ input.startAll(time); }
 	compr._lichType = AUDIO;
 	compr.stopAll = function(time)
 	{
@@ -7369,7 +7429,7 @@ function limiter(threshold, input)
 			{
 				input.disconnect(0);
 			},
-			(time - Soliton.context) * 1000
+			(time - Soliton.context.currentTime) * 1000
 		)
 	}
 
@@ -7378,6 +7438,7 @@ function limiter(threshold, input)
 
 _createUGen("limiter", limiter);
 
+/*
 function pan(position, input)
 {
 	if(typeof position !== "number")
@@ -7415,6 +7476,67 @@ function pan(position, input)
 }
 
 _createUGen("pan", pan);
+*/
+
+function pan(position, input)
+{
+	if(typeof position !== "number")
+		throw new Error("Panning position can only be a number.");
+
+	// assuming mono for the moment...
+	//var splitter = Soliton.context.createChannelSplitter(2);
+	var panner = Soliton.context.createChannelMerger(2);
+	var l = Soliton.context.createGain();
+	var r = Soliton.context.createGain();
+
+	input.connect(l);
+	input.connect(r);
+	
+	l.connect(panner, 0, 0);
+	r.connect(panner, 0, 1);
+
+	var modPos = linlin(position, -1, 1, 0, 1);
+	l.gain.value = 1 - modPos;
+	r.gain.value = modPos;
+	
+	//var panner = Soliton.context.createPanner();
+	//panner.panningModel = "equalpower";
+	//panner.distanceModel = "linear";
+	panner._lichType = AUDIO;
+
+	/*
+	var xd = position * 90;
+	var zd = xd + 90;
+	if(zd > 90)
+		zd = 180 - zd;
+
+	var x = Math.sin(xd * Math.PI / 180);
+	var z = Math.sin(zd * Math.PI / 180);
+
+	//panner.setPosition(x, 0, z);
+	//input.connect(panner);
+
+	Lich.post("x: " + x);
+	Lich.post("z: " + z);
+	
+	l.gain.value = x;
+	r.gain.value = z;*/
+	
+	panner.startAll = function(time)
+	{
+		input.startAll(time);
+	}
+
+	panner.stopAll = function(time)
+	{
+		input.stopAll(time);
+		setTimeout(function(){input.disconnect(0)}, (time - Soliton.context.currentTime) * 1000);
+	}
+
+	return panner;
+}
+
+_createUGen("pan", pan);
 
 function mix2(input1, input2)
 {
@@ -7434,7 +7556,7 @@ function mix2(input1, input2)
 	{
 		input1.stopAll(time);
 		input2.stopAll(time);
-		setTimeout(function(){input1.disconnect(0); input2.disconnect(0)}, (time - Soliton.context.currentTime) * 1000);
+		setTimeout(function(){input1.disconnect(); input2.disconnect(); mix.disconnect();}, (time - Soliton.context.currentTime) * 1000);
 	}
 	mix._lichType = AUDIO;
 	return mix;
@@ -8694,7 +8816,9 @@ function auxOut(bus, input)
 		}
 	}
 
+	
 	input.connect(bus);
+	
 	return {
 		_lichType:AUDIO, 
 		startAll:input.startAll, 
@@ -10055,28 +10179,29 @@ function killall()
 {
 	Lich.scheduler.freeScheduledEvents();
     Soliton.masterGain.disconnect(0);
+	Soliton.limiter.disconnect();
+
 	Soliton.masterGain = Soliton.context.createGain();
-	//Soliton.masterGain.connect(Soliton.context.destination);
 	Soliton.masterGain.gain.value = 0.25;
 	Soliton.limiter = Soliton.context.createDynamicsCompressor();
-	Soliton.limiter.threshold.value = 0;
-	//compr.knee.value = knee;
-	Soliton.limiter.ratio.value = 15;
-	Soliton.limiter.attack.value = 0.01;
-	Soliton.limiter.release.value = 0.01;
+	Soliton.limiter.threshold.value = -3;
+	Soliton.limiter.ratio.value = 20;
+	Soliton.limiter.attack.value = 0.003;
+	Soliton.limiter.release.value = 0.003;
 	Soliton.masterGain.connect(Soliton.limiter);
 	Soliton.limiter.connect(Soliton.context.destination);
+
 	_mouseUGens = 0;
 	document.onmousemove = null;
 	
-	Soliton.buses = [];
 	for(var i = 0; i < Soliton.numBuses; ++i)
 	{
+		Soliton.buses[i].disconnect();
 		var bus = Soliton.context.createGain();
 		bus._lichType = AUDIO;
 		bus.startAll = function(){};
 		bus.stopAll = function(){};
-		Soliton.buses.push(bus);
+		Soliton.buses[i] = bus;
 	}
 }
 

@@ -464,3 +464,11 @@ prange low high p = Pattern (\t -> r t (collapse t p))
 
 pexprange low high p = Pattern (\t -> linexp (collapse t p) -1 1 (collapse t low) (collapse t high))
 
+patternList = [ 
+    "pseq", "prand", "pwrand", "pshuf", "pfunc", "pwhite", "pexprange","pfir","pdust","pcrush", 
+    "pstutter", "pwrap", "pseries", "pgeom", "preverse", "pwarp", "pbright", "pbleft", "pbor", 
+    "pbxor", "pband", "ptright", "ptleft", "ptor", "ptxor", "ptand", "psmooth", "pprime", "psigmoid", 
+    "psimplex", "pselect", "pclip", "pfold", "pmul", "pdiv", "padd", "pminus", "pmod", "ppow", "psin",
+    "psaw", "ptri", "psquare", "pdelay", "pcomb", "ptcrush", "pcrush", "pdust", "pfir", "prange",
+    "pexprange"
+    ]
