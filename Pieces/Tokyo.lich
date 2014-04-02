@@ -82,62 +82,64 @@ hreseq ~> hres (pseq [1..15] >> pwarp (psin 0.7)) | ((/16) . (d2f prometheus)) |
 -------------------------------------------------------------------------------------------------------------------------
 
 -- Cole's drum FX bus
-let oDrumFX = auxIn 9 >> compressor -16.0 40 12 0.001 0.02 >> limiter -2 >> play
+let oDrumFX = auxIn 9 >> compressor -16.0 40 12 0.001 0.2 >> limiter -2 >> play
 stop oDrumFX
 
--- Red Noise "snare"
 let oLfn => noiseX f >> dist >> filt >> pan -0.75 >> perc 0 0.35 0.12 >> auxOut 9
     where
-        f = (random 1000 5000)
-        amt = (random 0.01 0.1)
+        f = (tseq [2000,5000,2000])
+        amt = (tseq [0.01,0.1])
         dist = distortion2 amt
         filt = highpass 1000 10
 
+oLfner +> _
 oLfner +> oLfn _ _ oLfn [oLfn oLfn] _ _ oLfn
 oLfner +> oLfn _ _ oLfn _ _ _ _
 oLfner +> oLfn _ _ oLfn _ _ [_ oLfn] oLfn
+oLfner +> _ oLfn oLfn oLfn oLfn [_ oLfn] _ oLfn
 stop oLfner
 
--- Crunchy hihat
 let oHfn => brown 4 >> dist >> highpass f q >> pan 0.75 >> perc 0 0.35 0.12 >> auxOut 9
     where
-        f = (random 3000 8000)
-        q = (random 15 30)
-        amt = (random 0.001 0.05)
+        f = (tseq [3500,8000])
+        q = (tseq [15,30,15])
+        amt = (tseq [0.001,0.05])
         dist = distortion2 amt
-        
+
+oHfner +> _        
 oHfner +> _ oHfn [_ oHfn] _
 oHfner +> _ oHfn [_ oHfn] _ oHfn _ oHfn _
 oHfner +> _ oHfn [_ oHfn] _ oHfn _ oHfn [_ oHfn]
 oHfner +> oHfn oHfn [_ oHfn] oHfn [oHfn oHfn] [_ oHfn] oHfn oHfn
 stop oHfner
 
--- Kick
+
 let oKk => (osc + bass + noise) >> perc 0.025 1 0.25 >> auxOut 9
    where
-       osc = sin (env2 [800,30] [0.06] 0 1)
+       osc = sin (env2 [1000,30] [0.06] 0 1)
        bass = sin 27.5
        noise = brown 0.05 >> lowpass 600 3 >> perc2 0.02 1 0.075
 
-oKker +> oKk _
+oKker +> _
 oKker +> oKk _ [oKk oKk] _ oKk _ oKk _
 oKker +> oKk _ oKk _ oKk [oKk oKk] oKk [_ oKk]
 oKker +> oKk _
+oKker +> oKk _ _ _  _ _ _ _  _ oKk _ _ oKk [_ oKk] _ oKk
 oKker +> oKk _ _ _  oKk _ _ _  oKk _ _ _ oKk [_ oKk] _ _
 oKker +> oKk _ _ _  oKk _ _ oKk  oKk _ _ _ oKk [_ oKk] _ _
 oKker +> oKk _ oKk _ oKk _ oKk _ oKk _ oKk _ oKk [_ oKk] _ oKk
 oKker +> oKk _ oKk _ oKk [_ oKk] _ oKk
 stop oKker
 
--- Snare (still needs work)
 let oSnr => (noise + osc) >> filt >> distortion2 0.05 >> pan -0.5 >> perc 0.01 1.5 0.25 >> auxOut 9
     where
-        n = brown 0.125 >> perc2 0 0.5 0.15
+        n = brown 0.125 >> perc2 0 0.5 0.1
         noise = n >> highpass (random 2500 2800) 15 >> lowpass 4000 10
         m = ((sin (random 130 135)) * (random 40 60)) + (env2 [600,200] [0.125] 1 1)
         osc = sin m >> highpass 400 10
-        filt = highpass (random 900 1100) 3
+        filt = highpass (tseq [1500,1000]) 3
 
+oSnrer +> _
 oSnrer +> _ _ oSnr _
 oSnrer +> _ _ oSnr _ [_ oSnr] oSnr oSnr [_ oSnr]
 oSnrer +> [_ oSnr] oSnr oSnr [_ oSnr]
@@ -145,19 +147,22 @@ oSnrer +> _ _ oSnr _  _ _ oSnr [_ oSnr]
 oSnrer +> oSnr _ [_ oSnr] _
 stop oSnrer
 
--- Hihat
 let oHht => n >> hf >> lf >> pan 0.5 >> perc 0 0.9 0.1 >> auxOut 9
     where
-        n = (choose [(white 1), (brown 1), (pink 1), (violet 1)])
-        hf = highpass (random 3800 4800) (random 10 20)
-        lf = lowpass (random 7000 7500) 15
+        n = (tseq [(white 1), (brown 1), (pink 1), (violet 1)])
+        cut = tseq [3000,4000]
+        hf = highpass cut (random 10 20)
+        lf = lowpass (cut + 4000) 15
 
+oHhter +> _
+oHhter +> oHht
+oHhter +> [oHht oHht]
 oHhter +> oHht [oHht oHht]
 oHhter +> oHht oHht oHht [oHht oHht]
 oHhter +> oHht [oHht oHht] oHht [oHht oHht] oHht oHht
+oHhter +> _ oHht oHht oHht oHht [_ oHht] _ oHht
 stop oHhter
 
--- Echo clap
 let oDh => noise >> del >> hf >> lf >> distortion2 0.2 >> perc 0.005 0.075 dur >> auxOut 9
     where
         dur = (tempoSeconds * 4)
@@ -165,8 +170,9 @@ let oDh => noise >> del >> hf >> lf >> distortion2 0.2 >> perc 0.005 0.075 dur >
         del = delay (tempoSeconds * 0.25) 0.35
         line = env2 [500,1000] [dur] 0 1
         hf = highpass line (random 10 20)
-        lf = highpass (line + 1500) (random 10 20)
+        lf = highpass (line + (tseq [400,1000])) (random 10 20)
 
+oDher +> _
 oDher +> oDh _ _ _  _ oDh _ _
 oDher +> oDh _ _ _  oDh _ [_ oDh] _
 oDher +> oDh _ _ _  oDh _ [_ oDh] oDh
@@ -177,15 +183,15 @@ oDher +> oDh [_ oDh] _ _  _ oDh [_ oDh] oDh
 oDher +> oDh _ oDh _  [oDh _ _] [_ oDh _] [_ _ oDh] _
 stop oDher
 
--- Chirpy hihat thing
 let oCrp => n >> hf >> lf >> filt >> distortion2 0.02 >> pan -0.2 >> perc 0 1.5 0.1 >> auxOut 9
     where
         n = pink 1
         hf = highpass (random 3800 4800) (random 10 20)
-        lf = lowpass (random 7000 7500) 15
+        lf = lowpass (tseq [3000,7000]) 15
         line = env2 [600,6000] [0.1] 1 1
-        filt = bandpass line 3
+        filt = bandpass line (tseq [1,3])
 
+oCrper +> _
 oCrper +> oCrp [oCrp oCrp]
 oCrper +> oCrp oCrp oCrp [oCrp oCrp]
 oCrper +> oCrp [oCrp oCrp] oCrp [oCrp oCrp] oCrp oCrp
@@ -195,12 +201,34 @@ oCrper +> _ oCrp _ _  _ oCrp [oCrp _ oCrp] [_ oCrp _]  _ oCrp _ _  _ oCrp _ [oCr
 stop oCrper
 
 
+let oFl => osc >> dist >> filt >> pan -0.5 >> perc 0.01 1 dur >> auxOut 9
+    where
+        dur = (tempoSeconds * 0.8)
+        f = tseq [1000,8000,2900]
+        osc = tri perc2 0 1 dur >> range (f/4) f
+        dist = distortion2 (tseq [0.5,0.7,0.2,0.9])
+        filt = lowpass (tseq [1000,2000,3000]) 10
+
+oFler +> oFl _
+oFler +> _ _ oFl _  _ oFl _ _
+oFler +> _ _ oFl _  oFl [_ oFl] _ [oFl oFl]
+oFler +> oFl _ oFl oFl  _ _ oFl _
+oFler +> [oFl oFl] [oFl oFl] oFl _  _ _ oFl _
+oFler +> [oFl oFl] [oFl oFl] oFl _  _ _ oFl _  _ oFl _ oFl  oFl [_ oFl] _ oFl
+stop oFler
 
 
+let oRvs => noise >> filt >> pan 0.25 >> env [0,1,0] [dur,0.01] 0 >> auxOut 9
+    where
+        noise = (sin (tseq [155,175,100]) + saw (tseq [25,55])) >> distortion2 0.4
+        dur = tempoSeconds * (tseq [0.5,0.3])
+        filt = lowpass (env2 [50,5000] [dur] 0 1) 10
 
-
-
-
+oRvser +> oRvs _ _ oRvs  _ oRvs oRvs _
+oRvser +> oRvs _ _ oRvs  _ oRvs oRvs _  _ _ oRvs _  oRvs [_ oRvs] _ _
+oRvser +> oRvs _ oRvs [oRvs oRvs]
+oRvser +> [oRvs oRvs] _ oRvs [oRvs oRvs]
+stop oRvser
 
 -------------------------------------------------------------------------------------------------------------------------
 -- | Curtis
