@@ -81,10 +81,11 @@ hreseq ~> hres (pseq [1..15] >> pwarp (psin 0.7)) | ((/16) . (d2f prometheus)) |
 -- | Cole
 -------------------------------------------------------------------------------------------------------------------------
 
--- Cole's drum FX bus
+-- master drum FX synth --
 let oDrumFX = auxIn 9 >> compressor -16.0 40 12 0.001 0.2 >> limiter -2 >> play
 stop oDrumFX
 
+-- lowish LFNoise hit --
 let oLfn => noiseX f >> dist >> filt >> pan -0.75 >> perc 0 0.35 0.12 >> auxOut 9
     where
         f = (tseq [2000,5000,2000])
@@ -99,6 +100,7 @@ oLfner +> oLfn _ _ oLfn _ _ [_ oLfn] oLfn
 oLfner +> _ oLfn oLfn oLfn oLfn [_ oLfn] _ oLfn
 stop oLfner
 
+-- highish noise hit --
 let oHfn => brown 4 >> dist >> highpass f q >> pan 0.75 >> perc 0 0.35 0.12 >> auxOut 9
     where
         f = (tseq [3500,8000])
@@ -114,6 +116,7 @@ oHfner +> oHfn oHfn [_ oHfn] oHfn [oHfn oHfn] [_ oHfn] oHfn oHfn
 stop oHfner
 
 
+-- kick --
 let oKk => (osc + bass + noise) >> perc 0.025 1 0.25 >> auxOut 9
    where
        osc = sin (env2 [1000,30] [0.06] 0 1)
@@ -121,16 +124,18 @@ let oKk => (osc + bass + noise) >> perc 0.025 1 0.25 >> auxOut 9
        noise = brown 0.05 >> lowpass 600 3 >> perc2 0.02 1 0.075
 
 oKker +> _
-oKker +> oKk _ [oKk oKk] _ oKk _ oKk _
-oKker +> oKk _ oKk _ oKk [oKk oKk] oKk [_ oKk]
+oKker +> oKk _ [oKk oKk] _  oKk _ oKk _
+oKker +> oKk _ oKk _  oKk [oKk oKk] oKk [_ oKk]
 oKker +> oKk _
 oKker +> oKk _ _ _  _ _ _ _  _ oKk _ _ oKk [_ oKk] _ oKk
 oKker +> oKk _ _ _  oKk _ _ _  oKk _ _ _ oKk [_ oKk] _ _
 oKker +> oKk _ _ _  oKk _ _ oKk  oKk _ _ _ oKk [_ oKk] _ _
-oKker +> oKk _ oKk _ oKk _ oKk _ oKk _ oKk _ oKk [_ oKk] _ oKk
-oKker +> oKk _ oKk _ oKk [_ oKk] _ oKk
+oKker +> oKk _ oKk _  oKk _ oKk _  oKk _ oKk _  oKk [_ oKk] _ oKk
+oKker +> oKk _ oKk _  oKk [_ oKk] _ oKk
 stop oKker
 
+
+-- shitty snare --
 let oSnr => (noise + osc) >> filt >> distortion2 0.05 >> pan -0.5 >> perc 0.01 1.5 0.25 >> auxOut 9
     where
         n = brown 0.125 >> perc2 0 0.5 0.1
@@ -147,6 +152,8 @@ oSnrer +> _ _ oSnr _  _ _ oSnr [_ oSnr]
 oSnrer +> oSnr _ [_ oSnr] _
 stop oSnrer
 
+
+-- hi hat --
 let oHht => n >> hf >> lf >> pan 0.5 >> perc 0 0.9 0.1 >> auxOut 9
     where
         n = (tseq [(white 1), (brown 1), (pink 1), (violet 1)])
@@ -163,6 +170,8 @@ oHhter +> oHht [oHht oHht] oHht [oHht oHht] oHht oHht
 oHhter +> _ oHht oHht oHht oHht [_ oHht] _ oHht
 stop oHhter
 
+
+-- echo clappy thing --
 let oDh => noise >> del >> hf >> lf >> distortion2 0.2 >> perc 0.005 0.075 dur >> auxOut 9
     where
         dur = (tempoSeconds * 4)
@@ -183,6 +192,8 @@ oDher +> oDh [_ oDh] _ _  _ oDh [_ oDh] oDh
 oDher +> oDh _ oDh _  [oDh _ _] [_ oDh _] [_ _ oDh] _
 stop oDher
 
+
+-- chirpy thing --
 let oCrp => n >> hf >> lf >> filt >> distortion2 0.02 >> pan -0.2 >> perc 0 1.5 0.1 >> auxOut 9
     where
         n = pink 1
@@ -201,6 +212,7 @@ oCrper +> _ oCrp _ _  _ oCrp [oCrp _ oCrp] [_ oCrp _]  _ oCrp _ _  _ oCrp _ [oCr
 stop oCrper
 
 
+-- metalic thing --
 let oFl => osc >> dist >> filt >> pan -0.5 >> perc 0.01 1 dur >> auxOut 9
     where
         dur = (tempoSeconds * 0.8)
@@ -209,26 +221,71 @@ let oFl => osc >> dist >> filt >> pan -0.5 >> perc 0.01 1 dur >> auxOut 9
         dist = distortion2 (tseq [0.5,0.7,0.2,0.9])
         filt = lowpass (tseq [1000,2000,3000]) 10
 
+oFler +> _
 oFler +> oFl _
 oFler +> _ _ oFl _  _ oFl _ _
 oFler +> _ _ oFl _  oFl [_ oFl] _ [oFl oFl]
 oFler +> oFl _ oFl oFl  _ _ oFl _
+oFler +> oFl oFl _ [oFl oFl]
+    _ _ oFl _
+    _ oFl oFl _
+    [oFl oFl] _ _ _
 oFler +> [oFl oFl] [oFl oFl] oFl _  _ _ oFl _
 oFler +> [oFl oFl] [oFl oFl] oFl _  _ _ oFl _  _ oFl _ oFl  oFl [_ oFl] _ oFl
 stop oFler
 
 
-let oRvs => noise >> filt >> pan 0.25 >> env [0,1,0] [dur,0.01] 0 >> auxOut 9
+-- reverse noise swell --
+let oRvs => noise >> filt >> pan 0.25 >> env [0,amp,0] [dur,0.01] 0 >> auxOut 9
     where
+        amp = 0.3
         noise = (sin (tseq [155,175,100]) + saw (tseq [25,55])) >> distortion2 0.4
         dur = tempoSeconds * (tseq [0.5,0.3])
         filt = lowpass (env2 [50,5000] [dur] 0 1) 10
 
+oRvser +> _
 oRvser +> oRvs _ _ oRvs  _ oRvs oRvs _
 oRvser +> oRvs _ _ oRvs  _ oRvs oRvs _  _ _ oRvs _  oRvs [_ oRvs] _ _
 oRvser +> oRvs _ oRvs [oRvs oRvs]
 oRvser +> [oRvs oRvs] _ oRvs [oRvs oRvs]
+oRvser +> [oRvs oRvs] _ oRvs [oRvs oRvs]
+    _ _ [oRvs oRvs] _
+    _ _ _ _
+    oRvs [oRvs oRvs] _ _
 stop oRvser
+
+
+-- falling sin bleep --
+let oSld => osc >> pan 0.4 >> perc 0.025 1.5 dur >> auxOut 9
+   where
+        dur = 0.06
+        lo = tseq [530,480]
+        osc = sin (env2 [5000,lo] [dur] 0 1)
+
+oSlder +> _
+oSlder +> oSld _
+oSlder +> oSld _ _ oSld  _ _ _ oSld  _ _ _ _  _ oSld oSld _
+oSlder +> oSld [oSld oSld] _ _  _ oSld _ _
+oSlder +> oSld [oSld oSld] _ _
+oSlder +> oSld [oSld oSld] [_ oSld] oSld  [oSld oSld] [_ oSld] oSld oSld
+stop oSlder
+
+
+-- AM noise "snare" --
+let oAn => noise >> dist >> filtA >> filtB >> pan -0.4 >> perc 0 1 dur >> auxOut 9
+    where
+        cut = tseq [2000,4000,1000]
+        noise = white (tri 8)
+        dur = (tempoSeconds * 1.5)
+        filtA = highpass (env2 [(cut/10),cut] [dur] 1 1) 4
+        filtB = lowpass cut 10
+        dist = distortion2 0.05
+
+oAner +> _
+oAner +> oAn _ oAn _  _ oAn oAn _
+oAner +> _ _ _ oAn  _ _ _ _  [oAn oAn] _ _ oAn  oAn _ _ oAn
+oAner +> oAn _ _ oAn  [oAn oAn] _ _ _  [oAn oAn] _ [oAn oAn] oAn  oAn _ _ oAn
+stop oAner
 
 -------------------------------------------------------------------------------------------------------------------------
 -- | Curtis
