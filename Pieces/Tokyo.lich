@@ -76,6 +76,64 @@ hreseq ~> hres (pseq [1..15] >> pwarp (psin 0.7)) | ((/16) . (d2f prometheus)) |
 
 
 
+-- Dark Chords
+let hDarkChords chord => filt >> perc onset amp 5
+    where
+        freqs = map (d2f (chord::scale)) (chord::degrees)
+        saws = sum $ map (pan (random -1 1) . saw) freqs
+        amp = 0.25 / (length freqs)
+        onset = exprandom 0.5 4
+        fEnv = env2 [mul 2 $ head freqs, mul 4 $ last freqs, head freqs] [onset, 5] 1 1
+        oscs = (sin (head freqs / 2) >> gain 2) + saws
+        filt = lowpass fEnv 0 oscs
+
+
+let hDarkProg = pbind "hDarkProg" hDarkChords chords 16
+    where
+        chord = Chord scriabin 4
+        chords = pseq [
+                chord [-6,1,4],
+                chord [-10,-6,0],
+                chord [-5,-2,3,6],
+                chord [-5,2,4,7]
+            ]
+        
+        
+        
+let hDarkBuf = newBuffer sampleRate
+let hDarkSynth freq => saw freq + saw (freq * 1.001) >> dec >> recPlayBuf hDarkBuf 1 -1 >> pn >> perc 0 0.15 (tempoSeconds * 4)
+    where
+        dec = decimate (noiseX 3 >> range 1000 sampleRate)
+        pn = pan (tseq [-0.5,0.5])
+
+hDarkM ~> hDarkSynth (pcomb (pseq [1..4]) (pseq [0..9])) | (d2f scriabin) | (pwarp (psin 0.05) (pseq [(*2),(*1),(/2)]))
+
+
+
+let hDarkBass freq => os >> lp >> pn >> en
+    where
+        sa = sin (freq/2) + saw (freq/4) + saw (freq/2)
+        no = sin freq >> distortion2 5 >> freqShift (neg freq) >> gain 20 >> clip 4
+        os = wchoose [0.7, 0.3] [sa, no] 
+        pn = pan (tseq [-0.125,0.125])
+        lf = square ((randI 1 8)/tempoSeconds/8) >> lag (exprandom 0.001 1)
+        lp = lowpass (lf >> exprange (freq / 4) (freq * 8)) 12
+        en = env [0,0.3,0.15,0] [0.0,(tempoSeconds * 4),0.5] 0
+
+hDarkB ~> hDarkBass (pcomb (pseq [1..4]) (pseq [0..4]) >> pstutter 2) | ((/4) . (d2f scriabin)) | (*4)
+
+
+let hDarkSynth2 freq => sin freq + sin (freq/2) >> gain 0.5 >> del >> dist >> pn >> perc 0 0.15 tempoSeconds
+    where
+        dist = distortion2 (psin 0.0625 >> pexprange 0.01 0.5 >> tmul 1)
+        del = delay ((tseq [1,2,4,8,16,32,64])/freq) 0.5
+        pn = pan (random -0.3 0.3)
+
+hDarkM2 ~> hDarkSynth2 (pseries 0 (pseq [1,7]) >> pwrap 0 17 >> pstutter 4) | ((/4) . d2f scriabin) | (/2)
+
+
+
+
 
 -------------------------------------------------------------------------------------------------------------------------
 -- | Cole

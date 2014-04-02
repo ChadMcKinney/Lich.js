@@ -67,7 +67,7 @@ wchoose prob list = if (length prob) /= (length list)
 	then error "wchoose prob and list must be the same length"
 	else if sum prob /= 1
 	then error "wchoose prob must sum to 1."
-	else index
+	else list !! index
 		where
 			p = lookup 1 $ foldl (\[l,acc] x -> let n = l + x in [n, acc ++ n]) [0,[]] prob
 			r = random 0 1

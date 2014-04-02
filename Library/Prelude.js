@@ -1055,10 +1055,13 @@ function sum(container)
 			{
 				var item = container[i];
 
-				if(typeof item !== "number")
-					throw new Error("sum can only be applied to lists containing numbers. Failed with " + Lich.VM.PrettyPrint(item));
+				//if(typeof item !== "number")
+				//	throw new Error("sum can only be applied to lists containing numbers. Failed with " + Lich.VM.PrettyPrint(item));
 
-				res += container[i];
+				if(i == 0)
+					res = container[0];
+				else
+					res = add(container[i], res);
 			}
 
 			return res;

@@ -238,7 +238,7 @@ function clientConnected()
 	if(!connected)
 	{
 		console.log("Connected to server.");
-		connectionStatus.style.color = "rgb(0,150,0)";
+		connectionStatus.style.color = "rgb(0,130,60)";
 		connectionStatus.value = "Connected";
 	}
 	connected = true;
@@ -249,7 +249,7 @@ function clientDisconnected()
 	if(!connected)
 	{
 		console.log("Disconnected from server.");
-		connectionStatus.style.color = "rgb(150,0,0)";
+		connectionStatus.style.color = "rgb(130,0,60)";
 		connectionStatus.value = "Disconnected";
 	}
 	socket.socket.reconnect();
