@@ -94,10 +94,10 @@ let oLfn => noiseX f >> dist >> filt >> pan -0.75 >> perc 0 0.35 0.12 >> auxOut 
         filt = highpass 1000 10
 
 oLfner +> _
-oLfner +> oLfn _ _ oLfn [oLfn oLfn] _ _ oLfn
-oLfner +> oLfn _ _ oLfn _ _ _ _
-oLfner +> oLfn _ _ oLfn _ _ [_ oLfn] oLfn
-oLfner +> _ oLfn oLfn oLfn oLfn [_ oLfn] _ oLfn
+oLfner +> oLfn _ _ oLfn  [oLfn oLfn] _ _ oLfn
+oLfner +> oLfn _ _ oLfn  _ _ _ _
+oLfner +> oLfn _ _ oLfn  _ _ [_ oLfn] oLfn
+oLfner +> _ oLfn oLfn oLfn  oLfn [_ oLfn] _ oLfn
 stop oLfner
 
 -- highish noise hit --
@@ -108,7 +108,7 @@ let oHfn => brown 4 >> dist >> highpass f q >> pan 0.75 >> perc 0 0.35 0.12 >> a
         amt = (tseq [0.001,0.05])
         dist = distortion2 amt
 
-oHfner +> _        
+oHfner +> _
 oHfner +> _ oHfn [_ oHfn] _
 oHfner +> _ oHfn [_ oHfn] _ oHfn _ oHfn _
 oHfner +> _ oHfn [_ oHfn] _ oHfn _ oHfn [_ oHfn]
@@ -127,8 +127,9 @@ oKker +> _
 oKker +> oKk _ [oKk oKk] _  oKk _ oKk _
 oKker +> oKk _ oKk _  oKk [oKk oKk] oKk [_ oKk]
 oKker +> oKk _
+oKker +> oKk _ _ _  _ _ _ _  _ oKk _ _  oKk _ _ _
 oKker +> oKk _ _ _  _ _ _ _  _ oKk _ _ oKk [_ oKk] _ oKk
-oKker +> oKk _ _ _  oKk _ _ _  oKk _ _ _ oKk [_ oKk] _ _
+oKker +> oKk _ _ _  oKk _ _ _ oKk _ _ _ oKk [_ oKk] _ _
 oKker +> oKk _ _ _  oKk _ _ oKk  oKk _ _ _ oKk [_ oKk] _ _
 oKker +> oKk _ oKk _  oKk _ oKk _  oKk _ oKk _  oKk [_ oKk] _ oKk
 oKker +> oKk _ oKk _  oKk [_ oKk] _ oKk
@@ -136,15 +137,18 @@ stop oKker
 
 
 -- shitty snare --
-let oSnr => (noise + osc) >> filt >> distortion2 0.05 >> pan -0.5 >> perc 0.01 1.5 0.25 >> auxOut 9
+let oSnr => (noise + osc) >> filt >> distortion2 0.05 >> pan -0.5 >> perc 0 0.5 dur >> auxOut 9
     where
-        n = brown 0.125 >> perc2 0 0.5 0.1
-        noise = n >> highpass (random 2500 2800) 15 >> lowpass 4000 10
-        m = ((sin (random 130 135)) * (random 40 60)) + (env2 [600,200] [0.125] 1 1)
-        osc = sin m >> highpass 400 10
-        filt = highpass (tseq [1500,1000]) 3
+        dur = tempoSeconds
+        n = brown 0.5 >> perc2 0 1 0.1
+        noise = n >> highpass (random 2500 2800) 15 >> lowpass 6000 10
+        f = tseq [230,240]
+        m = ((sin f) * (random 50 60)) + (env2 [700,150] [(dur*0.5)] 1 1)
+        osc = tri m >> highpass 500 1
+        filt = highpass (tseq [800,1000]) 1
 
 oSnrer +> _
+oSnrer +> _ oSnr
 oSnrer +> _ _ oSnr _
 oSnrer +> _ _ oSnr _ [_ oSnr] oSnr oSnr [_ oSnr]
 oSnrer +> [_ oSnr] oSnr oSnr [_ oSnr]
@@ -154,7 +158,7 @@ stop oSnrer
 
 
 -- hi hat --
-let oHht => n >> hf >> lf >> pan 0.5 >> perc 0 0.9 0.1 >> auxOut 9
+let oHht => n >> hf >> lf >> pan 0.5 >> perc 0.01 0.9 0.12 >> auxOut 9
     where
         n = (tseq [(white 1), (brown 1), (pink 1), (violet 1)])
         cut = tseq [3000,4000]
@@ -168,6 +172,7 @@ oHhter +> oHht [oHht oHht]
 oHhter +> oHht oHht oHht [oHht oHht]
 oHhter +> oHht [oHht oHht] oHht [oHht oHht] oHht oHht
 oHhter +> _ oHht oHht oHht oHht [_ oHht] _ oHht
+oHhter +> [oHht oHht] _ _ oHht  _ [oHht oHht] oHht oHht
 stop oHhter
 
 
@@ -194,7 +199,7 @@ stop oDher
 
 
 -- chirpy thing --
-let oCrp => n >> hf >> lf >> filt >> distortion2 0.02 >> pan -0.2 >> perc 0 1.5 0.1 >> auxOut 9
+let oCrp => n >> hf >> lf >> filt >> distortion2 0.02 >> pan 0.2 >> perc 0 2.5 0.1 >> auxOut 9
     where
         n = pink 1
         hf = highpass (random 3800 4800) (random 10 20)
@@ -203,12 +208,16 @@ let oCrp => n >> hf >> lf >> filt >> distortion2 0.02 >> pan -0.2 >> perc 0 1.5 
         filt = bandpass line (tseq [1,3])
 
 oCrper +> _
+oCrper +> oCrp
 oCrper +> oCrp [oCrp oCrp]
 oCrper +> oCrp oCrp oCrp [oCrp oCrp]
 oCrper +> oCrp [oCrp oCrp] oCrp [oCrp oCrp] oCrp oCrp
 oCrper +> oCrp oCrp oCrp [oCrp oCrp] oCrp oCrp oCrp [oCrp oCrp oCrp oCrp]
 oCrper +> _ oCrp _ _  _ oCrp _ [oCrp oCrp]
-oCrper +> _ oCrp _ _  _ oCrp [oCrp _ oCrp] [_ oCrp _]  _ oCrp _ _  _ oCrp _ [oCrp oCrp oCrp]  
+oCrper +> _ oCrp _ _
+    _ oCrp [oCrp _ oCrp] [_ oCrp _]
+    _ oCrp _ _
+    _ oCrp _ [oCrp oCrp oCrp]  
 stop oCrper
 
 
@@ -252,6 +261,10 @@ oRvser +> [oRvs oRvs] _ oRvs [oRvs oRvs]
     _ _ [oRvs oRvs] _
     _ _ _ _
     oRvs [oRvs oRvs] _ _
+oRvser +> _ _ oRvs _
+    [oRvs oRvs] _ [oRvs oRvs] _
+    _ oRvs _ _
+    [oRvs oRvs] oRvs oRvs _
 stop oRvser
 
 
@@ -272,20 +285,42 @@ stop oSlder
 
 
 -- AM noise "snare" --
-let oAn => noise >> dist >> filtA >> filtB >> pan -0.4 >> perc 0 1 dur >> auxOut 9
+let oAn => noise >> dist >> filtA >> filtB >> pan 0.4 >> perc 0 0.6 dur >> auxOut 9
     where
         cut = tseq [2000,4000,1000]
         noise = white (tri 8)
-        dur = (tempoSeconds * 1.5)
+        dur = (tempoSeconds * 1.25)
         filtA = highpass (env2 [(cut/10),cut] [dur] 1 1) 4
-        filtB = lowpass cut 10
+        filtB = lowpass cut 15
         dist = distortion2 0.05
 
 oAner +> _
 oAner +> oAn _ oAn _  _ oAn oAn _
 oAner +> _ _ _ oAn  _ _ _ _  [oAn oAn] _ _ oAn  oAn _ _ oAn
 oAner +> oAn _ _ oAn  [oAn oAn] _ _ _  [oAn oAn] _ [oAn oAn] oAn  oAn _ _ oAn
+oAner +> oAn _ oAn _
+    [_ oAn] oAn oAn _
+    oAn _ [_ oAn] oAn
+    oAn [oAn oAn] _ _
 stop oAner
+
+
+-- low bit noise --
+let oLbn => n >> filt >> crush 1 >> pan -0.6 >> perc 0 2 0.25 >> auxOut 9
+    where
+        n = noiseX (tseq [220,880,440])
+        filt = highpass (tseq [1760,1500]) 5
+
+oLbner +> _
+oLbner +> oLbn _ _ oLbn  oLbn _ _ _
+oLbner +> oLbn _ _ oLbn  oLbn _ [oLbn oLbn] _
+oLbner +> oLbn _ _ oLbn  oLbn [_ oLbn] [oLbn oLbn] oLbn
+oLbner +> _ _ _ _  [oLbn oLbn] _ _ _  _ _ _ _  [oLbn oLbn] [_ oLbn] _ _
+oLbner +> oLbn _ _ oLbn
+    oLbn _ [oLbn oLbn] _
+    _ _ oLbn _
+    [oLbn oLbn] _ [oLbn oLbn] _
+stop oLbner
 
 -------------------------------------------------------------------------------------------------------------------------
 -- | Curtis
