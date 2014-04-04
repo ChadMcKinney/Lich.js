@@ -201,9 +201,23 @@ Lich.VM.printAST = function(object)
 Lich.post = function(text)
 {
     var obj = document.getElementById("post");
-    var appendedText = document.createTextNode(text + "\n");
-    obj.appendChild(appendedText);
-    obj.scrollTop = obj.scrollHeight;
+    //var appendedText = document.createTextNode(text + "\n");
+
+	//var objText = obj.value.replace(/\s+$/g,"")
+	var split = obj.value.split("\n")
+
+	if(split.length > 20)
+	{
+		obj.value = text + "\n";
+		
+	}
+
+	else
+	{
+		obj.value = obj.value + text + "\n";
+		//obj.appendChild(appendedText);
+		//obj.scrollTop = obj.scrollHeight;
+	}
 }
 
 Lich.VM.PrettyPrint = function(object)
