@@ -140,12 +140,11 @@ hDarkM2 ~> hDarkSynth2 (pseries 0 (pseq [1,7]) >> pwrap 0 17 >> pstutter 4) | ((
 -------------------------------------------------------------------------------------------------------------------------
 
 -- master drum FX synth --
-let oDrumFX = auxIn 9 >> filt >> comp >> limit >> verb >> play
+let oDrumFX = auxIn 9 >> filt >> comp >> limit >> play
     where
         comp = compressor -18 40 50 0.001 0.2
         limit = limiter -3
         filt = lowpass 19000 0
-        verb = reverb 0.225 35 0.3 0.275
 stop oDrumFX
 
 
@@ -165,12 +164,13 @@ oLfner +> _ oLfn oLfn oLfn  oLfn [_ oLfn] _ oLfn
 stop oLfner
 
 -- highish noise hit --
-let oHfn => brown 4 >> dist >> highpass f q >> pan 0.75 >> perc 0 0.35 0.12 >> auxOut 9
+let oHfn => brown 4 >> dist >> filt >> pan 0.75 >> perc 0 0.35 0.12 >> auxOut 9
     where
         f = (tseq [3500,8000])
         q = (tseq [15,30,15])
         amt = (tseq [0.001,0.05])
         dist = distortion2 amt
+        filt = highpass f q
 
 oHfner +> _
 oHfner +> _ oHfn [_ oHfn] _
@@ -181,11 +181,12 @@ stop oHfner
 
 
 -- kick --
-let oKk => (osc + bass + noise) >> perc 0.025 1 0.25 >> auxOut 9
+let oKk => (osc + bass + noise) >> env [0,a,(a/4),0] [0.01,0.05,0.25] 0 >> auxOut 9
    where
-       osc = sin (env2 [1000,30] [0.06] 0 1)
-       bass = sin 27.5
-       noise = brown 0.05 >> lowpass 600 3 >> perc2 0.02 1 0.075
+        a = 2
+        osc = sin (env2 [1200,30] [0.06] 0 1)
+        bass = sin 27.5
+        noise = brown 0.05 >> lowpass 600 3 >> perc2 0.02 1 0.075
 
 oKker +> _
 oKker +> oKk _ _ _      _ _ _ _         _ oKk _ _       oKk _ _ _
@@ -203,7 +204,7 @@ stop oKker
 
 
 -- shitty snare --
-let oSnr => (noise + osc) >> filt >> distortion2 0.05 >> pan -0.5 >> perc 0 0.5 dur >> auxOut 9
+let oSnr => (noise + osc) >> filt >> dist >> pan -0.5 >> perc 0 0.5 dur >> auxOut 9
     where
         dur = tempoSeconds
         n = brown 0.5 >> perc2 0 1 0.1
@@ -212,6 +213,7 @@ let oSnr => (noise + osc) >> filt >> distortion2 0.05 >> pan -0.5 >> perc 0 0.5 
         m = ((sin f) * (random 50 60)) + (env2 [700,150] [(dur*0.5)] 1 1)
         osc = tri m >> highpass 500 1
         filt = highpass (tseq [800,1000]) 1
+        dist = distortion2 0.05
 
 oSnrer +> _
 oSnrer +> _ oSnr
@@ -246,7 +248,7 @@ stop oHhter
 
 
 -- echo clappy thing --
-let oDh => noise >> del >> hf >> lf >> distortion2 0.1 >> perc 0.005 0.1 dur >> auxOut 9
+let oDh => noise >> del >> hf >> lf >> dist >> perc 0.005 0.1 dur >> auxOut 9
     where
         dur = (tempoSeconds * 4)
         noise = brown 1 >> perc2 0 1 0.1
@@ -254,6 +256,7 @@ let oDh => noise >> del >> hf >> lf >> distortion2 0.1 >> perc 0.005 0.1 dur >> 
         line = env2 [500,1000] [dur] 0 1
         hf = highpass line (random 10 20)
         lf = highpass (line + (tseq [400,1000])) (random 10 20)
+        dist = distortion2 0.1
 
 oDher +> _
 oDher +> oDh _ _ _
@@ -342,7 +345,7 @@ stop oRvser
 
 
 -- falling sin bleep --
-let oSld => osc >> pan 0.4 >> perc 0.025 0.75 dur >> auxOut 9
+let oSld => osc >> pan 0.4 >> perc 0.025 1 dur >> auxOut 9
    where
         dur = 0.06
         hi = tseq [5000,7000,10000]
@@ -397,6 +400,25 @@ oLbner +> _ _ oLbn _
     [oLbn oLbn] [_ oLbn] _ oLbn
 stop oLbner
 
+-- lfo white noise
+let oVb => o >> m >> lf >> hf >> d >> p >> env [0,a,(a/3),0] [0,0.05,dur] 0
+    where
+        dur = tempoSeconds
+        a = 0.6
+        o = white 1
+        lfo = (square (dur*128) >> range 100 5000)
+        m = bandpass lfo (tseq [2,5])
+        d = distortion2 0.075
+        lf = lowpass (tseq [2000,5000]) 20
+        hf = highpass (tseq [600,1400,500]) 20
+        p = pan (tseq [-0.2,0.2])
+
+oVber +> _
+oVber +> oVb _
+oVber +> oVb _ _ oVb  oVb _ oVb _  _ oVb oVb _  oVb oVb oVb _
+oVber +> oVb _ _ _  _ oVb oVb _  _ oVb oVb _  _ oVb oVb _
+oVber +> _ oVb oVb _
+stop oVber
 -------------------------------------------------------------------------------------------------------------------------
 -- | Curtis
 -------------------------------------------------------------------------------------------------------------------------
