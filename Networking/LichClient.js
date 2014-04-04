@@ -7,7 +7,7 @@ var socket,clientName;
 
 function broadcastLichCode(code)
 {
-	console.log("Sending Code:" + code);
+	//console.log("Sending Code:" + code);
 	socket.emit('BroadcastCode',code);
 }
 
@@ -42,7 +42,7 @@ function receiveCursorPos(name,x,y)
 {
 	if(name != clientName)
 	{
-		console.log("receiveCursorPos: " + name + "," + x + "," + y);
+		//console.log("receiveCursorPos: " + name + "," + x + "," + y);
 		editors[name].clearSelection();
 		editors[name].moveCursorTo(x,y);
 		editors[name].clearSelection();
@@ -51,7 +51,7 @@ function receiveCursorPos(name,x,y)
 
 function receivedLichCode(code)
 {
-	console.log("Received Code:" + code);	
+	//console.log("Received Code:" + code);	
 	try
     {
     	var ast = Lich.parse(code);
@@ -72,7 +72,7 @@ function receivedLichCode(code)
 
     catch(e)
     {
-		Lich.post(e);
+		Lich.post(clientName + ": " + e);
 	}
 }
 
@@ -165,13 +165,13 @@ function readFileDataFromServer(fileData)
 
 function compileLibClient(libName)
 {
-	console.log("Sent CompileLib to server.");
+	//console.log("Sent CompileLib to server.");
 	socket.emit('CompileLib',libName);
 }
 
 function compileLibFromServer(libData)
 {
-	console.log("compiling from server");
+	//console.log("compiling from server");
 	var ast = Lich.parseLibrary(libData);
 	try
 	{
@@ -237,7 +237,7 @@ function clientConnected()
 {
 	if(!connected)
 	{
-		console.log("Connected to server.");
+		//console.log("Connected to server.");
 		connectionStatus.style.color = "rgb(0,130,60)";
 		connectionStatus.value = "Connected";
 	}
@@ -248,7 +248,7 @@ function clientDisconnected()
 {
 	if(!connected)
 	{
-		console.log("Disconnected from server.");
+		//console.log("Disconnected from server.");
 		connectionStatus.style.color = "rgb(130,0,60)";
 		connectionStatus.value = "Disconnected";
 	}
@@ -258,13 +258,13 @@ function clientDisconnected()
 
 function sendStateSync(state)
 {
-	console.log("sending state:\n"+state);
+	//console.log("sending state:\n"+state);
 	socket.emit("StateSync",state);
 }
 
 function receiveStateSync(state)
 {
-	console.log("Received state:\n"+state);
+	//console.log("Received state:\n"+state);
 }
 
 ////////////////////////////////////////////////////////////////////////

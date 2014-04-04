@@ -1142,7 +1142,7 @@ Lich.compileLet = function(ast)
 
 Lich.compileLetOne = function(ast)
 {
-	return Lich.compileAST(ast.decl)+";Lich.post(\"Lich> \"+Lich.VM.PrettyPrint("+ast.decl.ident.id+"))";
+	return Lich.compileAST(ast.decl)+";Lich.post(Lich.VM.PrettyPrint("+ast.decl.ident.id+"))";
 }
 
 Lich.compileListExp = function(ast)

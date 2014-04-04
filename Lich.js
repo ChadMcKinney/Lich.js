@@ -400,13 +400,13 @@ function parseCurrentLine(editor)
 		if(Lich.Lexer.yy.lexer.yylloc.first_line != Infinity 
 			&& Lich.Lexer.yy.lexer.yylloc.first_column != Infinity)
 		{
-			Lich.post("Lich> "+e + " found at [line, column]: [" + Lich.Lexer.yy.lexer.yylloc.first_line 
+			Lich.post(clientName + ": " +e + " found at [line, column]: [" + Lich.Lexer.yy.lexer.yylloc.first_line 
 			+ ", " + Lich.Lexer.yy.lexer.yylloc.first_column + "]");
 		}
 
 		else
 		{
-			Lich.post("Lich> "+e + " found at [line, column]: [0, 0]");
+			Lich.post(clientName + ": " +e + " found at [line, column]: [0, 0]");
 		}
 
 		//throw e;
@@ -508,7 +508,7 @@ function compileLich()
 	
 	catch(e)
 	{
-		Lich.post(e);
+		Lich.post(clientName + ": " + e);
 		throw e;
 	}
 	
