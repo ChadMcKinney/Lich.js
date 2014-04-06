@@ -216,7 +216,7 @@ Lich.post = function(text)
 	{
 		obj.value = obj.value + text + "\n";
 		//obj.appendChild(appendedText);
-		//obj.scrollTop = obj.scrollHeight;
+		obj.scrollTop = obj.scrollHeight;
 	}
 }
 

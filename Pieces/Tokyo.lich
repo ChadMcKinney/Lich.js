@@ -217,6 +217,17 @@ let hDarkSynth2 freq => sin freq + sin (freq/2) >> gain 0.5 >> del >> dist >> pn
 hDarkM2 ~> hDarkSynth2 (pseries 0 (pseq [1,7]) >> pwrap 0 17 >> pstutter 4) | ((/4) . d2f scriabin) | (/2)
 
 
+-- Mothra??
+let myBuf = newBuffer sampleRate
+let hRecSynth d => si >> recPlayBuf myBuf -1 1 >> lag 0.03 >> en
+    where
+        freq = d2f mothra d >> mul 0.5
+        freq2 = d2f mothra (d+6) >> mul 0.5
+        si = sin freq + sin freq2 + sin (freq*2)
+        en = env [0,0.3,0] [0,tempoSeconds*4] 0
+    
+hNoise ~> hRecSynth (pseq [0..17] >> pwarp (psin 0.1))
+
 
 -------------------------------------------------------------------------------------------------------------------------
 -- | Cole
