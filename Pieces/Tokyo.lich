@@ -223,7 +223,7 @@ hDarkM2 ~> hDarkSynth2 (pseries 0 (pseq [1,7]) >> pwrap 0 17 >> pstutter 4) | ((
 -------------------------------------------------------------------------------------------------------------------------
 
 -- master drum FX synth --
-let oDrumFX = auxIn 9 >> filt >> comp >> limit >> play
+let oDrumFX = auxIn 9 >> filt >> comp >> limit >> gain 1 >> play
     where
         comp = compressor -18 40 50 0.001 0.2
         limit = limiter -3
@@ -266,7 +266,7 @@ stop oHfner
 -- kick --
 let oKk => (osc + bass + noise) >> env [0,a,(a/4),0] [0.01,0.05,0.25] 0 >> auxOut 9
    where
-        a = 2
+        a = 0.8
         osc = sin (env2 [1200,30] [0.06] 0 1)
         bass = sin 27.5
         noise = brown 0.05 >> lowpass 600 3 >> perc2 0.02 1 0.075
@@ -381,7 +381,7 @@ stop oCrper
 
 
 -- metalic thing --
-let oFl => osc >> dist >> filt >> pan -0.5 >> perc 0.01 1 dur >> auxOut 9
+let oFl => osc >> dist >> filt >> pan -0.5 >> perc 0.01 0.4 dur >> auxOut 9
     where
         dur = (tempoSeconds * 0.8)
         f = tseq [1000,8000,2900]
@@ -406,7 +406,7 @@ stop oFler
 -- reverse noise swell --
 let oRvs => noise >> filt >> pan 0.25 >> env [0,amp,0] [dur,0.01] 0 >> auxOut 9
     where
-        amp = 0.3
+        amp = 0.2
         noise = (sin (tseq [155,175,100]) + saw (tseq [25,55])) >> distortion2 0.4
         dur = tempoSeconds * (tseq [0.5,0.3])
         filt = lowpass (env2 [50,5000] [dur] 0 1) 10
@@ -463,7 +463,7 @@ stop oAner
 
 
 -- low bit noise --
-let oLbn => n >> filt >> crush 1 >> pan -0.6 >> perc 0 2 0.15 >> auxOut 9
+let oLbn => n >> filt >> crush 1 >> pan -0.6 >> perc 0 1 0.15 >> auxOut 9
     where
         n = noiseX (tseq [220,880,440])
         filt = highpass (tseq [1760,1500]) 5
@@ -484,7 +484,7 @@ oLbner +> _ _ oLbn _
 stop oLbner
 
 -- lfo white noise
-let oVb => o >> m >> lf >> hf >> d >> p >> env [0,a,(a/3),0] [0,0.05,dur] 0
+let oVb => o >> m >> lf >> hf >> d >> p >> env [0,a,(a/3),0] [0,0.05,dur] 0 >> auxOut 9
     where
         dur = tempoSeconds
         a = 0.6
@@ -502,6 +502,93 @@ oVber +> oVb _ _ oVb  oVb _ oVb _  _ oVb oVb _  oVb oVb oVb _
 oVber +> oVb _ _ _  _ oVb oVb _  _ oVb oVb _  _ oVb oVb _
 oVber +> _ oVb oVb _
 stop oVber
+
+-- white fall
+let oWf => o >> f >> pan (tseq [-0.9,-0.9,0.9,0.9]) >> perc 0 0.1 1 >> auxOut 9
+    where
+        o = white 1
+        f = highpass (env2 [10000,100] [(tseq [0.2,0.1,0.4])] 1 1) 13
+
+oWfer +> _
+oWfer +> oWf _ _ oWf  _ _ _ _ 
+oWfer +> oWf _ oWf [oWf oWf]
+stop oWfer
+
+-- impulse echo
+let oDl => o >> dl >> di >> perc 0 1 0.5 >> auxOut 9
+    where
+        o = (impulse (tseq [1000,1000,980,980])) >> perc2 0 1 0.1
+        dl = delay (tempoSeconds * (tshuf [0.5,0.25])) 1
+        di = crush 3
+
+oDler +> _
+oDler +> oDl _ _ _
+stop oDler
+
+stop oKker
+
+---------------
+
+let oOne => o >> f >> d >> perc 0 1 0.25
+    where
+        o = crackle (random 0.1 1.0)
+        f = bandpass (tshuf [500,1000,700]) (tshuf [1,3,5,10])
+        d = distortion2 (tshuf [0.01,0.05,0.1])
+
+oOner +> oOne _ [oOne oOne] _ oOne [_ oOne] | (*1) (*1) (*2)
+stop oOner
+
+let oTwo => o >> f >> d >> perc 0 1 0.15
+    where
+        o = noiseN (tshuf [500,1000,700])
+        f = bandpass (tshuf [500,1000,700]) (tshuf [1,3,5,10])
+        d = distortion2 (tshuf [0.01,0.05,0.1])
+
+
+oTwor +> oTwo _ oTwo [_ oTwo] | (*1) (*2) (*2)
+stop oTwor
+
+let oRP => o >> recPlayBuf myBuf (tshuf [0.125,0.25,0.5,1]) (tshuf [0.125,0.25,0.5,1]) >> pan -0.4 >> perc 0 0.25 0.2
+    where
+        fm = saw (tshuf [110,220,440,550,660,770,880])
+        o = square (fm >> range 550 1200)
+
+oRPr +> oRP _ oRP [oRP oRP]
+stop oRPr
+
+let oRPt => o >> recPlayBuf myBuf (tshuf [0.125,0.25,0.5,1]) (tshuf [0.125,0.25,0.5,1]) >> c >> pan 0.4 >> perc 0 0.5 0.2
+    where
+        fm = tri (tshuf [110,220,440,550,660,770,880])
+        o = saw (fm >> range 330 660)
+        c = crush (tshuf [2,4,8,16])
+
+oRPtr +> oRPt _ oRPt
+stop oRPtr
+
+let oRPh => o >> recPlayBuf myBuf (tshuf [0.125,0.25,0.5,1]) (tshuf [0.125,0.25,0.5,1]) >> c >> pan 0.1 >> perc 0 0.5 0.75
+    where
+        fm = saw (tshuf [110,220,440,550,660,770,880])
+        o = tri (fm >> range 220 440)
+        c = crush (tshuf [2,4,8,16])
+
+oRPhr +> oRPh _ _ [oRPh oRPh] oRPh
+stop oRPhr
+
+let oDl => o >> dl >> di >> perc 0 1 0.5 >> auxThrough 9
+    where
+        o = (impulse (tseq [1000,1000,980,980])) >> perc2 0 1 0.1
+        dl = delay (tempoSeconds * (tshuf [0.5,0.25])) 1
+        di = crush 3
+
+oDler +> oDl _ _
+oDler +> oDl _ _ oDl _
+oDler +> oDl _ [oDl oDl] oDl
+stop oDler
+
+let oMRP => auxIn 9 >> recPlayBuf myBuf (tshuf [0.125,0.25,0.5,1]) (tshuf [0.125,0.25,0.5,1]) >> pan 0.1 >> perc 0 1 1
+
+oMRPr +> oMRP _ _ [oMRP oMRP] oMRP
+stop oMRPr
 -------------------------------------------------------------------------------------------------------------------------
 -- | Curtis
 -------------------------------------------------------------------------------------------------------------------------
