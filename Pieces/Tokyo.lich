@@ -54,8 +54,16 @@ hdelayFX3 => auxIn 2 >> gain 2 >> bandpass (sin 0.1317 >> range 200 2000) 5 >> d
 hneonBass freq => (square (freq/2)) + (saw (freq*2)) + (saw (freq*(add 2 (sin 4 >> gain 0.04)))) + (pink 1 >> lowpass freq 50) >> lowpass (sin 0.1 >> range 200 1000) 0.01 >> env [0.0,0.2,0.03,0] [0.002,1,3] 0
 hneonBassSeq ~> hneonBass (ff -12) _ (ff -8) _ _ _ (ff -4) _ (ff (choose [1, -1, -5])) _ _ (ff -9) _ _ (ff -5) | (/2) _ _ _ _ _ (/2) _
 
-hneonBass2 freq => (saw (freq/2)) + (saw (freq/(add 2 (tri 4 >> gain 0.08)))) + (pink 1 >> lowpass freq 10) >> env [0.0,0.25,0.03,0] [0.001,0.1,3] 0 >> auxThrough 3
+let ff = degree2Freq coleJI
+let hneonBass2 freq => source >> env [0.0,0.1,0.01,0] [0.001,0.1,tempoSeconds*8] 0 >> auxThrough 3
+    where
+        source = (saw (freq/2)) + (saw (freq/(add 2 (tri 4 >> gain 0.08)))) + (pink 1 >> lowpass freq 10)
+        
 hneonBassSeq2 ~> hneonBass2 [(ff $ choose [-6, -12]) (ff $ choose [-5,-8])] [(ff $ choose [-5, -4]) (ff (choose [1, -1, -5]))] [(ff -9) (ff -5)] | (*4) (*8) (*4) (*2) (*2) _ (/2)
+
+
+--hneonBass2 freq => (saw (freq/2)) + (saw (freq/(add 2 (tri 4 >> gain 0.08)))) + (pink 1 >> lowpass freq 10) >> env [0.0,0.25,0.03,0] [0.001,0.1,3] 0 >> auxThrough 3
+--hneonBassSeq2 ~> hneonBass2 [(ff $ choose [-6, -12]) (ff $ choose [-5,-8])] [(ff $ choose [-5, -4]) (ff (choose [1, -1, -5]))] [(ff -9) (ff -5)] | (*4) (*8) (*4) (*2) (*2) _ (/2)
 
 -- This goes with neonBass2
 hdelayFX4 => auxIn 3 >> env2 [0,1] [1] 0 >> delay (sin 0.3 >> range 0.01 0.001) 0.1 >> delay 1.25 0.6 >> gain 0.25
@@ -79,8 +87,9 @@ hdrums +> (pseq [hdb, hhh, hhh, hhh, hhh, hsn] >> pwarp (psin 0.75)) | (/2)
 -- Cool bass bubble glitchy
 let hres freq => brown 1 >> perc2 0.0 0.3 0.001 >> reson freq 1.5 >> distortion2 0.1 >> d >> en
     where
-        d = delay (noiseX 1 >> range 0.001 0.7) (noiseX 1 >> range 0.1 0.9)
-        en = env [0.5,0.15,0] [0.025,(exprandom 0.05 1)] 0
+        t = tempoSeconds * (pow 2 . neg $ randomI -1 3)
+        d = delay (env [t,t*2] [tempoSeconds/(randomI -1 4)] 1 1) (noiseX 1 >> exprange 0.01 0.75)
+        en n = n >> pan (tseq [-0.125, 0, 0.125]) >> env [1,0.1,0] [0.125,(exprandom 0.1 1)] 0
         
 hreseq ~> hres (pseq [1..15] >> pwarp (psin 0.7)) | ((/16) . (d2f prometheus)) | (pseq [(/2), (*1), (/2)] >> pwarp (psin 0.7))
 
@@ -88,16 +97,16 @@ hreseq ~> hres (pseq [1..15] >> pwarp (psin 0.7)) | ((/16) . (d2f prometheus)) |
 let hcbass deg dur speed => pl >> lo >> li >> en
     where
         freq = d2f prometheus deg
-        pl = saw freq + saw (freq*2) >> chorus speed (tseq [0.25,0.5,1])
-        lo = lowshelf freq 35
-        li = limiter -6
-        en = env [0.4,0.05,0] [0.05,dur/3] 0
+        pl = saw freq + square (freq/2) >> chorus speed (tseq [0.25,0.5,1])
+        lo = lowshelf (max 30 freq) 15
+        li = limiter -1
+        en = env [0.5,0.05,0] [0.1,dur/6] 0
         
         
 let hcbassSeq = pbind "pbass" hcbass [deg, dur, speed] dur
     where
-        deg = pseq [-12,-10..-6] >> pfir [1,0.5,-0.5] >> pwarp (psimplex 0.125) >> pstutter 6
-        dur = pseq (map (1/) [1,2,3,4,6]) >> pfir [1,0.5,0.5] >> pwarp (psin 0.1)
+        deg = pseq [-12,-10..-6] >> pfir [1,0.5,-0.5] >> pwarp (psimplex 0.125) >> pstutter 4
+        dur = pseq [1.5,1.5,1.5,1.5,1,1]
         speed = pseq [1..13] >> pwarp (psin 0.075)
         
 
@@ -119,8 +128,19 @@ let hCloudSeq = pbind "cloudSeq" hCloudChaos [deg,filt,dur] dur
         deg = pseq (map (*2) [1,1,2,1,4,0,-9,3,1,5]) >> pwarp (psaw 0.03) >> pmul (pseq [-4,3,-2,1,-0.5,0.25])
         filt = pseq [0,1,2,3]        
         
+let hRecBuf = newBuffer sampleRate
+let hRecSynth d => si >> recPlayBuf hRecBuf -1 1 >> lag 0.03 >> en
+    where
+        freq = d2f prometheus d >> mul 0.5
+        freq2 = d2f prometheus (d + 2) >> mul 0.5
+        si = sin freq + sin freq2 + sin (freq*2)
+        en = env [0.5,0.05,0] [0.2,tempoSeconds*4 - 0.2] 0
+    
+hNoise ~> hRecSynth (pseq [10..17] >> pwarp (psin 0.1))
     
 
+
+{-
 -- verb version?
 let hCloudBuffer = newBuffer sampleRate
 let hCloudChaos deg filt dur => os >> fi >> re >> en >> auxOut 8
@@ -135,6 +155,8 @@ let hCloudChaos deg filt dur => os >> fi >> re >> en >> auxOut 8
 
 let hCloudVerb = auxIn 8 >> reverb 1 100 0.01 0 >> play
 stop hCloudVerb
+-}
+
 
 
 ------------
@@ -191,7 +213,7 @@ let hDarkBass freq => os >> lp >> pn >> en
         en = env [0,0.3,0.15,0] [0.0,(tempoSeconds * 4),0.5] 0
 
 hDarkB ~> hDarkBass (pcomb (pseq [1..4]) (pseq [0..4]) >> pstutter 2) | ((/4) . (d2f scriabin)) | (*4)
--}
+
 
 let hDarkBass freq => os >> lp >> pn >> crush (randomI 6 32) >> en
    where
@@ -205,6 +227,29 @@ let hDarkBass freq => os >> lp >> pn >> crush (randomI 6 32) >> en
        en = env [0,0.05,0.05,0] [0.01,(tempoSeconds * (tseq [4,4,2,2,2,2,1,1,1,1])),0.1] 0
 
 hDarkB ~> hDarkBass (pcomb (pseq [0..7]) (pseq [0..4]) >> pstutter 5) | ((/4) . (d2f scriabin)) | (*(tseq [4,4,2,2,2,2,1,1,1,1]))
+-}
+
+let hDarkBass freq => os >> fp >> pn >> en >> auxOut 8
+    where
+        sa = saw (freq/2) + saw (freq/4) + saw (freq/2) >> gain 2 >> crush 8
+        no = sin freq >> distortion2 5 >> freqShift (neg freq)
+        no2 = noiseX (env2 [1760,440] [(random 0.5 2)] 1 1) >> gain 40 >> clip 10 >> distortion2 5
+        os = wchoose [0.8, 0.1,0.1] [sa, no, no2]
+        pn = pan (tseq [-0.125,0.125])
+        lf = square ((randI 1 8)/tempoSeconds/8) >> lag (exprandom 0.00001 1)
+        lp = lowpass (lf >> exprange (freq/4) (freq * 16)) (random 1 15)
+        hp n = n >> highpass (lf >> exprange (freq/4) (freq * 8)) (random 0 5) >> clip 1
+        fp = wchoose [0.8,0.2] [lp,hp]
+        en = env [0.2,0.1,0] [(tempoSeconds * (tseq [4,4,2,2,2,2,1,1,1,1])),0.1] 0
+
+hDarkB ~> hDarkBass (pcomb (pseq [0..7]) (pseq [0..4]) >> pstutter 5) | ((/4) . (d2f scriabin)) | (*(tseq [4,4,2,2,2,2,1,1,1,1]))
+
+
+let hDarkDelay = auxIn 8 >> delay (tempoSeconds/4) 0.5 >> limiter -1 >> play
+
+stop hDarkDelay
+
+
 
 let hDarkSynth2 freq => sin freq + sin (freq/2) >> gain 0.5 >> del >> dist >> pn >> en
     where
@@ -216,7 +261,7 @@ let hDarkSynth2 freq => sin freq + sin (freq/2) >> gain 0.5 >> del >> dist >> pn
         
 hDarkM2 ~> hDarkSynth2 (pseries 0 (pseq [1,7]) >> pwrap 0 17 >> pstutter 4) | ((/4) . d2f scriabin) | (/2)
 
-
+{-
 -- Mothra??
 let myBuf = newBuffer sampleRate
 let hRecSynth d => si >> recPlayBuf myBuf -1 1 >> lag 0.03 >> en
@@ -227,7 +272,7 @@ let hRecSynth d => si >> recPlayBuf myBuf -1 1 >> lag 0.03 >> en
         en = env [0,0.3,0] [0,tempoSeconds*4] 0
     
 hNoise ~> hRecSynth (pseq [0..17] >> pwarp (psin 0.1))
-
+-}
 
 -------------------------------------------------------------------------------------------------------------------------
 -- | Cole
