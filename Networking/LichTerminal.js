@@ -4,7 +4,7 @@
 
 editors = {};
 
-var _themes = ["ace/theme/lich", "ace/theme/lich3", "ace/theme/lich2"];
+var _themes = ["ace/theme/lich", "ace/theme/lich2", "ace/theme/lich3"];
 
 // NEED TO MAKE IDE STYLE NEW/OPEN/SAVE functions for the text editor
 function newDocument()

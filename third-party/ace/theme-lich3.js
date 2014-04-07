@@ -1,1 +1,106 @@
-define("ace/theme/lich3",["require","exports","module","ace/lib/dom"],function(e,t,n){t.isDark=!0,t.cssClass="ace-lich3",t.cssText=".ace-lich3 .ace_gutter {background: transparent;color: #C5C8C6}.ace-lich3 .ace_print-margin {width: 1px;background: #25282c}.ace-lich3 {background-color: transparent;color: #C5C8C6}.ace-lich3 .ace_cursor {color: #AEAFAD}.ace-lich3 .ace_marker-layer .ace_selection {background: #373B41}.ace-lich3.ace_multiselect .ace_selection.ace_start {box-shadow: 0 0 3px 0px #1D1F21;border-radius: 2px}.ace-lich3 .ace_marker-layer .ace_step {background: rgb(102, 82, 0)}.ace-lich3 .ace_marker-layer .ace_bracket {margin: -1px 0 0 -1px;border: 1px solid #4B4E55}.ace-lich3 .ace_marker-layer .ace_active-line {background: rgba(255, 255, 255, 0.051)}.ace-lich3 .ace_gutter-active-line {rgba(255, 255, 255, 0.051)}.ace-lich3 .ace_marker-layer .ace_selected-word {border: 1px solid #373B41}.ace-lich3 .ace_invisible {color: #4B4E55}.ace-lich3 .ace_keyword,.ace-lich3 .ace_meta,.ace-lich3 .ace_storage,.ace-lich3 .ace_storage.ace_type,.ace-lich3 .ace_support.ace_type {color: #B294BB}.ace-lich3 .ace_keyword.ace_operator {color: #8ABEB7}.ace-lich3 .ace_constant.ace_character,.ace-lich3 .ace_constant.ace_language,.ace-lich3 .ace_constant.ace_numeric,.ace-lich3 .ace_keyword.ace_other.ace_unit,.ace-lich3 .ace_support.ace_constant,.ace-lich3 .ace_variable.ace_parameter {color: #DE935F}.ace-lich3 .ace_constant.ace_other {color: #CED1CF}.ace-lich3 .ace_invalid {color: #CED2CF;background-color: #DF5F5F}.ace-lich3 .ace_invalid.ace_deprecated {color: #CED2CF;background-color: #B798BF}.ace-lich3 .ace_fold {background-color: #81A2BE;border-color: #C5C8C6}.ace-lich3 .ace_entity.ace_name.ace_function,.ace-lich3 .ace_support.ace_function,.ace-lich3 .ace_variable {color: #81A2BE}.ace-lich3 .ace_support.ace_class,.ace-lich3 .ace_support.ace_type {color: #F0C674}.ace-lich3 .ace_heading,.ace-lich3 .ace_markup.ace_heading,.ace-lich3 .ace_string {color: #B5BD68}.ace-lich3 .ace_entity.ace_name.ace_tag,.ace-lich3 .ace_entity.ace_other.ace_attribute-name,.ace-lich3 .ace_meta.ace_tag,.ace-lich3 .ace_string.ace_regexp,.ace-lich3 .ace_variable {color: #CC6666}.ace-lich3 .ace_comment {color: #969896}.ace-lich3 .ace_indent-guide {background: transparent}";var r=e("../lib/dom");r.importCssString(t.cssText,t.cssClass)})
+define('ace/theme/lich3', ['require', 'exports', 'module' , 'ace/lib/dom'], function(require, exports, module) {
+
+exports.isDark = true;
+exports.cssClass = "ace-lich3";
+exports.cssText = ".ace-lich3,\
+.ace-lich3 {\
+  background: transparent;\
+  color: #333;\
+  width:100%;\
+  height:100%;\
+  position:absolute;\
+  opacity: 0.0;\
+}\
+\
+.ace_gutter {\
+  background:#222\
+  color:#1414\
+}\
+\
+.ace-lich3 .ace_print-margin {\
+  width: 1px;\
+  background: #e8e8e8\
+}\
+\
+.ace-lich3 {\
+  background-color: transparent;\
+  color: #f1e3e2\
+}\
+\
+.ace-lich3 .ace_constant,\
+.ace-lich3 .ace_cursor,\
+.ace-lich3 .ace_storage {\
+  color: #913333\
+}\
+\
+.ace-lich3 .ace_marker-layer .ace_selection {\
+  background: #61595a\
+}\
+\
+.ace-lich3.ace_multiselect .ace_selection.ace_start {\
+  box-shadow: 0 0 3px 0px #141414;\
+  border-radius: 2px\
+}\
+\
+.ace-lich3 .ace_marker-layer .ace_step {\
+  background: rgb(198, 219, 174)\
+}\
+\
+.ace-lich3 .ace_marker-layer .ace_bracket {\
+  margin: -1px 0 0 -1px;\
+  border: 1px solid #8a8585\
+}\
+\
+.ace-lich3 .ace_marker-layer .ace_active-line {\
+  background: rgba(255, 255, 255, 0.051)\
+}\
+\
+.ace-lich3 .ace_gutter-active-line {\
+  background-color: rgba(255, 255, 255, 0.051)\
+}\
+\
+.ace-lich3 .ace_marker-layer .ace_selected-word {\
+  border: 1px solid #61595a\
+}\
+\
+.ace-lich3 .ace_fold {\
+  background-color: #309090;\
+  border-color: #f1e3e2\
+}\
+\
+.ace-lich3 .ace_keyword {\
+  color: #AA6a50;\
+}\
+\
+.ace-lich3 .ace_string,\
+.ace-lich3 .ace_string.ace_regexp,\
+.ace-lich3 .ace_support,\
+.ace-lich3 .ace_variable {\
+  color: #959068\
+}\
+\
+.ace-lich3 .ace_support.ace_function {\
+  color: #907674\
+}\
+\
+.ace-lich3 .ace_support.ace_constant {\
+  color: #9E51CF\
+}\
+\
+.ace-lich3 .ace_invalid {\
+  color: #F8F8F8;\
+  background-color: #D2A8A1\
+}\
+\
+.ace-lich3 .ace_comment {\
+  font-style: italic;\
+  color: #969896\
+}\
+\
+.ace-lich3 .ace_meta.ace_tag {\
+  color: #CC6666\
+}";
+
+var dom = require("../lib/dom");
+dom.importCssString(exports.cssText, exports.cssClass);
+});
