@@ -13,7 +13,7 @@ exports.cssText = ".ace-lich3,\
 }\
 \
 .ace_gutter {\
-  background:#333\
+  background:#222\
   color:#1414\
 }\
 \
@@ -30,7 +30,7 @@ exports.cssText = ".ace-lich3,\
 .ace-lich3 .ace_constant,\
 .ace-lich3 .ace_cursor,\
 .ace-lich3 .ace_storage {\
-  color: #CF6A4C\
+  color: #913333\
 }\
 \
 .ace-lich3 .ace_marker-layer .ace_selection {\
@@ -69,36 +69,36 @@ exports.cssText = ".ace-lich3,\
 }\
 \
 .ace-lich3 .ace_keyword {\
-  color: #CDA869\
+  color: #AA6a50;\
 }\
 \
 .ace-lich3 .ace_string,\
 .ace-lich3 .ace_string.ace_regexp,\
 .ace-lich3 .ace_support,\
 .ace-lich3 .ace_variable {\
-  color: #AC885B\
+  color: #959068\
 }\
 \
 .ace-lich3 .ace_support.ace_function {\
-  color: #DAD085\
+  color: #907674\
 }\
 \
 .ace-lich3 .ace_support.ace_constant {\
-  color: #CDA869\
+  color: #9E51CF\
 }\
 \
 .ace-lich3 .ace_invalid {\
   color: #F8F8F8;\
-  background-color: rgba(86, 45, 86, 0.75)\
+  background-color: #D2A8A1\
 }\
 \
 .ace-lich3 .ace_comment {\
   font-style: italic;\
-  color: #5F5A60\
+  color: #969896\
 }\
 \
 .ace-lich3 .ace_meta.ace_tag {\
-  color: #F9EE98\
+  color: #CC6666\
 }";
 
 var dom = require("../lib/dom");

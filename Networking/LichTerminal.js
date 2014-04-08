@@ -4,6 +4,8 @@
 
 editors = {};
 
+var _themes = ["ace/theme/lich", "ace/theme/lich2", "ace/theme/lich3"];
+
 // NEED TO MAKE IDE STYLE NEW/OPEN/SAVE functions for the text editor
 function newDocument()
 {
@@ -22,7 +24,7 @@ function openDocument()
 
 function writeTextToTerminal(id,text)
 {
-	if(id != clientName)
+	if(id != clientName && text != null)
 	{
 		//Lich.post("ID = " + id);
 		//Lich.post("CLIENT NAME + " + clientName);
@@ -89,14 +91,7 @@ function createTextArea(name,num,total)
 
 		//document.body.appendChild(input);
 		var editor = ace.edit("terminal"+name);
-
-		if(name == clientName)
-			editor.setTheme("ace/theme/lich");
-		else if(num > 1)
-			editor.setTheme("ace/theme/lich2");
-		else
-			editor.setTheme("ace/theme/clouds-midnight");
-
+		editor.setTheme(_themes[num%3]);
 
 		editor.getSession().setMode("ace/mode/haskell");
 		//editor.$highlightBrackets = function(){};

@@ -54,8 +54,16 @@ hdelayFX3 => auxIn 2 >> gain 2 >> bandpass (sin 0.1317 >> range 200 2000) 5 >> d
 hneonBass freq => (square (freq/2)) + (saw (freq*2)) + (saw (freq*(add 2 (sin 4 >> gain 0.04)))) + (pink 1 >> lowpass freq 50) >> lowpass (sin 0.1 >> range 200 1000) 0.01 >> env [0.0,0.2,0.03,0] [0.002,1,3] 0
 hneonBassSeq ~> hneonBass (ff -12) _ (ff -8) _ _ _ (ff -4) _ (ff (choose [1, -1, -5])) _ _ (ff -9) _ _ (ff -5) | (/2) _ _ _ _ _ (/2) _
 
-hneonBass2 freq => (saw (freq/2)) + (saw (freq/(add 2 (tri 4 >> gain 0.08)))) + (pink 1 >> lowpass freq 10) >> env [0.0,0.25,0.03,0] [0.001,0.1,3] 0 >> auxThrough 3
+let ff = degree2Freq coleJI
+let hneonBass2 freq => source >> env [0.0,0.1,0.01,0] [0.001,0.1,tempoSeconds*8] 0 >> auxThrough 3
+    where
+        source = (saw (freq/2)) + (saw (freq/(add 2 (tri 4 >> gain 0.08)))) + (pink 1 >> lowpass freq 10)
+        
 hneonBassSeq2 ~> hneonBass2 [(ff $ choose [-6, -12]) (ff $ choose [-5,-8])] [(ff $ choose [-5, -4]) (ff (choose [1, -1, -5]))] [(ff -9) (ff -5)] | (*4) (*8) (*4) (*2) (*2) _ (/2)
+
+
+--hneonBass2 freq => (saw (freq/2)) + (saw (freq/(add 2 (tri 4 >> gain 0.08)))) + (pink 1 >> lowpass freq 10) >> env [0.0,0.25,0.03,0] [0.001,0.1,3] 0 >> auxThrough 3
+--hneonBassSeq2 ~> hneonBass2 [(ff $ choose [-6, -12]) (ff $ choose [-5,-8])] [(ff $ choose [-5, -4]) (ff (choose [1, -1, -5]))] [(ff -9) (ff -5)] | (*4) (*8) (*4) (*2) (*2) _ (/2)
 
 -- This goes with neonBass2
 hdelayFX4 => auxIn 3 >> env2 [0,1] [1] 0 >> delay (sin 0.3 >> range 0.01 0.001) 0.1 >> delay 1.25 0.6 >> gain 0.25
@@ -79,8 +87,9 @@ hdrums +> (pseq [hdb, hhh, hhh, hhh, hhh, hsn] >> pwarp (psin 0.75)) | (/2)
 -- Cool bass bubble glitchy
 let hres freq => brown 1 >> perc2 0.0 0.3 0.001 >> reson freq 1.5 >> distortion2 0.1 >> d >> en
     where
-        d = delay (noiseX 1 >> range 0.001 0.7) (noiseX 1 >> range 0.1 0.9)
-        en = env [0.5,0.15,0] [0.025,(exprandom 0.05 1)] 0
+        t = tempoSeconds * (pow 2 . neg $ randomI -1 3)
+        d = delay (env [t,t*2] [tempoSeconds/(randomI -1 4)] 1 1) (noiseX 1 >> exprange 0.01 0.75)
+        en n = n >> pan (tseq [-0.125, 0, 0.125]) >> env [1,0.1,0] [0.125,(exprandom 0.1 1)] 0
         
 hreseq ~> hres (pseq [1..15] >> pwarp (psin 0.7)) | ((/16) . (d2f prometheus)) | (pseq [(/2), (*1), (/2)] >> pwarp (psin 0.7))
 
@@ -88,16 +97,16 @@ hreseq ~> hres (pseq [1..15] >> pwarp (psin 0.7)) | ((/16) . (d2f prometheus)) |
 let hcbass deg dur speed => pl >> lo >> li >> en
     where
         freq = d2f prometheus deg
-        pl = saw freq + saw (freq*2) >> chorus speed (tseq [0.25,0.5,1])
-        lo = lowshelf freq 35
-        li = limiter -6
-        en = env [0.4,0.05,0] [0.05,dur/3] 0
+        pl = saw freq + square (freq/2) >> chorus speed (tseq [0.25,0.5,1])
+        lo = lowshelf (max 30 freq) 15
+        li = limiter -1
+        en = env [0.5,0.05,0] [0.1,dur/6] 0
         
         
 let hcbassSeq = pbind "pbass" hcbass [deg, dur, speed] dur
     where
-        deg = pseq [-12,-10..-6] >> pfir [1,0.5,-0.5] >> pwarp (psimplex 0.125) >> pstutter 6
-        dur = pseq (map (1/) [1,2,3,4,6]) >> pfir [1,0.5,0.5] >> pwarp (psin 0.1)
+        deg = pseq [-12,-10..-6] >> pfir [1,0.5,-0.5] >> pwarp (psimplex 0.125) >> pstutter 4
+        dur = pseq [1.5,1.5,1.5,1.5,1,1]
         speed = pseq [1..13] >> pwarp (psin 0.075)
         
 
@@ -119,8 +128,19 @@ let hCloudSeq = pbind "cloudSeq" hCloudChaos [deg,filt,dur] dur
         deg = pseq (map (*2) [1,1,2,1,4,0,-9,3,1,5]) >> pwarp (psaw 0.03) >> pmul (pseq [-4,3,-2,1,-0.5,0.25])
         filt = pseq [0,1,2,3]        
         
+let hRecBuf = newBuffer sampleRate
+let hRecSynth d => si >> recPlayBuf hRecBuf -1 1 >> lag 0.03 >> en
+    where
+        freq = d2f prometheus d >> mul 0.5
+        freq2 = d2f prometheus (d + 2) >> mul 0.5
+        si = sin freq + sin freq2 + sin (freq*2)
+        en = env [0.5,0.05,0] [0.2,tempoSeconds*4 - 0.2] 0
+    
+hNoise ~> hRecSynth (pseq [10..17] >> pwarp (psin 0.1))
     
 
+
+{-
 -- verb version?
 let hCloudBuffer = newBuffer sampleRate
 let hCloudChaos deg filt dur => os >> fi >> re >> en >> auxOut 8
@@ -135,6 +155,8 @@ let hCloudChaos deg filt dur => os >> fi >> re >> en >> auxOut 8
 
 let hCloudVerb = auxIn 8 >> reverb 1 100 0.01 0 >> play
 stop hCloudVerb
+-}
+
 
 
 ------------
@@ -191,7 +213,7 @@ let hDarkBass freq => os >> lp >> pn >> en
         en = env [0,0.3,0.15,0] [0.0,(tempoSeconds * 4),0.5] 0
 
 hDarkB ~> hDarkBass (pcomb (pseq [1..4]) (pseq [0..4]) >> pstutter 2) | ((/4) . (d2f scriabin)) | (*4)
--}
+
 
 let hDarkBass freq => os >> lp >> pn >> crush (randomI 6 32) >> en
    where
@@ -205,6 +227,29 @@ let hDarkBass freq => os >> lp >> pn >> crush (randomI 6 32) >> en
        en = env [0,0.05,0.05,0] [0.01,(tempoSeconds * (tseq [4,4,2,2,2,2,1,1,1,1])),0.1] 0
 
 hDarkB ~> hDarkBass (pcomb (pseq [0..7]) (pseq [0..4]) >> pstutter 5) | ((/4) . (d2f scriabin)) | (*(tseq [4,4,2,2,2,2,1,1,1,1]))
+-}
+
+let hDarkBass freq => os >> fp >> pn >> en >> auxOut 8
+    where
+        sa = saw (freq/2) + saw (freq/4) + saw (freq/2) >> gain 2 >> crush 8
+        no = sin freq >> distortion2 5 >> freqShift (neg freq)
+        no2 = noiseX (env2 [1760,440] [(random 0.5 2)] 1 1) >> gain 40 >> clip 10 >> distortion2 5
+        os = wchoose [0.8, 0.1,0.1] [sa, no, no2]
+        pn = pan (tseq [-0.125,0.125])
+        lf = square ((randI 1 8)/tempoSeconds/8) >> lag (exprandom 0.00001 1)
+        lp = lowpass (lf >> exprange (freq/4) (freq * 16)) (random 1 15)
+        hp n = n >> highpass (lf >> exprange (freq/4) (freq * 8)) (random 0 5) >> clip 1
+        fp = wchoose [0.8,0.2] [lp,hp]
+        en = env [0.2,0.1,0] [(tempoSeconds * (tseq [4,4,2,2,2,2,1,1,1,1])),0.1] 0
+
+hDarkB ~> hDarkBass (pcomb (pseq [0..7]) (pseq [0..4]) >> pstutter 5) | ((/4) . (d2f scriabin)) | (*(tseq [4,4,2,2,2,2,1,1,1,1]))
+
+
+let hDarkDelay = auxIn 8 >> delay (tempoSeconds/4) 0.5 >> limiter -1 >> play
+
+stop hDarkDelay
+
+
 
 let hDarkSynth2 freq => sin freq + sin (freq/2) >> gain 0.5 >> del >> dist >> pn >> en
     where
@@ -216,7 +261,7 @@ let hDarkSynth2 freq => sin freq + sin (freq/2) >> gain 0.5 >> del >> dist >> pn
         
 hDarkM2 ~> hDarkSynth2 (pseries 0 (pseq [1,7]) >> pwrap 0 17 >> pstutter 4) | ((/4) . d2f scriabin) | (/2)
 
-
+{-
 -- Mothra??
 let myBuf = newBuffer sampleRate
 let hRecSynth d => si >> recPlayBuf myBuf -1 1 >> lag 0.03 >> en
@@ -227,14 +272,14 @@ let hRecSynth d => si >> recPlayBuf myBuf -1 1 >> lag 0.03 >> en
         en = env [0,0.3,0] [0,tempoSeconds*4] 0
     
 hNoise ~> hRecSynth (pseq [0..17] >> pwarp (psin 0.1))
-
+-}
 
 -------------------------------------------------------------------------------------------------------------------------
 -- | Cole
 -------------------------------------------------------------------------------------------------------------------------
 
 -- master drum FX synth --
-let oDrumFX = auxIn 9 >> filt >> comp >> limit >> play
+let oDrumFX = auxIn 9 >> filt >> comp >> limit >> gain 1 >> play
     where
         comp = compressor -18 40 50 0.001 0.2
         limit = limiter -3
@@ -277,7 +322,7 @@ stop oHfner
 -- kick --
 let oKk => (osc + bass + noise) >> env [0,a,(a/4),0] [0.01,0.05,0.25] 0 >> auxOut 9
    where
-        a = 2
+        a = 0.8
         osc = sin (env2 [1200,30] [0.06] 0 1)
         bass = sin 27.5
         noise = brown 0.05 >> lowpass 600 3 >> perc2 0.02 1 0.075
@@ -392,7 +437,7 @@ stop oCrper
 
 
 -- metalic thing --
-let oFl => osc >> dist >> filt >> pan -0.5 >> perc 0.01 1 dur >> auxOut 9
+let oFl => osc >> dist >> filt >> pan -0.5 >> perc 0.01 0.4 dur >> auxOut 9
     where
         dur = (tempoSeconds * 0.8)
         f = tseq [1000,8000,2900]
@@ -417,7 +462,7 @@ stop oFler
 -- reverse noise swell --
 let oRvs => noise >> filt >> pan 0.25 >> env [0,amp,0] [dur,0.01] 0 >> auxOut 9
     where
-        amp = 0.3
+        amp = 0.2
         noise = (sin (tseq [155,175,100]) + saw (tseq [25,55])) >> distortion2 0.4
         dur = tempoSeconds * (tseq [0.5,0.3])
         filt = lowpass (env2 [50,5000] [dur] 0 1) 10
@@ -474,7 +519,7 @@ stop oAner
 
 
 -- low bit noise --
-let oLbn => n >> filt >> crush 1 >> pan -0.6 >> perc 0 2 0.15 >> auxOut 9
+let oLbn => n >> filt >> crush 1 >> pan -0.6 >> perc 0 1 0.15 >> auxOut 9
     where
         n = noiseX (tseq [220,880,440])
         filt = highpass (tseq [1760,1500]) 5
@@ -495,7 +540,7 @@ oLbner +> _ _ oLbn _
 stop oLbner
 
 -- lfo white noise
-let oVb => o >> m >> lf >> hf >> d >> p >> env [0,a,(a/3),0] [0,0.05,dur] 0
+let oVb => o >> m >> lf >> hf >> d >> p >> env [0,a,(a/3),0] [0,0.05,dur] 0 >> auxOut 9
     where
         dur = tempoSeconds
         a = 0.6
@@ -513,6 +558,93 @@ oVber +> oVb _ _ oVb  oVb _ oVb _  _ oVb oVb _  oVb oVb oVb _
 oVber +> oVb _ _ _  _ oVb oVb _  _ oVb oVb _  _ oVb oVb _
 oVber +> _ oVb oVb _
 stop oVber
+
+-- white fall
+let oWf => o >> f >> pan (tseq [-0.9,-0.9,0.9,0.9]) >> perc 0 0.1 1 >> auxOut 9
+    where
+        o = white 1
+        f = highpass (env2 [10000,100] [(tseq [0.2,0.1,0.4])] 1 1) 13
+
+oWfer +> _
+oWfer +> oWf _ _ oWf  _ _ _ _ 
+oWfer +> oWf _ oWf [oWf oWf]
+stop oWfer
+
+-- impulse echo
+let oDl => o >> dl >> di >> perc 0 1 0.5 >> auxOut 9
+    where
+        o = (impulse (tseq [1000,1000,980,980])) >> perc2 0 1 0.1
+        dl = delay (tempoSeconds * (tshuf [0.5,0.25])) 1
+        di = crush 3
+
+oDler +> _
+oDler +> oDl _ _ _
+stop oDler
+
+stop oKker
+
+---------------
+
+let oOne => o >> f >> d >> perc 0 1 0.25
+    where
+        o = crackle (random 0.1 1.0)
+        f = bandpass (tshuf [500,1000,700]) (tshuf [1,3,5,10])
+        d = distortion2 (tshuf [0.01,0.05,0.1])
+
+oOner +> oOne _ [oOne oOne] _ oOne [_ oOne] | (*1) (*1) (*2)
+stop oOner
+
+let oTwo => o >> f >> d >> perc 0 1 0.15
+    where
+        o = noiseN (tshuf [500,1000,700])
+        f = bandpass (tshuf [500,1000,700]) (tshuf [1,3,5,10])
+        d = distortion2 (tshuf [0.01,0.05,0.1])
+
+
+oTwor +> oTwo _ oTwo [_ oTwo] | (*1) (*2) (*2)
+stop oTwor
+
+let oRP => o >> recPlayBuf myBuf (tshuf [0.125,0.25,0.5,1]) (tshuf [0.125,0.25,0.5,1]) >> pan -0.4 >> perc 0 0.25 0.2
+    where
+        fm = saw (tshuf [110,220,440,550,660,770,880])
+        o = square (fm >> range 550 1200)
+
+oRPr +> oRP _ oRP [oRP oRP]
+stop oRPr
+
+let oRPt => o >> recPlayBuf myBuf (tshuf [0.125,0.25,0.5,1]) (tshuf [0.125,0.25,0.5,1]) >> c >> pan 0.4 >> perc 0 0.5 0.2
+    where
+        fm = tri (tshuf [110,220,440,550,660,770,880])
+        o = saw (fm >> range 330 660)
+        c = crush (tshuf [2,4,8,16])
+
+oRPtr +> oRPt _ oRPt
+stop oRPtr
+
+let oRPh => o >> recPlayBuf myBuf (tshuf [0.125,0.25,0.5,1]) (tshuf [0.125,0.25,0.5,1]) >> c >> pan 0.1 >> perc 0 0.5 0.75
+    where
+        fm = saw (tshuf [110,220,440,550,660,770,880])
+        o = tri (fm >> range 220 440)
+        c = crush (tshuf [2,4,8,16])
+
+oRPhr +> oRPh _ _ [oRPh oRPh] oRPh
+stop oRPhr
+
+let oDl => o >> dl >> di >> perc 0 1 0.5 >> auxThrough 9
+    where
+        o = (impulse (tseq [1000,1000,980,980])) >> perc2 0 1 0.1
+        dl = delay (tempoSeconds * (tshuf [0.5,0.25])) 1
+        di = crush 3
+
+oDler +> oDl _ _
+oDler +> oDl _ _ oDl _
+oDler +> oDl _ [oDl oDl] oDl
+stop oDler
+
+let oMRP => auxIn 9 >> recPlayBuf myBuf (tshuf [0.125,0.25,0.5,1]) (tshuf [0.125,0.25,0.5,1]) >> pan 0.1 >> perc 0 1 1
+
+oMRPr +> oMRP _ _ [oMRP oMRP] oMRP
+stop oMRPr
 -------------------------------------------------------------------------------------------------------------------------
 -- | Curtis
 -------------------------------------------------------------------------------------------------------------------------
