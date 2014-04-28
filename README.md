@@ -67,7 +67,10 @@ Now all that's left is to open up Chrome (Firefox and Safari also work, but not 
 
 
 let testSynth freq => saw freq >> perc 0 0.2 0.3
+
 testPattern ~> testSynth 0 1 2 3 4 5 6 7 | (d2f major)
 
+
 -- When you've heard enough
+
 stop testPattern
