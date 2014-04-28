@@ -66,11 +66,11 @@ sudo node Networking/LichServer.js
 Now all that's left is to open up Chrome (Firefox and Safari also work, but not as well) and go to 127.0.0.1 (or if you're doing this on a different computer, say your server, just point your browser at that computer's IP). Once the page has loaded you can test that everything is running by executing this code (use shift-return to execute code a line of code) :
 
 
+```haskell
 let testSynth freq => saw freq >> perc 0 0.2 0.3
-
 testPattern ~> testSynth 0 1 2 3 4 5 6 7 | (d2f major)
 
 
 -- When you've heard enough
-
 stop testPattern
+```
