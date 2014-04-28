@@ -67,9 +67,9 @@ At this point you have all the dependancies for the server. Now you can just run
 
 sudo node Networking/LichServer.js
 
-Now all that's left is to open up Chrome (Firefox and Safari also work, but not as well) and go to 127.0.0.1 (or if you're doing this on a different computer, say your server, just point your browser at that computer's IP). Once the page has loaded you can test that everything is running by executing this code (use shift-return to execute code a line of code) :
+Now all that's left is to open up Chrome (Firefox and Safari also work, but not as well) and go to 127.0.0.1 (or if you're doing this on a different computer, say your server, just point your browser at that computer's IP). Once the page has loaded you can test that everything is running by executing this code (use shift-return to execute a line of code) :
 
-
+<!--- the ```haskell is for markdown rendering such as on GitHub. If you're reading this document via a text editor please ignore the ```haskell and the ``` at the end. -->
 ```haskell
 let testSynth freq => saw freq >> perc 0 0.2 0.3
 testPattern ~> testSynth 0 1 2 3 4 5 6 7 | (d2f major)
