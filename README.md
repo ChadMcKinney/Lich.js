@@ -48,16 +48,20 @@ either expressed or implied, of the FreeBSD Project.
 USAGE
 =====
 
-At the moment Lich.js is not officially released. If you still want to try it out you can get it up and running on your own computer but it will require a little work. There are still bugs, missing features, and essentially no documentation so don't expect a finished product. All that said, here are the instructions to try out Lich.js for yourself:
+At the moment Lich.js is not officially released. If you still want to try it out you can get it up and running on your own computer but it will require a little work. There are still bugs, missing features, and essentially no documentation so don't expect a finished product. All that said, here are the instructions to try out Lich.js for yourself.
 
 Lich.js is divided into two parts: a server and a client. To create a server you will first need Node.js installed on your computer. Node can be found here: http://nodejs.org/. If you're on Linux it should likely be in your standard repo, for instance in Ubuntu you can install it with: 
 
+```bash
 sudo apt-get install nodejs
+```
 
 Next you will need to use npm (node package manager) to install socket.io (a networking library) to the Lich.js local directory. In a unix based system (Linux/OSX) you can use the command line to do this as such:
 
+``` bash
 cd /path/to/lich.js
 npm install socket.io
+```
 
 At this point you have all the dependancies for the server. Now you can just run this from the command line to get the server up (this should be run from the lich.js folder):
 
@@ -69,7 +73,6 @@ Now all that's left is to open up Chrome (Firefox and Safari also work, but not 
 ```haskell
 let testSynth freq => saw freq >> perc 0 0.2 0.3
 testPattern ~> testSynth 0 1 2 3 4 5 6 7 | (d2f major)
-
 
 -- When you've heard enough
 stop testPattern
