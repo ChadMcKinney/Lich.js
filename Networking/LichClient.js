@@ -4,6 +4,7 @@
 // Client Networking
 ////////////////////////////////////////////////////////////////////////
 var socket,clientName;
+var startUpFunctions = [];
 
 function broadcastLichCode(code)
 {
@@ -240,6 +241,7 @@ function clientConnected()
 		//console.log("Connected to server.");
 		connectionStatus.style.color = "rgb(0,130,60)";
 		connectionStatus.value = "Connected";
+		runStartUpFunctions();
 	}
 	connected = true;
 }
@@ -323,4 +325,33 @@ function getCookie(name) {
 	var regexp = new RegExp("(?:^" + name + "|;\s*"+ name + ")=(.*?)(?:;|$)", "g");
 	var result = regexp.exec(document.cookie);
 	return (result === null) ? null : result[1];
+}
+
+function runStartUpFunctions()
+{
+	for(var i = 0; i < startUpFunctions.length; ++i)
+	{
+		startUpFunctions[i]();
+	}
+
+	startUpFunctions = [];
+}
+
+function addStartUpFunction(func)
+{
+	startUpFunctions.push(func);
+}
+
+function fillClientTerminal(text)
+{
+	if(!connected)
+	{
+		startUpFunctions.push(function(){editors[clientName].setValue(text, 0); editors[clientName].navigateFileStart();});
+	}
+
+	else
+	{
+		editors[clientName].setValue(text, 0);
+		editors[clientName].navigateFileStart();
+	}
 }
