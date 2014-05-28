@@ -19,11 +19,12 @@
 -- | Chad
 -------------------------------------------------------------------------------------------------------------------------
 
-------------
+-- Panner Crash testing code
+let testSynth = sin 440 >> perc 0 0.3 1 >> auxOut 2 >> play
+let test = auxIn 2 >> pan -1 >> auxThrough 2 >> play
+
+
 -- coleJI
-------------
-
-
 ff = degree2Freq coleJI
 
 -- section 1 stuff
@@ -78,6 +79,24 @@ let hsn => sin (env [1000, 200] [0.07] 0 1) >> perc2 0 1 0.07 >> add (pink 0.25)
 let hhh => square (pow 2 $ tstutter 3 $ pseq [1..14]) >> pink >> pan -0.25 >> perc 0 0.3 0.07
 
 hdrums +> (pseq [hdb, hhh, hhh, hhh, hhh, hsn] >> pwarp (psin 0.75)) | (/2)
+
+
+---------------
+-- Evil
+---------------
+
+-- This is more dreamy... I'm really bad at this.....
+let hIB => os >> en >> auxOut 5
+    where
+        fr = d2f iwato (pseries 3 7 >> tfold -13 6)
+        os = sin fr
+        en = perc 0 0.5 (tempoSeconds/2)
+        
+
+let hIwFX = auxIn 5 >> delay (tempoSeconds*2) 0.2 >> play
+stop hIwFX
+
+hIwato +> hIB | (/2) _ (/2) (/2) (/2) _ (/2) (/2) _ (/2) _ (/4) (/4) _ _
 
 
 ---------------

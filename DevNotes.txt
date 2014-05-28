@@ -1817,3 +1817,12 @@ let synth freq => saw freq >> lowpass (freq * 4) 1 >> perc 0 0.6 0.5
 -- We can use the progression similar to a scale, with c2f instead of d2f. c2f takes a scale and a chord degree.
 -- The chord degree can be any integer including negative numbers and will scale octaves appropriately
 bass ~> synth (pseries 0 (pseq [-2,5]) >> pfold -2 6) | (c2f doom)
+
+
+-- block chords, right now doesn't work in patterns :(
+let chordSynth freqs => map sf freqs
+    where
+        sf freq = saw freq >> lowpass (freq * 16) 0 >> perc 0 0.3 0.3
+
+map play $ chordSynth $ blockChord doom
+
