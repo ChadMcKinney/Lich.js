@@ -52,6 +52,19 @@ var _pow = Math.pow(10,4);
 var pi = Math.PI;
 var halfPi = pi / 2;
 var twoPi = pi * 2;
+var _nullNode = null; // Returned when resource pools run out of preallocated nodes
+var _zeroNode = null;
+var _zeroInNode = null;
+var _maxNodes = 5000; // maximum number of nodes in a resource pool
+var _numScriptNodes = 0;
+var _numScriptFXNodes = 0;
+var _scriptPool = [];
+var _scriptFXPools = [[],[],[],[],[],[],[],[],[],[]]; // script pools for various input sizes
+//var _maxFXNodes = {0:5000,1:2500,2:2500,3:2500,4:1000,5:500,6:500,7:500,8:500,9:500}; // Max number of nodes for various input sizes
+var _maxFXNodes = 1000;
+var _numScriptFXNodes = [0,0,0,0,0,0,0,0,0,0]; // current number of fx nodes for various input sizes
+var _zeroInNodes = [];
+var _blankBuffer = null;
 context = null;
 ugenList = ["distortion3","distortion4"]; // created in Prelude.lich, but can't reach _createUGen from Lich proper, so added here instead.
 
@@ -116,6 +129,15 @@ Soliton.init = function()
 
 		context = Soliton.context;
 		_createPrimitive("context", context);
+		/*_zeroInNode = Soliton.createOscillatorNode("sine", 0);
+		_zeroInNode.start(0);
+		_zeroInNode = sin(0);
+		_zeroInNode.start(0);*/
+		_nullNode = Soliton.context.createGain();
+		_zeroNode = Soliton.context.createGain();
+		_zeroNode.connect(Soliton.masterGain);
+		_zeroNode.gain.value = 0;
+		_blankBuffer = new Float32Array(1024);
 	}
 
 	catch(e)
@@ -137,6 +159,200 @@ Soliton.print = function(text) // You should probably redefine Soliton.print som
 Soliton.printError = function(text) // You should probably redefine Soliton.print somewhere in your code!!!!
 {
 	Lich.post(text);
+}
+
+// _requestScriptNode asks the _scriptPool for a node if there is one available for allocation or already preallocated. If not return _nullNode, a default gainNode
+function _requestScriptNode()
+{
+	if(_scriptPool.length > 0)
+	{
+		// Soliton.print("reuse node: " + _numScriptNodes);
+		return _scriptPool.pop();
+	}
+	
+	else if(_numScriptNodes < _maxNodes)
+	{
+		_numScriptNodes++;
+		// Soliton.print("new node: " + _numScriptNodes);
+		return Soliton.context.createScriptProcessor(1024, 0, 1);
+	}
+
+	else
+	{
+		Soliton.print("_nullNode");
+		return _nullNode;
+	}
+}
+
+// free a script node. If it's null, ignore it, if we have room in the pool, keep it, otherwise don't hold on to it but lower the _numScriptNodes
+function _freeScriptNode(scriptNode)
+{
+	scriptNode.disconnect();
+	
+	if(scriptNode === _nullNode)
+	{
+		// Soliton.print("FREE NULL NODE?");
+		return; // don't need to hold onto the null node
+	}
+
+	// Soliton.print("RECAPTURE!");
+	_scriptPool.push(scriptNode);
+		
+	/*
+	if(_scriptPool.length < _maxNodes)
+	{
+		_scriptPool.push(scriptNode);
+	}
+
+	else
+	{
+		_numScriptNodes--;
+		scriptNode = null;
+	}*/
+}
+
+function _blankAudioProcess(e)
+{
+	Soliton.print("_blank");
+	e.outputBuffer.getChannelData(0).set(_blankBuffer);
+}
+
+function _blankCalc(numInputs)
+{
+	return function(e)
+	{
+		for(var i = 0; i < numInputs; ++i)
+		{
+			Soliton.print(i);
+			e.inputBuffer.getChannelData(i).set(_blankBuffer);
+		}
+
+		e.outputBuffer.getChannelData(0).set(_blankBuffer);
+		Soliton.print("_blank");
+	}
+}
+
+// _requestScriptNode asks the _scriptPool for a node if there is one available for allocation or already preallocated. If not return _nullNode, a default gainNode
+function _requestScriptFXNode(numInputs)
+{
+	/* ONCE GOOGLE PATCHES THE DAMN MEMORY LEAK WE CAN RIP ALL OF THIS OUT!
+	if(_scriptFXPools[numInputs].length > 0)
+	{
+		Soliton.print("reuseFX: " + _numScriptFXNodes[numInputs]);
+		return _scriptFXPools[numInputs].pop();
+	}
+	
+	else if(_numScriptFXNodes[numInputs] < _maxFXNodes)
+	{*/
+		// Soliton.print("new fx: " + _numScriptFXNodes[numInputs]);
+		//_numScriptFXNodes[numInputs] += 1;
+
+	    if(numInputs == 0)
+			return _requestScriptNode();
+	
+		var preNode = null;
+	    var scriptNode = Soliton.context.createScriptProcessor(1024, numInputs, 1);
+	
+		if(numInputs == 1)
+		{
+			preNode = Soliton.context.createGain();
+		}
+
+		else
+		{
+			preNode = Soliton.context.createChannelMerger(numInputs);
+			preNode.channelInterpretation = "discrete";
+		}
+
+	    //scriptNode.script = scriptNode;
+	    //return scriptNode;
+		
+		var postNode = Soliton.context.createGain();
+		preNode.connect(scriptNode);
+		scriptNode.connect(postNode);
+		postNode.pre = preNode;
+		postNode.script = scriptNode;
+		return postNode;
+	
+	/*}
+
+	else
+	{
+		Soliton.print("_nullFXNode!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+		return _nullNode; // If we've hit the max number of voices return the _nullNode, which is just a simple gain node.
+	}*/
+}
+
+// free an FX script node (a script node with an input).
+// If it's null, ignore it, if we have room in the pool, keep it, otherwise don't hold on to it but lower the _numScriptNodes
+function _freeScriptFXNode(scriptNode, numInputs)
+{
+	if(numInputs == 0)
+		return _freeScriptNode(scriptNode);
+	
+	scriptNode.disconnect(); // make sure we're not connecting to anything else
+	// scriptNode.script.onaudioprocess = _blankAudioProcess;
+	
+	
+	if(scriptNode === _nullNode)
+		return; // don't need to hold onto the null node 
+
+	// scriptNode.pre.disconnect();
+	// scriptNode.script.disconnect();
+	// scriptNode.script.onaudioprocess = null;
+	scriptNode.onaudioprocess = null;
+	return;
+
+	
+	if(_scriptFXPools[numInputs].length < _maxFXNodes) // If we haven't hit our max nodes let's hang on to this one
+	{
+		// scriptNode.script.onaudioprocess = _blankCalc(numInputs); // reassign the audio call back to simply generate 0's
+		scriptNode.script.onaudioprocess = _blankAudioProcess;
+
+		//_scriptFXPools[numInputs].push(scriptNode);
+
+		/*
+		//Soliton.print("save you for later...");
+		scriptNode.onaudioprocess = _blankCalc(numInputs); // reassign the audio call back to simply generate 0's
+		// _zeroInNode.connect(scriptNode);
+		
+		//_scriptFXPools[numInputs].push(scriptNode); // push into pool for reuse
+		
+		var merger = Soliton.context.createChannelMerger(numInputs);
+		merger.channelInterpretation = "discrete";
+		var zeroInNodes = [];
+		
+		for(var i = 0; i < numInputs; ++i)
+		{
+			var zeroInNode = sin(0);
+			zeroInNode.start(0);
+			zeroInNode.connect(merger, 0, i);
+			zeroInNodes.push(zeroInNode);
+		}
+
+		merger.connect(scriptNode);*/
+
+		scriptNode.connect(_zeroNode); // connect to a dummy node to make the audio callback actually run
+		//_scriptFXPools[numInputs].push(scriptNode);
+
+		setTimeout( // Set a callback for two seconds later. This gives the node time to clean out the input with 0's before we reuse
+			function()
+			{
+				scriptNode.disconnect(); // disconnect from the dummy destination _zeroNode
+				// scriptNode.script.onaudioprocess = null;
+				_scriptFXPools[numInputs].push(scriptNode);
+				// Soliton.print("push");
+			},
+			5000
+		);
+	}
+		
+	else
+	{
+		//Soliton.print("GTFO!");
+		_numScriptFXNodes[numInputs] -= 1;
+		scriptNode = null; // be free node, be free!
+	}
 }
 
 Soliton.roundUp = function(inval, quant)
@@ -4328,9 +4544,10 @@ function iir(coeff1, coeff2, input)
 		outMem.push(0);
 	}
 
-	var filt = Soliton.context.createScriptProcessor(1024, 1, 1);
-
-	filt.onaudioprocess = function(event)
+	//var filt = Soliton.context.createScriptProcessor(1024, 1, 1);
+	var filt = _requestScriptFXNode(1);
+	
+	filt.script.onaudioprocess = function(event)
 	{
 		var inputArray = event.inputBuffer.getChannelData(0);
 		var outputArray = event.outputBuffer.getChannelData(0);
@@ -4361,12 +4578,12 @@ function iir(coeff1, coeff2, input)
 
 
 	filt._lichType = AUDIO;
-	input.connect(filt);
+	input.connect(filt.pre);
 	filt.startAll = function(time){input.startAll(time)};
 	filt.stopAll = function(time)
 	{
 		input.stopAll(time);
-		setTimeout(function(){input.disconnect(0); filt.disconnect(0)}, (time - Soliton.context.currentTime) * 1000)
+		setTimeout(function(){input.disconnect(0); /*filt.disconnect(0)*/ _freeScriptFXNode(filt,1);}, (time - Soliton.context.currentTime) * 1000)
 	};
 
 	return filt;
@@ -4379,43 +4596,48 @@ function fir(coeff, input)
 	if(!(coeff instanceof Array))
 		throw new Error("fir coeff must be a list.");
 
-	var inMem = new Array();
+	
 
-	for(var i = 0; i < coeff.length; ++i)
-	{
-		inMem.push(0);
-	}
-
-	var filt = Soliton.context.createScriptProcessor(1024, 1, 1);
-
-	filt.onaudioprocess = function(event)
-	{
-		var inputArray = event.inputBuffer.getChannelData(0);
-		var outputArray = event.outputBuffer.getChannelData(0);
-
-		for(var i = 0; i < 1024; i ++)
+	// var filt = Soliton.context.createScriptProcessor(1024, 1, 1);
+	var filt = _requestScriptFXNode(1);
+	
+	filt.script.onaudioprocess = (
+		function()
 		{
-			inMem[0] = inputArray[i];
-			var res = inMem[0] * coeff[0];
-			
-			for(var j = coeff.length - 1; j > 0; --j)
-			{
-				res += coeff[j] * inMem[j];
-				inMem[j] = inMem[j - 1];
-			}
-			
-			outputArray[i] = res;
-		}
-	}
+			var inMem = new Array();
 
+			for(var i = 0; i < coeff.length; ++i)
+			{
+				inMem.push(0);
+			}
+			return function(event)
+			{
+				var inputArray = event.inputBuffer.getChannelData(0);
+				var outputArray = event.outputBuffer.getChannelData(0);
+
+				for(var i = 0; i < 1024; i ++)
+				{
+					inMem[0] = inputArray[i];
+					var res = inMem[0] * coeff[0];
+					
+					for(var j = coeff.length - 1; j > 0; --j)
+					{
+						res += coeff[j] * inMem[j];
+						inMem[j] = inMem[j - 1];
+					}
+					
+					outputArray[i] = res;
+				}
+			}
+		})();
 
 	filt._lichType = AUDIO;
-	input.connect(filt);
+	input.connect(filt.pre);
 	filt.startAll = function(time){input.startAll(time)};
 	filt.stopAll = function(time)
 	{
 		input.stopAll(time);
-		setTimeout(function(){input.disconnect(); filt.disconnect()}, (time - Soliton.context.currentTime) * 1000)
+		setTimeout(function(){_freeScriptFXNode(filt, 1);/*filt.disconnect();*/filt.onaudioprocess = 0;input.disconnect(); }, (time - Soliton.context.currentTime) * 1000)
 	};
 
 	return filt;
@@ -4432,33 +4654,38 @@ function fos(a0, a1, b1, input)
 	if(typeof b1 === "number")
 		b1 = dc(b1);
 
-	var filt = Soliton.context.createScriptProcessor(1024, 4, 1);
-	var lastIn = 0;
-	var lastOut = 0;
+	//var filt = Soliton.context.createScriptProcessor(1024, 4, 1);
+	var filt = _requestScriptFXNode(4);
 
-	filt.onaudioprocess = function(event)
-	{
-		var a0Array = event.inputBuffer.getChannelData(0);
-		var a1Array = event.inputBuffer.getChannelData(1);
-		var b1Array = event.inputBuffer.getChannelData(2);
-		var inputArray = event.inputBuffer.getChannelData(3);
-		var outputArray = event.outputBuffer.getChannelData(0);
-
-		for(var i = 0; i < 1024; i ++)
+	filt.script.onaudioprocess = (
+		function()
 		{
-			lastOut = outputArray[i] = (inputArray[i] * a0Array[i]) + (lastIn * a1Array[i]) + (lastOut * b1Array[i]);
-			lastIn = inputArray[i];
-		}
-	}
+			var lastIn = 0;
+			var lastOut = 0;
+			return function(event)
+			{
+				var a0Array = event.inputBuffer.getChannelData(0);
+				var a1Array = event.inputBuffer.getChannelData(1);
+				var b1Array = event.inputBuffer.getChannelData(2);
+				var inputArray = event.inputBuffer.getChannelData(3);
+				var outputArray = event.outputBuffer.getChannelData(0);
 
-	var merger = Soliton.context.createChannelMerger(4);
-	merger.channelInterpretation = "discrete";
-	a0.connect(merger, 0, 0);
-	a1.connect(merger, 0, 1);
-	b1.connect(merger, 0, 2);
-	input.connect(merger, 0, 3);
-	merger.connect(filt);
+				for(var i = 0; i < 1024; i ++)
+				{
+					lastOut = outputArray[i] = (inputArray[i] * a0Array[i]) + (lastIn * a1Array[i]) + (lastOut * b1Array[i]);
+					lastIn = inputArray[i];
+				}
+			}
+		})();
 
+	//var merger = Soliton.context.createChannelMerger(4);
+	//merger.channelInterpretation = "discrete";
+	a0.connect(filt.pre, 0, 0);
+	a1.connect(filt.pre, 0, 1);
+	b1.connect(filt.pre, 0, 2);
+	input.connect(filt.pre, 0, 3);
+	//merger.connect(filt);
+	
 	filt._lichType = AUDIO;
 	filt.startAll = function(time)
 	{
@@ -4480,12 +4707,13 @@ function fos(a0, a1, b1, input)
 				a0.disconnect();
 				a1.disconnect();
 				b1.disconnect();
-				merger.disconnect();
+				// merger.disconnect();
 				input.disconnect(); 
-				filt.disconnect()
+				_freeScriptFXNode(filt,4);
 			}, 
 			(time - Soliton.context.currentTime) * 1000
-		)
+		);
+
 	};
 
 	return filt;
@@ -4506,14 +4734,15 @@ function sos(a0, a1, a2, b1, b2, input)
 	if(typeof b2 === "number")
 		b2 = dc(b2);
 
-	var filt = Soliton.context.createScriptProcessor(1024, 6, 1);
+	//var filt = Soliton.context.createScriptProcessor(1024, 6, 1);
+	var filt = _requestScriptFXNode(6);
 	var n1 = 0;
 	var n2 = 0;
 	var o1 = 0;
 	var o2 = 0;
 	var tempO2 = 0;
 
-	filt.onaudioprocess = function(event)
+	filt.script.onaudioprocess = function(event)
 	{
 		var a0Array = event.inputBuffer.getChannelData(0);
 		var a1Array = event.inputBuffer.getChannelData(1);
@@ -4533,15 +4762,15 @@ function sos(a0, a1, a2, b1, b2, input)
 		}
 	}
 
-	var merger = Soliton.context.createChannelMerger(6);
-	merger.channelInterpretation = "discrete";
-	a0.connect(merger, 0, 0);
-	a1.connect(merger, 0, 1);
-	a2.connect(merger, 0, 2);
-	b1.connect(merger, 0, 3);
-	b2.connect(merger, 0, 4);
-	input.connect(merger, 0, 5);
-	merger.connect(filt);
+	// var merger = Soliton.context.createChannelMerger(6);
+	// merger.channelInterpretation = "discrete";
+	a0.connect(filt.pre, 0, 0);
+	a1.connect(filt.pre, 0, 1);
+	a2.connect(filt.pre, 0, 2);
+	b1.connect(filt.pre, 0, 3);
+	b2.connect(filt.pre, 0, 4);
+	input.connect(filt.pre, 0, 5);
+	//merger.connect(filt);
 
 	filt._lichType = AUDIO;
 	filt.startAll = function(time)
@@ -4570,9 +4799,10 @@ function sos(a0, a1, a2, b1, b2, input)
 				a2.disconnect();
 				b1.disconnect();
 				b2.disconnect();
-				merger.disconnect();
+				/*merger.disconnect();*/
 				input.disconnect(); 
-				filt.disconnect()
+				_freeScriptFXNode(filt, 6);
+				//filt.disconnect()
 			}, 
 			(time - Soliton.context.currentTime) * 1000
 		)
@@ -4595,10 +4825,11 @@ function onepole(coeff, input)
 		inMem.push(0);
 	}
 
-	var filt = Soliton.context.createScriptProcessor(1024, 1, 1);
+	// var filt = Soliton.context.createScriptProcessor(1024, 1, 1);
+	var filt = _requestScriptFXNode(1);
 	var lastSample = 0;
 
-	filt.onaudioprocess = function(event)
+	filt.script.onaudioprocess = function(event)
 	{
 		var inputArray = event.inputBuffer.getChannelData(0);
 		var outputArray = event.outputBuffer.getChannelData(0);
@@ -4610,12 +4841,12 @@ function onepole(coeff, input)
 	}
 
 	filt._lichType = AUDIO;
-	input.connect(filt);
+	input.connect(filt.pre);
 	filt.startAll = function(time){input.startAll(time)};
 	filt.stopAll = function(time)
 	{
 		input.stopAll(time);
-		setTimeout(function(){input.disconnect(); filt.disconnect()}, (time - Soliton.context.currentTime) * 1000)
+		setTimeout(function(){input.disconnect(); _freeScriptFXNode(filt, 1);/*filt.disconnect()*/}, (time - Soliton.context.currentTime) * 1000)
 	};
 
 	return filt;
@@ -4625,10 +4856,11 @@ _createUGen("onepole", onepole);
 
 function hpz1(input)
 {
-	var filt = Soliton.context.createScriptProcessor(1024, 1, 1);
+	// var filt = Soliton.context.createScriptProcessor(1024, 1, 1);
+	var filt = _requestScriptFXNode(1);
 	var lastVal = 0.0;
 
-	filt.onaudioprocess = function(event)
+	filt.script.onaudioprocess = function(event)
 	{
 		var inputArray = event.inputBuffer.getChannelData(0);
 		var outputArray = event.outputBuffer.getChannelData(0);
@@ -4642,12 +4874,12 @@ function hpz1(input)
 
 
 	filt._lichType = AUDIO;
-	input.connect(filt);
+	input.connect(filt.pre);
 	filt.startAll = function(time){input.startAll(time)};
 	filt.stopAll = function(time)
 	{
 		input.stopAll(time);
-		setTimeout(function(){input.disconnect(); filt.disconnect()}, (time - Soliton.context.currentTime) * 1000)
+		setTimeout(function(){input.disconnect(); _freeScriptFXNode(filt, 1);/*filt.disconnect()*/}, (time - Soliton.context.currentTime) * 1000)
 	};
 
 	return filt;
@@ -4657,12 +4889,13 @@ _createUGen("hpz1", hpz1);
 
 function hpz2(input)
 {
-	var filt = Soliton.context.createScriptProcessor(1024, 1, 1);
+	// var filt = Soliton.context.createScriptProcessor(1024, 1, 1);
+	var filt = _requestScriptFXNode(1);
 	var lastVal1 = 0.0;
 	var lastVal2 = 0.0;
 
 
-	filt.onaudioprocess = function(event)
+	filt.script.onaudioprocess = function(event)
 	{
 		var inputArray = event.inputBuffer.getChannelData(0);
 		var outputArray = event.outputBuffer.getChannelData(0);
@@ -4677,12 +4910,12 @@ function hpz2(input)
 
 
 	filt._lichType = AUDIO;
-	input.connect(filt);
+	input.connect(filt.pre);
 	filt.startAll = function(time){input.startAll(time)};
 	filt.stopAll = function(time)
 	{
 		input.stopAll(time);
-		setTimeout(function(){input.disconnect(); filt.disconnect()}, (time - Soliton.context.currentTime) * 1000)
+		setTimeout(function(){input.disconnect(); _freeScriptFXNode(filt, 1);/*filt.disconnect()*/}, (time - Soliton.context.currentTime) * 1000)
 	};
 
 	return filt;
@@ -4692,10 +4925,11 @@ _createUGen("hpz2", hpz2);
 
 function lpz1(input)
 {
-	var filt = Soliton.context.createScriptProcessor(1024, 1, 1);
+	// var filt = Soliton.context.createScriptProcessor(1024, 1, 1);
+	var filt = _requestScriptFXNode(1);
 	var lastVal = 0.0;
 
-	filt.onaudioprocess = function(event)
+	filt.script.onaudioprocess = function(event)
 	{
 		var inputArray = event.inputBuffer.getChannelData(0);
 		var outputArray = event.outputBuffer.getChannelData(0);
@@ -4709,12 +4943,12 @@ function lpz1(input)
 
 
 	filt._lichType = AUDIO;
-	input.connect(filt);
+	input.connect(filt.pre);
 	filt.startAll = function(time){input.startAll(time)};
 	filt.stopAll = function(time)
 	{
 		input.stopAll(time);
-		setTimeout(function(){input.disconnect(); filt.disconnect()}, (time - Soliton.context.currentTime) * 1000)
+		setTimeout(function(){input.disconnect(); _freeScriptFXNode(filt, 1);/*filt.disconnect()*/}, (time - Soliton.context.currentTime) * 1000)
 	};
 
 	return filt;
@@ -4724,12 +4958,13 @@ _createUGen("lpz1", lpz1);
 
 function lpz2(input)
 {
-	var filt = Soliton.context.createScriptProcessor(1024, 1, 1);
+	// var filt = Soliton.context.createScriptProcessor(1024, 1, 1);
+	var filt = _requestScriptFXNode(1);
 	var lastVal1 = 0.0;
 	var lastVal2 = 0.0;
 
 
-	filt.onaudioprocess = function(event)
+	filt.script.onaudioprocess = function(event)
 	{
 		var inputArray = event.inputBuffer.getChannelData(0);
 		var outputArray = event.outputBuffer.getChannelData(0);
@@ -4744,12 +4979,12 @@ function lpz2(input)
 
 
 	filt._lichType = AUDIO;
-	input.connect(filt);
+	input.connect(filt.pre);
 	filt.startAll = function(time){input.startAll(time)};
 	filt.stopAll = function(time)
 	{
 		input.stopAll(time);
-		setTimeout(function(){input.disconnect(); filt.disconnect()}, (time - Soliton.context.currentTime) * 1000)
+		setTimeout(function(){input.disconnect(); _freeScriptFXNode(filt, 1);/*filt.disconnect()*/}, (time - Soliton.context.currentTime) * 1000)
 	};
 
 	return filt;
@@ -4759,12 +4994,13 @@ _createUGen("lpz2", lpz2);
 
 function bpz2(input)
 {
-	var filt = Soliton.context.createScriptProcessor(1024, 1, 1);
+	// var filt = Soliton.context.createScriptProcessor(1024, 1, 1);
+	var filt = _requestScriptFXNode(1);
 	var lastVal1 = 0.0;
 	var lastVal2 = 0.0;
 
 
-	filt.onaudioprocess = function(event)
+	filt.script.onaudioprocess = function(event)
 	{
 		var inputArray = event.inputBuffer.getChannelData(0);
 		var outputArray = event.outputBuffer.getChannelData(0);
@@ -4779,12 +5015,12 @@ function bpz2(input)
 
 
 	filt._lichType = AUDIO;
-	input.connect(filt);
+	input.connect(filt.pre);
 	filt.startAll = function(time){input.startAll(time)};
 	filt.stopAll = function(time)
 	{
 		input.stopAll(time);
-		setTimeout(function(){input.disconnect(); filt.disconnect()}, (time - Soliton.context.currentTime) * 1000)
+		setTimeout(function(){input.disconnect(); _freeScriptFXNode(filt, 1);/*filt.disconnect()*/}, (time - Soliton.context.currentTime) * 1000)
 	};
 
 	return filt;
@@ -4794,12 +5030,13 @@ _createUGen("bpz2", bpz2);
 
 function brz2(input)
 {
-	var filt = Soliton.context.createScriptProcessor(1024, 1, 1);
+	// var filt = Soliton.context.createScriptProcessor(1024, 1, 1);
+	var filt = _requestScriptFXNode(1);
 	var lastVal1 = 0.0;
 	var lastVal2 = 0.0;
 
 
-	filt.onaudioprocess = function(event)
+	filt.script.onaudioprocess = function(event)
 	{
 		var inputArray = event.inputBuffer.getChannelData(0);
 		var outputArray = event.outputBuffer.getChannelData(0);
@@ -4814,12 +5051,12 @@ function brz2(input)
 
 
 	filt._lichType = AUDIO;
-	input.connect(filt);
+	input.connect(filt.pre);
 	filt.startAll = function(time){input.startAll(time)};
 	filt.stopAll = function(time)
 	{
 		input.stopAll(time);
-		setTimeout(function(){input.disconnect(); filt.disconnect()}, (time - Soliton.context.currentTime) * 1000)
+		setTimeout(function(){input.disconnect(); _freeScriptFXNode(filt, 1);/*filt.disconnect()*/}, (time - Soliton.context.currentTime) * 1000)
 	};
 
 	return filt;
@@ -4827,24 +5064,21 @@ function brz2(input)
 
 _createUGen("brz2", brz2);
 
-Soliton.white = function(event)
+function killNode(node)
 {
-	var outputArrayL = event.outputBuffer.getChannelData(0);
-	//var outputArrayR = event.outputBuffer.getChannelData(1);
-
-	for(var i = 0; i < 1024; ++i)
+	return function()
 	{
-		outputArrayL[i] = Math.random() * 2 - 1;
-		//outputArrayR[i] = val;
+		node.onaudioprocess = null;
+		node.disconnect();
+		// node.addEventListener('audioprocess', null, false);
+		node = null;
 	}
 }
 
-Soliton.whiteTable = [];
-
 function white(amp)
 {
-	var whiteFunc = Soliton.context.createScriptProcessor(1024, 0, 1);
-
+	//var whiteFunc = Soliton.context.createScriptProcessor(1024, 0, 1);
+	var whiteFunc = _requestScriptNode();
 	whiteFunc.onaudioprocess = function(e) {
         var output = e.outputBuffer.getChannelData(0);
         for (var i = 0; i < 1024; i++) {
@@ -4866,7 +5100,7 @@ function white(amp)
 	}
 		
 	whiteFunc.connect(whiteGain);
-
+	
 	var gain = Soliton.context.createGain();
 	gain.gain.value = 0;
 	whiteGain.connect(gain);
@@ -4889,11 +5123,16 @@ function white(amp)
 		setTimeout(
 			function()
 			{
-				whiteFunc.disconnect();
+				_freeScriptNode(whiteFunc);
 				whiteGain.disconnect();
 				gain.disconnect();
 				if(amp._lichType == AUDIO)
 					amp.disconnect();
+
+				whiteFunc = null;
+				whiteGain = null;
+				gain = null;
+				amp = null;
 			}, 
 			(time - Soliton.context.currentTime) * 1000)
 	};
@@ -4907,8 +5146,9 @@ _createUGen("white", white);
 // Thanks to noise hack for the nice implementation: http://noisehack.com/generate-noise-web-audio-api/#pink-noise
 function pink(amp)
 {
-	var pinkFunc = Soliton.context.createScriptProcessor(1024, 0, 1);
-
+	//var pinkFunc = Soliton.context.createScriptProcessor(1024, 0, 1);
+	var pinkFunc = _requestScriptNode();
+	
 	var b0, b1, b2, b3, b4, b5, b6;
     b0 = b1 = b2 = b3 = b4 = b5 = b6 = 0.0;
     pinkFunc.onaudioprocess = function(e) {
@@ -4959,7 +5199,7 @@ function pink(amp)
 		setTimeout(
 			function()
 			{
-				pinkFunc.disconnect();
+				_freeScriptNode(pinkFunc);
 				pinkGain.disconnect();
 				gain.disconnect();
 				if(amp._lichType == AUDIO)
@@ -4978,7 +5218,8 @@ _createUGen("pink", pink);
 // Thanks to noise hack for the nice implementation: http://noisehack.com/generate-noise-web-audio-api/#pink-noise
 function violet(amp)
 {
-	var violetFunc = Soliton.context.createScriptProcessor(1024, 0, 1);
+	//var violetFunc = Soliton.context.createScriptProcessor(1024, 0, 1);
+	var violetFunc = _requestScriptNode();
 	var lastVal = 0.0;
     violetFunc.onaudioprocess = function(e) {
         var output = e.outputBuffer.getChannelData(0);
@@ -5021,7 +5262,8 @@ function violet(amp)
 		setTimeout(
 			function()
 			{
-				violetFunc.disconnect();
+				//violetFunc.disconnect();
+				_freeScriptNode(violetFunc);
 				gain.disconnect();
 				preGain.disconnect();
 				if(amp._lichType == AUDIO)
@@ -5039,7 +5281,8 @@ _createUGen("violet", violet);
 // Thanks to noise hack for the nice implementation: http://noisehack.com/generate-noise-web-audio-api/#brown-noise
 function brown(amp)
 {
-	var brownFunc = Soliton.context.createScriptProcessor(1024, 0, 1);
+	// var brownFunc = Soliton.context.createScriptProcessor(1024, 0, 1);
+	var brownFunc = _requestScriptNode();
 	var lastOut = 0;
 	brownFunc.onaudioprocess = function(e) {
         var output = e.outputBuffer.getChannelData(0);
@@ -5083,7 +5326,8 @@ function brown(amp)
 		setTimeout(
 			function()
 			{
-				brownFunc.disconnect();
+				// brownFunc.disconnect();
+				_freeScriptNode(brownFunc);
 				gain.disconnect();
 				preGain.disconnect();
 				if(amp._lichType == AUDIO)
@@ -5100,8 +5344,9 @@ _createUGen("brown", brown);
 
 function clipNoise(amp)
 {
-	var clipFunc = Soliton.context.createScriptProcessor(1024, 0, 1);
-
+	// var clipFunc = Soliton.context.createScriptProcessor(1024, 0, 1);
+	var clipFunc = _requestScriptNode();
+	
 	clipFunc.onaudioprocess = function(e) {
         var output = e.outputBuffer.getChannelData(0);
         for (var i = 0; i < 1024; i++) {
@@ -5141,7 +5386,8 @@ function clipNoise(amp)
 		setTimeout(
 			function()
 			{
-				clipFunc.disconnect();
+				// clipFunc.disconnect();
+				_freeScriptNode(clipFunc);
 				gain.disconnect();
 				preGain.disconnect();
 				if(amp._lichType == AUDIO)
@@ -5159,7 +5405,8 @@ _createUGen("clipNoise", clipNoise);
 function impulse(freq)
 {
 	var inputs = freq._lichType == AUDIO ? 1 : 0;
-	var ugenFunc = Soliton.context.createScriptProcessor(1024, inputs, 1);
+	// var ugenFunc = Soliton.context.createScriptProcessor(1024, inputs, 1);
+	var ugenFunc = _requestScriptFXNode(inputs);
 	var samplesPerCycle = 1;
 	var counter = 0;
 
@@ -5167,7 +5414,7 @@ function impulse(freq)
 	if(inputs == 0)
 	{
 		samplesPerCycle = Soliton.context.sampleRate / freq;
-		ugenFunc.onaudioprocess = function(e) {
+		ugenFunc.script.onaudioprocess = function(e) {
 	        var output = e.outputBuffer.getChannelData(0);
 
 	        for (var i = 0; i < 1024; i++) {
@@ -5189,7 +5436,7 @@ function impulse(freq)
 
 	else
 	{
-		ugenFunc.onaudioprocess = function(e) {
+		ugenFunc.script.onaudioprocess = function(e) {
 	        var output = e.outputBuffer.getChannelData(0);
 	        var input = e.inputBuffer.getChannelData(0);
 
@@ -5212,7 +5459,7 @@ function impulse(freq)
 	}
 
 	if(freq._lichType == AUDIO)
-		freq.connect(ugenFunc);
+		freq.connect(ugenFunc.pre);
 
 	var gain = Soliton.context.createGain();
     gain.gain.value = 0;
@@ -5231,7 +5478,7 @@ function impulse(freq)
 		if(freq._lichType == AUDIO)
 			freq.stopAll(time);
 
-		setTimeout(function(){ugenFunc.disconnect();gain.disconnect()}, (time - Soliton.context.currentTime) * 1100)
+		setTimeout(function(){_freeScriptFXNode(ugenFunc, inputs);/*ugenFunc.disconnect();*/gain.disconnect()}, (time - Soliton.context.currentTime) * 1100)
 	};
 
 	gain._lichType = AUDIO;
@@ -5243,7 +5490,8 @@ _createUGen("impulse", impulse);
 function noiseN(freq)
 {
 	var inputs = freq._lichType == AUDIO ? 1 : 0;
-	var ugenFunc = Soliton.context.createScriptProcessor(1024, inputs, 1);
+	// var ugenFunc = Soliton.context.createScriptProcessor(1024, inputs, 1);
+	var ugenFunc = _requestScriptFXNode(inputs);
 	var samplesPerCycle = 1;
 	var counter = 0;
 	var currentSample = 0;
@@ -5251,7 +5499,7 @@ function noiseN(freq)
 	if(inputs == 0)
 	{
 		samplesPerCycle = Soliton.context.sampleRate / freq;
-		ugenFunc.onaudioprocess = function(e) {
+		ugenFunc.script.onaudioprocess = function(e) {
 	        var output = e.outputBuffer.getChannelData(0);
 
 	        for (var i = 0; i < 1024; i++) {
@@ -5270,7 +5518,7 @@ function noiseN(freq)
 
 	else
 	{
-		ugenFunc.onaudioprocess = function(e) {
+		ugenFunc.script.onaudioprocess = function(e) {
 	        var output = e.outputBuffer.getChannelData(0);
 	        var input = e.inputBuffer.getChannelData(0);
 
@@ -5290,7 +5538,7 @@ function noiseN(freq)
 	}
 
 	if(freq._lichType == AUDIO)
-		freq.connect(ugenFunc);
+		freq.connect(ugenFunc.pre);
 
 	var gain = Soliton.context.createGain();
     gain.gain.value = 0;
@@ -5309,7 +5557,7 @@ function noiseN(freq)
 		if(freq._lichType == AUDIO)
 			freq.stopAll(time);
 
-		setTimeout(function(){ugenFunc.disconnect();gain.disconnect()}, (time - Soliton.context.currentTime) * 1100)
+		setTimeout(function(){_freeScriptFXNode(ugenFunc, inputs);/*ugenFunc.disconnect();*/gain.disconnect()}, (time - Soliton.context.currentTime) * 1100)
 	};
 
 	gain._lichType = AUDIO;
@@ -5321,7 +5569,8 @@ _createUGen("noiseN", noiseN);
 function noiseL(freq)
 {
 	var inputs = freq._lichType == AUDIO ? 1 : 0;
-	var ugenFunc = Soliton.context.createScriptProcessor(1024, inputs, 1);
+	// var ugenFunc = Soliton.context.createScriptProcessor(1024, inputs, 1);
+	var ugenFunc = _requestScriptFXNode(inputs);
 	var samplesPerCycle = 1;
 	var counter = 0;
 	var currentSample = 0;
@@ -5334,7 +5583,7 @@ function noiseL(freq)
 	{
 		samplesPerCycle = Soliton.context.sampleRate / freq;
 		slope = 1 / samplesPerCycle;
-		ugenFunc.onaudioprocess = function(e) {
+		ugenFunc.script.onaudioprocess = function(e) {
 	        var output = e.outputBuffer.getChannelData(0);
 
 	        for (var i = 0; i < 1024; i++) {
@@ -5357,7 +5606,7 @@ function noiseL(freq)
 
 	else
 	{
-		ugenFunc.onaudioprocess = function(e) {
+		ugenFunc.script.onaudioprocess = function(e) {
 	        var output = e.outputBuffer.getChannelData(0);
 	        var input = e.inputBuffer.getChannelData(0);
 
@@ -5380,7 +5629,7 @@ function noiseL(freq)
 	}
 
 	if(freq._lichType == AUDIO)
-		freq.connect(ugenFunc);
+		freq.connect(ugenFunc.pre);
 
 	var gain = Soliton.context.createGain();
     gain.gain.value = 0;
@@ -5399,7 +5648,7 @@ function noiseL(freq)
 		if(freq._lichType == AUDIO)
 			freq.stopAll(time);
 
-		setTimeout(function(){ugenFunc.disconnect();gain.disconnect()}, (time - Soliton.context.currentTime) * 1100)
+		setTimeout(function(){_freeScriptFXNode(ugenFunc, inputs);/*ugenFunc.disconnect();*/gain.disconnect()}, (time - Soliton.context.currentTime) * 1100)
 	};
 
 	gain._lichType = AUDIO;
@@ -5411,7 +5660,8 @@ _createUGen("noiseL", noiseL);
 function noiseX(freq)
 {
 	var inputs = freq._lichType == AUDIO ? 1 : 0;
-	var ugenFunc = Soliton.context.createScriptProcessor(1024, inputs, 1);
+	//var ugenFunc = Soliton.context.createScriptProcessor(1024, inputs, 1);
+	var ugenFunc = _requestScriptFXNode(inputs);
 	var samplesPerCycle = 1;
 	var counter = 2;
 	var currentSample = 0;
@@ -5426,7 +5676,7 @@ function noiseX(freq)
 		samplesPerCycle = Soliton.context.sampleRate /  Math.max(freq, 0.001);
 		slope = 1 / samplesPerCycle;
 
-		ugenFunc.onaudioprocess = function(e) {
+		ugenFunc.script.onaudioprocess = function(e) {
 	        var output = e.outputBuffer.getChannelData(0);
 
 	        for (var i = 0; i < 1024; i++) {
@@ -5448,7 +5698,7 @@ function noiseX(freq)
 
 	else
 	{
-		ugenFunc.onaudioprocess = function(e) {
+		ugenFunc.script.onaudioprocess = function(e) {
 	        var output = e.outputBuffer.getChannelData(0);
 	        var input = e.inputBuffer.getChannelData(0);
 
@@ -5472,7 +5722,7 @@ function noiseX(freq)
 	}
 
 	if(freq._lichType == AUDIO)
-		freq.connect(ugenFunc);
+		freq.connect(ugenFunc.pre);
 
 	var gain = Soliton.context.createGain();
     gain.gain.value = 0;
@@ -5491,7 +5741,7 @@ function noiseX(freq)
 		if(freq._lichType == AUDIO)
 			freq.stopAll(time);
 
-		setTimeout(function(){ugenFunc.disconnect();gain.disconnect()}, (time - Soliton.context.currentTime) * 1100)
+		setTimeout(function(){_freeScriptFXNode(ugenFunc, inputs);/*ugenFunc.disconnect();*/gain.disconnect()}, (time - Soliton.context.currentTime) * 1100)
 	};
 
 	gain._lichType = AUDIO;
@@ -5503,7 +5753,8 @@ _createUGen("noiseX", noiseX);
 function dust(density)
 {
 	var inputs = density._lichType == AUDIO ? 1 : 0;
-	var ugenFunc = Soliton.context.createScriptProcessor(1024, inputs, 1);
+	// var ugenFunc = Soliton.context.createScriptProcessor(1024, inputs, 1);
+	var ugenFunc = _requestScriptFXNode(inputs);
 	var threshold = 0;
 	var scale = 1;
 	var sampleDur = 1 / Soliton.context.sampleRate;
@@ -5513,7 +5764,7 @@ function dust(density)
 		threshold = density * sampleDur;
         scale =  threshold > 0 ? 2 / threshold : 0;
 
-		ugenFunc.onaudioprocess = function(e) {
+		ugenFunc.script.onaudioprocess = function(e) {
 	        var output = e.outputBuffer.getChannelData(0);
 
 	        for (var i = 0; i < 1024; i++) 
@@ -5534,7 +5785,7 @@ function dust(density)
 
 	else
 	{
-		ugenFunc.onaudioprocess = function(e) {
+		ugenFunc.script.onaudioprocess = function(e) {
 	        var output = e.outputBuffer.getChannelData(0);
 	        var input = e.inputBuffer.getChannelData(0);
 
@@ -5554,7 +5805,7 @@ function dust(density)
 	}
 
 	if(density._lichType == AUDIO)
-		density.connect(ugenFunc);
+		density.connect(ugenFunc.pre);
 
 	var gain = Soliton.context.createGain();
     gain.gain.value = 0;
@@ -5573,7 +5824,7 @@ function dust(density)
 		if(density._lichType == AUDIO)
 			density.stopAll(time);
 
-		setTimeout(function(){ugenFunc.disconnect();gain.disconnect()}, (time - Soliton.context.currentTime) * 1100)
+		setTimeout(function(){_freeScriptFXNode(ugenFunc, inputs);/*ugenFunc.disconnect();*/gain.disconnect()}, (time - Soliton.context.currentTime) * 1100)
 	};
 
 	gain._lichType = AUDIO;
@@ -5587,7 +5838,8 @@ function slope(value1, value2, time)
 	if(typeof value1 !== "number" || typeof value2 !== "number" || typeof time !== "number")
 		throw new Error("line instantiated with a non-number argument. line can only be used with numbers.");
 
-	var ugenFunc = Soliton.context.createScriptProcessor(1024, 0, 1);
+	// var ugenFunc = Soliton.context.createScriptProcessor(1024, 0, 1);
+	var ugenFunc = _requestScriptNode();
 	var currentSample = value1;
 	var timeSamples = time * Soliton.context.sampleRate;
 	var sl = (value2 - value1) / timeSamples;
@@ -5625,7 +5877,7 @@ function slope(value1, value2, time)
 	gain.stopAll = function(time)
 	{
 		gain.gain.setValueAtTime(0, time + 0.1);
-		setTimeout(function(){ugenFunc.disconnect();gain.disconnect()}, (time - Soliton.context.currentTime) * 1100)
+		setTimeout(function(){_freeScriptFXNode(ugenFunc, inputs);/*ugenFunc.disconnect();*/gain.disconnect()}, (time - Soliton.context.currentTime) * 1100)
 	};
 
 	gain._lichType = AUDIO;
@@ -5639,7 +5891,8 @@ function slopeX(value1, value2, time)
 	if(typeof value1 !== "number" || typeof value2 !== "number" || typeof time !== "number")
 		throw new Error("line instantiated with a non-number argument. line can only be used with numbers.");
 
-	var ugenFunc = Soliton.context.createScriptProcessor(1024, 0, 1);
+	// var ugenFunc = Soliton.context.createScriptProcessor(1024, 0, 1);
+	var ugenFunc = _requestScriptNode();
 	var currentSample = value1;
 	var timeSamples = time * Soliton.context.sampleRate;
 	var sl = 0;
@@ -5684,7 +5937,7 @@ function slopeX(value1, value2, time)
 	gain.stopAll = function(time)
 	{
 		gain.gain.setValueAtTime(0, time + 0.1);
-		setTimeout(function(){ugenFunc.disconnect();gain.disconnect()}, (time - Soliton.context.currentTime) * 1100)
+		setTimeout(function(){_freeScriptFXNode(ugenFunc, inputs);/*ugenFunc.disconnect();*/gain.disconnect()}, (time - Soliton.context.currentTime) * 1100)
 	};
 
 	gain._lichType = AUDIO;
@@ -5698,12 +5951,13 @@ function toggle(input)
 	if(input._lichType != AUDIO)
 		throw new Error("toggle can only be used with audio ugens.");
 
-	var ugenFunc = Soliton.context.createScriptProcessor(1024, 1, 1);
+	//var ugenFunc = Soliton.context.createScriptProcessor(1024, 1, 1);
+	var ugenFunc = _requestScriptFXNode(1);
 	var prevVal = 0;
 	var curVal = 0;
 	var level = 0;
 
-	ugenFunc.onaudioprocess = function(e) {
+	ugenFunc.script.onaudioprocess = function(e) {
         var output = e.outputBuffer.getChannelData(0);
         var inputArray = e.inputBuffer.getChannelData(0);
 
@@ -5720,7 +5974,7 @@ function toggle(input)
 	var gain = Soliton.context.createGain();
     gain.gain.value = 0;
     ugenFunc.connect(gain);
-    input.connect(ugenFunc);
+    input.connect(ugenFunc.pre);
 
 	gain.startAll = function(time)
 	{
@@ -5732,7 +5986,7 @@ function toggle(input)
 	{
 		gain.gain.setValueAtTime(0, time + 0.1);
 		input.stopAll(time);
-		setTimeout(function(){ugenFunc.disconnect();gain.disconnect()}, (time - Soliton.context.currentTime) * 1100)
+		setTimeout(function(){/*ugenFunc.disconnect();*/_freeScriptFXNode(ugenFunc,1);gain.disconnect()}, (time - Soliton.context.currentTime) * 1100)
 	};
 
 	gain._lichType = AUDIO;
@@ -5746,12 +6000,13 @@ function latch(trig, input)
 	if(input._lichType != AUDIO || trig._lichType != AUDIO)
 		throw new Error("latch can only be used with audio ugens.");
 
-	var ugenFunc = Soliton.context.createScriptProcessor(1024, 2, 1);
+	// var ugenFunc = Soliton.context.createScriptProcessor(1024, 2, 1);
+	var ugenFunc = _requestScriptFXNode(2);
 	var prevVal = 0;
 	var curVal = 0;
 	var level = 0;
 
-	ugenFunc.onaudioprocess = function(e) {
+	ugenFunc.script.onaudioprocess = function(e) {
         var output = e.outputBuffer.getChannelData(0);
         var inputArray = e.inputBuffer.getChannelData(0);
         var triggerArray = e.inputBuffer.getChannelData(1);
@@ -5770,11 +6025,11 @@ function latch(trig, input)
     gain.gain.value = 0;
     ugenFunc.connect(gain);
     
-    var merger = Soliton.context.createChannelMerger(2);
-	merger.channelInterpretation = "discrete";
-	input.connect(merger, 0, 0);
-	trig.connect(merger, 0, 1);
-	merger.connect(ugenFunc);
+    // var merger = Soliton.context.createChannelMerger(2);
+	// merger.channelInterpretation = "discrete";
+	input.connect(ugenFunc.pre, 0, 0);
+	trig.connect(ugenFunc.pre, 0, 1);
+	// merger.connect(ugenFunc);
 
 	gain.startAll = function(time)
 	{
@@ -5789,7 +6044,7 @@ function latch(trig, input)
 		input.stopAll(time);
 		trig.stopAll(time);
 		setTimeout(
-			function(){ugenFunc.disconnect();gain.disconnect();merger.disconnect();input.disconnect();trig.disconnect()}, 
+			function(){_freeScriptFXNode(ugenFunc,2);gain.disconnect();/*ugenFunc.disconnect();merger.disconnect();*/input.disconnect();trig.disconnect()}, 
 			(time - Soliton.context.currentTime) * 1100
 		)
 	};
@@ -5805,12 +6060,13 @@ function gate(trig, input)
 	if(input._lichType != AUDIO || trig._lichType != AUDIO)
 		throw new Error("gate can only be used with audio ugens.");
 
-	var ugenFunc = Soliton.context.createScriptProcessor(1024, 2, 1);
+	// var ugenFunc = Soliton.context.createScriptProcessor(1024, 2, 1);
+	var ugenFunc = _requestScriptFXNode(2);
 	var prevVal = 0;
 	var curVal = 0;
 	var level = 0;
 
-	ugenFunc.onaudioprocess = function(e) {
+	ugenFunc.script.onaudioprocess = function(e) {
         var output = e.outputBuffer.getChannelData(0);
         var inputArray = e.inputBuffer.getChannelData(0);
         var triggerArray = e.inputBuffer.getChannelData(1);
@@ -5836,11 +6092,11 @@ function gate(trig, input)
     gain.gain.value = 0;
     ugenFunc.connect(gain);
     
-    var merger = Soliton.context.createChannelMerger(2);
-	merger.channelInterpretation = "discrete";
-	input.connect(merger, 0, 0);
-	trig.connect(merger, 0, 1);
-	merger.connect(ugenFunc);
+    // var merger = Soliton.context.createChannelMerger(2);
+	// merger.channelInterpretation = "discrete";
+	input.connect(ugenFunc.pre, 0, 0);
+	trig.connect(ugenFunc.pre, 0, 1);
+	// merger.connect(ugenFunc);
 
 	gain.startAll = function(time)
 	{
@@ -5855,7 +6111,7 @@ function gate(trig, input)
 		input.stopAll(time);
 		trig.stopAll(time);
 		setTimeout(
-			function(){ugenFunc.disconnect();gain.disconnect();merger.disconnect();input.disconnect();trig.disconnect()}, 
+			function(){_freeScriptFXNode(ugenFunc,2);gain.disconnect();/*ugenFunc.disconnect();merger.disconnect();*/input.disconnect();trig.disconnect()}, 
 			(time - Soliton.context.currentTime) * 1100
 		)
 	};
@@ -5879,11 +6135,12 @@ function divider(div, input)
 		});
 	}
 
-	var ugenFunc = Soliton.context.createScriptProcessor(1024, 2, 1);
+	// var ugenFunc = Soliton.context.createScriptProcessor(1024, 2, 1);
+	var ugenFunc = _requestScriptFXNode(2);
 	var counter = 0;
 	var level = 0;
 
-	ugenFunc.onaudioprocess = function(e) {
+	ugenFunc.script.onaudioprocess = function(e) {
         var output = e.outputBuffer.getChannelData(0);
         var inputArray = e.inputBuffer.getChannelData(0);
         var divArray = e.inputBuffer.getChannelData(1);
@@ -5911,9 +6168,9 @@ function divider(div, input)
     
     var merger = Soliton.context.createChannelMerger(2);
 	merger.channelInterpretation = "discrete";
-	input.connect(merger, 0, 0);
-	div.connect(merger, 0, 1);
-	merger.connect(ugenFunc);
+	input.connect(ugenFunc.pre, 0, 0);
+	div.connect(ugenFunc.pre, 0, 1);
+	// merger.connect(ugenFunc);
 
 	gain.startAll = function(time)
 	{
@@ -5928,7 +6185,7 @@ function divider(div, input)
 		input.stopAll(time);
 		div.stopAll(time);
 		setTimeout(
-			function(){ugenFunc.disconnect();gain.disconnect();merger.disconnect();input.disconnect();div.disconnect()}, 
+			function(){_freeScriptFXNode(ugenFunc,2);gain.disconnect();/*ugenFunc.disconnect();merger.disconnect();*/input.disconnect();div.disconnect()}, 
 			(time - Soliton.context.currentTime) * 1100
 		)
 	};
@@ -5952,12 +6209,13 @@ function trigDivider(div, input)
 		});
 	}
 
-	var ugenFunc = Soliton.context.createScriptProcessor(1024, 2, 1);
+	// var ugenFunc = Soliton.context.createScriptProcessor(1024, 2, 1);
+	var ugenFunc = _freeScriptFXNode(2);
 	var counter = 0;
 	var prevVal = 0;
 	var level = 0;
 
-	ugenFunc.onaudioprocess = function(e) {
+	ugenFunc.script.onaudioprocess = function(e) {
         var output = e.outputBuffer.getChannelData(0);
         var inputArray = e.inputBuffer.getChannelData(0);
         var divArray = e.inputBuffer.getChannelData(1);
@@ -5990,11 +6248,11 @@ function trigDivider(div, input)
     gain.gain.value = 0;
     ugenFunc.connect(gain);
     
-    var merger = Soliton.context.createChannelMerger(2);
-	merger.channelInterpretation = "discrete";
-	input.connect(merger, 0, 0);
-	div.connect(merger, 0, 1);
-	merger.connect(ugenFunc);
+    // var merger = Soliton.context.createChannelMerger(2);
+	// merger.channelInterpretation = "discrete";
+	input.connect(ugenFunc.pre, 0, 0);
+	div.connect(ugenFunc.pre, 0, 1);
+	// merger.connect(ugenFunc);
 
 	gain.startAll = function(time)
 	{
@@ -6009,7 +6267,7 @@ function trigDivider(div, input)
 		input.stopAll(time);
 		div.stopAll(time);
 		setTimeout(
-			function(){ugenFunc.disconnect();gain.disconnect();merger.disconnect();input.disconnect();div.disconnect()}, 
+			function(){_freeScriptFXNode(ugenFunc, 2);gain.disconnect();/*ugenFunc.disconnect();merger.disconnect();*/input.disconnect();div.disconnect()}, 
 			(time - Soliton.context.currentTime) * 1100
 		)
 	};
@@ -6035,11 +6293,14 @@ function select(inputArray, index)
 
 	if(inputArray.length == 0)
 		throw new Error("select array length must be larger than 1");
-
-	var ugenFunc = Soliton.context.createScriptProcessor(1024, inputArray.length + 1, 1);
+	else if(inputArray.length > 10)
+		throw new Error("select array length must be less than 10");
+	
+	// var ugenFunc = Soliton.context.createScriptProcessor(1024, inputArray.length + 1, 1);
+	var ugenFunc = _requestScriptFXNode(inputArray.length + 1);
 	ugenFunc.numInputs = inputArray.length;
 
-	ugenFunc.onaudioprocess = function(e) {
+	ugenFunc.script.onaudioprocess = function(e) {
         var output = e.outputBuffer.getChannelData(0);
         var index = e.inputBuffer.getChannelData(0);
         var currentBuffer = e.inputBuffer.getChannelData(1);
@@ -6063,16 +6324,16 @@ function select(inputArray, index)
     gain.gain.value = 0;
     ugenFunc.connect(gain);
     
-    var merger = Soliton.context.createChannelMerger(inputArray.length + 1);
-	merger.channelInterpretation = "discrete";
+    // var merger = Soliton.context.createChannelMerger(inputArray.length + 1);
+	// merger.channelInterpretation = "discrete";
 	index.connect(merger, 0, 0);
 	
 	for(var i = 0; i < inputArray.length; ++i)
 	{
-		inputArray[i].connect(merger, 0, i + 1);
+		inputArray[i].connect(ugenFunc.pre, 0, i + 1);
 	}
 	
-	merger.connect(ugenFunc);
+	// merger.connect(ugenFunc);
 
 	gain.startAll = function(time)
 	{
@@ -6098,9 +6359,10 @@ function select(inputArray, index)
 		setTimeout(
 			function()
 			{
-				ugenFunc.disconnect();
+				_freeScriptFXNode(ugenFunc, inputArray.length + 1);
+				//ugenFunc.disconnect();
 				gain.disconnect();
-				merger.disconnect();
+				/*merger.disconnect();*/
 
 				for(var i = 0; i < inputArray.length; ++i)
 				{
@@ -6125,13 +6387,14 @@ function stepper(min, max, step, trig)
 	if(typeof min !== "number" || typeof max !== "number" || typeof step !== "number")
 		throw new Error("stepper can only be used as: stepper number number number ugen");
 
-	var ugenFunc = Soliton.context.createScriptProcessor(1024, 1, 1);
+	// var ugenFunc = Soliton.context.createScriptProcessor(1024, 1, 1);
+	var ugenFunc = _requestScriptFXNode(1);
 	var prevVal = 0;
 	var counter = 0;
 	var count = Math.floor((max - min) / step);
 	var level = min;
 
-	ugenFunc.onaudioprocess = function(e) {
+	ugenFunc.script.onaudioprocess = function(e) {
         var output = e.outputBuffer.getChannelData(0);
         var trigArray = e.inputBuffer.getChannelData(0);
 
@@ -6155,7 +6418,7 @@ function stepper(min, max, step, trig)
 	var gain = Soliton.context.createGain();
     gain.gain.value = 0;
     ugenFunc.connect(gain);
-    trig.connect(ugenFunc);
+    trig.connect(ugenFunc.pre);
 
 	gain.startAll = function(time)
 	{
@@ -6168,7 +6431,7 @@ function stepper(min, max, step, trig)
 		gain.gain.setValueAtTime(0, time + 0.1);
 		trig.stopAll(time);
 		setTimeout(
-			function(){ugenFunc.disconnect();gain.disconnect();trig.disconnect();}, 
+			function(){_freeScriptFXNode(ugenFunc, 1);/*ugenFunc.disconnect();*/gain.disconnect();trig.disconnect();}, 
 			(time - Soliton.context.currentTime) * 1100
 		)
 	};
@@ -6184,13 +6447,14 @@ function timer(trig)
 	if(trig._lichType != AUDIO)
 		throw new Error("timer can only be used with a ugen trigger input.");
 
-	var ugenFunc = Soliton.context.createScriptProcessor(1024, 1, 1);
+	// var ugenFunc = Soliton.context.createScriptProcessor(1024, 1, 1);
+	var ugenFunc = _requestScriptFXNode(1);
 	ugenFunc.lastTime = Soliton.context.currentTime;
 	var level = 0;
 	var prevVal = 0;
 
 
-	ugenFunc.onaudioprocess = function(e) {
+	ugenFunc.script.onaudioprocess = function(e) {
         var output = e.outputBuffer.getChannelData(0);
         var trigArray = e.inputBuffer.getChannelData(0);
 
@@ -6211,7 +6475,7 @@ function timer(trig)
 	var gain = Soliton.context.createGain();
     gain.gain.value = 0;
     ugenFunc.connect(gain);
-    trig.connect(ugenFunc);
+    trig.connect(ugenFunc.pre);
 
 	gain.startAll = function(time)
 	{
@@ -6224,7 +6488,7 @@ function timer(trig)
 	{
 		gain.gain.setValueAtTime(0, time + 0.1);
 		trig.stopAll(time);
-		setTimeout(function(){ugenFunc.disconnect();gain.disconnect();trig.disconnect();}, (time - Soliton.context.currentTime) * 1100)
+		setTimeout(function(){_freeScriptFXNode(ugenFunc, 1);/*ugenFunc.disconnect();*/gain.disconnect();trig.disconnect();}, (time - Soliton.context.currentTime) * 1100)
 	};
 
 	gain._lichType = AUDIO;
@@ -6244,12 +6508,13 @@ function sweep(sweepRate, trig)
 	if(sweepRate._lichType != AUDIO)
 		throw new Error("sweep rate can only be a number or ugen.");
 
-	var ugenFunc = Soliton.context.createScriptProcessor(1024, 2, 1);
+	// var ugenFunc = Soliton.context.createScriptProcessor(1024, 2, 1);
+	var ugenFunc = _requestScriptFXNode(2);
 	var level = 0;
 	var prevVal = 0;
 	var sampleDur = 1 / Soliton.context.sampleRate;
 
-	ugenFunc.onaudioprocess = function(e) 
+	ugenFunc.script.onaudioprocess = function(e) 
 	{
 		var output = e.outputBuffer.getChannelData(0);
         var trigArray = e.inputBuffer.getChannelData(0);
@@ -6273,11 +6538,11 @@ function sweep(sweepRate, trig)
     gain.gain.value = 0;
     ugenFunc.connect(gain);
 
-    var merger = Soliton.context.createChannelMerger(2);
-	merger.channelInterpretation = "discrete";
-	trig.connect(merger, 0, 0);
-    sweepRate.connect(merger, 0, 1);
-    merger.connect(ugenFunc);
+    // var merger = Soliton.context.createChannelMerger(2);
+	// merger.channelInterpretation = "discrete";
+	trig.connect(ugenFunc.pre, 0, 0);
+    sweepRate.connect(ugenFunc.pre, 0, 1);
+    // merger.connect(ugenFunc);
 
 	gain.startAll = function(time)
 	{
@@ -6292,7 +6557,7 @@ function sweep(sweepRate, trig)
 		trig.stopAll(time);
 		sweepRate.stopAll(time);
 		setTimeout(
-			function(){ugenFunc.disconnect();gain.disconnect();trig.disconnect();sweepRate.disconnect(); merger.disconnect();}, 
+			function(){_freeScriptFXNode(ugenFunc, 2);gain.disconnect();trig.disconnect();sweepRate.disconnect(); /*ugenFunc.disconnect();merger.disconnect();*/}, 
 			(time - Soliton.context.currentTime) * 1100
 		);
 	};
@@ -6317,11 +6582,12 @@ function phasor(min, max, rate)
 	if(rate._lichType != AUDIO || min._lichType != AUDIO || max._lichType != AUDIO)
 		throw new Error("phasor can only be used with numbers or ugens.");
 
-	var ugenFunc = Soliton.context.createScriptProcessor(1024, 3, 1);
+	// var ugenFunc = Soliton.context.createScriptProcessor(1024, 3, 1);
+	var ugenFunc = _freeScriptFXNode(3);
 	var level = 0;
 	var prevVal = 0;
 
-	ugenFunc.onaudioprocess = function(e) 
+	ugenFunc.script.onaudioprocess = function(e) 
 	{
 		var output = e.outputBuffer.getChannelData(0);
         var minArray = e.inputBuffer.getChannelData(0);
@@ -6344,12 +6610,12 @@ function phasor(min, max, rate)
     gain.gain.value = 0;
     ugenFunc.connect(gain);
 
-    var merger = Soliton.context.createChannelMerger(3);
-	merger.channelInterpretation = "discrete";
-	min.connect(merger, 0, 0);
-    max.connect(merger, 0, 1);
-    rate.connect(merger, 0, 2);
-    merger.connect(ugenFunc);
+    // var merger = Soliton.context.createChannelMerger(3);
+	// merger.channelInterpretation = "discrete";
+	min.connect(ugenFunc.pre, 0, 0);
+    max.connect(ugenFunc.pre, 0, 1);
+    rate.connect(ugenFunc.pre, 0, 2);
+    // merger.connect(ugenFunc);
 
 	gain.startAll = function(time)
 	{
@@ -6366,7 +6632,7 @@ function phasor(min, max, rate)
 		max.stopAll(time);
 		rate.stopAll(time);
 		setTimeout(
-			function(){ugenFunc.disconnect();gain.disconnect();min.disconnect();max.disconnect();rate.disconnect(); merger.disconnect();}, 
+			function(){_freeScriptFXNode(ugenFunc, 3);gain.disconnect();min.disconnect();max.disconnect();rate.disconnect(); /*ugenFunc.disconnect();merger.disconnect();*/}, 
 			(time - Soliton.context.currentTime) * 1100
 		);
 	};
@@ -6382,13 +6648,14 @@ function poll(input)
 	if(input._lichType != AUDIO)
 		throw new Error("timer can only be used with a ugen trigger input.");
 
-	var ugenFunc = Soliton.context.createScriptProcessor(1024, 1, 1);
+	// var ugenFunc = Soliton.context.createScriptProcessor(1024, 1, 1);
+	var ugenFunc = _requestScriptFXNode(1);
 	var level = 0;
 	var prevVal = 0;
 	var counter = 0;
 	var dur = 0.1 * Soliton.context.sampleRate;
 
-	ugenFunc.onaudioprocess = function(e) {
+	ugenFunc.script.onaudioprocess = function(e) {
         var output = e.outputBuffer.getChannelData(0);
         var inputArray = e.inputBuffer.getChannelData(0);
 
@@ -6407,7 +6674,7 @@ function poll(input)
 	var gain = Soliton.context.createGain();
     gain.gain.value = 0;
     ugenFunc.connect(gain);
-    input.connect(ugenFunc);
+    input.connect(ugenFunc.pre);
 
 	gain.startAll = function(time)
 	{
@@ -6420,7 +6687,7 @@ function poll(input)
 	{
 		gain.gain.setValueAtTime(0, time + 0.1);
 		input.stopAll(time);
-		setTimeout(function(){ugenFunc.disconnect();gain.disconnect();input.disconnect();}, (time - Soliton.context.currentTime) * 1100)
+		setTimeout(function(){_freeScriptFXNode(ugenFunc, 1);/*ugenFunc.disconnect();*/gain.disconnect();input.disconnect();}, (time - Soliton.context.currentTime) * 1100)
 	};
 
 	gain._lichType = AUDIO;
@@ -6437,13 +6704,14 @@ function crackle(param)
 	if(param._lichType != AUDIO)
 		throw new Error("crackle can only be used with a ugens and numbers.");
 
-	var ugenFunc = Soliton.context.createScriptProcessor(1024, 1, 1);
+	// var ugenFunc = Soliton.context.createScriptProcessor(1024, 1, 1);
+	var ugenFunc = _requestScriptFXNode(1);
 	var level = 0;
 	var y0 = 0;
 	var y1 = Math.random();
 	var y2 = 0;
 
-	ugenFunc.onaudioprocess = function(e) {
+	ugenFunc.script.onaudioprocess = function(e) {
         var output = e.outputBuffer.getChannelData(0);
         var inputArray = e.inputBuffer.getChannelData(0);
 
@@ -6458,7 +6726,7 @@ function crackle(param)
 	var gain = Soliton.context.createGain();
     gain.gain.value = 0;
     ugenFunc.connect(gain);
-    param.connect(ugenFunc);
+    param.connect(ugenFunc.pre);
 
 	gain.startAll = function(time)
 	{
@@ -6471,7 +6739,7 @@ function crackle(param)
 	{
 		gain.gain.setValueAtTime(0, time + 0.1);
 		param.stopAll(time);
-		setTimeout(function(){ugenFunc.disconnect();gain.disconnect();param.disconnect();}, (time - Soliton.context.currentTime) * 1100)
+		setTimeout(function(){_freeScriptFXNode(ugenFunc, 1);/*ugenFunc.disconnect();*/gain.disconnect();param.disconnect();}, (time - Soliton.context.currentTime) * 1100)
 	};
 
 	gain._lichType = AUDIO;
@@ -6494,12 +6762,13 @@ function trand(min, max, trig)
 	if(trig._lichType != AUDIO || min._lichType != AUDIO || max._lichType != AUDIO)
 		throw new Error("phasor can only be used with numbers or ugens.");
 
-	var ugenFunc = Soliton.context.createScriptProcessor(1024, 3, 1);
+	// var ugenFunc = Soliton.context.createScriptProcessor(1024, 3, 1);
+	var ugenFunc = _requestScriptFXNode(3);
 	var level = 0;
 	var prevVal = 0;
 	var range = 0;
 
-	ugenFunc.onaudioprocess = function(e) 
+	ugenFunc.script.onaudioprocess = function(e) 
 	{
 		var output = e.outputBuffer.getChannelData(0);
         var minArray = e.inputBuffer.getChannelData(0);
@@ -6523,12 +6792,12 @@ function trand(min, max, trig)
     gain.gain.value = 0;
     ugenFunc.connect(gain);
 
-    var merger = Soliton.context.createChannelMerger(3);
-	merger.channelInterpretation = "discrete";
-	min.connect(merger, 0, 0);
-    max.connect(merger, 0, 1);
-    trig.connect(merger, 0, 2);
-    merger.connect(ugenFunc);
+    // var merger = Soliton.context.createChannelMerger(3);
+	// merger.channelInterpretation = "discrete";
+	min.connect(ugenFunc.pre, 0, 0);
+    max.connect(ugenFunc.pre, 0, 1);
+    trig.connect(ugenFunc.pre, 0, 2);
+    // merger.connect(ugenFunc);
 
 	gain.startAll = function(time)
 	{
@@ -6545,7 +6814,7 @@ function trand(min, max, trig)
 		max.stopAll(time);
 		trig.stopAll(time);
 		setTimeout(
-			function(){ugenFunc.disconnect();gain.disconnect();min.disconnect();max.disconnect();trig.disconnect(); merger.disconnect();}, 
+			function(){_freeScriptFXNode(ugenFunc, 3);gain.disconnect();min.disconnect();max.disconnect();trig.disconnect(); /*ugenFunc.disconnect();merger.disconnect();*/}, 
 			(time - Soliton.context.currentTime) * 1100
 		);
 	};
@@ -6570,12 +6839,13 @@ function trandX(min, max, trig)
 	if(trig._lichType != AUDIO || min._lichType != AUDIO || max._lichType != AUDIO)
 		throw new Error("phasor can only be used with numbers or ugens.");
 
-	var ugenFunc = Soliton.context.createScriptProcessor(1024, 3, 1);
+	// var ugenFunc = Soliton.context.createScriptProcessor(1024, 3, 1);
+	var ugenFunc = _requestScriptFXNode(3);
 	var level = 0;
 	var prevVal = 0;
 	var range = 0;
 
-	ugenFunc.onaudioprocess = function(e) 
+	ugenFunc.script.onaudioprocess = function(e) 
 	{
 		var output = e.outputBuffer.getChannelData(0);
         var minArray = e.inputBuffer.getChannelData(0);
@@ -6600,12 +6870,12 @@ function trandX(min, max, trig)
     gain.gain.value = 0;
     ugenFunc.connect(gain);
 
-    var merger = Soliton.context.createChannelMerger(3);
-	merger.channelInterpretation = "discrete";
-	min.connect(merger, 0, 0);
-    max.connect(merger, 0, 1);
-    trig.connect(merger, 0, 2);
-    merger.connect(ugenFunc);
+    // var merger = Soliton.context.createChannelMerger(3);
+	// merger.channelInterpretation = "discrete";
+	min.connect(ugenFunc.pre, 0, 0);
+    max.connect(ugenFunc.pre, 0, 1);
+    trig.connect(ugenFunc.pre, 0, 2);
+    // merger.connect(ugenFunc);
 
 	gain.startAll = function(time)
 	{
@@ -6622,7 +6892,7 @@ function trandX(min, max, trig)
 		max.stopAll(time);
 		trig.stopAll(time);
 		setTimeout(
-			function(){ugenFunc.disconnect();gain.disconnect();min.disconnect();max.disconnect();trig.disconnect(); merger.disconnect();}, 
+			function(){_freeScriptFXNode(ugenFunc, 3);gain.disconnect();min.disconnect();max.disconnect();trig.disconnect(); /*ugenFunc.disconnect();merger.disconnect();*/}, 
 			(time - Soliton.context.currentTime) * 1100
 		);
 	};
@@ -6644,11 +6914,12 @@ function coinGate(probability, trig)
 	if(probability._lichType != AUDIO)
 		throw new Error("coinGate probability can only be a number or ugen.");
 
-	var ugenFunc = Soliton.context.createScriptProcessor(1024, 2, 1);
+	// var ugenFunc = Soliton.context.createScriptProcessor(1024, 2, 1);
+	var ugenFunc = _requestScriptFXNode(2);
 	var level = 0;
 	var prevVal = 0;
 
-	ugenFunc.onaudioprocess = function(e) 
+	ugenFunc.script.onaudioprocess = function(e) 
 	{
 		var output = e.outputBuffer.getChannelData(0);
         var trigArray = e.inputBuffer.getChannelData(0);
@@ -6678,11 +6949,11 @@ function coinGate(probability, trig)
     gain.gain.value = 0;
     ugenFunc.connect(gain);
 
-    var merger = Soliton.context.createChannelMerger(2);
-	merger.channelInterpretation = "discrete";
-	trig.connect(merger, 0, 0);
-    probability.connect(merger, 0, 1);
-    merger.connect(ugenFunc);
+    // var merger = Soliton.context.createChannelMerger(2);
+	// merger.channelInterpretation = "discrete";
+	trig.connect(ugenFunc.pre, 0, 0);
+    probability.connect(ugenFunc.pre, 0, 1);
+    // merger.connect(ugenFunc);
 
 	gain.startAll = function(time)
 	{
@@ -6697,7 +6968,7 @@ function coinGate(probability, trig)
 		trig.stopAll(time);
 		probability.stopAll(time);
 		setTimeout(
-			function(){ugenFunc.disconnect();gain.disconnect();trig.disconnect();probability.disconnect(); merger.disconnect();}, 
+			function(){_freeScriptFXNode(ugenFunc, 2);gain.disconnect();trig.disconnect();probability.disconnect(); /*ugenFunc.disconnect();merger.disconnect();*/}, 
 			(time - Soliton.context.currentTime) * 1100
 		);
 	};
@@ -6751,7 +7022,8 @@ function simplex(freq)
 	if(typeof freq !== "number")
 		throw new Error("simplex frequency must be a number.");
 
-	var simplexFunc = Soliton.context.createScriptProcessor(1024, 0, 1);
+	// var simplexFunc = Soliton.context.createScriptProcessor(1024, 0, 1);
+	var simplexFunc = _requestScriptNode();
 	var x = 0;
 	var increment = freq * (1 / Soliton.context.sampleRate);
 
@@ -6795,7 +7067,7 @@ function simplex(freq)
 	gain.stopAll = function(time)
 	{
 		gain.gain.setValueAtTime(0, time + 0.1);
-		setTimeout(function(){simplexFunc.disconnect();gain.disconnect()}, (time - Soliton.context.currentTime) * 1100)
+		setTimeout(function(){_freeScriptNode(simplexFunc);/*simplexFunc.disconnect();*/gain.disconnect()}, (time - Soliton.context.currentTime) * 1100)
 	};
 
 	gain._lichType = AUDIO;
@@ -6867,7 +7139,8 @@ function pluck(freq, decayTime, coeff, input)
 	if(input._lichType != AUDIO)
 		throw new Error("pluck input is not an audio ugen.");
 
-	var ugenFunc = Soliton.context.createScriptProcessor(1024, 1, 1);
+	// var ugenFunc = Soliton.context.createScriptProcessor(1024, 1, 1);
+	var ugenFunc = _requestScriptFXNode(1);
 	var memory = allocDelayBlock();
 	//var memory = new Float32Array(2048);
 	//var maxIndex = memory.length;
@@ -6906,7 +7179,7 @@ function pluck(freq, decayTime, coeff, input)
 	}
 	
 
-	ugenFunc.onaudioprocess = function(e) 
+	ugenFunc.script.onaudioprocess = function(e) 
 	{
 		var output = e.outputBuffer.getChannelData(0);
         var inputArray = e.inputBuffer.getChannelData(0);
@@ -6934,7 +7207,7 @@ function pluck(freq, decayTime, coeff, input)
 	var gain = Soliton.context.createGain();
     gain.gain.value = 0;
     ugenFunc.connect(gain);
-    input.connect(ugenFunc);
+    input.connect(ugenFunc.pre);
 
 	gain.startAll = function(time)
 	{
@@ -6951,7 +7224,8 @@ function pluck(freq, decayTime, coeff, input)
 			{
 				freeDelayBlock(memory);
 				memory = null;
-				ugenFunc.disconnect();
+				_freeScriptFXNode(ugenFunc, 1);
+				// ugenFunc.disconnect();
 				gain.disconnect();
 				input.disconnect();
 			}, 
@@ -7071,9 +7345,10 @@ function distortion2(amt, input)
 	if(typeof amt === "number")
 		amt = dc(amt);
 
-	var ugenFunc = Soliton.context.createScriptProcessor(1024, 2, 1);
-
-	ugenFunc.onaudioprocess = function(e) 
+	// var ugenFunc = Soliton.context.createScriptProcessor(1024, 2, 1);
+	var ugenFunc = _requestScriptFXNode(2);
+	
+	ugenFunc.script.onaudioprocess = function(e) 
 	{
         var output = e.outputBuffer.getChannelData(0);
         var inputArray = e.inputBuffer.getChannelData(0);
@@ -7089,11 +7364,11 @@ function distortion2(amt, input)
     gain.gain.value = 0;
     ugenFunc.connect(gain);
     
-    var merger = Soliton.context.createChannelMerger(2);
-	merger.channelInterpretation = "discrete";
-	input.connect(merger, 0, 0);
-	amt.connect(merger, 0, 1);
-	merger.connect(ugenFunc);
+    // var merger = Soliton.context.createChannelMerger(2);
+	// merger.channelInterpretation = "discrete";
+	input.connect(ugenFunc.pre, 0, 0);
+	amt.connect(ugenFunc.pre, 0, 1);
+	// merger.connect(ugenFunc);
 
 	gain.startAll = function(time)
 	{
@@ -7108,7 +7383,7 @@ function distortion2(amt, input)
 		input.stopAll(time);
 		amt.stopAll(time);
 		setTimeout(
-			function(){ugenFunc.disconnect();gain.disconnect();merger.disconnect();input.disconnect();amt.disconnect()}, 
+			function(){_freeScriptFXNode(ugenFunc,2);gain.disconnect();/*ugenFunc.disconnect();merger.disconnect();*/input.disconnect();amt.disconnect()}, 
 			(time - Soliton.context.currentTime) * 1100
 		)
 	};
@@ -7127,9 +7402,10 @@ function distortion(amt, input)
 	if(typeof amt === "number")
 		amt = dc(amt);
 
-	var ugenFunc = Soliton.context.createScriptProcessor(1024, 2, 1);
+	// var ugenFunc = Soliton.context.createScriptProcessor(1024, 2, 1);
+	var ugenFunc = _requestScriptFXNode(2);
 
-	ugenFunc.onaudioprocess = function(e) 
+	ugenFunc.script.onaudioprocess = function(e) 
 	{
         var output = e.outputBuffer.getChannelData(0);
         var inputArray = e.inputBuffer.getChannelData(0);
@@ -7146,11 +7422,11 @@ function distortion(amt, input)
     gain.gain.value = 0;
     ugenFunc.connect(gain);
     
-    var merger = Soliton.context.createChannelMerger(2);
-	merger.channelInterpretation = "discrete";
-	input.connect(merger, 0, 0);
-	amt.connect(merger, 0, 1);
-	merger.connect(ugenFunc);
+    // var merger = Soliton.context.createChannelMerger(2);
+	// merger.channelInterpretation = "discrete";
+	input.connect(ugenFunc.pre, 0, 0);
+	amt.connect(ugenFunc.pre, 0, 1);
+	// merger.connect(ugenFunc);
 
 	gain.startAll = function(time)
 	{
@@ -7165,7 +7441,7 @@ function distortion(amt, input)
 		input.stopAll(time);
 		amt.stopAll(time);
 		setTimeout(
-			function(){ugenFunc.disconnect();gain.disconnect();merger.disconnect();input.disconnect();amt.disconnect()}, 
+			function(){_freeScriptFXNode(ugenFunc, 2);gain.disconnect();/*ugenFunc.disconnect();merger.disconnect();*/input.disconnect();amt.disconnect()}, 
 			(time - Soliton.context.currentTime) * 1100
 		)
 	};
@@ -7600,12 +7876,13 @@ Soliton.linexpUGen = function(inMin, inMax, outMin, outMax)
 
 function exprange(low, high, input)
 {
-	var rangeFunc = Soliton.context.createScriptProcessor(1024, 1, 1);
-	rangeFunc.onaudioprocess = Soliton.linexpUGen(-1, 1, low, high);
+	// var rangeFunc = Soliton.context.createScriptProcessor(1024, 1, 1);
+	var rangeFunc = _requestScriptFXNode(1);
+	rangeFunc.script.onaudioprocess = Soliton.linexpUGen(-1, 1, low, high);
 	rangeFunc.startAll = input.startAll;
 	rangeFunc._lichType = AUDIO;
-	input.connect(rangeFunc);
-	rangeFunc.stopAll = function(time){input.stopAll(time); setTimeout(function(){input.disconnect(0)}, (time - Soliton.context.currentTime) * 1000)}
+	input.connect(rangeFunc.pre);
+	rangeFunc.stopAll = function(time){input.stopAll(time); setTimeout(function(){input.disconnect(0); _freeScriptFXNode(rangeFunc, 1);}, (time - Soliton.context.currentTime) * 1000)}
 	return rangeFunc;
 }
 
@@ -7615,7 +7892,7 @@ Soliton.divisionUGen = function(event)
 	var inputArray2 = event.inputBuffer.getChannelData(1);
 	var outputArrayL = event.outputBuffer.getChannelData(0);
 
-	Lich.post(inputArray2[0]);
+	// Lich.post(inputArray2[0]);
 	for(var i = 0; i < 1024; ++i)
 	{
 		if(inputArray2[i] == 0)
@@ -7633,10 +7910,11 @@ function _audioDivision(input1, input2)
 	if(typeof input2 === "number")
 		input2 = dc(input2);
 
-	var merger = Soliton.context.createChannelMerger(2);
-	merger.channelInterpretation = "discrete";
-	var divisionFunc = Soliton.context.createScriptProcessor(1024, 2, 2);
-	divisionFunc.onaudioprocess = function(event)
+	// var merger = Soliton.context.createChannelMerger(2);
+	// merger.channelInterpretation = "discrete";
+	// var divisionFunc = Soliton.context.createScriptProcessor(1024, 2, 2);
+	var divisionFunc = _requestScriptFXNode(2);
+	divisionFunc.script.onaudioprocess = function(event)
 	{
 		var inputArray1 = event.inputBuffer.getChannelData(0);
 		var inputArray2 = event.inputBuffer.getChannelData(1);
@@ -7660,15 +7938,15 @@ function _audioDivision(input1, input2)
 		input1.stopAll(time);
 		input2.stopAll(time); 
 		setTimeout(
-			function(){input1.disconnect(0); input2.disconnect(0); merger.disconnect(); divisionFunc.disconnect()}, 
+			function(){input1.disconnect(0); input2.disconnect(0); _freeScriptFXNode(divisionFunc, 2);/*divisionFunc.disconnect();merger.disconnect();*/}, 
 			(time - Soliton.context.currentTime) * 1000
 		);
 	}
 	
 	divisionFunc._lichType = AUDIO;
-	input1.connect(merger, 0, 0);
-	input2.connect(merger, 0, 1);
-	merger.connect(divisionFunc);
+	input1.connect(divisionFunc.pre, 0, 0);
+	input2.connect(divisionFunc.pre, 0, 1);
+	// merger.connect(divisionFunc);
 	return divisionFunc;
 }
 
@@ -7692,7 +7970,8 @@ function lag(lagTime, input)
 	if(typeof lagTime === "number")
 		lagTime = dc(lagTime);
 
-	var ugenFunc = Soliton.context.createScriptProcessor(1024, 2, 1);
+	// var ugenFunc = Soliton.context.createScriptProcessor(1024, 2, 1);
+	var ugenFunc = _requestScriptFXNode(2);
 	var counter = 0;
 	var level = 0;
 	var b1 = 0;
@@ -7702,7 +7981,7 @@ function lag(lagTime, input)
 	var y1 = 0;
 	var y0 = 0;
 
-	ugenFunc.onaudioprocess = function(e) 
+	ugenFunc.script.onaudioprocess = function(e) 
 	{
         var output = e.outputBuffer.getChannelData(0);
         var inputArray = e.inputBuffer.getChannelData(0);
@@ -7741,11 +8020,11 @@ function lag(lagTime, input)
     gain.gain.value = 0;
     ugenFunc.connect(gain);
     
-    var merger = Soliton.context.createChannelMerger(2);
-	merger.channelInterpretation = "discrete";
-	input.connect(merger, 0, 0);
-	lagTime.connect(merger, 0, 1);
-	merger.connect(ugenFunc);
+    // var merger = Soliton.context.createChannelMerger(2);
+	// merger.channelInterpretation = "discrete";
+	input.connect(ugenFunc.pre, 0, 0);
+	lagTime.connect(ugenFunc.pre, 0, 1);
+	// merger.connect(ugenFunc);
 
 	gain.startAll = function(time)
 	{
@@ -7760,7 +8039,7 @@ function lag(lagTime, input)
 		input.stopAll(time);
 		lagTime.stopAll(time);
 		setTimeout(
-			function(){ugenFunc.disconnect();gain.disconnect();merger.disconnect();input.disconnect();lagTime.disconnect()}, 
+			function(){_freeScriptFXNode(ugenFunc, 2);gain.disconnect();/*ugenFunc.disconnect();merger.disconnect();*/input.disconnect();lagTime.disconnect()}, 
 			(time - Soliton.context.currentTime) * 1100
 		)
 	};
@@ -7779,10 +8058,11 @@ function integrator(coeff, input)
 	if(typeof coeff === "number")
 		coeff = dc(coeff);
 
-	var ugenFunc = Soliton.context.createScriptProcessor(1024, 2, 1);
+	// var ugenFunc = Soliton.context.createScriptProcessor(1024, 2, 1);
+	var ugenFunc = _requestScriptFXNode(2);
 	var lastOut = 0;
 
-	ugenFunc.onaudioprocess = function(e) 
+	ugenFunc.script.onaudioprocess = function(e) 
 	{
         var output = e.outputBuffer.getChannelData(0);
         var inputArray = e.inputBuffer.getChannelData(0);
@@ -7799,11 +8079,11 @@ function integrator(coeff, input)
     gain.gain.value = 0;
     ugenFunc.connect(gain);
     
-    var merger = Soliton.context.createChannelMerger(2);
-	merger.channelInterpretation = "discrete";
-	input.connect(merger, 0, 0);
-	coeff.connect(merger, 0, 1);
-	merger.connect(ugenFunc);
+    // var merger = Soliton.context.createChannelMerger(2);
+	// merger.channelInterpretation = "discrete";
+	input.connect(ugenFunc.pre, 0, 0);
+	coeff.connect(ugenFunc.pre, 0, 1);
+	// merger.connect(ugenFunc);
 
 	gain.startAll = function(time)
 	{
@@ -7818,7 +8098,7 @@ function integrator(coeff, input)
 		input.stopAll(time);
 		coeff.stopAll(time);
 		setTimeout(
-			function(){ugenFunc.disconnect();gain.disconnect();merger.disconnect();input.disconnect();coeff.disconnect()}, 
+			function(){_freeScriptFXNode(ugenFunc, 2);gain.disconnect();/*ugenFunc.disconnect();merger.disconnect();*/input.disconnect();coeff.disconnect()}, 
 			(time - Soliton.context.currentTime) * 1100
 		)
 	};
@@ -7837,12 +8117,13 @@ function decay(decayTime, input)
 	if(typeof decayTime === "number")
 		decayTime = dc(decayTime);
 
-	var ugenFunc = Soliton.context.createScriptProcessor(1024, 2, 1);
+	// var ugenFunc = Soliton.context.createScriptProcessor(1024, 2, 1);
+	var ugenFunc = _freeScriptFXNode(2);
 	var lastOut = 0;
 	var lastDecay = 0;
 	var b1 = 0;
 
-	ugenFunc.onaudioprocess = function(e) 
+	ugenFunc.script.onaudioprocess = function(e) 
 	{
         var output = e.outputBuffer.getChannelData(0);
         var inputArray = e.inputBuffer.getChannelData(0);
@@ -7865,11 +8146,11 @@ function decay(decayTime, input)
     gain.gain.value = 0;
     ugenFunc.connect(gain);
     
-    var merger = Soliton.context.createChannelMerger(2);
-	merger.channelInterpretation = "discrete";
-	input.connect(merger, 0, 0);
-	decayTime.connect(merger, 0, 1);
-	merger.connect(ugenFunc);
+    // var merger = Soliton.context.createChannelMerger(2);
+	// merger.channelInterpretation = "discrete";
+	input.connect(ugenFunc.pre, 0, 0);
+	decayTime.connect(ugenFunc.pre, 0, 1);
+	// merger.connect(ugenFunc);
 
 	gain.startAll = function(time)
 	{
@@ -7884,7 +8165,7 @@ function decay(decayTime, input)
 		input.stopAll(time);
 		decayTime.stopAll(time);
 		setTimeout(
-			function(){ugenFunc.disconnect();gain.disconnect();merger.disconnect();input.disconnect();decayTime.disconnect()}, 
+			function(){_freeScriptFXNode(ugenFunc, 2);gain.disconnect();/*ugenFunc.disconnect();merger.disconnect();*/input.disconnect();decayTime.disconnect()}, 
 			(time - Soliton.context.currentTime) * 1100
 		)
 	};
@@ -7906,7 +8187,8 @@ function reson(freq, decayTime, input)
 	if(typeof decayTime === "number")
 		decayTime = dc(decayTime);
 
-	var ugenFunc = Soliton.context.createScriptProcessor(1024, 3, 1);
+	// var ugenFunc = Soliton.context.createScriptProcessor(1024, 3, 1);
+	var ugenFunc = _freeScriptFXNode(3);
 	var ffreq = 0;
 	var r = 0;
 	var twoR = 0;
@@ -7927,7 +8209,7 @@ function reson(freq, decayTime, input)
 	var _radiansPerSample = (2 * 3.141592653589793) / Soliton.context.sampleRate;
 	var filterSlope = 1 / (1024/3);
 
-	ugenFunc.onaudioprocess = function(e) 
+	ugenFunc.script.onaudioprocess = function(e) 
 	{
         var output = e.outputBuffer.getChannelData(0);
         var inputArray = e.inputBuffer.getChannelData(0);
@@ -7975,12 +8257,12 @@ function reson(freq, decayTime, input)
     gain.gain.value = 0;
     ugenFunc.connect(gain);
     
-    var merger = Soliton.context.createChannelMerger(3);
-	merger.channelInterpretation = "discrete";
-	input.connect(merger, 0, 0);
-	freq.connect(merger, 0, 1);
-	decayTime.connect(merger, 0, 2);
-	merger.connect(ugenFunc);
+    // var merger = Soliton.context.createChannelMerger(3);
+	// merger.channelInterpretation = "discrete";
+	input.connect(ugenFunc.pre, 0, 0);
+	freq.connect(ugenFunc.pre, 0, 1);
+	decayTime.connect(ugenFunc.pre, 0, 2);
+	// merger.connect(ugenFunc);
 
 	gain.startAll = function(time)
 	{
@@ -7997,7 +8279,7 @@ function reson(freq, decayTime, input)
 		freq.stopAll(time);
 		decayTime.stopAll(time);
 		setTimeout(
-			function(){ugenFunc.disconnect();gain.disconnect();merger.disconnect();input.disconnect();decayTime.disconnect();freq.disconnect();}, 
+			function(){_freeScriptFXNode(ugenFunc, 3);gain.disconnect();/*ugenFunc.disconnect();merger.disconnect();*/input.disconnect();decayTime.disconnect();freq.disconnect();}, 
 			(time - Soliton.context.currentTime) * 1100
 		)
 	};
@@ -8364,10 +8646,11 @@ function playBuf(buffer, rate)
 	if(rate._lichType != AUDIO)
 		throw new Error("playBuf can only be used with a ugens and numbers.");
 
-	var ugenFunc = Soliton.context.createScriptProcessor(1024, 1, 1);
+	// var ugenFunc = Soliton.context.createScriptProcessor(1024, 1, 1);
+	var ugenFunc = _requestScriptFXNode(1);
 	var counter = 0;
 
-	ugenFunc.onaudioprocess = function(e) {
+	ugenFunc.script.onaudioprocess = function(e) {
         var output = e.outputBuffer.getChannelData(0);
         var rateArray = e.inputBuffer.getChannelData(0);
 
@@ -8381,7 +8664,7 @@ function playBuf(buffer, rate)
 	var gain = Soliton.context.createGain();
     gain.gain.value = 0;
     ugenFunc.connect(gain);
-    rate.connect(ugenFunc);
+    rate.connect(ugenFunc.pre);
 
 	gain.startAll = function(time)
 	{
@@ -8400,7 +8683,8 @@ function playBuf(buffer, rate)
 		setTimeout(
 			function()
 			{
-				ugenFunc.disconnect();
+				/*ugenFunc.disconnect();*/
+				_freeScriptFXNode(ugenFunc, 1);
 				gain.disconnect();
 				rate.disconnect();
 			}, 
@@ -8428,11 +8712,12 @@ function recPlayBuf(buffer, wrRate, rdRate, input)
 	if(wrRate._lichType != AUDIO || rdRate._lichType != AUDIO || input._lichType != AUDIO)
 		throw new Error("playBuf can only be used with a ugens and numbers.");
 
-	var ugenFunc = Soliton.context.createScriptProcessor(1024, 3, 1);
+	// var ugenFunc = Soliton.context.createScriptProcessor(1024, 3, 1);
+	var ugenFunc = _requestScriptFXNode(3);
 	var wrCounter = 0;
 	var rdCounter = 0;
 
-	ugenFunc.onaudioprocess = function(e) {
+	ugenFunc.script.onaudioprocess = function(e) {
         var output = e.outputBuffer.getChannelData(0);
         var wrRateArray = e.inputBuffer.getChannelData(0);
         var rdRateArray = e.inputBuffer.getChannelData(1);
@@ -8451,12 +8736,12 @@ function recPlayBuf(buffer, wrRate, rdRate, input)
     gain.gain.value = 0;
     ugenFunc.connect(gain);
 
-    var merger = Soliton.context.createChannelMerger(3);
-    merger.channelInterpretation = "discrete";
-    wrRate.connect(merger, 0, 0);
-    rdRate.connect(merger, 0, 1);
-    input.connect(merger, 0, 2);
-    merger.connect(ugenFunc);
+    // var merger = Soliton.context.createChannelMerger(3);
+    // merger.channelInterpretation = "discrete";
+    wrRate.connect(ugenFunc.pre, 0, 0);
+    rdRate.connect(ugenFunc.pre, 0, 1);
+    input.connect(ugenFunc.pre, 0, 2);
+    // merger.connect(ugenFunc);
 
 	gain.startAll = function(time)
 	{
@@ -8477,12 +8762,13 @@ function recPlayBuf(buffer, wrRate, rdRate, input)
 		setTimeout(
 			function()
 			{
-				ugenFunc.disconnect();
+				/*ugenFunc.disconnect();*/
+				_freeScriptFXNode(ugenFunc, 3);
 				gain.disconnect();
 				rdRate.disconnect();
 				wrRate.disconnect();
 				input.disconnect();
-				merger.disconnect();
+				/*merger.disconnect();*/
 			}, 
 			(time - Soliton.context.currentTime) * 1100
 		)
@@ -8532,8 +8818,9 @@ var _dcNothing = new Float32Array(2);
 
 function dc(value)
 {
-	var dcFunc = Soliton.context.createScriptProcessor(1024, 0, 1);
-
+	//var dcFunc = Soliton.context.createScriptProcessor(1024, 0, 1);
+	var dcFunc = _requestScriptNode();
+	
 	dcFunc.onaudioprocess = function(event)
 	{
 		var outputArray = event.outputBuffer.getChannelData(0);
@@ -8545,7 +8832,18 @@ function dc(value)
 	}
 
 	dcFunc.startAll = function(time){};
-	dcFunc.stopAll = function(time){};
+	dcFunc.stopAll = function(time)
+	{
+		setTimeout(
+			function()
+			{
+				_freeScriptNode(dcFunc);
+			},
+			(time - Soliton.context.currentTime) * 1000
+		);
+				
+	};
+	
 	dcFunc._lichType = AUDIO;
 	return dcFunc;
 }
@@ -8585,17 +8883,31 @@ function perc(attack, peak, decay, input)
 
 	var percGain = Soliton.context.createGain();
 	input.connect(percGain);
-	
+
+	percGain.stopAll = function(time)
+	{
+		input.stopAll(time);
+		setTimeout(
+			function()
+			{
+				input.disconnect();
+				percGain.disconnect();
+				input = null;
+				percGain = null;
+			},
+			(time - Soliton.context.currentTime) * 1000 + 1000 // give the node longer to be sure we don't cut off any nodes akwardly
+		);
+	}
+
 	percGain.startAll = function(time)
 	{
 		input.startAll(time);
 		percGain.gain.setValueAtTime(0, time);
 		percGain.gain.linearRampToValueAtTime(peak, attack + time);
 		percGain.gain.linearRampToValueAtTime(0, attack + decay + time);
-		input.stopAll(attack + decay + time);
+		percGain.stopAll(attack + decay + time);
 	}
-
-	percGain.stopAll = input.stopAll;
+	
 	percGain._lichType = AUDIO;
 	return percGain;
 }
@@ -8625,6 +8937,16 @@ function perc2(attack, peak, decay, input)
 	percGain.stopAll = function(time)
 	{
 		input.stopAll(time);
+		setTimeout(
+			function()
+			{
+				input.disconnect();
+				percGain.disconnect();
+				input = null;
+				percGain = null;
+			},
+			(time - Soliton.context.currentTime) * 1000 + 1000 // give the node longer to be sure we don't cut off any nodes akwardly
+		);
 	}
 
 	percGain._lichType = AUDIO;
@@ -8657,10 +8979,24 @@ function env(levels, times, shape, input)
 				percGain.gain.exponentialRampToValueAtTime(levels[i], finalTime);
 		}
 		
-		input.stopAll(finalTime);
+		percGain.stopAll(finalTime);
 	}
 
-	percGain.stopAll = input.stopAll;
+	percGain.stopAll = function(time)
+	{
+		input.stopAll(time);
+		setTimeout(
+			function()
+			{
+				input.disconnect();
+				percGain.disconnect();
+				input = null;
+				percGain = null;
+			},
+			(time - Soliton.context.currentTime) * 1000 + 1000 // give the node longer to be sure we don't cut off any nodes akwardly
+		);
+	}
+	
 	percGain._lichType = AUDIO;
 	return percGain;
 }
@@ -8695,6 +9031,16 @@ function env2(levels, times, shape, input)
 	percGain.stopAll = function(time)
 	{
 		input.stopAll(time);
+		setTimeout(
+			function()
+			{
+				input.disconnect();
+				percGain.disconnect();
+				input = null;
+				percGain = null;
+			},
+			(time - Soliton.context.currentTime) * 1000 + 1000 // give the node longer to be sure we don't cut off any nodes akwardly
+		);
 	}
 
 	percGain._lichType = AUDIO;
@@ -8862,11 +9208,13 @@ function clip(value, input)
 	else if(value._lichType != AUDIO)
 		value = dc(value);
 
-	var merger = Soliton.context.createChannelMerger(2);
-	merger.channelInterpretation = "discrete";
-	var clipNode = Soliton.context.createScriptProcessor(1024, 2, 1);
+	// var merger = Soliton.context.createChannelMerger(2);
+	// merger.channelInterpretation = "discrete";
 
-	clipNode.onaudioprocess = function(event)
+	//var clipNode = Soliton.context.createScriptProcessor(1024, 2, 1);
+	var clipNode = _requestScriptFXNode(2);
+	
+	clipNode.script.onaudioprocess = function(event)
 	{
 		var inputArrayL = event.inputBuffer.getChannelData(0);
 		var clipArray = event.inputBuffer.getChannelData(1);
@@ -8888,9 +9236,9 @@ function clip(value, input)
 	}
 
 
-	input.connect(merger, 0, 0);
-	value.connect(merger, 0, 1);
-	merger.connect(clipNode);
+	input.connect(clipNode.pre, 0, 0);
+	value.connect(clipNode.pre, 0, 1);
+	// merger.connect(clipNode);
 
 	clipNode.startAll = function(time)
 	{ 
@@ -8902,7 +9250,7 @@ function clip(value, input)
 	{ 
 		input.stopAll(time);
 		value.stopAll(time);
-		setTimeout(function(){input.disconnect(); value.disconnect(); merger.disconnect(); clipNode.disconnect()}, (time - Soliton.context.currentTime) * 1000);
+		setTimeout(function(){input.disconnect(); value.disconnect(); /*merger.disconnect();*/ _freeScriptFXNode(clipNode,2);/*clipNode.disconnect()*/}, (time - Soliton.context.currentTime) * 1000);
 	}
 
 	clipNode._lichType = AUDIO;
@@ -8919,11 +9267,12 @@ function wrap(value, input)
 	else if(value._lichType != AUDIO)
 		value = dc(value);
 
-	var merger = Soliton.context.createChannelMerger(2);
-	merger.channelInterpretation = "discrete";
-	var wrapNode = Soliton.context.createScriptProcessor(1024, 2, 1);
-
-	wrapNode.onaudioprocess = function(event)
+	// var merger = Soliton.context.createChannelMerger(2);
+	// merger.channelInterpretation = "discrete";
+	//var wrapNode = Soliton.context.createScriptProcessor(1024, 2, 1);
+	var wrapNode = _requestScriptFXNode(2);
+	
+	wrapNode.script.onaudioprocess = function(event)
 	{
 		var inputArray = event.inputBuffer.getChannelData(0);
 		var wrapArray = event.inputBuffer.getChannelData(1);
@@ -8939,9 +9288,9 @@ function wrap(value, input)
 		}
 	}
 
-	input.connect(merger, 0, 0);
-	value.connect(merger, 0, 1);
-	merger.connect(wrapNode);
+	input.connect(wrapNode.pre, 0, 0);
+	value.connect(wrapNode.pre, 0, 1);
+	// merger.connect(wrapNode);
 
 	wrapNode.startAll = function(time)
 	{ 
@@ -8953,7 +9302,7 @@ function wrap(value, input)
 	{ 
 		input.stopAll(time);
 		value.stopAll(time);
-		setTimeout(function(){input.disconnect(); value.disconnect(); merger.disconnect(); wrapNode.disconnect()}, (time - Soliton.context.currentTime) * 1000);
+		setTimeout(function(){input.disconnect(); value.disconnect(); /*merger.disconnect();*/ _freeScriptFXNode(wrapNode,2);/*wrapNode.disconnect()*/}, (time - Soliton.context.currentTime) * 1000);
 	}
 
 	wrapNode._lichType = AUDIO;
@@ -9001,9 +9350,10 @@ function fold(value, input)
 
 	var merger = Soliton.context.createChannelMerger(2);
 	merger.channelInterpretation = "discrete";
-	var foldNode = Soliton.context.createScriptProcessor(1024, 2, 1);
-
-	foldNode.onaudioprocess = function(event)
+	//var foldNode = Soliton.context.createScriptProcessor(1024, 2(1024, 2, 1);
+	var foldNode = _requestScriptFXNode(2);
+	
+	foldNode.script.onaudioprocess = function(event)
 	{
 		var inputArray = event.inputBuffer.getChannelData(0);
 		var foldArray = event.inputBuffer.getChannelData(1);
@@ -9019,9 +9369,9 @@ function fold(value, input)
 		}
 	}
 
-	input.connect(merger, 0, 0);
-	value.connect(merger, 0, 1);
-	merger.connect(foldNode);
+	input.connect(foldNode.pre, 0, 0);
+	value.connect(foldNode.pre, 0, 1);
+	// merger.connect(foldNode);
 
 	foldNode.startAll = function(time)
 	{ 
@@ -9033,7 +9383,7 @@ function fold(value, input)
 	{ 
 		input.stopAll(time);
 		value.stopAll(time);
-		setTimeout(function(){input.disconnect(); value.disconnect(); merger.disconnect(); foldNode.disconnect()}, (time - Soliton.context.currentTime) * 1000);
+		setTimeout(function(){input.disconnect(); value.disconnect(); /*merger.disconnect();*/ _freeScriptFXNode(foldNode, 2);/*foldNode.disconnect()*/}, (time - Soliton.context.currentTime) * 1000);
 	}
 
 	foldNode._lichType = AUDIO;
@@ -9066,7 +9416,8 @@ function mouseX(low, high, scale)
 
 	//var merger = Soliton.context.createChannelMerger(2);
 	//merger.channelInterpretation = "discrete";
-	var fxNode = Soliton.context.createScriptProcessor(1024, 0, 1);
+	// var fxNode = Soliton.context.createScriptProcessor(1024, 0, 1);
+	var fxNode = _requestScriptNode();
 	var fxGain = Soliton.context.createGain();
 	fxGain.gain.value = 0;
 	fxNode.connect(fxGain);
@@ -9098,7 +9449,8 @@ function mouseX(low, high, scale)
 		setTimeout(
 			function()
 			{
-				fxNode.disconnect();
+				//fxNode.disconnect();
+				_freeScriptNode(fxNode);
 				fxGain.disconnect();
 				_mouseUGens = Math.max(0, _mouseUGens - 1);
 				if(_mouseUGens == 0)
@@ -9122,7 +9474,8 @@ function mouseY(low, high, scale)
 
 	//var merger = Soliton.context.createChannelMerger(2);
 	//merger.channelInterpretation = "discrete";
-	var fxNode = Soliton.context.createScriptProcessor(1024, 0, 1);
+	// var fxNode = Soliton.context.createScriptProcessor(1024, 0, 1);
+	var fxNode = _requestScriptNode();
 	var fxGain = Soliton.context.createGain();
 	fxGain.gain.value = 0;
 	fxNode.connect(fxGain);
@@ -9154,7 +9507,8 @@ function mouseY(low, high, scale)
 		setTimeout(
 			function()
 			{
-				fxNode.disconnect();
+				// fxNode.disconnect();
+				_freeScriptNode(fxNode);
 				fxGain.disconnect();
 				_mouseUGens = Math.max(0, _mouseUGens - 1);
 				if(_mouseUGens == 0)
@@ -9179,11 +9533,12 @@ function crush(depth, input)
 	else if(depth._lichType != AUDIO)
 		depth = dc(depth);
 
-	var merger = Soliton.context.createChannelMerger(2);
-	merger.channelInterpretation = "discrete";
-	var fxNode = Soliton.context.createScriptProcessor(1024, 2, 1);
+	//var merger = Soliton.context.createChannelMerger(2);
+	//merger.channelInterpretation = "discrete";
+	//var fxNode = Soliton.context.createScriptProcessor(1024, 2, 1);
+	var fxNode = _requestScriptFXNode(2);
 
-	fxNode.onaudioprocess = function(event)
+	fxNode.script.onaudioprocess = function(event)
 	{
 		var inputArray = event.inputBuffer.getChannelData(0);
 		var crushArray = event.inputBuffer.getChannelData(1);
@@ -9197,9 +9552,11 @@ function crush(depth, input)
 		}
 	}
 
-	input.connect(merger, 0, 0);
-	depth.connect(merger, 0, 1);
-	merger.connect(fxNode);
+	//input.connect(merger, 0, 0);
+	//depth.connect(merger, 0, 1);
+	//merger.connect(fxNode);
+	input.connect(fxNode.pre, 0, 0);
+	depth.connect(fxNode.pre, 0, 1);
 
 	fxNode.startAll = function(time)
 	{ 
@@ -9211,7 +9568,7 @@ function crush(depth, input)
 	{ 
 		depth.stopAll(time);
 		input.stopAll(time);
-		setTimeout(function(){input.disconnect(); depth.disconnect(); merger.disconnect(); fxNode.disconnect()}, (time - Soliton.context.currentTime) * 1000);
+		setTimeout(function(){_freeScriptFXNode(fxNode,2); input.disconnect(); depth.disconnect();/* merger.disconnect(); fxNode.disconnect()*/}, (time - Soliton.context.currentTime) * 1000);
 	}
 
 	fxNode._lichType = AUDIO;
@@ -9228,14 +9585,16 @@ function decimate(rate, input)
 	else if(rate._lichType != AUDIO)
 		rate = dc(rate);
 
-	var merger = Soliton.context.createChannelMerger(2);
-	merger.channelInterpretation = "discrete";
-	var fxNode = Soliton.context.createScriptProcessor(1024, 2, 1);
+	// var merger = Soliton.context.createChannelMerger(2);
+	// merger.channelInterpretation = "discrete";
+	// var fxNode = Soliton.context.createScriptProcessor(1024, 2, 1);
+	var fxNode = _requestScriptFXNode(2);
+	
 	var currentSample = 0;
 	var decimCount = 0;
 	var ratio = 1;
 
-	fxNode.onaudioprocess = function(event)
+	fxNode.script.onaudioprocess = function(event)
 	{
 		var inputArray = event.inputBuffer.getChannelData(0);
 		var rateArray = event.inputBuffer.getChannelData(1);
@@ -9261,9 +9620,9 @@ function decimate(rate, input)
 	}
 
 
-	input.connect(merger, 0, 0);
-	rate.connect(merger, 0, 1);
-	merger.connect(fxNode);
+	input.connect(fxNode.pre, 0, 0);
+	rate.connect(fxNode.pre, 0, 1);
+	//merger.connect(fxNode);
 
 	fxNode.startAll = function(time)
 	{ 
@@ -9275,7 +9634,7 @@ function decimate(rate, input)
 	{ 
 		rate.stopAll(time);
 		input.stopAll(time);
-		setTimeout(function(){input.disconnect(); rate.disconnect(); merger.disconnect(); fxNode.disconnect()}, (time - Soliton.context.currentTime) * 1000);
+		setTimeout(function(){input.disconnect(); rate.disconnect(); /*merger.disconnect(); */_freeScriptFXNode(fxNode,2);/*fxNode.disconnect()*/}, (time - Soliton.context.currentTime) * 1000);
 	}
 
 	fxNode._lichType = AUDIO;
@@ -9441,9 +9800,10 @@ function pitchShift(shift, input)
 	else if(shift._lichType != AUDIO)
 		shift = dc(shift);
 
-	var merger = Soliton.context.createChannelMerger(2);
-	merger.channelInterpretation = "discrete";
-	var fxNode = Soliton.context.createScriptProcessor(1024, 2, 1);
+	// var merger = Soliton.context.createChannelMerger(2);
+	// merger.channelInterpretation = "discrete";
+	// var fxNode = Soliton.context.createScriptProcessor(1024, 2, 1);
+	var fxNode = _requestScriptFXNode(2);
 	var writePhase = 0;
 	var samplerate = Soliton.context.sampleRate;
 	var readOffset = samplerate * 0.01; // 80 ms
@@ -9464,7 +9824,7 @@ function pitchShift(shift, input)
 	var readFracA = 0;
 	var readFracB = 0;
 
-	fxNode.onaudioprocess = function(event)
+	fxNode.script.onaudioprocess = function(event)
 	{
 		var inputArray = event.inputBuffer.getChannelData(0);
 		var shiftArray = event.inputBuffer.getChannelData(1);
@@ -9525,9 +9885,9 @@ function pitchShift(shift, input)
 	}
 
 
-	input.connect(merger, 0, 0);
-	shift.connect(merger, 0, 1);
-	merger.connect(fxNode);
+	input.connect(fxNode.pre, 0, 0);
+	shift.connect(fxNode.pre, 0, 1);
+	// merger.connect(fxNode);
 
 	fxNode.startAll = function(time)
 	{ 
@@ -9546,8 +9906,9 @@ function pitchShift(shift, input)
 				memory = null;
 				input.disconnect(); 
 				shift.disconnect(); 
-				merger.disconnect(); 
-				fxNode.disconnect();
+				/*merger.disconnect();*/ 
+				_freeScriptFXNode(fxNode,2);
+				//fxNode.disconnect();
 			}, 
 			(time - Soliton.context.currentTime) * 1000
 		);
@@ -9598,9 +9959,10 @@ function freqShift(shift, input)
 	else if(shift._lichType != AUDIO)
 		shift = dc(shift);
 
-	var merger = Soliton.context.createChannelMerger(2);
-	merger.channelInterpretation = "discrete";
-	var fxNode = Soliton.context.createScriptProcessor(1024, 2, 1);
+	// var merger = Soliton.context.createChannelMerger(2);
+	// merger.channelInterpretation = "discrete";
+	// var fxNode = Soliton.context.createScriptProcessor(1024, 2, 1);
+	var fxNode = _requestScriptFXNode(2);
 	var y1 = new Float32Array(12);
 	var ay1, ay2, ay3, ay4, ay5, ay6;
     var ay7, ay8, ay9, ay10, ay11, ay12;
@@ -9615,7 +9977,7 @@ function freqShift(shift, input)
     var currentFreq;
     var neg;
 
-	fxNode.onaudioprocess = function(event)
+	fxNode.script.onaudioprocess = function(event)
 	{
 		var inputArray = event.inputBuffer.getChannelData(0);
 		var shiftArray = event.inputBuffer.getChannelData(1);
@@ -9697,9 +10059,9 @@ function freqShift(shift, input)
 		//Lich.post(sinPhase);
 	}
 
-	input.connect(merger, 0, 0);
-	shift.connect(merger, 0, 1);
-	merger.connect(fxNode);
+	input.connect(fxNode.pre, 0, 0);
+	shift.connect(fxNode.pre, 0, 1);
+	// merger.connect(fxNode);
 
 	fxNode.startAll = function(time)
 	{ 
@@ -9717,8 +10079,9 @@ function freqShift(shift, input)
 				memory = null;
 				input.disconnect(); 
 				shift.disconnect(); 
-				merger.disconnect(); 
-				fxNode.disconnect();
+				/*merger.disconnect();*/ 
+				_freeScriptFXNode(fxNode, 2);
+				// fxNode.disconnect();
 			}, 
 			(time - Soliton.context.currentTime) * 1000
 		);
@@ -9734,7 +10097,7 @@ _createUGen("freqShift", freqShift);
 function reverb(mix, roomSize, decayTime, damp, input)
 {
 	if(input._lichType != AUDIO)
-		throw new Error("phaser must be used with an audio ugen for input.");
+		throw new Error("reverb must be used with an audio ugen for input.");
 
 	if(typeof mix !== "number" || typeof decayTime !== "number" || typeof damp !== "number")
 		throw new Error("reverb mix, room, and damp arguments must be numbers.");
@@ -10203,6 +10566,16 @@ function killall()
 		bus.stopAll = function(){};
 		Soliton.buses[i] = bus;
 	}
+
+	_numScriptNodes = 0;
+	_numScriptFXNodes = 0;
+	_scriptPool = [];
+	_scriptFXPools = [[],[],[],[],[],[],[],[],[],[]]; // script pools for various input sizes
+	_numScriptFXNodes = [0,0,0,0,0,0,0,0,0,0]; // current number of fx nodes for various input sizes
+	_nullNode = Soliton.context.createGain();
+	_zeroNode = Soliton.context.createGain();
+	_zeroNode.connect(Soliton.masterGain);
+	_zeroNode.gain.value = 0;
 }
 
 _createPrimitive("killall", killall);
@@ -10287,6 +10660,8 @@ Soliton.PercStream = function(_events, _modifiers)
 					synth.connect(Soliton.masterGain);
 					synth.startAll(this.nextTime + offset);
 				}
+
+				synth = null;
 			}
 
 			catch(e)
@@ -10686,7 +11061,7 @@ Soliton.SteadyScheduler = function()
 	var playing = false;
 	var startTime = null;
 	var lookAhead = 25; // How frequently to call scheduling, in milliseconds
-	var scheduleAhead = 0.1; // How far ahead to actually schedule events, in seconds
+	var scheduleAhead = 0.25; // How far ahead to actually schedule events, in seconds
 	 // We use 2 queues and a temporary variable to efficiently filter called events by swapping variables, only using push, 
 	 // and reassining currentQueue.length = 0
 	var currentQueue = [];

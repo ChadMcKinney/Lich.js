@@ -1826,3 +1826,222 @@ let chordSynth freqs => map sf freqs
 
 map play $ chordSynth $ blockChord doom
 
+
+
+-- memory test code
+setTempo 280
+
+-- master drum FX synth --
+let oDrumFX = auxIn 9 >> filt >> comp >> limit >> gain 1 >> play
+    where
+        comp = compressor -18 40 50 0.001 0.2
+        limit = limiter -3
+        filt = lowpass 19000 0
+
+-- hi hat --
+let oHht => n >> hf >> lf >> crush 1 >> pan 0.5 >> perc 0.01 0.9 0.1 >> auxOut 9
+    where
+        n = (tseq [(white 1), (brown 1), (pink 1), (violet 1)])
+        cut = tseq [3000,4000]
+        hf = highpass cut (random 10 20)
+        lf = lowpass (cut + 4000) 15
+
+
+let hh => white 1 >> fir [0.3,-0.1] >> perc 0 1 0.1
+let hh2 => violet 1 >> pan -0.25 >> perc 0 1 0.1
+let hh3 => pink 1 >> pan 0.1 >> perc 0 1 0.3
+
+oHhter +> hh hh2 hh hh hh2 hh | (/2)
+oHhter2 +> hh2 hh2 hh3 hh2 hh2 hh hh | (pseq [(*1.5),(*2),(*1),(*0.5),(*0.5),(*3)] >> pstutter (pseq [4,2,1,4]))
+
+stop oHhter2
+
+hher +> hh
+stop hher
+
+let s3 = auxIn 1 >> exprange 40 160 >> square >> gain 0.2 >> delay 1 0.5 >> auxThrough 1 >> gain 2 >> play
+stop s3
+
+
+square (saw 1 >> exprange 1 20000) >> add (auxIn 0 >> delay (1/6) 0) >> fir [random -0.4 0.4 | x <- [1..10]] >> limiter -3 >> auxThrough 0 >> play
+
+
+
+
+
+
+
+
+
+
+
+---------------------------------------------------------------------------------------------
+
+setTempo 10000
+
+-- master drum FX synth --
+let oDrumFX = auxIn 9 >> filt >> comp >> limit >> gain 1 >> play
+    where
+        comp = compressor -18 40 50 0.001 0.2
+        limit = limiter -3
+        filt = lowpass 19000 0
+
+-- hi hat --
+let hh => n >> hf >> lf >> crush 1 >> pan 0.5 >> perc 0.01 0.9 0.1
+    where
+        n = (tseq [(white 1), (brown 1), (pink 1), (violet 1)])
+        cut = tseq [3000,4000]
+        hf = highpass cut (random 10 20)
+        lf = lowpass (cut + 4000) 15
+
+
+let hh => choose [white 1, sin 440] >> fos 0.3 -0.1 0.1 >> perc 0 2 0.5
+
+
+let hh => choose [white 1, sin 440] >> fir [0.3,-0.1,0.1] >> perc 0 0.3 0.5
+let hh => white 1 >> fir [0.3,-0.1,0.1] >> perc 0 0.3 0.5
+let hh => sin (impulse 4 >> range 1 10) >> lag 1 >> range 50 1000 >> sin >> perc 0 0.3 0.5
+let hh => white 1 >> perc 0 0.3 0.5
+oHhter +> hh
+stop oHhter
+setTempo 10000
+
+
+let kd = degree2Freq koto -- Compile this first!
+white 1 >> perc2 0 1 0.05 >> pluck (kd (random -5 10)) 3 0.3 >> perc 0.01 0.15 1 >> play
+pink 1 >> perc2 0.5 1 0.05 >> pluck (kd (random -5 10)) 3 0.3 >> perc 0.1 0.1 2 >> play
+brown 1 >> perc2 1 0.3 3 >> pluck (kd (random -5 10)) 6 0.7 >> perc 1 0.5 3 >> play
+
+let kSynth freq => white 1 >> perc2 0 1 0.05 >> pluck freq 6 0.3 >> perc 0.01 0.15 1
+kMelody ~> kSynth (kd -12) _ (kd -8) _ (kd -4) (kd (choose [1, -1, -5])) (kd -9) (kd -5) | (*2) _ _ _ _ _ (*2) _ | (*2)
+kMelody2 ~> kSynth (kd -12) _ (kd -8) (kd -4) _ (kd (choose [1, -1, -5])) _ (kd -9) _ (kd -5) | (*4) (*4) (*2) | (*2)
+stop kMelody
+stop kMelody2
+
+--cool pluck based synth
+let kSynth freq => saw freq >> add (saw (freq*1.002)) >> perc2 0 1 1 >> pluck freq 1 0.9 >> perc 0.0001 0.4 0.2
+kBass ~> kSynth [(kd -12) (kd -8)] [(kd -4) (kd (choose [-2, -4, -5]))] [(kd -9) (kd (choose [-7, -5]))] | (/2)
+
+
+-- Cool flittery plucky melody
+let kSynth3 freq => white 1 >> perc2 0 1 0.03 >> pluck freq (random 0.1 4) (random 0.05 1) >> perc 0.0 0.15 0.5
+kMelody3 ~> kSynth3 [(kd -12) (kd -8)] [(kd -4) (kd (choose [-2, -4, -5]))] [(kd -9) (kd (choose [-7, -5]))] | (/2) _ _ (/2) _ (*2) _ (*2) (*4) _ (/2) _ _ (/2) _ (*2) (*4) (*8) _
+
+
+
+--------------------------------------------------------------------------------------------------------
+
+Stack Overflow question
+
+var context = new webkitAudioContext();
+
+function killNode(node)
+{
+	return function()
+	{
+		node.disconnect();
+		node.onaudioprocess = null;
+        node = null;
+	}
+}
+
+function noise() 
+{
+    var node = context.createScriptProcessor(1024, 0, 1);
+	node.onaudioprocess = function(e)
+	{
+		var output = e.outputBuffer.getChannelData(0);
+		for(var i = 0; i < 1024; ++i)
+		{
+            output[i] = (Math.random() * 2 - 1) * 0.001;
+		}
+	}
+    
+	node.connect(context.destination);
+	setTimeout(killNode(node), 100);
+}
+
+
+function generateNoise()
+{
+    for(var i = 0; i < 99999; ++i)
+    {
+        noise();   
+    }
+}
+
+generateNoise();
+
+gets up to 16% then drops down to about 14% and stays there indefinitely
+
+http://jsfiddle.net/6YBWf/3/
+
+------------------------------------------------
+
+Simple test code for Lich
+
+setTempo 8000
+let hh => white 1 >> perc 0 0.3 0.001
+oHhter +> hh
+stop oHhter
+
+
+
+
+
+
+
+
+
+let hh => choose [white 1, sin 440] >> fos 0.3 -0.1 0.1 >> perc 0 2 0.5
+
+
+let hh => choose [white 1, sin 440] >> fir [0.3,-0.1,0.1] >> perc 0 0.3 0.5
+let hh => white 1 >> fir [0.3,-0.1,0.1] >> perc 0 0.3 0.5
+let hh => sin (impulse 4 >> range 1 10) >> lag 1 >> range 50 1000 >> sin >> perc 0 0.3 0.5
+let hh => white 1 >> perc 0 0.3 0.5
+let hh => saw 200 >> fir [random 0 0.1, random -0.5 -0.1, random -0.1 0.6] >> perc 0 0.3 0.4
+let hh => saw 200 >> lpz1 >> perc 0 0.3 0.4
+let hh => saw 200 >> fir [0.3, 0.1, -0.1] >> perc 0 0.3 0.4
+let hh => saw 200 >> decimate 1000 >> perc 0 0.3 0.4
+let hh => sin 440 >> crush 1 >> perc 0 0.3 0.1
+let hh => choose [white 1] >> crush 1 >> perc 0 0.3 0.3
+let hh => choose [white 1, sin 440, saw 40] >> choose [onepole 0.3, lpz1] >> perc 0 0.3 0.3
+oHhter +> hh
+stop oHhter
+setTempo 800
+
+
+
+
+
+
+
+let hh => choose [white 1, sin 440] >> fos 0.3 -0.1 0.1 >> perc 0 2 0.5
+
+
+let hh => choose [white 1, sin 440] >> fir [0.3,-0.1,0.1] >> perc 0 0.3 0.25
+let hh => white 1 >> fir [0.3,-0.1,0.1] >> perc 0 0.3 0.5
+let hh => sin (impulse 4 >> range 1 10) >> lag 1 >> range 50 1000 >> sin >> perc 0 0.3 0.5
+let hh => white 1 >> perc 0 0.3 0.5
+let hh => saw 200 >> fir [random 0 0.1, random -0.5 -0.1, random -0.1 0.6] >> perc 0 0.3 0.4
+let hh => saw 200 >> lpz1 >> perc 0 0.3 0.4
+let hh => saw 200 >> fir [0.3, 0.1, -0.1] >> perc 0 0.3 0.4
+let hh => saw (pseq [80,70] >> tstutter 32) >> decimate (pseq [44100, 1000, 10000] >> tstutter 8) >> perc 0 0.5 0.4
+let hh => sin 440 >> crush 1 >> perc 0 0.3 0.1
+let hh => choose [white 1] >> crush 1 >> perc 0 0.3 0.3
+let hh => choose [white 1, sin 440, saw 40] >> choose [crush 1, decimate 10000] >> perc 0 0.3 0.1
+let hh => white 1 >> crush 1 >> pan 0.5 >> perc 0 0.3 0.2
+let hh => choose [sin 440, saw 40] >> exprange 1 20000 >> sin >> perc 0 0.3 0.3
+let hh => choose [sin 440, saw 40] >> choose [onepole 0.3, lpz1] >> exprange 1 20000 >> sin >> perc 0 0.3 0.3
+
+oHhter +> hh
+stop oHhter
+setTempo 5000
+
+
+
+let hh => choose [sin 440, saw 40] >> lpz1 >> pan (random -1 1) >> perc 0 0.3 0.1
+
+oHhter +> hh
+stop oHhter
