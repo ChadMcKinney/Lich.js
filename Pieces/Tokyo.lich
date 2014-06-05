@@ -315,18 +315,10 @@ let oLfn => noiseX f >> dist >> filt >> pan -0.75 >> perc 0 0.35 0.12 >> auxOut 
         filt = highpass 1000 10
 
 oLfner +> _
-oLfner +> oLfn
-oLfner +> oLfn _
 oLfner +> oLfn _ _ oLfn  [oLfn oLfn] _ _ oLfn
 oLfner +> oLfn _ _ oLfn  _ _ _ _
 oLfner +> oLfn _ _ oLfn  _ _ [_ oLfn] oLfn
 oLfner +> _ oLfn oLfn oLfn  oLfn [_ oLfn] _ oLfn
-oLfner +> _ oLfn oLfn oLfn
-oLfner +> oLfn [_ oLfn] _ oLfn
-    _ oLfn _ _
-    _ [_ oLfn] oLfn _
-    oLfn _ [_ oLfn] oLfn
-oLfner +> [oLfn oLfn] [_ oLfn] _ | (*1) (*1) (*1) (*2)
 stop oLfner
 
 -- highish noise hit --
@@ -347,12 +339,12 @@ stop oHfner
 
 
 -- kick --
-let oKk => (osc + bass + noise) >> env [0,a,(a/4),0] [0.01,0.5,0.45] 0 >> auxOut 9
+let oKk => (osc + bass + noise) >> env [0,a,(a/4),0] [0.01,0.05,0.25] 0 >> auxOut 9
    where
         a = 0.8
-        osc = sin (env2 [650,30] [0.075] 0 1)
+        osc = sin (env2 [1200,30] [0.06] 0 1)
         bass = sin 27.5
-        noise = brown 0.1 >> lowpass 600 3 >> perc2 0.02 1 0.07
+        noise = brown 0.05 >> lowpass 600 3 >> perc2 0.02 1 0.075
 
 oKker +> _
 oKker +> oKk _ _ _      _ _ _ _         _ oKk _ _       oKk _ _ _
@@ -598,22 +590,21 @@ oWfer +> oWf _ oWf [oWf oWf]
 stop oWfer
 
 -- impulse echo
-let oDl => o >> dl >> di >> pan (tseq [-0.2,-0.1,0.1,0.2]) >> perc 0 1 0.5 >> auxThrough 9
+let oDl => o >> dl >> di >> perc 0 1 0.5 >> auxOut 9
     where
         o = (impulse (tseq [1000,1000,980,980])) >> perc2 0 1 0.1
         dl = delay (tempoSeconds * (tshuf [0.5,0.25])) 1
         di = crush 3
 
-oDler +> oDl _ _
-oDler +> oDl _ _ oDl _
-oDler +> oDl _ [oDl oDl] oDl
+oDler +> _
+oDler +> oDl _ _ _
 stop oDler
 
 stop oKker
 
 ---------------
 
-let oOne => o >> f >> d >> pan -0.2 >> perc 0 1 0.25
+let oOne => o >> f >> d >> perc 0 1 0.25
     where
         o = crackle (random 0.1 1.0)
         f = bandpass (tshuf [500,1000,700]) (tshuf [1,3,5,10])
@@ -622,7 +613,7 @@ let oOne => o >> f >> d >> pan -0.2 >> perc 0 1 0.25
 oOner +> oOne _ [oOne oOne] _ oOne [_ oOne] | (*1) (*1) (*2)
 stop oOner
 
-let oTwo => o >> f >> d >> pan 0.2 >> perc 0 1 0.15
+let oTwo => o >> f >> d >> perc 0 1 0.15
     where
         o = noiseN (tshuf [500,1000,700])
         f = bandpass (tshuf [500,1000,700]) (tshuf [1,3,5,10])
@@ -658,7 +649,7 @@ let oRPh => o >> recPlayBuf myBuf (tshuf [0.125,0.25,0.5,1]) (tshuf [0.125,0.25,
 oRPhr +> oRPh _ _ [oRPh oRPh] oRPh
 stop oRPhr
 
-let oDl => o >> dl >> di >> pan (tseq [-0.2,-0.1,0.1,0.2]) >> perc 0 1 0.5 >> auxThrough 9
+let oDl => o >> dl >> di >> perc 0 1 0.5 >> auxThrough 9
     where
         o = (impulse (tseq [1000,1000,980,980])) >> perc2 0 1 0.1
         dl = delay (tempoSeconds * (tshuf [0.5,0.25])) 1
@@ -673,112 +664,6 @@ let oMRP => auxIn 9 >> recPlayBuf myBuf (tshuf [0.125,0.25,0.5,1]) (tshuf [0.125
 
 oMRPr +> oMRP _ _ [oMRP oMRP] oMRP
 stop oMRPr
-
-------------------
--- sample drums --
-------------------
-
-let oAt => samp >> pan 0.1 >> perc 0 1 1
-    where
-        samp = (playSample "AlgoAtariBlast" (random 0.9 1.1) 0 0.3)
-
-oAter +> oAt
-stop oAter
-
-
-let oBp => samp >> pan -0.1 >> perc 0 1 1
-    where
-        samp = (playSample "AlgoBeeeeeep" (random 0.9 1.1) 0 0.3)
-
-oBper +> oBp
-stop oBper
-
-
-let oHn => samp >> pan 0.15 >> perc 0 1 1
-    where
-        samp = (playSample "AlgoHenon" (random 0.9 1.1) 0 0.3)
-
-oHner +> oHn
-stop oHner
-
-
-let oHt => samp >> pan -0.15 >> perc 0 1 1
-    where
-        samp = (playSample "AlgoHiHat" (random 0.9 1.1) 0 0.3)
-
-oHter +> _
-oHter +> oHt
-oHter +> [oHt oHt]
-oHter +> oHt [oHt oHt]
-oHter +> oHt oHt oHt [oHt oHt]
-oHter +> oHt [oHt oHt] oHt [oHt oHt] oHt oHt
-oHter +> _ oHt oHt oHt oHt [_ oHt] _ oHt
-oHter +> [oHt oHt] _ _ oHt  _ [oHt oHt] oHt oHt
-stop oHter
-
-
-let oKk => samp >> pan 0 >> perc 0 1 1
-    where
-        samp = (playSample "AlgoHouseKick" (random 0.9 1.1) 0 0.3)
-
-oKker +> _
-oKker +> oKk _ _ _      _ _ _ _         _ oKk _ _       oKk _ _ _
-oKker +> oKk _ _ _      _ _ oKk _       _ oKk _ _       oKk _ _ oKk
-oKker +> oKk _ _ _      _ _ oKk _       oKk oKk _ _       oKk _ _ oKk
-oKker +> oKk _ _ _      _ _ _ _         _ oKk _ _       oKk [_ oKk] _ oKk
-oKker +> oKk _ _ _      oKk _ _ _       oKk _ _ _       oKk [_ oKk] _ _
-oKker +> oKk _ _ _      oKk _ _ oKk     oKk _ _ _       oKk [_ oKk] _ _
-oKker +> oKk _ oKk _    oKk _ oKk _     oKk _ oKk _     oKk [_ oKk] _ oKk
-oKker +> oKk _ oKk _    oKk [_ oKk] _ oKk
-oKker +> oKk _
-oKker +> oKk _ [oKk oKk] _  oKk _ oKk _
-oKker +> oKk _ oKk _    oKk [oKk oKk] oKk [_ oKk]
-stop oKker
-
-
-let oLc => samp >> pan 0.2 >> perc 0 6 1
-    where
-        samp = (playSample "AlgoLinCong" (random 0.9 1.1) 0 0.3)
-
-oLcer +> oLc
-stop oLcer
-
-
-let oMn => samp >> pan -0.2 >> perc 0 1 1
-    where
-        samp = (playSample "AlgoModNoise" (random 0.9 1.1) 0 0.3)
-
-oMner +> oMn
-stop oMner
-
-
-let oQc => samp >> pan 0.12 >> perc 0 1 1
-    where
-        samp = (playSample "AlgoQuadC" (random 0.9 1.1) 0 0.3)
-
-oQcer +> oQc
-stop oQcer
-
-
-let oSn => samp >> pan -0.12 >> perc 0 1 1
-    where
-        samp = (playSample "AlgoSnare" (random 0.9 1.1) 0 0.3)
-
-oSner +> oSn
-oSner +> _
-oSner +> oSn _ oSn _  _ oSn oSn _
-oSner +> _ _ _ oSn  _ _ _ _  [oSn oSn] _ _ oSn  oSn _ _ oSn
-oSner +> oSn _ _ oSn  [oSn oSn] _ _ _  [oSn oSn] _ [oSn oSn] oSn  oSn _ _ oSn
-oSner +> oSn _ oSn _    [_ oSn] oSn oSn _  oSn _ [_ oSn] oSn  oSn [oSn oSn] _ _
-stop oSner
-
-let oSl => samp >> pan 0.17 >> perc 0 1 1
-    where
-        samp = (playSample "AlgoStandardL" (random 0.9 1.1) 0 0.3)
-
-oSler +> oSl
-stop oSler
-
 -------------------------------------------------------------------------------------------------------------------------
 -- | Curtis
 -------------------------------------------------------------------------------------------------------------------------
