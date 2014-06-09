@@ -391,7 +391,7 @@ function saw(freq)
 
 function white(amp)
 {
-	return new UGen("WhiteNoise", AudioRate, [], 1, 0);
+	return _binaryOpUGen(_BIN_MUL, new UGen("WhiteNoise", AudioRate, [], 1, 0), amp);
 }
 
 function dc(value)
