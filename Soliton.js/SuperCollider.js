@@ -75,7 +75,9 @@ var defaultServerOptions = {
 
 var scsynth = require('supercolliderjs').scsynth;
 var server = new scsynth({
-	path:"/usr/local/bin"
+	path:"/usr/local/bin",
+	debug: false,
+	echo: false,
 });
 
 var fs = require('fs');
@@ -108,9 +110,25 @@ setInterval( // Initial messages
 	2000
 );*/
 
+
 /*
 s.on('OSC', function(addr, msg) {
-	console.log(addr+msg);
+	//console.log(addr+msg);
+	if(addr == "/fail")
+		console.log('scsynth ERROR:' + msg);
+});
+
+scsynth.on('sendosc', function() {
+	
+});
+
+scsynth.on('rcvosc', function(addr, msg) {
+	if(addr == "/fail")
+		console.log('scsynth ERROR:' + msg);
+});
+
+scsynth.on('debug', function(d) {
+  //console.log('scsynth ERROR:' + d);
 });
 */
 
@@ -383,7 +401,6 @@ function multiNewUGen(name, rate, inputs, numOutputs, specialIndex)
 			res.push(new UGen(name, rate, newInputs, numOutputs, specialIndex));
 		}
 
-		console.log(res);
 		return res;
 	}
 }
@@ -696,7 +713,6 @@ function _ugenToDefList(ugen, constants, controls)
 	{
 		if(!controls.hasOwnProperty(ugen.name))
 		{
-			console.log("_CONTROLNAME: " + ugen.name);
 			controls[ugen.name] = ugen.controlIndex;
 			controls.arr.push(ugen);
 			controls.numControls += 1;
@@ -826,7 +842,7 @@ function _synthDef(name, def)
 	// File and OSC
 	
 	buf = buf.slice(0, offset);
-	console.log(buf.toString());
+	// console.log(buf.toString());
 	var path = "/tmp/"+name+".scsyndef";
 	
 	fs.writeFile(
