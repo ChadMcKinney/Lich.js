@@ -379,6 +379,7 @@ function _audioDivision(a, b)
 	return _binaryOpUGen(_BIN_DIV, a, b);
 }
 
+// deterministic
 function sin(freq)
 {
 	return new UGen("SinOsc", AudioRate, [freq, 0], 1, 0);
@@ -389,6 +390,37 @@ function saw(freq)
 	return new UGen("Saw", AudioRate, [freq], 1, 0);
 }
 
+function tri(freq)
+{
+	return new UGen("LFTri", AudioRate, [freq,0], 1, 0);
+}
+
+function square(freq)
+{
+	return new UGen("Pulse", AudioRate, [freq,0.5], 1, 0);
+}
+
+function pulse(freq,width)
+{
+	return new UGen("Pulse", AudioRate, [freq,width], 1, 0);
+}
+
+function blip(freq,nharm)
+{
+	return new UGen("Blip", AudioRate, [freq,nharm], 1, 0);
+}
+
+function formant(fundf,formf,bwf)
+{
+	return new UGen("Formant", AudioRate, [fundf,formf,bwf], 1, 0);
+}
+
+function impulse(freq)
+{
+	return new UGen("Impulse", AudioRate, [freq,0], 1, 0);
+}
+
+// noise
 function white(amp)
 {
 	return _binaryOpUGen(_BIN_MUL, new UGen("WhiteNoise", AudioRate, [], 1, 0), amp);
@@ -439,6 +471,7 @@ function noiseX(value)
 	return new UGen("LFNoise2", AudioRate, [value], 1, 0);
 }
 
+// chaos
 function cuspN(freq,a,b,xi)
 {
 	return new UGen("CuspN", AudioRate, [freq,a,b,xi], 1, 0);
@@ -459,6 +492,23 @@ function gbmanL(freq,xi,yi)
 	return new UGen("GbmanL", AudioRate, [freq,xi,yi], 1, 0);
 }
 
+// filters
+function lowpass(freq, q, input)
+{
+	return new UGen("RLPF", AudioRate, [input,freq,1/q], 1, 0);
+}
+
+function highpass(freq, q, input)
+{
+	return new UGen("RHPF", AudioRate, [input,freq,1/q], 1, 0);
+}
+
+function bandpass(freq, q, input)
+{
+	return new UGen("BPF", AudioRate, [input,freq,1/q], 1, 0);
+}
+
+//
 function dc(value)
 {
 	return new UGen("DC", AudioRate, [value], 1, 0);
