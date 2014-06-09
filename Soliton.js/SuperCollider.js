@@ -622,7 +622,7 @@ function _synthDef(name, def)
 	
 	buf = buf.slice(0, offset);
 	console.log(buf.toString());
-	var path = "/home/octopian/Documents/source/WebDev/Lich.js/"+name+".scsyndef";
+	var path = "/tmp/"+name+".scsyndef";
 	
 	fs.writeFile(
 		path,
