@@ -454,6 +454,11 @@ function gbmanN(freq,xi,yi)
 	return new UGen("GbmanN", AudioRate, [freq,xi,yi], 1, 0);
 }
 
+function gbmanL(freq,xi,yi)
+{
+	return new UGen("GbmanL", AudioRate, [freq,xi,yi], 1, 0);
+}
+
 function dc(value)
 {
 	return new UGen("DC", AudioRate, [value], 1, 0);
