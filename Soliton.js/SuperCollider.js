@@ -394,6 +394,66 @@ function white(amp)
 	return _binaryOpUGen(_BIN_MUL, new UGen("WhiteNoise", AudioRate, [], 1, 0), amp);
 }
 
+function pink(amp)
+{
+	return _binaryOpUGen(_BIN_MUL, new UGen("PinkNoise", AudioRate, [], 1, 0), amp);
+}
+
+function brown(amp)
+{
+	return _binaryOpUGen(_BIN_MUL, new UGen("BrownNoise", AudioRate, [], 1, 0), amp);
+}
+
+function gray(amp)
+{
+	return _binaryOpUGen(_BIN_MUL, new UGen("GrayNoise", AudioRate, [], 1, 0), amp);
+}
+
+function clipNoise(amp)
+{
+	return _binaryOpUGen(_BIN_MUL, new UGen("ClipNoise", AudioRate, [], 1, 0), amp);
+}
+// fix this?
+function crackle(chaos)
+{
+	return new UGen("Crackle", AudioRate, [chaos], 1, 0);
+}
+
+function dust(value)
+{
+	return new UGen("Dust", AudioRate, [value], 1, 0);
+}
+
+function noiseN(value)
+{
+	return new UGen("LFNoise0", AudioRate, [value], 1, 0);
+}
+
+function noiseL(value)
+{
+	return new UGen("LFNoise1", AudioRate, [value], 1, 0);
+}
+
+function noiseX(value)
+{
+	return new UGen("LFNoise2", AudioRate, [value], 1, 0);
+}
+
+function cuspN(freq,a,b,xi)
+{
+	return new UGen("CuspN", AudioRate, [freq,a,b,xi], 1, 0);
+}
+
+function cuspL(freq,a,b,xi)
+{
+	return new UGen("CuspL", AudioRate, [freq,a,b,xi], 1, 0);
+}
+
+function gbmanN(freq,xi,yi)
+{
+	return new UGen("GbmanN", AudioRate, [freq,xi,yi], 1, 0);
+}
+
 function dc(value)
 {
 	return new UGen("DC", AudioRate, [value], 1, 0);
