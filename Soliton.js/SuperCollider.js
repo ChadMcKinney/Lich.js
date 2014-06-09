@@ -343,6 +343,49 @@ function UGen(name, rate, inputs, numOutputs, specialIndex)
 	this.synthIndex = -1;
 	this.outputIndex = 0;
 	this._lichType = AUDIO;
+	this._collected = false; // used internally to cull duplicates in the synth graph
+}
+
+// supports multi-channel expansion
+function multiNewUGen(name, rate, inputs, numOutputs, specialIndex)
+{
+	var size = 0;
+
+	// Find the largest array length
+	for(var i = 0; i < inputs.length; ++i)
+	{
+		var input = inputs[i];
+		
+		if(input instanceof Array)
+		{
+			size = size > input.length ? size : input.length;
+		}
+	}
+
+	if(size == 0)
+	{
+		return new UGen(name, rate, inputs, numOutputs, specialIndex);
+	}
+
+	else
+	{
+		var res = [];
+
+		for(var i = 0; i < size; ++i)
+		{
+			var newInputs = inputs.map(function(e) {
+				if(e instanceof Array)
+					return e[i % e.length];
+				else
+					return e;
+			});
+
+			res.push(new UGen(name, rate, newInputs, numOutputs, specialIndex));
+		}
+
+		console.log(res);
+		return res;
+	}
 }
 
 ////////////////////
@@ -356,7 +399,12 @@ var _BIN_DIV = 4;
 
 function _binaryOpUGen(selector, a, b)
 {
-	return new UGen("BinaryOpUGen", AudioRate, [a, b], 1, selector);
+	var rate = ControlRate;
+	
+	if(a.rate == AudioRate || b.rate == AudioRate)
+		rate = AudioRate;
+	
+	return multiNewUGen("BinaryOpUGen", rate, [a, b], 1, selector);
 }
 
 function mix2(a, b)
@@ -382,148 +430,161 @@ function _audioDivision(a, b)
 // deterministic
 function sin(freq)
 {
-	return new UGen("SinOsc", AudioRate, [freq, 0], 1, 0);
+	return multiNewUGen("SinOsc", AudioRate, [freq, 0], 1, 0);
 }
 
 function saw(freq)
 {
-	return new UGen("Saw", AudioRate, [freq], 1, 0);
+	return multiNewUGen("Saw", AudioRate, [freq], 1, 0);
 }
 
 function tri(freq)
 {
-	return new UGen("LFTri", AudioRate, [freq,0], 1, 0);
+	return multiNewUGen("LFTri", AudioRate, [freq,0], 1, 0);
 }
 
 function square(freq)
 {
-	return new UGen("Pulse", AudioRate, [freq,0.5], 1, 0);
+	return multiNewUGen("Pulse", AudioRate, [freq,0.5], 1, 0);
 }
 
 function pulse(freq,width)
 {
-	return new UGen("Pulse", AudioRate, [freq,width], 1, 0);
+	return multiNewUGen("Pulse", AudioRate, [freq,width], 1, 0);
 }
 
 function blip(freq,nharm)
 {
-	return new UGen("Blip", AudioRate, [freq,nharm], 1, 0);
+	return multiNewUGen("Blip", AudioRate, [freq,nharm], 1, 0);
 }
 
 function formant(fundf,formf,bwf)
 {
-	return new UGen("Formant", AudioRate, [fundf,formf,bwf], 1, 0);
+	return multiNewUGen("Formant", AudioRate, [fundf,formf,bwf], 1, 0);
 }
 
 function impulse(freq)
 {
-	return new UGen("Impulse", AudioRate, [freq,0], 1, 0);
+	return multiNewUGen("Impulse", AudioRate, [freq,0], 1, 0);
 }
 
 // noise
 function white(amp)
 {
-	return _binaryOpUGen(_BIN_MUL, new UGen("WhiteNoise", AudioRate, [], 1, 0), amp);
+	return _binaryOpUGen(_BIN_MUL, multiNewUGen("WhiteNoise", AudioRate, [], 1, 0), amp);
 }
 
 function pink(amp)
 {
-	return _binaryOpUGen(_BIN_MUL, new UGen("PinkNoise", AudioRate, [], 1, 0), amp);
+	return _binaryOpUGen(_BIN_MUL, multiNewUGen("PinkNoise", AudioRate, [], 1, 0), amp);
 }
 
 function brown(amp)
 {
-	return _binaryOpUGen(_BIN_MUL, new UGen("BrownNoise", AudioRate, [], 1, 0), amp);
+	return _binaryOpUGen(_BIN_MUL, multiNewUGen("BrownNoise", AudioRate, [], 1, 0), amp);
 }
 
 function gray(amp)
 {
-	return _binaryOpUGen(_BIN_MUL, new UGen("GrayNoise", AudioRate, [], 1, 0), amp);
+	return _binaryOpUGen(_BIN_MUL, multiNewUGen("GrayNoise", AudioRate, [], 1, 0), amp);
 }
 
 function clipNoise(amp)
 {
-	return _binaryOpUGen(_BIN_MUL, new UGen("ClipNoise", AudioRate, [], 1, 0), amp);
+	return _binaryOpUGen(_BIN_MUL, multiNewUGen("ClipNoise", AudioRate, [], 1, 0), amp);
 }
 // fix this?
 function crackle(chaos)
 {
-	return new UGen("Crackle", AudioRate, [chaos], 1, 0);
+	return multiNewUGen("Crackle", AudioRate, [chaos], 1, 0);
 }
 
 function dust(value)
 {
-	return new UGen("Dust", AudioRate, [value], 1, 0);
+	return multiNewUGen("Dust", AudioRate, [value], 1, 0);
 }
 
 function noiseN(value)
 {
-	return new UGen("LFNoise0", AudioRate, [value], 1, 0);
+	return multiNewUGen("LFNoise0", AudioRate, [value], 1, 0);
 }
 
 function noiseL(value)
 {
-	return new UGen("LFNoise1", AudioRate, [value], 1, 0);
+	return multiNewUGen("LFNoise1", AudioRate, [value], 1, 0);
 }
 
 function noiseX(value)
 {
-	return new UGen("LFNoise2", AudioRate, [value], 1, 0);
+	return multiNewUGen("LFNoise2", AudioRate, [value], 1, 0);
 }
 
 // chaos
 function cuspN(freq,a,b,xi)
 {
-	return new UGen("CuspN", AudioRate, [freq,a,b,xi], 1, 0);
+	return multiNewUGen("CuspN", AudioRate, [freq,a,b,xi], 1, 0);
 }
 
 function cuspL(freq,a,b,xi)
 {
-	return new UGen("CuspL", AudioRate, [freq,a,b,xi], 1, 0);
+	return multiNewUGen("CuspL", AudioRate, [freq,a,b,xi], 1, 0);
 }
 
 function gbmanN(freq,xi,yi)
 {
-	return new UGen("GbmanN", AudioRate, [freq,xi,yi], 1, 0);
+	return multiNewUGen("GbmanN", AudioRate, [freq,xi,yi], 1, 0);
 }
 
 function gbmanL(freq,xi,yi)
 {
-	return new UGen("GbmanL", AudioRate, [freq,xi,yi], 1, 0);
+	return multiNewUGen("GbmanL", AudioRate, [freq,xi,yi], 1, 0);
 }
 
 // filters
 function lowpass(freq, q, input)
 {
-	return new UGen("RLPF", AudioRate, [input,freq,1/q], 1, 0);
+	return multiNewUGen("RLPF", AudioRate, [input,freq,1/q], 1, 0);
 }
 
 function highpass(freq, q, input)
 {
-	return new UGen("RHPF", AudioRate, [input,freq,1/q], 1, 0);
+	return multiNewUGen("RHPF", AudioRate, [input,freq,1/q], 1, 0);
 }
 
 function bandpass(freq, q, input)
 {
-	return new UGen("BPF", AudioRate, [input,freq,1/q], 1, 0);
+	return multiNewUGen("BPF", AudioRate, [input,freq,1/q], 1, 0);
 }
 
 //
 function dc(value)
 {
-	return new UGen("DC", AudioRate, [value], 1, 0);
+	return multiNewUGen("DC", AudioRate, [value], 1, 0);
 }
 
 function out(busNum, value)
 {
-	return new UGen("Out", AudioRate, [busNum, value], 0, 0); // Out has not outputs
+	var outGen =  multiNewUGen("Out", AudioRate, [busNum, value], 0, 0); // Out has not outputs
+
+	if(outGen instanceof Array)
+	{
+		for(var i = 0; i < outGen.length; ++i) // expand the output bus to account for multichannel expansion
+		{
+			outGen[i].inputs[0] = busNum + i;
+		}
+	}
+
+	return outGen;
 }
 
-// Control is used interanlly for SynthDef arguments/controls
+// Control is used internally for SynthDef arguments/controls
 
 function _ControlName(name, controlIndex)
 {
-	return {_lichType:"CONTROL_NAME", name: name, controlIndex: controlIndex };
+	this._lichType = AUDIO;
+	this.name = name;
+	this.controlIndex = controlIndex;
+	this.rate = ControlRate;
 }
 
 function _Control(numControls)
@@ -535,7 +596,7 @@ function _Control(numControls)
 		values.push(0);
 	}
 	
-	return new UGen("Control", ControlRate, values, numControls, 0);
+	return multiNewUGen("Control", ControlRate, values, numControls, 0);
 }
 
 function _writeInputSpec(buf, ugen, offset, constants, controls)
@@ -549,7 +610,7 @@ function _writeInputSpec(buf, ugen, offset, constants, controls)
 		buf.writeInt32BE(constants[ugen], offset);
 	}
 
-	else if(ugen._lichType == "CONTROL_NAME")
+	else if(ugen instanceof _ControlName)
 	{
 		buf.writeInt32BE(0, offset); // The control ugen is always in the 0 index
 		offset += 4;
@@ -607,7 +668,19 @@ function _pstring(buf, string, offset)
 
 function _ugenToDefList(ugen, constants, controls)
 {
-	if(typeof ugen === "number")
+	if(ugen instanceof Array) // Multichannel support
+	{
+		var defList = [];
+
+		for(var i = 0; i < ugen.length; ++i)
+		{
+			defList = defList.concat(_ugenToDefList(ugen[i], constants, controls));
+		}
+
+		return defList;
+	}
+	
+	else if(typeof ugen === "number")
 	{
 		if(!constants.hasOwnProperty(ugen))
 		{
@@ -619,10 +692,11 @@ function _ugenToDefList(ugen, constants, controls)
 		return [];
 	}
 
-	else if(ugen._lichType === "CONTROL_NAME")
+	else if(ugen instanceof _ControlName)
 	{
 		if(!controls.hasOwnProperty(ugen.name))
 		{
+			console.log("_CONTROLNAME: " + ugen.name);
 			controls[ugen.name] = ugen.controlIndex;
 			controls.arr.push(ugen);
 			controls.numControls += 1;
@@ -651,6 +725,20 @@ function _writeDef(buf, children, offset, constants, controls)
 	return offset;
 }
 
+function _removeDuplicateChildren(children)
+{
+	for(var i = 0; i < children.length; ++i)
+	{
+		var child = children[i];
+
+		if(child._collected)
+			children[i] = null;
+		else
+			child._collected = true;
+	}
+
+	return children.filter(function(e){ return e != null });
+}
 
 // Compile a Lich synth to a SuperCollider synth definition. This requires a very specific binary format.
 function _synthDef(name, def)
@@ -666,6 +754,8 @@ function _synthDef(name, def)
 	var constants = { numConstants: 1, arr: [0], 0:0 }; // We always need the zero constat for controls
 	var children = _ugenToDefList(def, constants, controls).reverse();
 
+	children = _removeDuplicateChildren(children);
+	
 	if(controls.numControls > 0)
 		children = [_Control(controls.numControls)].concat(children);
 	
@@ -673,7 +763,7 @@ function _synthDef(name, def)
 	{
 		children[i].synthIndex = i;
 	}
-
+	
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Header
 	
@@ -787,7 +877,7 @@ Lich.compileSynthDef = function(ast)
 
 			else
 			{
-				localArgNames.push("var " + argName + " = _ControlName(\""+argName+"\","+numArgs+");");
+				localArgNames.push("var " + argName + " = new _ControlName(\""+argName+"\","+numArgs+");");
 				localArgs.push(argName);
 				numArgs++;
 			}
