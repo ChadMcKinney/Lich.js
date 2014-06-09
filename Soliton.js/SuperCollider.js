@@ -639,11 +639,6 @@ function _synthDef(name, def)
 	return Lich.VM.Void;
 }
 
-function _playSynthDef(name, args)
-{	
-	return new Synth(name, args);
-}
-
 function stop(synth)
 {
 	if(!(synth instanceof Synth))
@@ -699,7 +694,7 @@ Lich.compileSynthDef = function(ast)
 		argsAndIndexes.push(localArgs[i]);
 	}
 	
-	res += ast.ident.id + "=function("+localArgs.join(",")+"){return _playSynthDef(\""+ast.ident.id+"\",["+argsAndIndexes.join(",")+"]);};";
+	res += ast.ident.id + "=function("+localArgs.join(",")+"){return new Synth(\""+ast.ident.id+"\",["+argsAndIndexes.join(",")+"]);};";
 	 
 	if(Lich.parseType !== "library")
 		res += ";Lich.VM.Print("+ast.ident.id+");";
