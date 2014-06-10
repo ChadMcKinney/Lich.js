@@ -409,6 +409,11 @@ function multiNewUGen(name, rate, inputs, numOutputs, specialIndex)
 // UGen Bindings
 ////////////////////
 
+/**
+ * Lich.sc UGen bindings.
+ * @module Lich.sc UGens
+ */
+
 var _BIN_PLUS = 0;
 var _BIN_MINUS = 1;
 var _BIN_MUL = 2;
@@ -444,141 +449,566 @@ function _audioDivision(a, b)
 	return _binaryOpUGen(_BIN_DIV, a, b);
 }
 
-// deterministic
+/**
+ * Output a constant value
+ *
+ * @class dc
+ * @constructor
+ * @param value Value to be output
+ * @example let test value => dc value >> out 0
+ * @example let t = test 1
+ * @example stop t
+ */
+function dc(value)
+{
+	return multiNewUGen("DC", AudioRate, [value], 1, 0);
+}
+
+/**
+ * Oscillators.
+ * @submodule Oscillators
+ */
+
+/**
+ * A sine wave oscillator.
+ *
+ * @class sin
+ * @constructor
+ * @param freq Frequency
+ * @example let test f => sin f >> out 0
+ * @example let t = test 440
+ * @example stop t
+ */
 function sin(freq)
 {
 	return multiNewUGen("SinOsc", AudioRate, [freq, 0], 1, 0);
 }
 
+/**
+ * A saw wave oscillator.
+ *
+ * @class saw 
+ * @constructor
+ * @param freq Frequency
+ * @example let test f => saw f >> out 0
+ * @example let t = test 440
+ * @example stop t
+ */
 function saw(freq)
 {
 	return multiNewUGen("Saw", AudioRate, [freq], 1, 0);
 }
 
+/**
+ * A triangle wave oscillator.
+ *
+ * @class tri
+ * @constructor
+ * @param freq Frequency
+ * @example let test f => tri f >> out 0
+ * @example let t = test 440
+ * @example stop t
+ */
 function tri(freq)
 {
 	return multiNewUGen("LFTri", AudioRate, [freq,0], 1, 0);
 }
 
+/**
+ * A square wave oscillator.
+ *
+ * @class square
+ * @constructor
+ * @param freq Frequency
+ * @example let test f => square f >> out 0
+ * @example let t = test 440
+ * @example stop t
+ */
 function square(freq)
 {
 	return multiNewUGen("Pulse", AudioRate, [freq,0.5], 1, 0);
 }
 
+/**
+ * A pulse wave oscillator with variable duty cycle.
+ *
+ * @class pulse
+ * @constructor
+ * @param freq Frequency
+ * @param width Pulse width from 0.0 to 1.0
+ * @example let test f w => pulse f w >> out 0
+ * @example let t = test 440 0.2
+ * @example stop t
+ */
 function pulse(freq,width)
 {
 	return multiNewUGen("Pulse", AudioRate, [freq,width], 1, 0);
 }
 
+/**
+ * An oscillator with a variable number of harmonics of equal amplitude.
+ *
+ * @class blip
+ * @constructor
+ * @param freq Frequency
+ * @param nharm Number of harmonics
+ * @example let test f n => blip f n >> out 0
+ * @example let t = test 440 5
+ * @example stop t
+ */
 function blip(freq,nharm)
 {
 	return multiNewUGen("Blip", AudioRate, [freq,nharm], 1, 0);
 }
 
+/**
+ * Generates a set of harmonics around a formant frequency at a given fundamental frequency.
+ *
+ * @class formant
+ * @constructor
+ * @param fundf Fundamental frequency
+ * @param formf Formant frequency
+ * @param bwf Pulse width frequency. Must be >= fundf.
+ * @example let test fund form bwf => blip fund form bwf >> out 0
+ * @example let t = test 440 1760 880
+ * @example stop t
+ */
 function formant(fundf,formf,bwf)
 {
 	return multiNewUGen("Formant", AudioRate, [fundf,formf,bwf], 1, 0);
 }
 
+/**
+ * Generates single sample impulses at a frequency.
+ *
+ * @class impulse
+ * @constructor
+ * @param freq Frequency
+ * @example let test f => impulse f >> out 0
+ * @example let t = test 5
+ * @example stop t
+ */
 function impulse(freq)
 {
 	return multiNewUGen("Impulse", AudioRate, [freq,0], 1, 0);
 }
 
-// noise
+/**
+ * White noise generator.
+ *
+ * @class white 
+ * @constructor
+ * @param amp Amplitude of the noise
+ * @example let test a => white a >> out 0
+ * @example let t = test 1
+ * @example stop t
+ */
 function white(amp)
 {
 	return _binaryOpUGen(_BIN_MUL, multiNewUGen("WhiteNoise", AudioRate, [], 1, 0), amp);
 }
 
+/**
+ * Noise.
+ * @submodule Noise
+ */
+
+/**
+ * Pink noise generator.
+ *
+ * @class pink
+ * @constructor
+ * @param amp Amplitude of the noise
+ * @example let test a => pink a >> out 0
+ * @example let t = test 1
+ * @example stop t
+ */
 function pink(amp)
 {
 	return _binaryOpUGen(_BIN_MUL, multiNewUGen("PinkNoise", AudioRate, [], 1, 0), amp);
 }
 
+/**
+ * Brownian noise generator.
+ *
+ * @class brown
+ * @constructor
+ * @param amp Amplitude of the noise
+ * @example let test a => brown a >> out 0
+ * @example let t = test 1
+ * @example stop t
+ */
 function brown(amp)
 {
 	return _binaryOpUGen(_BIN_MUL, multiNewUGen("BrownNoise", AudioRate, [], 1, 0), amp);
 }
 
+/**
+ * Gray noise generator.
+ *
+ * @class gray
+ * @constructor
+ * @param amp Amplitude of the noise
+ * @example let test a => gray a >> out 0
+ * @example let t = test 1
+ * @example stop t
+ */
 function gray(amp)
 {
 	return _binaryOpUGen(_BIN_MUL, multiNewUGen("GrayNoise", AudioRate, [], 1, 0), amp);
 }
 
+/**
+ * Generates noise whose values are either -1 or 1.
+ *
+ * @class clipNoise
+ * @constructor
+ * @param amp Amplitude of the noise
+ * @example let test a => clipNoise a >> out 0
+ * @example let t = test 1
+ * @example stop t
+ */
 function clipNoise(amp)
 {
 	return _binaryOpUGen(_BIN_MUL, multiNewUGen("ClipNoise", AudioRate, [], 1, 0), amp);
 }
+
+/**
+ * A noise generator based on a chaotic function.
+ *
+ * @class crackle
+ * @constructor
+ * @param chaos A parameter of the chaotic function with useful values from just below 1.0 to just above 2.0. Towards 2.0 the sound crackles.
+ * @example let test c => crackle c >> out 0
+ * @example let t = test 1.5
+ * @example stop t
+ */
 // fix this?
 function crackle(chaos)
 {
 	return multiNewUGen("Crackle", AudioRate, [chaos], 1, 0);
 }
 
-function dust(value)
+/**
+ * Generates random impulses from 0 to +1.
+ *
+ * @class dust
+ * @constructor
+ * @param density Average number of impulses per second.
+ * @example let test d => dust d >> out 0
+ * @example let t = test 1.5
+ * @example stop t
+ */
+function dust(density)
 {
-	return multiNewUGen("Dust", AudioRate, [value], 1, 0);
+	return multiNewUGen("Dust", AudioRate, [density], 1, 0);
 }
 
-function noiseN(value)
+/**
+ * A stepped random number generator
+ *
+ * @class noiseN
+ * @constructor
+ * @param freq Frequency of random number generation
+ * @example let test f => noiseN f >> out 0
+ * @example let t = test 440
+ * @example stop t
+ */
+function noiseN(freq)
 {
-	return multiNewUGen("LFNoise0", AudioRate, [value], 1, 0);
+	return multiNewUGen("LFNoise0", AudioRate, [freq], 1, 0);
 }
 
-function noiseL(value)
+/**
+ * A linearly interpolated random number generator
+ *
+ * @class noiseL
+ * @constructor
+ * @param freq Frequency of random number generation
+ * @example let test f => noiseL f >> out 0
+ * @example let t = test 440
+ * @example stop t
+ */
+function noiseL(freq)
 {
-	return multiNewUGen("LFNoise1", AudioRate, [value], 1, 0);
+	return multiNewUGen("LFNoise1", AudioRate, [freq], 1, 0);
 }
 
-function noiseX(value)
+/**
+ * A cubic interpolated random number generator
+ *
+ * @class noiseX
+ * @constructor
+ * @param freq Frequency of random number generation
+ * @example let test f => noiseX f >> out 0
+ * @example let t = test 440
+ * @example stop t
+ */
+function noiseX(freq)
 {
-	return multiNewUGen("LFNoise2", AudioRate, [value], 1, 0);
+	return multiNewUGen("LFNoise2", AudioRate, [freq], 1, 0);
 }
 
-// chaos
+/**
+ * A non-interpolating sound generator based on the difference equation: x[n+1] = a - b * sqrt(abs(x[n]))
+ *
+ * @class cuspN 
+ * @constructor
+ * @param freq Frequency
+ * @param a Equation variable
+ * @param b Equation variable
+ * @param xi Initial value of x
+ * @example let test f a b xi => cuspN f a b xi >> out 0
+ * @example let t = test 22050 1 1.9 0
+ * @example stop t
+ */
 function cuspN(freq,a,b,xi)
 {
 	return multiNewUGen("CuspN", AudioRate, [freq,a,b,xi], 1, 0);
 }
 
+/**
+ * Chaotic Oscillators.
+ * @submodule Chaos
+ */
+
+/**
+ * A linearly interpolating sound generator based on the difference equation: x[n+1] = a - b * sqrt(abs(x[n]))
+ *
+ * @class cuspL 
+ * @constructor
+ * @param freq Frequency
+ * @param a Equation variable
+ * @param b Equation variable
+ * @param xi Initial value of x
+ * @example let test f a b xi => cuspL f a b xi >> out 0
+ * @example let t = test 22050 1 1.9 0
+ * @example stop t
+ */
 function cuspL(freq,a,b,xi)
 {
 	return multiNewUGen("CuspL", AudioRate, [freq,a,b,xi], 1, 0);
 }
 
+/**
+ * A non-interpolating sound generator based on the difference equation: x[n+1] = 1 - y[n] + abs(x[n]); y[n+1] = x[n];
+ *
+ * @class gbmanN
+ * @constructor
+ * @param freq Frequency
+ * @param xi Initial value of x
+ * @param yi Initial value of y
+ * @example let test f xi yi => gbmanN f xi yi >> out 0
+ * @example let t = test 22050 1.2 2.1
+ * @example stop t
+ */
 function gbmanN(freq,xi,yi)
 {
 	return multiNewUGen("GbmanN", AudioRate, [freq,xi,yi], 1, 0);
 }
 
+/**
+ * A linearly interpolating sound generator based on the difference equation: x[n+1] = 1 - y[n] + abs(x[n]); y[n+1] = x[n];
+ *
+ * @class gbmanL
+ * @constructor
+ * @param freq Frequency
+ * @param xi Initial value of x
+ * @param yi Initial value of y
+ * @example let test f xi yi => gbmanL f xi yi >> out 0
+ * @example let t = test 22050 1.2 2.1
+ * @example stop t
+ */
 function gbmanL(freq,xi,yi)
 {
 	return multiNewUGen("GbmanL", AudioRate, [freq,xi,yi], 1, 0);
 }
 
-// filters
+/**
+ * A low pass filter.
+ * 
+ * @class lowpass
+ * @constructor
+ * @param freq Cutoff frequency for the filter
+ * @param q Quality of the filter
+ * @example let test f q => white 1 >> lowpass f q >> out 0
+ * @example let t = test 440 10
+ * @example stop t
+ */
 function lowpass(freq, q, input)
 {
 	return multiNewUGen("RLPF", AudioRate, [input,freq,1/q], 1, 0);
 }
 
+/**
+ * Filters.
+ * @submodule Filters
+ */
+
+/**
+ * A high pass filter.
+ * 
+ * @class highpass
+ * @constructor
+ * @param freq Cutoff frequency for the filter
+ * @param q Quality of the filter
+ * @example let test f q => white 1 >> highpass f q >> out 0
+ * @example let t = test 440 10
+ * @example stop t
+ */
 function highpass(freq, q, input)
 {
 	return multiNewUGen("RHPF", AudioRate, [input,freq,1/q], 1, 0);
 }
 
+/**
+ * A band pass filter.
+ * 
+ * @class bandpass 
+ * @constructor
+ * @param freq Cutoff frequency for the filter
+ * @param q Quality of the filter
+ * @example let test f q => white 1 >> bandpass f q >> out 0
+ * @example let t = test 440 10
+ * @example stop t
+ */
 function bandpass(freq, q, input)
 {
 	return multiNewUGen("BPF", AudioRate, [input,freq,1/q], 1, 0);
 }
 
-//
-function dc(value)
+/**
+ * Ramp a signal between two values over time.
+ *
+ * @class lag
+ * @constructor
+ * @param lagtime Ramp time in seconds
+ * @example let test lagtime => noiseN 100 >> lag lagtime >> out 0
+ * @example let t = test 0.001
+ * @example stop t
+ */
+function lag(lagtime, input)
 {
-	return multiNewUGen("DC", AudioRate, [value], 1, 0);
+	return multiNewUGen("Lag", AudioRate, [input,lagtime], 1, 0);
 }
 
+/**
+ * An allpass delay line with no interpolation.
+ * 
+ * @class allpassN
+ * @constructor
+ * @param maxDel Max delay time in seconds
+ * @param del Delay time in seconds
+ * @param decay Time for the echoes to decay by 60 decibels.
+ * @example let test del => impulse 1 >> allpassN del del 1 >> out 0
+ * @example let t = test 0.1
+ * @example stop t
+ */
+function allpassN(maxDel, del, decay, input)
+{
+	return multiNewUGen("AllpassN", AudioRate, [input,maxDel,del,decay], 1, 0);
+}
+
+/**
+ * Delays.
+ * @submodule Delays
+ */
+
+/**
+ * An allpass delay line with linear interpolation.
+ *
+ * @class allpassL
+ * @constructor
+ * @param maxDel Max delay time in seconds
+ * @param del Delay time in seconds
+ * @param decay Time for the echoes to decay by 60 decibels.
+ * @example let test del => impulse 1 >> allpassL del del 1 >> out 0
+ * @example let t = test 0.1
+ * @example stop t
+ */
+function allpassL(maxDel, del, decay, input)
+{
+	return multiNewUGen("AllpassL", AudioRate, [input,maxDel,del,decay], 1, 0);
+}
+
+/**
+ * An allpass delay line with cubic interpolation.
+ *
+ * @class allpassC 
+ * @constructor
+ * @param maxDel Max delay time in seconds
+ * @param del Delay time in seconds
+ * @param decay Time for the echoes to decay by 60 decibels.
+ * @example let test del => impulse 1 >> allpassC del del 1 >> out 0
+ * @example let t = test 0.1
+ * @example stop t
+ */
+function allpassC(maxDel, del, decay, input)
+{
+	return multiNewUGen("AllpassC", AudioRate, [input,maxDel,del,decay], 1, 0);
+}
+
+/**
+ * A comb delay line with no interpolation.
+ *
+ * @class combN
+ * @constructor
+ * @param maxDel Max delay time in seconds
+ * @param del Delay time in seconds
+ * @param decay Time for the echoes to decay by 60 decibels.
+ * @example let test del => impulse 1 >> combN del del 1 >> out 0
+ * @example let t = test 0.1
+ * @example stop t
+ */
+function combN(maxDel, del, decay, input)
+{
+	return multiNewUGen("CombN", AudioRate, [input,maxDel,del,decay], 1, 0);
+}
+
+/**
+ * A comb delay line with linear interpolation.
+ *
+ * @class combL
+ * @constructor
+ * @param maxDel Max delay time in seconds
+ * @param del Delay time in seconds
+ * @param decay Time for the echoes to decay by 60 decibels.
+ * @example let test del => impulse 1 >> combL del del 1 >> out 0
+ * @example let t = test 0.1
+ * @example stop t
+ */
+function combL(maxDel, del, decay, input)
+{
+	return multiNewUGen("CombL", AudioRate, [input,maxDel,del,decay], 1, 0);
+}
+
+/**
+ * A comb delay line with cubic interpolation.
+ *
+ * @class combC
+ * @constructor
+ * @param maxDel Max delay time in seconds
+ * @param del Delay time in seconds
+ * @param decay Time in seconds for the echoes to decay by 60 decibels.
+ * @example let test del => impulse 1 >> combC del del 1 >> out 0
+ * @example let t = test 0.1
+ * @example stop t
+ */
+function combC(maxDel, del, decay, input)
+{
+	return multiNewUGen("CombC", AudioRate, [input,maxDel,del,decay], 1, 0);
+}
+
+/**
+ * Send a signal to an output bus.
+ *
+ * @class out
+ * @constructor
+ * @param busNum The bus index to send to
+ * @example let test bus => white 1 >> out bus
+ * @example let t = test 0
+ * @example stop t
+ */
 function out(busNum, value)
 {
 	var outGen =  multiNewUGen("Out", AudioRate, [busNum, value], 0, 0); // Out has not outputs
@@ -593,6 +1023,11 @@ function out(busNum, value)
 
 	return outGen;
 }
+
+/**
+ * Output.
+ * @submodule Output
+ */
 
 // Control is used internally for SynthDef arguments/controls
 
