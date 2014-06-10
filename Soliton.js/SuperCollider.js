@@ -1020,15 +1020,7 @@ var _shapeNames = {
 	cubed: 7
 }
 
-/**
- * Envelope generator. Used for amplitude envelopes, will automatically free the synth when finished.
- * @class env
- * @param levels The levels that the envelope will move through
- * @param times The times it takes for the env to move between levels. Should be 1 item less than levels
- * @param shape Either a shape number or string. Some examples: -4, 0, 1, "linear", "squared"
- * @param input The input will be scaled according to the envelope. This can be a ugen or number.
- */
-function env(levels, times, shape, input)
+function _prEnv(levels, times, shape, input, doneAction)
 {
 	if(!(levels instanceof Array && times instanceof Array))
 		throw new Error("env levels and times must be arrays");
@@ -1050,15 +1042,41 @@ function env(levels, times, shape, input)
 		contents.push(curveNum);
 	}
 	
-	var gainNode = multiNewUGen(
+	return multiNewUGen(
 		"EnvGen",
 		AudioRate,
-		[1/*gate*/, 1/*levelScale*/, 0/*levelBias*/, 1/*timeScale*/, 2/*doneAction*/].concat(contents),
+		[1/*gate*/, 1/*levelScale*/, 0/*levelBias*/, 1/*timeScale*/, doneAction].concat(contents),
 		1,
 		0
 	);
+}
 
-	return _binaryOpUGen(_BIN_MUL, gainNode, input);
+/**
+ * Envelope generator. Used for amplitude envelopes, will automatically free the synth when finished.
+ * @class env
+ * @param levels The levels that the envelope will move through
+ * @param times The times it takes for the env to move between levels. Should be 1 item less than levels
+ * @param shape Either a shape number or string. Some examples: -4, 0, 1, "linear", "squared"
+ * @param input The input will be scaled according to the envelope. This can be a ugen or number.
+ */
+function env(levels, times, shape, input)
+{	
+	// doneAction 2 kills the synth
+	return _binaryOpUGen(_BIN_MUL, _prEnv(levels, times, shape, input, 2), input);
+}
+
+/**
+ * Envelope generator. Used for amplitude envelopes, will NOT automatically free the synth when finished.
+ * @class env2
+ * @param levels The levels that the envelope will move through
+ * @param times The times it takes for the env to move between levels. Should be 1 item less than levels
+ * @param shape Either a shape number or string. Some examples: -4, 0, 1, "linear", "squared"
+ * @param input The input will be scaled according to the envelope. This can be a ugen or number.
+ */
+function env2(levels, times, shape, input)
+{	
+	// doneAction 0 doesn't kill the synth
+	return _binaryOpUGen(_BIN_MUL, _prEnv(levels, times, shape, input, 0), input);
 }
 
 /**
@@ -1072,6 +1090,19 @@ function env(levels, times, shape, input)
 function perc(attackTime, peak, decayTime, input)
 {
 	return env([0,peak,0], [attackTime, decayTime], -4, input);
+}
+
+/**
+ * Envelope generator. Used for amplitude envelopes, will NOT automatically free the synth when finished.
+ * @class perc2
+ * @param attackTime Time for the envelope to go from 0 to the peak
+ * @param peak The highest level the envelope with reach
+ * @param decayTime Time for the envelope to go from the peak to 0
+ * @param input The input will be scaled according to the envelope. This can be a ugen or number.
+ */
+function perc2(attackTime, peak, decayTime, input)
+{
+	return env2([0,peak,0], [attackTime, decayTime], -4, input);
 }
 
 /**
