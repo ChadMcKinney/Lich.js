@@ -595,7 +595,6 @@ function out(busNum, value)
 }
 
 // Control is used internally for SynthDef arguments/controls
-
 function _ControlName(name, controlIndex)
 {
 	this._lichType = AUDIO;
