@@ -1000,6 +1000,86 @@ function combC(maxDel, del, decay, input)
 }
 
 /**
+ * Envelopes.
+ * @submodule Envelopes
+ */
+
+var _shapeNames = {
+	step: 0,
+	lin: 1,
+	linear: 1,
+	exp: 2,
+	exponential: 2,
+	sin: 3,
+	sine: 3,
+	wel: 4,
+	welch: 4,
+	sqr: 6,
+	squared: 6,
+	cub: 7,
+	cubed: 7
+}
+
+/**
+ * Envelope generator. Used for amplitude envelopes, will automatically free the synth when finished.
+ * @class env
+ * @param levels The levels that the envelope will move through
+ * @param times The times it takes for the env to move between levels. Should be 1 item less than levels
+ * @param shape Either a shape number or string. Some examples: -4, 0, 1, "linear", "squared"
+ * @param input The input will be scaled according to the envelope. This can be a ugen or number.
+ */
+function env(levels, times, shape, input)
+{
+	if(!(levels instanceof Array && times instanceof Array))
+		throw new Error("env levels and times must be arrays");
+
+	var size = times.length;
+	var contents = [];
+	contents.push(levels[0]);
+	contents.push(size);
+	contents.push(-99); // -99 = no releaseNode
+	contents.push(-99); // -99 = no loopNode
+	var shapeNum = _shapeNames.hasOwnProperty(shape) ? _shapeNames[shape] : 5; // 5 = custom shape
+	var curveNum = typeof shape === "string" ? 0 : shape; // 0 default shape
+
+	for(var i = 0; i < size; ++i)
+	{
+		contents.push(levels[i+1]);
+		contents.push(times[i]);
+		contents.push(shapeNum);
+		contents.push(curveNum);
+	}
+	
+	var gainNode = multiNewUGen(
+		"EnvGen",
+		AudioRate,
+		[1/*gate*/, 1/*levelScale*/, 0/*levelBias*/, 1/*timeScale*/, 2/*doneAction*/].concat(contents),
+		1,
+		0
+	);
+
+	return _binaryOpUGen(_BIN_MUL, gainNode, input);
+}
+
+/**
+ * Envelope generator. Used for amplitude envelopes, will automatically free the synth when finished.
+ * @class perc
+ * @param attackTime Time for the envelope to go from 0 to the peak
+ * @param peak The highest level the envelope with reach
+ * @param decayTime Time for the envelope to go from the peak to 0
+ * @param input The input will be scaled according to the envelope. This can be a ugen or number.
+ */
+function perc(attackTime, peak, decayTime, input)
+{
+	return env([0,peak,0], [attackTime, decayTime], -4, input);
+}
+
+/**
+ * Inputs and Outputs
+ * @submodule InputOutput
+ */
+
+/**
  * Send a signal to an output bus.
  *
  * @class out
