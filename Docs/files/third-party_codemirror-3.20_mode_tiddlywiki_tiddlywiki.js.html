@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>third-party/codemirror-3.20/mode/tiddlywiki/tiddlywiki.js - Lich.sc</title>
+    <link rel="stylesheet" href="http://yui.yahooapis.com/3.9.1/build/cssgrids/cssgrids-min.css">
+    <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
+    <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
+    <link rel="shortcut icon" type="image/png" href="../assets/favicon.png">
+    <script src="http://yui.yahooapis.com/combo?3.9.1/build/yui/yui-min.js"></script>
+</head>
+<body class="yui3-skin-sam">
+
+<div id="doc">
+    <div id="hd" class="yui3-g header">
+        <div class="yui3-u-3-4">
+            
+                <h1><img src="../assets/css/logo.png" title="Lich.sc"></h1>
+            
+        </div>
+        <div class="yui3-u-1-4 version">
+            <em>API Docs for: 0.1</em>
+        </div>
+    </div>
+    <div id="bd" class="yui3-g">
+
+        <div class="yui3-u-1-4">
+            <div id="docs-sidebar" class="sidebar apidocs">
+                <div id="api-list">
+    <h2 class="off-left">APIs</h2>
+    <div id="api-tabview" class="tabview">
+        <ul class="tabs">
+            <li><a href="#api-classes">Classes</a></li>
+            <li><a href="#api-modules">Modules</a></li>
+        </ul>
+
+        <div id="api-tabview-filter">
+            <input type="search" id="api-filter" placeholder="Type to filter APIs">
+        </div>
+
+        <div id="api-tabview-panel">
+            <ul id="api-classes" class="apis classes">
+            
+                <li><a href="../classes/allpassC.html">allpassC</a></li>
+            
+                <li><a href="../classes/allpassL.html">allpassL</a></li>
+            
+                <li><a href="../classes/allpassN.html">allpassN</a></li>
+            
+                <li><a href="../classes/bandpass.html">bandpass</a></li>
+            
+                <li><a href="../classes/blip.html">blip</a></li>
+            
+                <li><a href="../classes/brown.html">brown</a></li>
+            
+                <li><a href="../classes/clipNoise.html">clipNoise</a></li>
+            
+                <li><a href="../classes/combC.html">combC</a></li>
+            
+                <li><a href="../classes/combL.html">combL</a></li>
+            
+                <li><a href="../classes/combN.html">combN</a></li>
+            
+                <li><a href="../classes/crackle.html">crackle</a></li>
+            
+                <li><a href="../classes/cuspL.html">cuspL</a></li>
+            
+                <li><a href="../classes/cuspN.html">cuspN</a></li>
+            
+                <li><a href="../classes/dc.html">dc</a></li>
+            
+                <li><a href="../classes/delayC.html">delayC</a></li>
+            
+                <li><a href="../classes/delayL.html">delayL</a></li>
+            
+                <li><a href="../classes/delayN.html">delayN</a></li>
+            
+                <li><a href="../classes/dust.html">dust</a></li>
+            
+                <li><a href="../classes/env.html">env</a></li>
+            
+                <li><a href="../classes/env2.html">env2</a></li>
+            
+                <li><a href="../classes/formant.html">formant</a></li>
+            
+                <li><a href="../classes/gbmanL.html">gbmanL</a></li>
+            
+                <li><a href="../classes/gbmanN.html">gbmanN</a></li>
+            
+                <li><a href="../classes/gray.html">gray</a></li>
+            
+                <li><a href="../classes/highpass.html">highpass</a></li>
+            
+                <li><a href="../classes/impulse.html">impulse</a></li>
+            
+                <li><a href="../classes/lag.html">lag</a></li>
+            
+                <li><a href="../classes/lowpass.html">lowpass</a></li>
+            
+                <li><a href="../classes/noiseL.html">noiseL</a></li>
+            
+                <li><a href="../classes/noiseN.html">noiseN</a></li>
+            
+                <li><a href="../classes/noiseX.html">noiseX</a></li>
+            
+                <li><a href="../classes/out.html">out</a></li>
+            
+                <li><a href="../classes/perc.html">perc</a></li>
+            
+                <li><a href="../classes/perc2.html">perc2</a></li>
+            
+                <li><a href="../classes/pink.html">pink</a></li>
+            
+                <li><a href="../classes/pulse.html">pulse</a></li>
+            
+                <li><a href="../classes/saw.html">saw</a></li>
+            
+                <li><a href="../classes/sin.html">sin</a></li>
+            
+                <li><a href="../classes/square.html">square</a></li>
+            
+                <li><a href="../classes/tri.html">tri</a></li>
+            
+                <li><a href="../classes/white.html">white</a></li>
+            
+            </ul>
+
+            <ul id="api-modules" class="apis modules">
+            
+                <li><a href="../modules/Chaos.html">Chaos</a></li>
+            
+                <li><a href="../modules/Delays.html">Delays</a></li>
+            
+                <li><a href="../modules/Envelopes.html">Envelopes</a></li>
+            
+                <li><a href="../modules/Filters.html">Filters</a></li>
+            
+                <li><a href="../modules/InputOutput.html">InputOutput</a></li>
+            
+                <li><a href="../modules/Lich.sc UGens.html">Lich.sc UGens</a></li>
+            
+                <li><a href="../modules/Noise.html">Noise</a></li>
+            
+                <li><a href="../modules/Oscillators.html">Oscillators</a></li>
+            
+            </ul>
+        </div>
+    </div>
+</div>
+
+            </div>
+        </div>
+        <div class="yui3-u-3-4">
+                <div id="api-options">
+        Show:
+        <label for="api-show-inherited">
+            <input type="checkbox" id="api-show-inherited" checked>
+            Inherited
+        </label>
+
+        <label for="api-show-protected">
+            <input type="checkbox" id="api-show-protected">
+            Protected
+        </label>
+
+        <label for="api-show-private">
+            <input type="checkbox" id="api-show-private">
+            Private
+        </label>
+        <label for="api-show-deprecated">
+            <input type="checkbox" id="api-show-deprecated">
+            Deprecated
+        </label>
+
+    </div>
+
+
+            <div class="apidocs">
+                <div id="docs-main">
+                    <div class="content">
+                        <h1 class="file-heading">File: third-party/codemirror-3.20/mode/tiddlywiki/tiddlywiki.js</h1>
+
+<div class="file">
+    <pre class="code prettyprint linenums">
+/***
+    |&#x27;&#x27;Name&#x27;&#x27;|tiddlywiki.js|
+    |&#x27;&#x27;Description&#x27;&#x27;|Enables TiddlyWikiy syntax highlighting using CodeMirror|
+    |&#x27;&#x27;Author&#x27;&#x27;|PMario|
+    |&#x27;&#x27;Version&#x27;&#x27;|0.1.7|
+    |&#x27;&#x27;Status&#x27;&#x27;|&#x27;&#x27;stable&#x27;&#x27;|
+    |&#x27;&#x27;Source&#x27;&#x27;|[[GitHub|https://github.com/pmario/CodeMirror2/blob/tw-syntax/mode/tiddlywiki]]|
+    |&#x27;&#x27;Documentation&#x27;&#x27;|http://codemirror.tiddlyspace.com/|
+    |&#x27;&#x27;License&#x27;&#x27;|[[MIT License|http://www.opensource.org/licenses/mit-license.php]]|
+    |&#x27;&#x27;CoreVersion&#x27;&#x27;|2.5.0|
+    |&#x27;&#x27;Requires&#x27;&#x27;|codemirror.js|
+    |&#x27;&#x27;Keywords&#x27;&#x27;|syntax highlighting color code mirror codemirror|
+    ! Info
+    CoreVersion parameter is needed for TiddlyWiki only!
+***/
+//{{{
+CodeMirror.defineMode(&quot;tiddlywiki&quot;, function () {
+  // Tokenizer
+  var textwords = {};
+
+  var keywords = function () {
+    function kw(type) {
+      return { type: type, style: &quot;macro&quot;};
+    }
+    return {
+      &quot;allTags&quot;: kw(&#x27;allTags&#x27;), &quot;closeAll&quot;: kw(&#x27;closeAll&#x27;), &quot;list&quot;: kw(&#x27;list&#x27;),
+      &quot;newJournal&quot;: kw(&#x27;newJournal&#x27;), &quot;newTiddler&quot;: kw(&#x27;newTiddler&#x27;),
+      &quot;permaview&quot;: kw(&#x27;permaview&#x27;), &quot;saveChanges&quot;: kw(&#x27;saveChanges&#x27;),
+      &quot;search&quot;: kw(&#x27;search&#x27;), &quot;slider&quot;: kw(&#x27;slider&#x27;),   &quot;tabs&quot;: kw(&#x27;tabs&#x27;),
+      &quot;tag&quot;: kw(&#x27;tag&#x27;), &quot;tagging&quot;: kw(&#x27;tagging&#x27;),       &quot;tags&quot;: kw(&#x27;tags&#x27;),
+      &quot;tiddler&quot;: kw(&#x27;tiddler&#x27;), &quot;timeline&quot;: kw(&#x27;timeline&#x27;),
+      &quot;today&quot;: kw(&#x27;today&#x27;), &quot;version&quot;: kw(&#x27;version&#x27;),   &quot;option&quot;: kw(&#x27;option&#x27;),
+
+      &quot;with&quot;: kw(&#x27;with&#x27;),
+      &quot;filter&quot;: kw(&#x27;filter&#x27;)
+    };
+  }();
+
+  var isSpaceName = /[\w_\-]/i,
+  reHR = /^\-\-\-\-+$/,                                 // &lt;hr&gt;
+  reWikiCommentStart = /^\/\*\*\*$/,            // /***
+  reWikiCommentStop = /^\*\*\*\/$/,             // ***/
+  reBlockQuote = /^&lt;&lt;&lt;$/,
+
+  reJsCodeStart = /^\/\/\{\{\{$/,                       // //{{{ js block start
+  reJsCodeStop = /^\/\/\}\}\}$/,                        // //}}} js stop
+  reXmlCodeStart = /^&lt;!--\{\{\{--&gt;$/,           // xml block start
+  reXmlCodeStop = /^&lt;!--\}\}\}--&gt;$/,            // xml stop
+
+  reCodeBlockStart = /^\{\{\{$/,                        // {{{ TW text div block start
+  reCodeBlockStop = /^\}\}\}$/,                 // }}} TW text stop
+
+  reUntilCodeStop = /.*?\}\}\}/;
+
+  function chain(stream, state, f) {
+    state.tokenize = f;
+    return f(stream, state);
+  }
+
+  // Used as scratch variables to communicate multiple values without
+  // consing up tons of objects.
+  var type, content;
+
+  function ret(tp, style, cont) {
+    type = tp;
+    content = cont;
+    return style;
+  }
+
+  function jsTokenBase(stream, state) {
+    var sol = stream.sol(), ch;
+
+    state.block = false;        // indicates the start of a code block.
+
+    ch = stream.peek();         // don&#x27;t eat, to make matching simpler
+
+    // check start of  blocks
+    if (sol &amp;&amp; /[&lt;\/\*{}\-]/.test(ch)) {
+      if (stream.match(reCodeBlockStart)) {
+        state.block = true;
+        return chain(stream, state, twTokenCode);
+      }
+      if (stream.match(reBlockQuote)) {
+        return ret(&#x27;quote&#x27;, &#x27;quote&#x27;);
+      }
+      if (stream.match(reWikiCommentStart) || stream.match(reWikiCommentStop)) {
+        return ret(&#x27;code&#x27;, &#x27;comment&#x27;);
+      }
+      if (stream.match(reJsCodeStart) || stream.match(reJsCodeStop) || stream.match(reXmlCodeStart) || stream.match(reXmlCodeStop)) {
+        return ret(&#x27;code&#x27;, &#x27;comment&#x27;);
+      }
+      if (stream.match(reHR)) {
+        return ret(&#x27;hr&#x27;, &#x27;hr&#x27;);
+      }
+    } // sol
+    ch = stream.next();
+
+    if (sol &amp;&amp; /[\/\*!#;:&gt;|]/.test(ch)) {
+      if (ch == &quot;!&quot;) { // tw header
+        stream.skipToEnd();
+        return ret(&quot;header&quot;, &quot;header&quot;);
+      }
+      if (ch == &quot;*&quot;) { // tw list
+        stream.eatWhile(&#x27;*&#x27;);
+        return ret(&quot;list&quot;, &quot;comment&quot;);
+      }
+      if (ch == &quot;#&quot;) { // tw numbered list
+        stream.eatWhile(&#x27;#&#x27;);
+        return ret(&quot;list&quot;, &quot;comment&quot;);
+      }
+      if (ch == &quot;;&quot;) { // definition list, term
+        stream.eatWhile(&#x27;;&#x27;);
+        return ret(&quot;list&quot;, &quot;comment&quot;);
+      }
+      if (ch == &quot;:&quot;) { // definition list, description
+        stream.eatWhile(&#x27;:&#x27;);
+        return ret(&quot;list&quot;, &quot;comment&quot;);
+      }
+      if (ch == &quot;&gt;&quot;) { // single line quote
+        stream.eatWhile(&quot;&gt;&quot;);
+        return ret(&quot;quote&quot;, &quot;quote&quot;);
+      }
+      if (ch == &#x27;|&#x27;) {
+        return ret(&#x27;table&#x27;, &#x27;header&#x27;);
+      }
+    }
+
+    if (ch == &#x27;{&#x27; &amp;&amp; stream.match(/\{\{/)) {
+      return chain(stream, state, twTokenCode);
+    }
+
+    // rudimentary html:// file:// link matching. TW knows much more ...
+    if (/[hf]/i.test(ch)) {
+      if (/[ti]/i.test(stream.peek()) &amp;&amp; stream.match(/\b(ttps?|tp|ile):\/\/[\-A-Z0-9+&amp;@#\/%?=~_|$!:,.;]*[A-Z0-9+&amp;@#\/%=~_|$]/i)) {
+        return ret(&quot;link&quot;, &quot;link&quot;);
+      }
+    }
+    // just a little string indicator, don&#x27;t want to have the whole string covered
+    if (ch == &#x27;&quot;&#x27;) {
+      return ret(&#x27;string&#x27;, &#x27;string&#x27;);
+    }
+    if (ch == &#x27;~&#x27;) {    // _no_ CamelCase indicator should be bold
+      return ret(&#x27;text&#x27;, &#x27;brace&#x27;);
+    }
+    if (/[\[\]]/.test(ch)) { // check for [[..]]
+      if (stream.peek() == ch) {
+        stream.next();
+        return ret(&#x27;brace&#x27;, &#x27;brace&#x27;);
+      }
+    }
+    if (ch == &quot;@&quot;) {    // check for space link. TODO fix @@...@@ highlighting
+      stream.eatWhile(isSpaceName);
+      return ret(&quot;link&quot;, &quot;link&quot;);
+    }
+    if (/\d/.test(ch)) {        // numbers
+      stream.eatWhile(/\d/);
+      return ret(&quot;number&quot;, &quot;number&quot;);
+    }
+    if (ch == &quot;/&quot;) { // tw invisible comment
+      if (stream.eat(&quot;%&quot;)) {
+        return chain(stream, state, twTokenComment);
+      }
+      else if (stream.eat(&quot;/&quot;)) { //
+        return chain(stream, state, twTokenEm);
+      }
+    }
+    if (ch == &quot;_&quot;) { // tw underline
+      if (stream.eat(&quot;_&quot;)) {
+        return chain(stream, state, twTokenUnderline);
+      }
+    }
+    // strikethrough and mdash handling
+    if (ch == &quot;-&quot;) {
+      if (stream.eat(&quot;-&quot;)) {
+        // if strikethrough looks ugly, change CSS.
+        if (stream.peek() != &#x27; &#x27;)
+          return chain(stream, state, twTokenStrike);
+        // mdash
+        if (stream.peek() == &#x27; &#x27;)
+          return ret(&#x27;text&#x27;, &#x27;brace&#x27;);
+      }
+    }
+    if (ch == &quot;&#x27;&quot;) { // tw bold
+      if (stream.eat(&quot;&#x27;&quot;)) {
+        return chain(stream, state, twTokenStrong);
+      }
+    }
+    if (ch == &quot;&lt;&quot;) { // tw macro
+      if (stream.eat(&quot;&lt;&quot;)) {
+        return chain(stream, state, twTokenMacro);
+      }
+    }
+    else {
+      return ret(ch);
+    }
+
+    // core macro handling
+    stream.eatWhile(/[\w\$_]/);
+    var word = stream.current(),
+    known = textwords.propertyIsEnumerable(word) &amp;&amp; textwords[word];
+
+    return known ? ret(known.type, known.style, word) : ret(&quot;text&quot;, null, word);
+
+  } // jsTokenBase()
+
+  // tw invisible comment
+  function twTokenComment(stream, state) {
+    var maybeEnd = false,
+    ch;
+    while (ch = stream.next()) {
+      if (ch == &quot;/&quot; &amp;&amp; maybeEnd) {
+        state.tokenize = jsTokenBase;
+        break;
+      }
+      maybeEnd = (ch == &quot;%&quot;);
+    }
+    return ret(&quot;comment&quot;, &quot;comment&quot;);
+  }
+
+  // tw strong / bold
+  function twTokenStrong(stream, state) {
+    var maybeEnd = false,
+    ch;
+    while (ch = stream.next()) {
+      if (ch == &quot;&#x27;&quot; &amp;&amp; maybeEnd) {
+        state.tokenize = jsTokenBase;
+        break;
+      }
+      maybeEnd = (ch == &quot;&#x27;&quot;);
+    }
+    return ret(&quot;text&quot;, &quot;strong&quot;);
+  }
+
+  // tw code
+  function twTokenCode(stream, state) {
+    var ch, sb = state.block;
+
+    if (sb &amp;&amp; stream.current()) {
+      return ret(&quot;code&quot;, &quot;comment&quot;);
+    }
+
+    if (!sb &amp;&amp; stream.match(reUntilCodeStop)) {
+      state.tokenize = jsTokenBase;
+      return ret(&quot;code&quot;, &quot;comment&quot;);
+    }
+
+    if (sb &amp;&amp; stream.sol() &amp;&amp; stream.match(reCodeBlockStop)) {
+      state.tokenize = jsTokenBase;
+      return ret(&quot;code&quot;, &quot;comment&quot;);
+    }
+
+    ch = stream.next();
+    return (sb) ? ret(&quot;code&quot;, &quot;comment&quot;) : ret(&quot;code&quot;, &quot;comment&quot;);
+  }
+
+  // tw em / italic
+  function twTokenEm(stream, state) {
+    var maybeEnd = false,
+    ch;
+    while (ch = stream.next()) {
+      if (ch == &quot;/&quot; &amp;&amp; maybeEnd) {
+        state.tokenize = jsTokenBase;
+        break;
+      }
+      maybeEnd = (ch == &quot;/&quot;);
+    }
+    return ret(&quot;text&quot;, &quot;em&quot;);
+  }
+
+  // tw underlined text
+  function twTokenUnderline(stream, state) {
+    var maybeEnd = false,
+    ch;
+    while (ch = stream.next()) {
+      if (ch == &quot;_&quot; &amp;&amp; maybeEnd) {
+        state.tokenize = jsTokenBase;
+        break;
+      }
+      maybeEnd = (ch == &quot;_&quot;);
+    }
+    return ret(&quot;text&quot;, &quot;underlined&quot;);
+  }
+
+  // tw strike through text looks ugly
+  // change CSS if needed
+  function twTokenStrike(stream, state) {
+    var maybeEnd = false, ch;
+
+    while (ch = stream.next()) {
+      if (ch == &quot;-&quot; &amp;&amp; maybeEnd) {
+        state.tokenize = jsTokenBase;
+        break;
+      }
+      maybeEnd = (ch == &quot;-&quot;);
+    }
+    return ret(&quot;text&quot;, &quot;strikethrough&quot;);
+  }
+
+  // macro
+  function twTokenMacro(stream, state) {
+    var ch, word, known;
+
+    if (stream.current() == &#x27;&lt;&lt;&#x27;) {
+      return ret(&#x27;brace&#x27;, &#x27;macro&#x27;);
+    }
+
+    ch = stream.next();
+    if (!ch) {
+      state.tokenize = jsTokenBase;
+      return ret(ch);
+    }
+    if (ch == &quot;&gt;&quot;) {
+      if (stream.peek() == &#x27;&gt;&#x27;) {
+        stream.next();
+        state.tokenize = jsTokenBase;
+        return ret(&quot;brace&quot;, &quot;macro&quot;);
+      }
+    }
+
+    stream.eatWhile(/[\w\$_]/);
+    word = stream.current();
+    known = keywords.propertyIsEnumerable(word) &amp;&amp; keywords[word];
+
+    if (known) {
+      return ret(known.type, known.style, word);
+    }
+    else {
+      return ret(&quot;macro&quot;, null, word);
+    }
+  }
+
+  // Interface
+  return {
+    startState: function () {
+      return {
+        tokenize: jsTokenBase,
+        indented: 0,
+        level: 0
+      };
+    },
+
+    token: function (stream, state) {
+      if (stream.eatSpace()) return null;
+      var style = state.tokenize(stream, state);
+      return style;
+    },
+
+    electricChars: &quot;&quot;
+  };
+});
+
+CodeMirror.defineMIME(&quot;text/x-tiddlywiki&quot;, &quot;tiddlywiki&quot;);
+//}}}
+
+    </pre>
+</div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="../assets/vendor/prettify/prettify-min.js"></script>
+<script>prettyPrint();</script>
+<script src="../assets/js/yui-prettify.js"></script>
+<script src="../assets/../api.js"></script>
+<script src="../assets/js/api-filter.js"></script>
+<script src="../assets/js/api-list.js"></script>
+<script src="../assets/js/api-search.js"></script>
+<script src="../assets/js/apidocs.js"></script>
+</body>
+</html>
