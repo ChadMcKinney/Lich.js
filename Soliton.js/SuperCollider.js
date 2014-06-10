@@ -893,6 +893,36 @@ function lag(lagtime, input)
 }
 
 /**
+ * Bit crush a signal.
+ *
+ * @class crush
+ * @constructor
+ * @param bits Bitdepth of resulting signal (1-64)
+ * @example let test b => sin 440 >> crush b >> out 0
+ * @example let t = test 4
+ * @example stop t
+ */
+function crush(bits, input)
+{
+	return multiNewUGen("Decimator", AudioRate, [input,44100,bits], 1, 0);
+}
+
+/**
+ * Sample rate reduction on a signal.
+ *
+ * @class decimate
+ * @constructor
+ * @param rate Sample rate of resulting signel (1-44100)
+ * @example let test r => sin 440 >> decimate r >> out 0
+ * @example let t = test 11000
+ * @example stop t
+ */
+function decimate(rate, input)
+{
+	return multiNewUGen("Decimator", AudioRate, [input,rate,64], 1, 0);
+}
+
+/**
  * An allpass delay line with no interpolation.
  * 
  * @class allpassN
