@@ -1000,6 +1000,54 @@ function combC(maxDel, del, decay, input)
 }
 
 /**
+ * A simple delay with no interpolation.
+ *
+ * @class delayN
+ * @constructor
+ * @param maxDel Max delay time in seconds
+ * @param del Delay time in seconds
+ * @example let test del => impulse 1 >> delayN del del >> out 0
+ * @example let t = test 0.1
+ * @example stop t
+ */
+function delayN(maxDel, del, input)
+{
+	return multiNewUGen("DelayN", AudioRate, [input,maxDel,del], 1, 0);
+}
+
+/**
+ * A simple delay with linear interpolation.
+ *
+ * @class delayL
+ * @constructor
+ * @param maxDel Max delay time in seconds
+ * @param del Delay time in seconds
+ * @example let test del => impulse 1 >> delayL del del >> out 0
+ * @example let t = test 0.1
+ * @example stop t
+ */
+function delayL(maxDel, del, input)
+{
+	return multiNewUGen("DelayL", AudioRate, [input,maxDel,del], 1, 0);
+}
+
+/**
+ * A simple delay with cubic interpolation.
+ *
+ * @class delayC
+ * @constructor
+ * @param maxDel Max delay time in seconds
+ * @param del Delay time in seconds
+ * @example let test del => impulse 1 >> delayC del del >> out 0
+ * @example let t = test 0.1
+ * @example stop t
+ */
+function delayC(maxDel, del, input)
+{
+	return multiNewUGen("DelayC", AudioRate, [input,maxDel,del], 1, 0);
+}
+
+/**
  * Send a signal to an output bus.
  *
  * @class out
