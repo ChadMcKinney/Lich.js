@@ -1000,7 +1000,6 @@ function combC(maxDel, del, decay, input)
 }
 
 /**
-<<<<<<< HEAD
  * A simple delay with no interpolation.
  *
  * @class delayN
@@ -1047,12 +1046,6 @@ function delayC(maxDel, del, input)
 {
 	return multiNewUGen("DelayC", AudioRate, [input,maxDel,del], 1, 0);
 }
-
-/**
-=======
- * Envelopes.
- * @submodule Envelopes
- */
 
 var _shapeNames = {
 	step: 0,
@@ -1104,6 +1097,7 @@ function _prEnv(levels, times, shape, input, doneAction)
 /**
  * Envelope generator. Used for amplitude envelopes, will automatically free the synth when finished.
  * @class env
+ * @constructor
  * @param levels The levels that the envelope will move through
  * @param times The times it takes for the env to move between levels. Should be 1 item less than levels
  * @param shape Either a shape number or string. Some examples: -4, 0, 1, "linear", "squared"
@@ -1116,8 +1110,14 @@ function env(levels, times, shape, input)
 }
 
 /**
+ * Envelopes.
+ * @submodule Envelopes
+ */
+
+/**
  * Envelope generator. Used for amplitude envelopes, will NOT automatically free the synth when finished.
  * @class env2
+ * @constructor
  * @param levels The levels that the envelope will move through
  * @param times The times it takes for the env to move between levels. Should be 1 item less than levels
  * @param shape Either a shape number or string. Some examples: -4, 0, 1, "linear", "squared"
@@ -1132,6 +1132,7 @@ function env2(levels, times, shape, input)
 /**
  * Envelope generator. Used for amplitude envelopes, will automatically free the synth when finished.
  * @class perc
+ * @constructor
  * @param attackTime Time for the envelope to go from 0 to the peak
  * @param peak The highest level the envelope with reach
  * @param decayTime Time for the envelope to go from the peak to 0
@@ -1145,6 +1146,7 @@ function perc(attackTime, peak, decayTime, input)
 /**
  * Envelope generator. Used for amplitude envelopes, will NOT automatically free the synth when finished.
  * @class perc2
+ * @constructor
  * @param attackTime Time for the envelope to go from 0 to the peak
  * @param peak The highest level the envelope with reach
  * @param decayTime Time for the envelope to go from the peak to 0
@@ -1156,12 +1158,6 @@ function perc2(attackTime, peak, decayTime, input)
 }
 
 /**
- * Inputs and Outputs
- * @submodule InputOutput
- */
-
-/**
->>>>>>> 38b5437d653f34d54c52a940e6718bc7254dc43f
  * Send a signal to an output bus.
  *
  * @class out
@@ -1187,8 +1183,8 @@ function out(busNum, value)
 }
 
 /**
- * Output.
- * @submodule Output
+ * Inputs and Outputs
+ * @submodule InputOutput
  */
 
 // Control is used internally for SynthDef arguments/controls
