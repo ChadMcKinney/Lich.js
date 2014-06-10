@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>gbmanN - Lich.sc</title>
+    <title>crush - Lich.sc</title>
     <link rel="stylesheet" href="http://yui.yahooapis.com/3.9.1/build/cssgrids/cssgrids-min.css">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
     <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
@@ -182,7 +182,7 @@
             <div class="apidocs">
                 <div id="docs-main">
                     <div class="content">
-                        <h1>gbmanN Class</h1>
+                        <h1>crush Class</h1>
 <div class="box meta">
     
 
@@ -190,13 +190,13 @@
 
     
         <div class="foundat">
-            Defined in: <a href="../files/Soliton.js_SuperCollider.js.html#l793"><code>Soliton.js&#x2F;SuperCollider.js:793</code></a>
+            Defined in: <a href="../files/Soliton.js_SuperCollider.js.html#l895"><code>Soliton.js&#x2F;SuperCollider.js:895</code></a>
         </div>
     
 
     
         
-            Module: <a href="../modules/Chaos.html">Chaos</a><br>
+            Module: <a href="../modules/Filters.html">Filters</a><br>
             Parent Module: <a href="../modules/Lich.sc UGens.html">Lich.sc UGens</a>
         
     
@@ -207,15 +207,15 @@
 
 
 <div class="box intro">
-    <p>A non-interpolating sound generator based on the difference equation: x[n+1] = 1 - y[n] + abs(x[n]); y[n+1] = x[n];</p>
+    <p>Bit crush a signal.</p>
 
 </div>
 
 
     <div class="constructor">
         <h2>Constructor</h2>
-        <div id="method_gbmanN" class="method item">
-    <h3 class="name"><code>gbmanN</code></h3>
+        <div id="method_crush" class="method item">
+    <h3 class="name"><code>crush</code></h3>
 
     
         <div class="args">
@@ -223,19 +223,7 @@
             
                 <li class="arg">
                     
-                        <code>freq</code>
-                    
-                </li>
-            
-                <li class="arg">
-                    
-                        <code>xi</code>
-                    
-                </li>
-            
-                <li class="arg">
-                    
-                        <code>yi</code>
+                        <code>bits</code>
                     
                 </li>
             
@@ -268,7 +256,7 @@
             
         
         
-        <a href="../files/Soliton.js_SuperCollider.js.html#l793"><code>Soliton.js&#x2F;SuperCollider.js:793</code></a>
+        <a href="../files/Soliton.js_SuperCollider.js.html#l895"><code>Soliton.js&#x2F;SuperCollider.js:895</code></a>
         
         </p>
 
@@ -290,46 +278,14 @@
             
                 <li class="param">
                     
-                        <code class="param-name">freq</code>
+                        <code class="param-name">bits</code>
                         <span class="type">Object</span>
                     
 
                     
 
                     <div class="param-description">
-                        <p>Frequency</p>
-
-                    </div>
-
-                    
-                </li>
-            
-                <li class="param">
-                    
-                        <code class="param-name">xi</code>
-                        <span class="type">Object</span>
-                    
-
-                    
-
-                    <div class="param-description">
-                        <p>Initial value of x</p>
-
-                    </div>
-
-                    
-                </li>
-            
-                <li class="param">
-                    
-                        <code class="param-name">yi</code>
-                        <span class="type">Object</span>
-                    
-
-                    
-
-                    <div class="param-description">
-                        <p>Initial value of y</p>
+                        <p>Bitdepth of resulting signal (1-64)</p>
 
                     </div>
 
@@ -347,8 +303,8 @@
             <h4>Example:</h4>
 
             <div class="example-content">
-                <p> let test f xi yi =&gt; gbmanN f xi yi &gt;&gt; out 0</p>
-<p> let t = test 22050 1.2 2.1</p>
+                <p> let test b =&gt; sin 440 &gt;&gt; crush b &gt;&gt; out 0</p>
+<p> let t = test 4</p>
 <p> stop t</p>
 
             </div>

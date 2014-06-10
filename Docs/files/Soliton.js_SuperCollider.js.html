@@ -63,11 +63,15 @@
             
                 <li><a href="../classes/crackle.html">crackle</a></li>
             
+                <li><a href="../classes/crush.html">crush</a></li>
+            
                 <li><a href="../classes/cuspL.html">cuspL</a></li>
             
                 <li><a href="../classes/cuspN.html">cuspN</a></li>
             
                 <li><a href="../classes/dc.html">dc</a></li>
+            
+                <li><a href="../classes/decimate.html">decimate</a></li>
             
                 <li><a href="../classes/delayC.html">delayC</a></li>
             
@@ -1074,6 +1078,36 @@ function bandpass(freq, q, input)
 function lag(lagtime, input)
 {
 	return multiNewUGen(&quot;Lag&quot;, AudioRate, [input,lagtime], 1, 0);
+}
+
+/**
+ * Bit crush a signal.
+ *
+ * @class crush
+ * @constructor
+ * @param bits Bitdepth of resulting signal (1-64)
+ * @example let test b =&gt; sin 440 &gt;&gt; crush b &gt;&gt; out 0
+ * @example let t = test 4
+ * @example stop t
+ */
+function crush(bits, input)
+{
+	return multiNewUGen(&quot;Decimator&quot;, AudioRate, [input,44100,bits], 1, 0);
+}
+
+/**
+ * Sample rate reduction on a signal.
+ *
+ * @class decimate
+ * @constructor
+ * @param rate Sample rate of resulting signel (1-44100)
+ * @example let test r =&gt; sin 440 &gt;&gt; decimate r &gt;&gt; out 0
+ * @example let t = test 11000
+ * @example stop t
+ */
+function decimate(rate, input)
+{
+	return multiNewUGen(&quot;Decimator&quot;, AudioRate, [input,rate,64], 1, 0);
 }
 
 /**

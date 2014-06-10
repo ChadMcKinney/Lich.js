@@ -60,6 +60,8 @@
                 "highpass": 1,
                 "bandpass": 1,
                 "lag": 1,
+                "crush": 1,
+                "decimate": 1,
                 "allpassN": 1,
                 "allpassL": 1,
                 "allpassC": 1,
@@ -511,6 +513,8 @@
                 "highpass": 1,
                 "bandpass": 1,
                 "lag": 1,
+                "crush": 1,
+                "decimate": 1,
                 "allpassN": 1,
                 "allpassL": 1,
                 "allpassC": 1,
@@ -530,7 +534,7 @@
             "namespaces": {},
             "tag": "module",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1160,
+            "line": 1190,
             "description": "Lich.sc UGen bindings."
         },
         "Oscillators": {
@@ -605,7 +609,9 @@
                 "lowpass": 1,
                 "highpass": 1,
                 "bandpass": 1,
-                "lag": 1
+                "lag": 1,
+                "crush": 1,
+                "decimate": 1
             },
             "fors": {},
             "is_submodule": 1,
@@ -613,7 +619,7 @@
             "module": "Lich.sc UGens",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 880,
+            "line": 910,
             "description": "Filters."
         },
         "Delays": {
@@ -636,7 +642,7 @@
             "module": "Lich.sc UGens",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1034,
+            "line": 1064,
             "description": "Delays."
         },
         "Envelopes": {
@@ -654,7 +660,7 @@
             "module": "Lich.sc UGens",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1146,
+            "line": 1176,
             "description": "Envelopes."
         },
         "InputOutput": {
@@ -669,7 +675,7 @@
             "module": "Lich.sc UGens",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1160,
+            "line": 1190,
             "description": "Inputs and Outputs"
         }
     },
@@ -1471,6 +1477,60 @@
                 " stop t"
             ]
         },
+        "crush": {
+            "name": "crush",
+            "shortname": "crush",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Filters",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 895,
+            "description": "Bit crush a signal.",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "bits",
+                    "description": "Bitdepth of resulting signal (1-64)"
+                }
+            ],
+            "example": [
+                " let test b => sin 440 >> crush b >> out 0",
+                " let t = test 4",
+                " stop t"
+            ]
+        },
+        "decimate": {
+            "name": "decimate",
+            "shortname": "decimate",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Filters",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 910,
+            "description": "Sample rate reduction on a signal.",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "rate",
+                    "description": "Sample rate of resulting signel (1-44100)"
+                }
+            ],
+            "example": [
+                " let test r => sin 440 >> decimate r >> out 0",
+                " let t = test 11000",
+                " stop t"
+            ]
+        },
         "allpassN": {
             "name": "allpassN",
             "shortname": "allpassN",
@@ -1483,7 +1543,7 @@
             "submodule": "Delays",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 895,
+            "line": 925,
             "description": "An allpass delay line with no interpolation.",
             "is_constructor": 1,
             "params": [
@@ -1518,7 +1578,7 @@
             "submodule": "Delays",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 917,
+            "line": 947,
             "description": "An allpass delay line with linear interpolation.",
             "is_constructor": 1,
             "params": [
@@ -1553,7 +1613,7 @@
             "submodule": "Delays",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 934,
+            "line": 964,
             "description": "An allpass delay line with cubic interpolation.",
             "is_constructor": 1,
             "params": [
@@ -1588,7 +1648,7 @@
             "submodule": "Delays",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 951,
+            "line": 981,
             "description": "A comb delay line with no interpolation.",
             "is_constructor": 1,
             "params": [
@@ -1623,7 +1683,7 @@
             "submodule": "Delays",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 968,
+            "line": 998,
             "description": "A comb delay line with linear interpolation.",
             "is_constructor": 1,
             "params": [
@@ -1658,7 +1718,7 @@
             "submodule": "Delays",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 985,
+            "line": 1015,
             "description": "A comb delay line with cubic interpolation.",
             "is_constructor": 1,
             "params": [
@@ -1693,7 +1753,7 @@
             "submodule": "Delays",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1002,
+            "line": 1032,
             "description": "A simple delay with no interpolation.",
             "is_constructor": 1,
             "params": [
@@ -1724,7 +1784,7 @@
             "submodule": "Delays",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1018,
+            "line": 1048,
             "description": "A simple delay with linear interpolation.",
             "is_constructor": 1,
             "params": [
@@ -1755,7 +1815,7 @@
             "submodule": "Delays",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1034,
+            "line": 1064,
             "description": "A simple delay with cubic interpolation.",
             "is_constructor": 1,
             "params": [
@@ -1786,7 +1846,7 @@
             "submodule": "Envelopes",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1097,
+            "line": 1127,
             "description": "Envelope generator. Used for amplitude envelopes, will automatically free the synth when finished.",
             "is_constructor": 1,
             "params": [
@@ -1820,7 +1880,7 @@
             "submodule": "Envelopes",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1117,
+            "line": 1147,
             "description": "Envelope generator. Used for amplitude envelopes, will NOT automatically free the synth when finished.",
             "is_constructor": 1,
             "params": [
@@ -1854,7 +1914,7 @@
             "submodule": "Envelopes",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1132,
+            "line": 1162,
             "description": "Envelope generator. Used for amplitude envelopes, will automatically free the synth when finished.",
             "is_constructor": 1,
             "params": [
@@ -1888,7 +1948,7 @@
             "submodule": "Envelopes",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1146,
+            "line": 1176,
             "description": "Envelope generator. Used for amplitude envelopes, will NOT automatically free the synth when finished.",
             "is_constructor": 1,
             "params": [
@@ -1922,7 +1982,7 @@
             "submodule": "InputOutput",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1160,
+            "line": 1190,
             "description": "Send a signal to an output bus.",
             "is_constructor": 1,
             "params": [
