@@ -1,0 +1,2094 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Compiler/Compiler.js - Lich.sc</title>
+    <link rel="stylesheet" href="http://yui.yahooapis.com/3.9.1/build/cssgrids/cssgrids-min.css">
+    <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
+    <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
+    <link rel="shortcut icon" type="image/png" href="../assets/favicon.png">
+    <script src="http://yui.yahooapis.com/combo?3.9.1/build/yui/yui-min.js"></script>
+</head>
+<body class="yui3-skin-sam">
+
+<div id="doc">
+    <div id="hd" class="yui3-g header">
+        <div class="yui3-u-3-4">
+            
+                <h1><img src="../assets/css/logo.png" title="Lich.sc"></h1>
+            
+        </div>
+        <div class="yui3-u-1-4 version">
+            <em>API Docs for: 0.1</em>
+        </div>
+    </div>
+    <div id="bd" class="yui3-g">
+
+        <div class="yui3-u-1-4">
+            <div id="docs-sidebar" class="sidebar apidocs">
+                <div id="api-list">
+    <h2 class="off-left">APIs</h2>
+    <div id="api-tabview" class="tabview">
+        <ul class="tabs">
+            <li><a href="#api-classes">Classes</a></li>
+            <li><a href="#api-modules">Modules</a></li>
+        </ul>
+
+        <div id="api-tabview-filter">
+            <input type="search" id="api-filter" placeholder="Type to filter APIs">
+        </div>
+
+        <div id="api-tabview-panel">
+            <ul id="api-classes" class="apis classes">
+            
+                <li><a href="../classes/allpassC.html">allpassC</a></li>
+            
+                <li><a href="../classes/allpassL.html">allpassL</a></li>
+            
+                <li><a href="../classes/allpassN.html">allpassN</a></li>
+            
+                <li><a href="../classes/bandpass.html">bandpass</a></li>
+            
+                <li><a href="../classes/blip.html">blip</a></li>
+            
+                <li><a href="../classes/brown.html">brown</a></li>
+            
+                <li><a href="../classes/clipNoise.html">clipNoise</a></li>
+            
+                <li><a href="../classes/combC.html">combC</a></li>
+            
+                <li><a href="../classes/combL.html">combL</a></li>
+            
+                <li><a href="../classes/combN.html">combN</a></li>
+            
+                <li><a href="../classes/crackle.html">crackle</a></li>
+            
+                <li><a href="../classes/crush.html">crush</a></li>
+            
+                <li><a href="../classes/cuspL.html">cuspL</a></li>
+            
+                <li><a href="../classes/cuspN.html">cuspN</a></li>
+            
+                <li><a href="../classes/dc.html">dc</a></li>
+            
+                <li><a href="../classes/decimate.html">decimate</a></li>
+            
+                <li><a href="../classes/delayC.html">delayC</a></li>
+            
+                <li><a href="../classes/delayL.html">delayL</a></li>
+            
+                <li><a href="../classes/delayN.html">delayN</a></li>
+            
+                <li><a href="../classes/dust.html">dust</a></li>
+            
+                <li><a href="../classes/env.html">env</a></li>
+            
+                <li><a href="../classes/env2.html">env2</a></li>
+            
+                <li><a href="../classes/formant.html">formant</a></li>
+            
+                <li><a href="../classes/gbmanL.html">gbmanL</a></li>
+            
+                <li><a href="../classes/gbmanN.html">gbmanN</a></li>
+            
+                <li><a href="../classes/gray.html">gray</a></li>
+            
+                <li><a href="../classes/highpass.html">highpass</a></li>
+            
+                <li><a href="../classes/impulse.html">impulse</a></li>
+            
+                <li><a href="../classes/lag.html">lag</a></li>
+            
+                <li><a href="../classes/lowpass.html">lowpass</a></li>
+            
+                <li><a href="../classes/noiseL.html">noiseL</a></li>
+            
+                <li><a href="../classes/noiseN.html">noiseN</a></li>
+            
+                <li><a href="../classes/noiseX.html">noiseX</a></li>
+            
+                <li><a href="../classes/out.html">out</a></li>
+            
+                <li><a href="../classes/perc.html">perc</a></li>
+            
+                <li><a href="../classes/perc2.html">perc2</a></li>
+            
+                <li><a href="../classes/pink.html">pink</a></li>
+            
+                <li><a href="../classes/pulse.html">pulse</a></li>
+            
+                <li><a href="../classes/saw.html">saw</a></li>
+            
+                <li><a href="../classes/sin.html">sin</a></li>
+            
+                <li><a href="../classes/square.html">square</a></li>
+            
+                <li><a href="../classes/tri.html">tri</a></li>
+            
+                <li><a href="../classes/white.html">white</a></li>
+            
+            </ul>
+
+            <ul id="api-modules" class="apis modules">
+            
+                <li><a href="../modules/Chaos.html">Chaos</a></li>
+            
+                <li><a href="../modules/Delays.html">Delays</a></li>
+            
+                <li><a href="../modules/Envelopes.html">Envelopes</a></li>
+            
+                <li><a href="../modules/Filters.html">Filters</a></li>
+            
+                <li><a href="../modules/InputOutput.html">InputOutput</a></li>
+            
+                <li><a href="../modules/Lich.sc UGens.html">Lich.sc UGens</a></li>
+            
+                <li><a href="../modules/Noise.html">Noise</a></li>
+            
+                <li><a href="../modules/Oscillators.html">Oscillators</a></li>
+            
+            </ul>
+        </div>
+    </div>
+</div>
+
+            </div>
+        </div>
+        <div class="yui3-u-3-4">
+                <div id="api-options">
+        Show:
+        <label for="api-show-inherited">
+            <input type="checkbox" id="api-show-inherited" checked>
+            Inherited
+        </label>
+
+        <label for="api-show-protected">
+            <input type="checkbox" id="api-show-protected">
+            Protected
+        </label>
+
+        <label for="api-show-private">
+            <input type="checkbox" id="api-show-private">
+            Private
+        </label>
+        <label for="api-show-deprecated">
+            <input type="checkbox" id="api-show-deprecated">
+            Deprecated
+        </label>
+
+    </div>
+
+
+            <div class="apidocs">
+                <div id="docs-main">
+                    <div class="content">
+                        <h1 class="file-heading">File: Compiler/Compiler.js</h1>
+
+<div class="file">
+    <pre class="code prettyprint linenums">
+/* 
+    Lich.js - JavaScript audio/visual live coding language
+    Copyright (C) 2012 Chad McKinney
+
+	http://chadmckinneyaudio.com/
+	seppukuzombie@gmail.com
+
+	LICENSE
+	=======
+
+	Licensed under the Simplified BSD License:
+
+	Redistribution and use in source and binary forms, with or without
+	modification, are permitted provided that the following conditions are met: 
+
+	1. Redistributions of source code must retain the above copyright notice, this
+	   list of conditions and the following disclaimer. 
+	2. Redistributions in binary form must reproduce the above copyright notice,
+	   this list of conditions and the following disclaimer in the documentation
+	   and/or other materials provided with the distribution. 
+
+	THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS IS&quot; AND
+	ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+	WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+	DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+	ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+	(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+	LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+	ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+	(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+	The views and conclusions contained in the software and documentation are those
+	of the authors and should not be interpreted as representing official policies, 
+	either expressed or implied, of the FreeBSD Project.
+*/
+
+Function.prototype.curriedArgs = [];
+
+// Function currying that allows for currying to be used multiple times.
+Function.prototype.curry = function curry() 
+{
+	if(typeof this.curriedFunc !== &quot;undefined&quot;)
+	{
+		if(this.curriedFunc.length &lt;= (this.curriedArgs.length + arguments.length))
+	    {
+	    	return this.curriedFunc.apply(this.curriedFunc, this.curriedArgs.concat(Array.prototype.slice.call(arguments)));
+	    }
+
+	    else
+	    {
+	    	return this.curriedFunc.curry.apply(this.curriedFunc, this.curriedArgs.concat(Array.prototype.slice.call(arguments)));
+	    }
+	}
+
+	else
+	{
+		if(this.length &lt;= arguments.length)
+		{
+			return this.apply(this, arguments);
+		}
+
+		var fn = this;
+	    var args = Array.prototype.slice.call(arguments);
+	    var newFunc = function() {
+
+	    	if(fn.length &lt;= (args.length + arguments.length))
+	    	{
+	    		return fn.apply(fn, args.concat(Array.prototype.slice.call(arguments)));
+	    	}
+
+	    	else
+	    	{
+	    		return fn.curry.apply(fn, args.concat(Array.prototype.slice.call(arguments)));
+	    	}
+	    };
+
+	    newFunc.curriedFunc = fn;
+	    newFunc.curriedArgs = args;
+	    return newFunc;
+	}
+};
+
+// Thanks to: https://gist.github.com/Gozala/1697037
+function tco(f) {
+  /**
+  Takes &#x60;f&#x60; function and returns wrapper in return, that may be
+  used for tail recursive algorithms. Note that returned funciton
+  is not side effect free and should not be called from anywhere
+  else during tail recursion. In other words if
+  &#x60;var f = tco(function foo() { ... bar() ... })&#x60;, then &#x60;bar&#x60;
+  should never call &#x60;f&#x60;. It is ok though for &#x60;bar&#x60; to call &#x60;tco(foo)&#x60;
+  instead.
+
+  ## Examples
+  var sum = tco(function(x, y) {
+    return y &gt; 0 ? sum(x + 1, y - 1) :
+           y &lt; 0 ? sum(x - 1, y + 1) :
+           x
+  })
+  sum(20, 100000) // =&gt; 100020
+  **/
+
+  var value, active = false, accumulated = []
+  return function accumulator() {
+    // Every time accumulator is called, given set of parameters
+    // are accumulated.
+    accumulated.push(arguments)
+    // If accumulator is inactive (is not in the process of
+    // tail recursion) activate and start accumulating parameters.
+    if (!active) {
+      active = true
+      // If wrapped &#x60;f&#x60; performs tail call, then new set of parameters will
+      // be accumulated causing new iteration in the loop. If &#x60;f&#x60; does not
+      // performs tail call then accumulation is finished and &#x60;value&#x60; will
+      // be returned. 
+      while (accumulated.length) value = f.apply(this, accumulated.shift())
+      active = false
+      return value
+    }
+  }
+}
+
+function forEachCpsTco(arr, visitor, done) // cps style array iteration via recursion
+{ 
+    trampoline(forEachCpsRecTco(0, arr, visitor, done));
+}
+
+function forEachCpsRecTco(index, arr, visitor, done) 
+{
+    if (index &lt; arr.length) 
+    {
+    	var retArr;
+        visitor(arr[index], index, function () 
+        {
+            retArr = [forEachCpsRecTco,[index+1, arr, visitor, done]];
+        });
+
+        return retArr;
+    } 
+
+    else 
+    {
+        return [done];
+    }
+}
+
+function forEachCps(arr, visitor, done) // cps style array iteration via recursion
+{ 
+    forEachCpsRec(0, arr, visitor, done)
+}
+
+function forEachCpsRec(index, arr, visitor, done) 
+{
+    if (index &lt; arr.length) 
+    {
+        visitor(arr[index], index, function () 
+        {
+            forEachCpsRec(index+1, arr, visitor, done);
+        });
+    } 
+
+    else 
+    {
+        done();
+    }
+}
+
+function forEachDictCps(arr, visitor, done) // cps style array iteration via recursion
+{ 
+	var keys = Object.keys(arr).filter(function(element) { return element != &quot;_lichType&quot;});
+    forEachDictCpsRec(0, keys, visitor, done)
+}
+
+function forEachDictCpsRec(index, arr, visitor, done) 
+{
+    if (index &lt; arr.length) 
+    {
+        visitor(arr[index], index, function () 
+        {
+            forEachDictCpsRec(index+1, arr, visitor, done);
+        });
+    } 
+
+    else 
+    {
+        done();
+    }
+}
+
+function forEachDictReverseCps(arr, visitor, done) // cps style array iteration via recursion
+{ 
+	var keys = Object.keys(arr).filter(function(element) { return element != &quot;_lichType&quot;});
+    forEachDictReverseCpsRec(keys.length - 1, keys, visitor, done)
+}
+
+function forEachDictReverseCpsRec(index, arr, visitor, done) 
+{
+    if (index &gt;= 0) 
+    {
+        visitor(arr[index], index, function () 
+        {
+            forEachDictReverseCpsRec(index-1, arr, visitor, done);
+        });
+    } 
+
+    else 
+    {
+        done();
+    }
+}
+
+function forEachReverseCps(arr, visitor, done) // cps style array iteration via recursion
+{ 
+    forEachReverseCpsRec(arr.length - 1, arr, visitor, done)
+}
+
+function forEachReverseCpsRec(index, arr, visitor, done) 
+{
+    if(index &gt;= 0) 
+    {
+        visitor(arr[index], index, function () 
+        {
+            forEachReverseCpsRec(index - 1, arr, visitor, done);
+        });
+    } 
+
+    else 
+    {
+        done();
+    }
+}
+
+function forEachWithBreakCps(arr, visitor, done) // cps style array iteration via recursion
+{ 
+    forEachCpsWithBreakRec(0, arr, visitor, done)
+}
+
+function forEachCpsWithBreakRec(index, arr, visitor, done)
+{
+    if (index &lt; arr.length) 
+    {
+        visitor(arr[index], index, function(doBreak) // Extra doBreak argument for conditional breaking
+        {
+        	if(doBreak)
+            	done();
+        	else
+            	forEachCpsWithBreakRec(index+1, arr, visitor, done);
+        });
+    }
+
+    else 
+    {
+        done();
+    }
+}
+
+function forEachPairsCps(arr, visitor, done) // cps style array iteration via recursion
+{ 
+    forEachPairsCpsRec(0, arr, visitor, done)
+}
+
+function forEachPairsCpsRec(index, arr, visitor, done) // increment by pairs
+{
+    if (index &lt; arr.length) 
+    {
+        visitor(arr[index], index, function () 
+        {
+            forEachPairsCpsRec(index+2, arr, visitor, done);
+        });
+    } 
+
+    else 
+    {
+        done();
+    }
+}
+
+function mapCps(arr, func, done) 
+{
+    mapCpsRec(0, [], arr, func, done)
+}
+
+function mapCpsRec(index, outArr, inArr, func, done) 
+{
+    if (index &lt; inArr.length) 
+    {
+        func(inArr[index], index, function (result) 
+        {
+            mapCpsRec(index+1, outArr.concat(result),
+                      inArr, func, done);
+        });
+    } 
+
+    else {
+        done(outArr);
+    }
+}
+
+function mapDictCps(arr, func, done) 
+{
+	var keys = Object.keys(arr).filter(function(element) { return element != &quot;_lichType&quot;});
+    mapDictCpsRec(0, {}, keys, func, done)
+}
+
+function mapDictCpsRec(index, outArr, inArr, func, done) 
+{
+    if (index &lt; inArr.length) 
+    {
+        func(inArr[index], index, function (result) 
+        {
+        	outArr[inArr[index]] = result;
+            mapDictCpsRec(index+1, outArr, inArr, func, done);
+        });
+    } 
+
+    else {
+        done(outArr);
+    }
+}
+
+
+function trampoline(result) 
+{
+    while(Array.isArray(result)) 
+    {
+        var func = result[0];
+        var args = (result.length &gt;= 2 ? result[1] : []);
+        result = func.apply(null, args);
+    }
+}
+
+Lich.verifyDef = function(name)
+{
+	if(Lich.parseType === &quot;library&quot;)
+	{
+		if(Lich.libraryNamespace.indexOf(name) != -1)
+			throw new Error(&quot;Duplicate definition for &quot; + name);
+		else
+			Lich.libraryNamespace.push(name);
+	}
+
+	if(Lich.VM.reserved.hasOwnProperty(name))
+		throw new Error(&quot;Duplicate definition for reserved variable &quot; + name + &quot;. Use a different name.&quot;);
+}
+
+// The Lich.js compiler traverse the abstract syntax tree returned by the parser and calls native JavaScript
+Lich.compileAST = function(ast)
+{
+	if(ast instanceof Array)
+	{
+		var res = new Array();
+		for(var i = 0; i &lt; ast.length; ++i)
+		{	
+			res.push(Lich.compileAST(ast[i]));
+		}
+
+		return res;
+	}
+
+	else if(ast instanceof Object)
+	{
+		switch(ast.astType)
+		{
+			case &quot;primitive&quot;:
+				return ast;
+
+			case &quot;percStream&quot;:
+				return Lich.compilePercStream(ast);
+
+			case &quot;percList&quot;:
+				return Lich.compilePercList(ast);
+
+			case &quot;percMods&quot;:
+				return Lich.compilePercMods(ast);
+
+			case &quot;soloStream&quot;:
+				return Lich.compileSoloStream(ast);
+
+			case &quot;soloList&quot;:
+				return Lich.compileSoloList(ast);
+
+			case &quot;soloMods&quot;:
+				return Lich.compileSoloMods(ast);
+
+			case &quot;decl-fun&quot;:
+				return Lich.compileDeclFun(ast);
+
+			case &quot;local-decl-fun&quot;:
+				return Lich.compileLocalDeclFun(ast);
+				
+			case &quot;fun-where&quot;:
+				return Lich.compileFunWhere(ast);
+				
+			case &quot;ite&quot;:
+				return Lich.compileIte(ast);
+				
+			case &quot;application&quot;:
+				return Lich.compileApplication(ast);
+				
+			case &quot;function-application-op&quot;:
+				return Lich.compileFunctionApplicationOp(ast);
+
+			case &quot;receive&quot;:
+				return Lich.compileReceive(ast);
+				
+			case &quot;function-composition&quot;:
+				return Lich.compileFunctionComposition(ast);
+
+			case &quot;function-stream&quot;:
+				return Lich.compileFunctionStream(ast);
+
+			case &quot;lambda&quot;:
+				return Lich.compileLambda(ast);
+				
+			case &quot;let&quot;:
+				return Lich.compileLet(ast);
+				
+			case &quot;let-one&quot;: // ghci style let expression for global definitions
+				return Lich.compileLetOne(ast);
+				
+			case &quot;listexp&quot;:
+				return Lich.compileListExp(ast);
+				
+			case &quot;qop&quot;:
+				return Lich.compileQop(ast);
+				
+			case &quot;conpat&quot;:
+				return Lich.compileConPat(ast);
+				
+			case &quot;wildcard&quot;:
+				return { _lichType: WILDCARD };
+				
+			case &quot;integer-lit&quot;:
+			case &quot;char-lit&quot;:
+			case &quot;number&quot;:
+			case &quot;float-lit&quot;:
+			case &quot;boolean-lit&quot;:
+			case &quot;string-lit&quot;:
+				return ast.value;
+				
+			case &quot;varname&quot;:
+				return Lich.compileVarName(ast);
+				
+			case &quot;dacon&quot;:
+				return Lich.compileDacon(ast);
+				
+			case &quot;binop-exp&quot;:
+				return Lich.compileBinOpExp(ast);
+
+			case &quot;curried-binop-exp&quot;:
+				return Lich.compileCurriedBinOpExp(ast);
+
+			case &quot;left-curried-binop-exp&quot;:
+				return Lich.compileLeftCurriedBinOpExp(ast);
+
+			case &quot;right-curried-binop-exp&quot;:
+				return Lich.compileRightCurriedBinOpExp(ast);
+				
+			case &quot;negate&quot;:
+				return Lich.compileNegate(ast);
+				
+			case &quot;listrange&quot;:
+				return Lich.compileListRange(ast);
+				
+			case &quot;dictionary&quot;:
+				return Lich.compileDictionary(ast);
+				
+			case &quot;case&quot;:
+				return Lich.compileCase(ast);
+				
+			case &quot;Nothing&quot;:
+				return &quot;Lich.VM.Nothing&quot;;
+				
+			case &quot;list-comprehension&quot;:
+				return Lich.compileListComprehension(ast);
+				
+			case &quot;module&quot;:
+				return Lich.compileModule(ast);
+				
+			case &quot;body&quot;:
+				return Lich.compileBody(ast);
+				
+			case &quot;data-decl&quot;:
+				return Lich.compileDataDecl(ast);
+				
+			case &quot;data-inst&quot;:
+				return Lich.compileDataInst(ast);
+				
+			case &quot;data-lookup&quot;:
+				return Lich.compileDataLookup(ast);
+				
+			case &quot;data-update&quot;:
+				return Lich.compileDataUpdate(ast);
+				
+			case &quot;data-enum&quot;:
+				return Lich.compileDataEnum(ast);
+				
+			case &quot;data-match&quot;:
+				return Lich.compileDataMatch(ast);
+				
+			case &quot;topdecl-decl&quot;:
+				return Lich.compileTopdeclDecl(ast);
+
+			case &quot;top-exp&quot;:
+				return Lich.compileTopExp(ast);
+
+			case &quot;do-exp&quot;:
+				return Lich.compileDoExp(ast);
+
+			case &quot;guard-fun&quot;:
+				return Lich.compileGuardExp(ast);
+
+			case &quot;synthdef&quot;:
+				return Lich.compileSynthDef(ast);
+
+			case &quot;impjs&quot;:
+				return Lich.compileImportJS(ast);
+
+			default:
+				return Lich.unsupportedSemantics(ast);
+		}
+	}
+
+	else if(typeof ast === &quot;undefined&quot;)
+	{
+		return Lich.VM.Nothing;
+	}
+
+	else
+	{
+		throw new Error(&quot;Unknown AST Type: &quot; + (typeof ast));
+	}
+}
+
+Lich.unsupportedSemantics = function(ast)
+{
+	throw new Error(&quot;Unsupported semantics for &quot; +ast+&quot; with type &quot;+ ast.astType);
+}
+
+Lich.getType = function(object)
+{
+	if(object == null)
+		return NOTHING;
+
+	var type = typeof object;
+
+	if(object instanceof Array)
+		return LIST;
+	else if(type === &quot;undefined&quot;)
+		return NOTHING;
+	else if(type === &quot;number&quot;)
+		return NUMBER;
+	else if(type === &quot;string&quot;)
+		return STRING;
+	else if(type === &quot;function&quot;)
+		return CLOSURE;
+	else if(type === &quot;boolean&quot;)
+		return BOOLEAN;
+	else if(typeof object._lichType !== &quot;undefined&quot;)
+		return object._lichType;
+	else
+		throw new Error(&quot;uknown object: &quot; + object);
+	
+}
+
+Lich.dataMatch = function(object, pat)
+{
+	if(Lich.getType(object) != DATA)
+	{
+		return false;
+	}	
+
+	else
+	{
+		if(object._datatype == pat)
+			return true;
+		else
+			return false;
+	}
+}
+
+Lich.matchError = function(object, pat)
+{
+	throw new Error(&quot;Unmatched pattern: &quot; + object);
+}
+
+Lich.listMatchError = function(i)
+{
+	throw new Error(&quot;Function argument does not match list pattern for argument number &quot;+i);
+}
+
+Lich.lambdaPatternPrint = function(numArgs)
+{
+	var lambdaString = &quot;(\\\\&quot;;
+	for(var i = 0; i &lt; numArgs; ++i)
+	{
+		lambdaString = lambdaString + &quot;_ &quot;;
+	}
+
+	lambdaString = lambdaString + &quot;-&gt;)&quot;;
+	return lambdaString;
+}
+
+Lich.numLambdaArgs = function(object)
+{
+	if(typeof object.curriedFunc !== &quot;undefined&quot;)
+	{
+		return object.curriedFunc.length - object.curriedArgs.length;
+	}
+
+	else
+	{
+		return object.length;
+	}
+}
+
+Lich.generateMatchFunc = function(object, pat, i, throwCode)
+{
+	var matchCode = &quot;&quot;;
+	if(pat.astType == &quot;at-match&quot;)
+	{
+		pat = pat.pat;
+	}
+
+	switch(pat.astType)
+	{
+	case &quot;varname&quot;:
+	case &quot;wildcard&quot;:
+		if(throwCode)
+			return matchCode;
+		else
+			return matchCode + &quot;true&quot;;
+
+	case &quot;Nothing&quot;:
+		if(throwCode)
+		{
+			return (matchCode + &quot;if(Lich.getType(&quot;+object+&quot;) != NOTHING){throw new Error(\&quot;Function argument does not match Nothing pattern for &quot;
+				+&quot;argument number \&quot;+&quot;+i+&quot;)};&quot;);
+		}
+
+		else
+		{
+			return matchCode + &quot;Lich.getType(&quot;+object+&quot;) == NOTHING&quot;;
+		}
+
+	case &quot;data-match&quot;:
+
+		if(!throwCode)
+			matchCode += &quot;(function(){&quot;;
+
+		matchCode = matchCode + &quot;if(Lich.dataMatch(&quot;+object+&quot;, \&quot;&quot;+pat.id+&quot;\&quot;)){&quot;;
+
+		for(var j = 0; j &lt; pat.members.length; ++j)
+		{
+			matchCode = matchCode + pat.members[j] + &quot; = &quot; + object + &quot;[&quot; + object + &quot;._argNames[&quot; + j + &quot;]];&quot;;
+		}
+
+		if(throwCode)
+			matchCode = matchCode + &quot;}else{throw new Error(\&quot;Function argument does not match &quot;+pat.id+&quot; pattern for argument number \&quot;+&quot;+i+&quot;)};&quot;;
+		else
+			matchCode = matchCode + &quot;;return true}else{return false}&quot;;
+		
+		if(!throwCode)
+			matchCode += &quot;})()&quot;;
+
+		return matchCode;
+
+	case &quot;literal-match&quot;:
+		var value = pat.value.value;
+		if(typeof value === &quot;string&quot;)
+			value = value.replace(/\&quot;/g,&quot;&quot;);
+
+		if(throwCode)
+		{
+			return (matchCode+&quot;if(&quot;+object+&quot; !== &quot;+pat.value.value+&quot;){Lich.VM.Print(&quot;+object+&quot;);throw new Error(\&quot;Function argument does not match &quot;
+				+value+&quot; pattern for argument number \&quot;+&quot;+i+&quot;)};&quot;);
+		}
+
+		else
+		{
+			return matchCode + object+&quot; === &quot;+pat.value.value;
+		}
+
+	case &quot;head-tail-match&quot;:
+
+		if(!throwCode)
+			matchCode += &quot;(function(){&quot;;
+
+		matchCode = matchCode + &quot;if(Lich.getType(&quot;+object+&quot;) == LIST){if(&quot;+object+&quot;.length &lt; 1){&quot;;
+
+		if(throwCode)
+		{
+			matchCode = matchCode +&quot;throw new Error(\&quot;Function argument does not match (&quot;+pat.head+&quot;:&quot;+pat.tail+&quot;) pattern for argument number \&quot;+&quot;+i
+				+&quot;+\&quot;. Matching lists much have a length greater than 0.\&quot;)}else{&quot;;
+		}
+
+		else
+		{
+			matchCode = matchCode + &quot;return false}else{&quot;;
+		}
+
+		if(pat.head.astType != &quot;wildcard&quot;)
+		{
+			matchCode = matchCode + pat.head + &quot; = &quot; + object + &quot;.length &gt;= 1 ? &quot; + object + &quot;[0] : Lich.VM.Nothing;&quot;;
+		}
+
+		if(pat.tail.astType != &quot;wildcard&quot;)
+		{
+			matchCode = matchCode + pat.tail + &quot; = &quot; + object + &quot;.slice(1, &quot; + object + &quot;.length);&quot;;
+		}
+		
+		if(throwCode)
+		{
+			matchCode = matchCode + &quot;}}else{throw new Error(\&quot;Function argument does not match (&quot;+pat.head+&quot;:&quot;+pat.tail+&quot;) pattern for argument number \&quot;+&quot;
+				+i+&quot;+\&quot;. Supplied argument is not a list.\&quot;)};&quot;;
+		}
+
+		else
+		{
+			matchCode = matchCode + &quot;;return true}}else{return false};&quot;;
+		}
+		
+		if(!throwCode)
+			matchCode += &quot;})()&quot;;
+		
+		return matchCode;
+
+	case &quot;list-match&quot;:
+
+		if(!throwCode)
+			matchCode += &quot;(function(){&quot;;
+
+		matchCode = matchCode + &quot;if(Lich.getType(&quot;+object+&quot;) == LIST){if(&quot;+object+&quot;.length == &quot;+pat.list.length+&quot;){&quot;;
+				
+		for(var j = 0; j &lt; pat.list.length; ++j)
+		{
+			if(pat.list[j].astType !== &quot;wildcard&quot;)
+			{
+				if(pat.list[j].astType == &quot;varname&quot;)
+				{
+					matchCode = matchCode + pat.list[j].id + &quot; = &quot; + object + &quot;[&quot; + j + &quot;];&quot;;
+				}
+
+				else
+				{
+					var tempCode = Lich.generateMatchFunc(object+&quot;[&quot;+j+&quot;]&quot;, pat.list[j], i, throwCode);
+					if(throwCode)
+						matchCode = matchCode + tempCode;
+					else
+						matchCode = matchCode + &quot;var _bool=(function(){&quot; + tempCode + &quot;})();if(!(_bool)){return false};&quot;;
+				}
+			}
+		}
+
+		if(throwCode)
+		{
+			matchCode = matchCode + &quot;}else{Lich.listMatchError(&quot;+i+&quot;)}}else{Lich.listMatchError(&quot;+i+&quot;)};&quot;;	
+		}
+
+		else
+		{
+			matchCode = matchCode + &quot;;return true}else{return false}}else{return false};&quot;;	
+		}
+		
+		if(!throwCode)
+			matchCode += &quot;})()&quot;;
+		
+		return matchCode;
+
+	case &quot;lambda-pat&quot;:
+
+		if(throwCode)
+		{
+			matchCode = matchCode + &quot;if((typeof &quot;+ object + &quot; !== \&quot;function\&quot;)||(Lich.numLambdaArgs(&quot;+object+&quot;) != &quot; + pat.numArgs+&quot;)){&quot;
+				+&quot;throw new Error(\&quot;Function argument does not match &quot;+Lich.lambdaPatternPrint(pat.numArgs)+&quot; pattern for argument number \&quot;+&quot;+i+&quot;)};&quot;;	
+			return matchCode;
+		}
+
+		else
+		{
+			matchCode = matchCode + &quot;(typeof &quot;+ object + &quot; === \&quot;function\&quot;)&amp;&amp;(Lich.numLambdaArgs(&quot;+object+&quot;) == &quot; + pat.numArgs+&quot;)&quot;;	
+		}
+		
+	default:
+		return matchCode;
+	}
+}
+
+// Generates a list of argument names and optional variable names from a pattern. 
+// Used to create local scope variables before generating the actual matching code.
+// Every match must generate an argument name for the pattern, and can optionally create extra variables as needed.
+// The i argument is used to prevent namespace clashes in name generation. All non-user generated names must start with an underscore
+Lich.generateOneArgNameAndMatchVars = function(pat, i)
+{
+	var argName = &quot;_&quot;;
+	var matchVars = &quot;&quot;;
+	if(pat.astType == &quot;at-match&quot;)
+	{
+		argName = pat.id;
+		var arr = Lich.generateOneArgNameAndMatchVars(pat.pat, i);
+		var tempName = arr[0];
+		var tempVars = arr[1];
+		matchVars = matchVars + tempVars;
+		return [argName, matchVars];
+	}
+
+	else
+	{
+		switch(pat.astType)
+		{
+		case &quot;varname&quot;:
+		case &quot;wildcard&quot;:
+			argName = pat.id;
+			return [argName, matchVars];
+
+		case &quot;Nothing&quot;:
+			argName = &quot;_nothing&quot;+i;
+			return [argName, matchVars];
+
+		case &quot;data-match&quot;:
+			argName = &quot;_&quot;+pat.id+i;
+			for(var i = 0; i &lt; pat.members.length; ++i)
+			{	
+				matchVars = matchVars + &quot;var &quot;+pat.members[i]+&quot;;&quot;;
+			}
+			return [argName, matchVars];
+
+		case &quot;literal-match&quot;:
+			argName = &quot;_&quot;+pat.astType.replace(/-/g,&quot;_&quot;)+i;
+			return [argName, matchVars];
+
+		case &quot;head-tail-match&quot;:
+			argName = &quot;_headTail&quot;+i;
+			if(pat.head.astType != &quot;wildcard&quot;)
+			{
+				matchVars = matchVars + &quot;var &quot;+pat.head+&quot;;&quot;;	
+			}
+			
+			if(pat.tail.astType != &quot;wildcard&quot;)
+			{
+				matchVars = matchVars + &quot;var &quot;+pat.tail+&quot;;&quot;;	
+			}
+			return [argName, matchVars];
+
+		case &quot;list-match&quot;:
+			argName = &quot;_list&quot;+i;
+			for(var j = 0; j &lt; pat.list.length; ++j)
+			{
+				var elem = pat.list[j];
+				if(elem.astType !== &quot;wildcard&quot;)
+				{
+					if(elem.astType == &quot;varname&quot;)
+					{
+						matchVars = matchVars + &quot;var &quot;+elem.id+&quot;;&quot;;
+					}
+	
+					else
+					{
+						matchVars += Lich.generateOneArgNameAndMatchVars(elem, i)[1];
+					}
+				}
+			}
+
+			return [argName, matchVars];
+
+		case &quot;lambda-pat&quot;:
+			argName = &quot;_lambda&quot;+i;
+			return [argName,matchVars];
+
+		default:
+			return [argName,matchVars];
+		}
+	}
+}
+
+Lich.generateArgNamesAndMatchVars = function(args)
+{
+	var argNames = new Array();
+	var matchVars = &quot;&quot;;
+	
+	for(var i = 0; i &lt; args.length; ++i)
+	{
+		var arr = Lich.generateOneArgNameAndMatchVars(args[i], i);
+		argNames.push(arr[0]);
+		matchVars += arr[1];
+	}
+
+	return [argNames, matchVars];
+}
+
+Lich.checkFunctionArgMatches = function(argNames, pats)
+{
+	var matchCode = &quot;&quot;;
+	for(var i = 0; i &lt; argNames.length; ++i)
+	{
+		matchCode += Lich.generateMatchFunc(argNames[i], pats[i], i, true);
+	}
+
+	return matchCode;
+
+}
+
+Lich.compileModule = function(ast)
+{
+	Lich.post(&quot;Compiling module: &quot; + ast.modid);
+	var res = Lich.compileAST(ast.body);
+	Lich.post(&quot;Done compiling module: &quot; + ast.modid);
+	return res;
+}
+
+Lich.compileBody = function(ast)
+{
+	var body = &quot;&quot;;
+	for(var i = 0; i &lt; ast.topdecls.length; ++i)
+	{
+		body += Lich.compileAST(ast.topdecls[i]) + &quot;;&quot;;
+	}
+
+	return body;
+}
+
+Lich.compileTopdeclDecl = function(ast)
+{
+	return Lich.compileAST(ast.decl);
+}
+
+Lich.compileTopdeclData = function(ast)
+{
+	return Lich.unsupportedSemantics(ast);
+}
+
+Lich.compileLocalDeclFun = function(ast)
+{
+	if(ast.args.length == 0)
+	{
+		return &quot;var &quot;+ast.ident.id + &quot;=&quot; + Lich.compileAST(ast.rhs);
+	}
+
+	else
+	{
+		
+		var localArgNames = [];
+
+		for(var i = 0; i &lt; ast.args.length; ++i)
+		{
+			if(ast.args[i].astType == &quot;varname&quot;)
+			{
+				if(localArgNames.indexOf(ast.args[i].id) != -1)
+					throw new Error(&quot;Duplicate definition for argument: &quot; + ast.args[i].id + &quot; in function &quot; + ast.ident.id);
+				else
+					localArgNames.push(ast.args[i].id);
+			}
+		}
+
+		var rhs = Lich.compileAST(ast.rhs);
+		var arr = Lich.generateArgNamesAndMatchVars(ast.args);
+		var argNames = arr[0];
+		var matchVars = arr[1];
+		var matchCode = Lich.checkFunctionArgMatches(argNames, ast.args);
+		return &quot;var &quot; + ast.ident.id + &quot;=function (&quot; + argNames.join(&quot;,&quot;) + &quot;){&quot;+matchVars+matchCode+&quot;return &quot;+rhs+&quot;}&quot;;
+	}
+}
+
+Lich.printAll = function(arr)
+{
+	for(var i = 0; i &lt; arr.length; ++i)
+	{
+		Lich.post(&quot;printAll: &quot; + Lich.VM.PrettyPrint(arr[i]));
+	}
+}
+
+Lich.compileDeclFun = function(ast)
+{
+	Lich.verifyDef(ast.ident.id);
+
+	if(ast.args.length == 0 &amp;&amp; typeof ast.noCollapse == &quot;undefined&quot;)
+	{
+		return  ast.ident.id + &quot;=&quot;+Lich.compileAST(ast.rhs)+&quot;;&quot;;
+	}
+
+	else
+	{
+		var localArgNames = [];
+
+		for(var i = 0; i &lt; ast.args.length; ++i)
+		{
+			if(ast.args[i].astType == &quot;varname&quot;)
+			{
+				if(localArgNames.indexOf(ast.args[i].id) != -1)
+					throw new Error(&quot;Duplicate definition for argument: &quot; + ast.args[i].id + &quot; in function &quot; + ast.ident.id);
+				else
+					localArgNames.push(ast.args[i].id);
+			}
+		}
+
+		var rhs = Lich.compileAST(ast.rhs);
+		var arr = Lich.generateArgNamesAndMatchVars(ast.args);
+		var argNames = arr[0];
+		var matchVars = arr[1];
+		var matchCode = Lich.checkFunctionArgMatches(argNames, ast.args);
+		return ast.ident.id+&quot;=function &quot;+ast.ident.id+&quot;(&quot; + argNames.join(&quot;,&quot;) + &quot;){&quot;+matchVars+matchCode+&quot;return &quot;+rhs+&quot;}&quot;;
+	}
+}
+
+Lich.compileFunWhere = function(ast)
+{
+	var declNames = [];
+
+	for(var i = 0; i &lt; ast.decls.length; ++i)
+	{
+		if(declNames.indexOf(ast.decls[i].ident.id) != -1)
+			throw new Error(&quot;Duplicate definition for local declaration: &quot; + ast.decls[i].ident.id);
+		else
+			declNames.push(ast.decls[i].ident.id);
+	}
+
+	var decls = [];
+	for(var i = 0; i &lt; ast.decls.length; ++i)
+	{
+		var elem = ast.decls[i];
+
+		if(elem.astType == &quot;decl-fun&quot;)
+			elem.astType = &quot;local-decl-fun&quot;;
+		else if(elem.astType == &quot;guard-fun&quot;)
+			elem.local = true;
+
+		decls.push(Lich.compileAST(elem));
+	}
+
+	var exp = Lich.compileAST(ast.exp);
+	return &quot;(function(){&quot;+decls.join(&quot;;&quot;)+&quot;;return &quot;+exp+&quot;})();&quot;;
+}
+
+Lich.compileConstr = function(ast)
+{
+	Lich.unsupportedSemantics(ast);
+}
+
+Lich.compileIte = function(ast)
+{
+	var expRes1 = Lich.compileAST(ast.e1);
+	var expRes2 = Lich.compileAST(ast.e2);
+	var expRes3 = Lich.compileAST(ast.e3);
+	return &quot;(function(){if(&quot;+expRes1+&quot;){return &quot;+expRes2+&quot;}else{return &quot;+expRes3+&quot;}})()&quot;;
+}
+
+Lich.application = function(func, args)
+{
+	if(typeof func !==&quot;function&quot;)
+		throw new Error(&quot;Expression &quot; + Lich.VM.PrettyPrint(func) + &quot; cannot be used as a function for function application.&quot;);
+
+	return func.curry.apply(func, args);
+}
+
+Lich.compileApplication = function(ast)
+{
+	var exps = [];
+	for(var i = 0; i &lt; ast.exps.length; ++i)
+	{
+		exps.push(Lich.compileAST(ast.exps[i]));
+	}
+
+	return &quot;Lich.application(&quot; + exps[0]+&quot;,[&quot;+exps.slice(1, exps.length).join(&quot;,&quot;)+&quot;])&quot;;
+}
+
+Lich.compileFunctionApplicationOp = function(ast)
+{
+	return &quot;Lich.application(&quot;+Lich.compileAST(ast.lhs)+&quot;,[&quot;+Lich.compileAST(ast.rhs)+&quot;])&quot;;
+}
+
+Lich.compileFunctionComposition = function(ast)
+{
+	var funcs = [];
+	for(var i = 0; i &lt; ast.exps.length; ++i)
+	{
+		funcs.push(Lich.compileAST(ast.exps[i]));
+	}
+
+	return &quot;function(a){var funcs=[&quot;+funcs.join(&quot;,&quot;)+&quot;];var res = a;for(var i = funcs.length - 1; i &gt;= 0; --i){res = funcs[i](res);};return res;}&quot;;
+}
+
+Lich.compileFunctionStream = function(ast)
+{
+	var funcs = &quot;&quot;;
+	var end = &quot;&quot;;
+	for(var i = ast.exps.length - 1; i &gt;= 0; --i)
+	{
+		if(i &gt; 0)
+			funcs += &quot;Lich.application(&quot;;
+
+		funcs += &quot;(&quot;+Lich.compileAST(ast.exps[i])+&quot;)&quot;;
+
+		if(i &gt; 0)
+		{
+			funcs += &quot;,[&quot;;
+			end += &quot;])&quot;;
+		}
+	}
+
+	return funcs + end;
+}
+
+Lich.compileLambda = function(ast)
+{
+	var rhs = Lich.compileAST(ast.rhs);
+	var arr = Lich.generateArgNamesAndMatchVars(ast.args);
+	var argNames = arr[0];
+	var matchVars = arr[1];
+	var matchCode = Lich.checkFunctionArgMatches(argNames, ast.args);
+	return &quot;(function (&quot; + argNames.join(&quot;,&quot;) + &quot;){&quot;+matchVars+matchCode+&quot;return &quot;+rhs+&quot;})&quot;; 			
+}
+
+Lich.compileLet = function(ast)
+{
+	var declNames = [];
+
+	for(var i = 0; i &lt; ast.decls.length; ++i)
+	{
+		if(declNames.indexOf(ast.decls[i].ident.id) != -1)
+			throw new Error(&quot;Duplicate definition for local declaration: &quot; + ast.decls[i].ident.id);
+		else
+			declNames.push(ast.decls[i].ident.id);
+	}
+
+	var decls = [];
+	for(var i = 0; i &lt; ast.decls.length; ++i)
+	{
+		var elem = ast.decls[i];
+
+		if(elem.astType == &quot;decl-fun&quot;)
+			elem.astType = &quot;local-decl-fun&quot;;
+		else if(elem.astType == &quot;guard-fun&quot;)
+			elem.local = true;
+
+		decls.push(Lich.compileAST(elem));
+	}
+
+	var exp = Lich.compileAST(ast.exp);
+	return &quot;(function(){&quot;+decls.join(&quot;;&quot;)+&quot;;return &quot;+exp+&quot;})();&quot;;
+}
+
+Lich.compileLetOne = function(ast)
+{
+	return Lich.compileAST(ast.decl)+&quot;;Lich.post(Lich.VM.PrettyPrint(&quot;+ast.decl.ident.id+&quot;))&quot;;
+}
+
+Lich.compileListExp = function(ast)
+{
+	var res = [];
+	for(var i = 0; i &lt; ast.members.length; ++i)
+	{
+		res.push(Lich.compileAST(ast.members[i]));
+	}
+
+	return &quot;[&quot;+res.join(&quot;,&quot;)+&quot;]&quot;;
+}
+
+Lich.compileQop = function(ast)
+{
+	return Lich.unsupportedSemantics(ast);
+}
+
+Lich.compileConPat = function(ast)
+{
+	return Lich.unsupportedSemantics(ast);
+}
+
+Lich.compileWildCard = function(ast)
+{
+	return Lich.unsupportedSemantics(ast);
+}
+
+Lich.compileVarName = function(ast)
+{
+	return ast.id;
+}
+
+Lich.compileDacon = function(ast)
+{
+	if(ast == &quot;Nothing&quot;)
+		return &quot;null&quot;;
+	else
+		return Lich.unsupportedSemantics({astType:ast});
+}
+
+Lich.compileDataDecl = function(ast)
+{
+	Lich.verifyDef(ast.id);
+
+	var argNames = [];
+	var initialData = [];
+	var args = [];
+	var dataPairs = [];
+	for(var i = 0; i &lt; ast.members.length; ++i)
+	{
+		//var elemRes = Lich.compileAST(ast.members[i].exp);
+		argNames.push(&quot;\&quot;&quot;+ast.members[i].id+&quot;\&quot;&quot;);
+		args.push(ast.members[i].id);
+		dataPairs.push(ast.members[i].id+&quot;:&quot;+ast.members[i].id);
+	}
+
+	initialData.push(&quot;_lichType:DATA&quot;);
+	initialData.push(&quot;_datatype:\&quot;&quot;+ast.id+&quot;\&quot;&quot;);
+	initialData.push(&quot;_argNames:[&quot;+argNames.join(&quot;,&quot;)+&quot;]&quot;);
+
+	return ast.id+&quot;=function(&quot;+args.join(&quot;,&quot;)+&quot;){return {&quot;+initialData.concat(dataPairs).join(&quot;,&quot;)+&quot;}}&quot;;
+}
+
+Lich.newData = function(constructor, members)
+{
+	if(constructor == null) throw new Error(&quot;Unable to find data constructor for &quot; + constructor);
+	var data = _deepCopy(constructor);
+	
+	for(var i = 0; i &lt; members.length; ++i)
+	{
+		data[constructor._argNames[i]] = members[i];
+	}
+
+	return data;
+}
+
+Lich.compileDataInst = function(ast)
+{
+	var members = [];
+	for(var i = 0; i &lt; ast.members.length; ++i)
+	{
+		members.push(Lich.compileAST(ast.members[i]));
+	}
+
+	if(members.length &gt; 0)
+		return &quot;Lich.application(&quot;+ast.id+&quot;,[&quot;+members.join(&quot;,&quot;)+&quot;])&quot;;
+	else
+		return ast.id;
+}
+
+Lich.compileDataLookup = function(ast)
+{
+	return Lich.compileAST(ast.data)+&quot;.&quot;+ast.member;
+}
+
+Lich.dataUpdate = function(data,members)
+{
+	var newData = _deepCopy(data);
+	for(var i = 0; i &lt; members.length; ++i)
+	{
+		newData[members[i].id] = members[i].exp;
+	}
+
+	return newData;
+}
+
+Lich.compileDataUpdate = function(ast)
+{
+	var dataCon = Lich.compileAST(ast.data);
+	var members = [];
+	for(var i = 0; i &lt; ast.members.length; ++i)
+	{
+		members.push(&quot;{id:\&quot;&quot;+ast.members[i].id+&quot;\&quot;, exp:&quot;+Lich.compileAST(ast.members[i].exp)+&quot;}&quot;)
+	}
+
+	return &quot;Lich.dataUpdate(&quot;+dataCon+&quot;,[&quot;+members.join(&quot;,&quot;)+&quot;])&quot;;
+}
+
+Lich.compileDataEnum = function(ast)
+{
+	Lich.verifyDef(ast.id);
+	dataPairs = new Array();
+	var res = &quot;&quot;;
+
+	for(var i = 0; i &lt; ast.members.length; ++i)
+	{
+		res = res + ast.members[i] + &quot;={_lichType:DATA,_argNames:[],_datatype:\&quot;&quot;+ast.members[i]+&quot;\&quot;};&quot;
+		dataPairs.push(&quot;\&quot;&quot;+ast.members[i] + &quot;\&quot;&quot; + &quot;:&quot; + ast.members[i]);
+	}
+
+	var argNames = ast.members.map(function(elem){return &quot;\&quot;&quot;+elem+&quot;\&quot;&quot;;});
+
+	dataPairs.push(&quot;_lichType:DATA&quot;);
+	dataPairs.push(&quot;_argNames:[&quot;+argNames.join(&quot;,&quot;)+&quot;]&quot;);
+	dataPairs.push(&quot;_datatype:\&quot;&quot;+ast.id+&quot;\&quot;&quot;);
+	return res+ast.id+&quot;={&quot;+dataPairs.join(&quot;,&quot;)+&quot;};&quot;;
+}
+
+var _literalBinOps = [&quot;+&quot;,&quot;-&quot;,&quot;/&quot;,&quot;*&quot;,&quot;%&quot;,&quot;&gt;&quot;,&quot;&lt;&quot;,&quot;&gt;=&quot;,&quot;&lt;=&quot;,&quot;==&quot;];
+_binOps = {};
+
+Lich.compileBinOpExp = function(ast)
+{
+	var lhs = Lich.compileAST(ast.lhs);
+	var rhs = Lich.compileAST(ast.rhs);
+	
+	if(((ast.lhs.astType == &quot;float-lit&quot; || ast.lhs.astType == &quot;string-lit&quot;) &amp;&amp; (ast.rhs.astType == &quot;float-lit&quot; || ast.rhs.astType == &quot;string-lit&quot;))
+		&amp;&amp; _literalBinOps.indexOf(ast.op) != -1)
+		return lhs+ast.op+&quot; &quot;+rhs; // space added for negative numbers
+	else if(Lich.VM.reserved.hasOwnProperty(ast.op))
+		return _binOps[ast.op]+&quot;(&quot;+lhs+&quot;,&quot;+rhs+&quot;)&quot;;
+	else
+		throw new Error(&quot;Unrecongized binary operator: &quot; + ast.op);
+}
+
+
+Lich.compileCurriedBinOpExp = function(ast)
+{
+	if(Lich.VM.reserved.hasOwnProperty(ast.op))
+		return &quot;Lich.VM.reserved[\&quot;&quot;+ast.op+&quot;\&quot;]&quot;;
+	else
+		throw new Error(&quot;Unrecongized binary operator: &quot; + ast.op);
+}
+
+Lich.compileLeftCurriedBinOpExp = function(ast)
+{
+	if(Lich.VM.reserved.hasOwnProperty(ast.op))
+		return &quot;Lich.VM.reserved[\&quot;&quot;+ast.op+&quot;\&quot;].curry(&quot;+Lich.compileAST(ast.lhs)+&quot;)&quot;;
+	else
+		throw new Error(&quot;Unrecongized binary operator: &quot; + ast.op);
+}
+
+Lich.compileRightCurriedBinOpExp = function(ast)
+{
+	if(Lich.VM.reserved.hasOwnProperty(ast.op))
+		return &quot;(function(lhs){return Lich.application(Lich.VM.reserved[\&quot;&quot;+ast.op+&quot;\&quot;],[lhs,&quot;+Lich.compileAST(ast.rhs)+&quot;])})&quot;;
+	else
+		throw new Error(&quot;Unrecongized binary operator: &quot; + ast.op);
+}
+
+Lich.compileNegate = function(ast)
+{ 
+	return &quot;(-&quot;+Lich.compileAST(ast.rhs)+&quot;)&quot;
+}
+
+Lich.listRange = function(lower, upper, next)
+{
+	var skip = 0;
+
+	if(Lich.getType(next) == NOTHING)
+	{
+		if(lower &lt; upper)
+			skip = 1;
+		else
+			skip = -1;
+	}
+	
+	else
+	{
+		skip = next - lower;
+	}
+
+	if(typeof lower !== &quot;number&quot; || typeof skip !== &quot;number&quot; || typeof upper !== &quot;number&quot;)
+	{
+		throw new Error(&quot;List range syntax can only be used with numbers. failed with: &quot; 
+			+ Lich.VM.PrettyPrint(lower) + &quot;,&quot; + Lich.VM.PrettyPrint(next) + &quot;..&quot; + Lich.VM.PrettyPrint(upper));
+	}
+
+	var array = new Array();
+
+	if(skip &lt;= 0)
+	{
+		for(var i = lower; i &gt;= upper; i += skip)
+		{
+			array.push(i);
+		}
+
+		return array;
+	}
+
+	else
+	{
+		for(var i = lower; i &lt;= upper; i += skip)
+		{
+			array.push(i);
+		}
+
+		return array;
+	}
+}
+
+Lich.compileListRange = function(ast)
+{
+	var lower = Lich.compileAST(ast.lower);
+	var upper = Lich.compileAST(ast.upper);
+	
+	if(typeof ast.skip !== &quot;undefined&quot;)
+	{
+		return &quot;Lich.listRange(&quot;+lower+&quot;,&quot;+upper+&quot;,&quot;+Lich.compileAST(ast.skip)+&quot;)&quot;;
+	}
+	
+	else
+	{
+		return &quot;Lich.listRange(&quot;+lower+&quot;,&quot;+upper+&quot;, Lich.VM.Nothing)&quot;;
+	}
+}
+
+Lich.newDictionary = function(pairs)
+{
+	res = {_lichType:DICTIONARY};
+
+	for(var i = 0; i &lt; pairs.length; ++i)
+	{
+		res[pair[0]] = pair[1];
+	}
+
+	return res;
+}
+
+Lich.compileDictionary = function(ast)
+{
+	var pairs = new Array();
+	pairs.push(&quot;_lichType:DICTIONARY&quot;);
+
+	for(var i = 0; i &lt; ast.pairs.length; i += 2)
+	{
+		var dictKey = Lich.compileAST(ast.pairs[i]);
+		var dictRes = Lich.compileAST(ast.pairs[i+1]);
+		pairs.push(dictKey+&quot;:&quot;+dictRes);
+	}
+
+	return &quot;{&quot; + pairs.join(&quot;,&quot;) + &quot;}&quot;;
+}
+
+Lich.compileCase = function(ast)
+{
+	var caseCode = &quot;(function(_object){&quot;;
+	var matchCode = &quot;&quot;;
+
+	for(var i = 0; i &lt; ast.alts.length; ++i)
+	{
+		var elem = ast.alts[i];
+		var pat = elem.pat;
+		var arr = Lich.generateOneArgNameAndMatchVars(pat, i);
+		var argName = arr[0];
+		var matchVars = arr[1];
+
+		if(pat.astType == &quot;at-match&quot;)
+			caseCode += &quot;var &quot;+argName+&quot;=_object;&quot;;
+
+		caseCode += matchVars;
+
+		var tempMatchCode = Lich.generateMatchFunc(&quot;_object&quot;, pat, i, false);
+		var altExp = Lich.compileAST(elem.exp);
+
+		if(i &gt; 0)
+			matchCode += &quot;else &quot;;
+
+		matchCode += &quot;if(&quot;+tempMatchCode+&quot;){return &quot;+altExp+&quot;}&quot;;
+	}
+
+	return caseCode + matchCode + &quot;else throw new Error(\&quot;case statement found no matching patterns.\&quot;)})(&quot;+Lich.compileAST(ast.exp)+&quot;)&quot;;
+}
+
+Lich.generateListComprehensionCode = function(exp,generators,filters)
+{
+	var code = &quot;(function(){var _listRes = new Array();&quot;;
+
+	for(var i = 0; i &lt; generators.length; ++i)
+	{
+		var varName = &quot;_list&quot;+i;
+		var iName = &quot;i&quot;+i;
+		code += &quot;var &quot;+varName+&quot;=&quot;+generators[i][1]+&quot;;for(var &quot;+iName+&quot;=0;&quot;+iName+&quot;&lt;&quot;+varName+&quot;.length;++&quot;+iName+&quot;){&quot;+generators[i][0]+&quot;=&quot;
+			+varName+&quot;[i&quot;+i+&quot;];&quot;
+	}
+
+	var doFilters = filters.length &gt; 0;
+
+	if(doFilters)
+		code += &quot;if(&quot;;
+
+	for(var i = 0; i &lt; filters.length; ++i)
+	{
+		if(i &gt; 0)
+			code += &quot;&amp;&amp;(&quot;;
+		else
+			code += &quot;(&quot;;
+
+		code += filters[i]+&quot;)&quot;;
+	}
+	
+	if(doFilters)
+		code += &quot;){&quot;;
+
+	code += &quot;_listRes.push(&quot;+exp+&quot;);&quot;;
+
+	if(doFilters)
+		code += &quot;}&quot;;
+
+	for(var i = generators.length-1; i &gt;= 0; --i)
+	{
+		code += &quot;}&quot;;
+	}
+
+	return code+&quot;; return _listRes})()&quot;;
+}
+
+Lich.compileListComprehension = function(ast)
+{
+	var filters = new Array();
+	var generators = new Array();
+
+	// First we collect all the filter functions
+	for(var i = 0; i &lt; ast.generators.length; ++i)
+	{
+		if(ast.generators[i].astType != &quot;decl-fun&quot;)
+		{
+			filters.push(Lich.compileAST(ast.generators[i]));
+		}	
+	}
+
+	// Collect all the lists from the generators
+	for(var i = 0; i &lt; ast.generators.length; ++i)
+	{
+		if(ast.generators[i].astType == &quot;decl-fun&quot;)
+		{
+			generators.push([ast.generators[i].ident, Lich.compileAST(ast.generators[i].rhs)]);
+		}
+	}
+
+	return Lich.generateListComprehensionCode(Lich.compileAST(ast.exp), generators, filters);
+}
+
+function postProcessJSON(object)
+{
+	if (Object.prototype.toString.call(object) === &#x27;[object Array]&#x27;) 
+    {
+        var out = [], i = 0, len = object.length;
+        for ( ; i &lt; len; i++) 
+        {
+			object[i] = postProcessJSON(object[i]);
+        }
+
+        return object;
+    }
+
+	else if(typeof object === &#x27;object&#x27;) 
+    {
+    	if(object == null || typeof object === &quot;undefined&quot;)
+    		return Lich.VM.Nothing;
+
+    	if(object._lichType == CLOSURE)
+	    {
+	    	return eval(object.value);
+	    }
+
+	    else
+	    {
+	    	for(n in object)
+	    	{
+	    		object[n] = postProcessJSON(object[n]);
+	    	}
+	    }
+
+	    return object;
+    }
+
+    return object;
+}
+
+Lich.parseJSON = function(json)
+{
+	try{
+		return postProcessJSON(JSON.parse(json));
+	}
+
+	catch(e)
+	{
+		Lich.post(e);
+	}
+	// return JSON.retrocycle(postProcessJSON(JSON.parse(json)));
+}
+
+Lich.stringify = function(object)
+{
+	var string = &quot;&quot;;
+
+	try{
+		string = JSON.stringify(object, function (key, val) 
+		// return JSON.stringify(JSON.decycle(object), function (key, val) 
+		{
+			if(typeof val === &quot;function&quot;)
+			{
+				/*
+				var funcAndArgs = _extractFunctionAndArgs(val);
+				var funcString = funcAndArgs[0].toString();
+				/*var args = Lich.stringify(funcAndArgs[1]);
+				var func = funcString.match(/function ([^\(]+)/);
+
+				if(func == null || typeof func === &quot;undefined&quot;)
+					func = funcString;
+				else
+					func = func[1];*/
+
+				return {_lichType:CLOSURE, value: &quot;((function(){return &quot;+val+&quot;})())&quot;};
+
+
+
+				//return Lich.stringify({_lichType:CLOSURE, value: &quot;((function(){return &quot;+value+&quot;})())&quot;});
+				//Lich.post(&quot;Lich.Stringify = &quot; + val);
+				//return Lich.stringify({_lichType:CLOSURE, value: &quot;((function(){return &quot;+func+&quot;})())&quot;});
+				//return &quot;((function(){return &quot;+func+&quot;})())&quot;;
+			}
+
+		    return val;
+
+		});
+	}
+
+	catch(e)
+	{
+		Lich.post(e);
+	}
+
+	return string;
+}
+/*
+Lich.receive = function(patternFunc, ret)
+{
+	if(Lich.VM.currentThread === &quot;main&quot;)
+		throw new Error(&quot;Cannot use receive from the main thread. receive can only be called by an Actor.&quot;);
+
+	if(messageBox.length == 0)
+	{
+		//Lich.post(&quot;*******if(messageBox.length == 0)&quot;);
+		queuedReceive = [Lich.receive, this, Array.prototype.slice.call(arguments)];
+		return;
+	}
+
+	var match = false;
+	var messageIndex = 0;
+	var altFunc;
+	var continueFunc = [Lich.receive, this, Array.prototype.slice.call(arguments)];
+
+	// Two dimensional iteration over each message against each defined pattern.
+	// If we find a match break from both loops and call the pattern&#x27;s matching expression.
+	// Otherwise we schedule receive to be called again upon the arrival of a new message.
+	forEachWithBreakCps
+	(
+		messageBox, // For each message in the messageBox
+		function(exp, i, nextMessage)
+		{
+			Lich.collapse(exp, function(expRes)
+			{
+				patternFunc(expRes, function(_bool, func)
+				{
+					if(_bool)
+					{
+						match = true;
+						messageIndex = i;
+						altFunc = func;
+						nextMessage(true); // break
+					}
+
+					else
+					{
+						nextMessage(false); // continue
+					}
+				})
+			});
+		},
+
+		function()
+		{
+			//Lich.post(&quot;Receive altFunc = &quot; + altFunc);
+			if(match) // Did we find a match?
+			{
+				//Lich.post(&quot;*****MATCH!!!!!!!!!&quot;);
+				messageBox.splice(messageIndex, 1); // Remove the message from the message box
+				queuedReceive = null;
+				// We found a match, so compile the pattern&#x27;s expression, continue with ret(res)
+				Lich.collapse(altFunc, ret);
+			}
+
+			else // No match
+			{
+				// createListener for future messages
+				//Lich.post(&quot;*********NO MATCH&quot;);
+				queuedReceive = continueFunc;
+			}
+		}
+	);
+}
+
+Lich.compileReceive = function(ast, ret)
+{
+	var caseCode = &quot;Lich.receive.curry(function(_object,_patRet){&quot;;
+	Lich.compileAST(ast.exp, function(exp)
+	{
+		//caseCode += exp+&quot;,function(_object){&quot;;
+
+		matchCode = &quot;&quot;;
+		forEachCps(
+			ast.alts, 
+			function(elem,i,next)
+			{
+				var pat = elem.pat;
+				Lich.generateOneArgNameAndMatchVars(pat, i, function(argName, matchVars)
+				{
+					if(pat.astType == &quot;at-match&quot;)
+						caseCode += &quot;var &quot;+argName+&quot;=_object;&quot;;
+
+					caseCode += matchVars;
+					Lich.generateMatchFunc(&quot;_object&quot;, pat, i, false, function(tempMatchCode)
+					{
+						Lich.compileAST(ast.alts[i].exp, function(altExp)
+						{
+							matchCode += &quot;if((function(){&quot; + tempMatchCode + &quot;})()){return _patRet(true,&quot;+ altExp + &quot;)};&quot;;
+							next();
+						});
+					})
+				});
+			},
+
+			function()
+			{
+				caseCode += matchCode + &quot;_patRet(false)})&quot;;
+				ret(caseCode);
+			}
+		);
+	});
+}*/
+
+Lich.compileTopExp = function(ast)
+{
+	return &quot;Lich.post(Lich.VM.PrettyPrint(&quot;+Lich.compileAST(ast.exp)+&quot;));&quot;;
+}
+
+Lich.compileImportJS = function(ast)
+{
+	return &quot;importjs(&quot;+ast.imports+&quot;)&quot;;
+}
+
+Lich.compileDoExp = function(ast, ret)
+{
+	var res = &quot;&quot;;
+	var first = ast.exps.length - 1;
+
+	for(var i = first; i &gt;= 0; --i)
+	{
+
+		if(i == first)
+			res = Lich.compileAST(ast.exps[i].exp);
+		else
+			res = &quot;bind(&quot;+Lich.compileAST(ast.exps[i].exp)+&quot;,function(&quot; + ast.exps[i].arg + &quot;){return &quot;+res+&quot;})&quot;;
+	}
+
+	return res; 
+}
+
+Lich.compileGuardExp = function(ast, ret)
+{
+	var arr = Lich.generateArgNamesAndMatchVars(ast.args);
+	var argNames = arr[0];
+	var matchVars = arr[1];
+	var matchCode = Lich.checkFunctionArgMatches(argNames, ast.args);
+	var prefix = ast.ident.id+&quot;=function &quot;+ast.ident.id;
+					
+	if(ast.local)
+		prefix = &quot;var &quot; + ast.ident.id + &quot;=function&quot;;
+
+	var gaurdCode = prefix +&quot;(&quot; + [].concat(argNames).join(&quot;,&quot;) + &quot;){&quot;+matchVars+matchCode;
+
+	for(var i = 0; i &lt; ast.guards.length; ++i)
+	{
+		if(i &gt; 0)
+			gaurdCode += &quot;else &quot;;
+		gaurdCode += &quot;if(&quot;+Lich.compileAST(ast.guards[i].e1)+&quot;){return &quot;+Lich.compileAST(ast.guards[i].e2)+&quot;}&quot;;
+	}
+
+	return gaurdCode + &quot;else throw new Error(\&quot;Non-exhaustive patterns in guard function.\&quot;)}&quot;;
+}
+
+Lich.compilePercStream = function(ast)
+{
+	Lich.verifyDef(ast.id);
+	var list = Lich.compileAST(ast.list);
+	var modifiers = Lich.compileAST(ast.modifiers);
+	var res;
+	if(eval (&quot;typeof &quot;+ast.id+&quot; !== \&quot;undefined\&quot;&quot;))
+	{
+		res = ast.id+&quot;.update(&quot;+list+&quot;,&quot;+modifiers+&quot;);&quot;;
+		res += &quot;Lich.post(\&quot;&quot; + ast.id + &quot; \&quot;+ Lich.VM.PrettyPrint(&quot; + ast.id + &quot;));&quot;;
+	}
+				
+	else
+	{
+		res = ast.id+&quot;=new Soliton.PercStream(&quot;+list+&quot;,&quot;+modifiers+&quot;);&quot;;
+		if(Lich.parseType !== &quot;library&quot;)
+		{
+			res += ast.id + &quot;.play();&quot;;
+			//res += &quot;Lich.scheduler.addScheduledEvent(&quot;+ast.id+&quot;);&quot;;
+			res += &quot;Lich.post(\&quot;&quot; + ast.id + &quot; \&quot;+ Lich.VM.PrettyPrint(&quot; + ast.id + &quot;));&quot;;
+		}
+	}
+
+	return res;
+}
+
+Lich.compilePercList = function(ast)
+{
+	var res = [];
+
+	for(var i = 0; i &lt; ast.list.length; ++i)
+	{
+		var listItem = ast.list[i];
+		if(listItem.astType != &quot;varname&quot;)
+			res.push(Lich.compileAST(listItem));
+		else
+			res.push(&quot;\&quot;&quot;+listItem.id+&quot;\&quot;&quot;);
+	}
+
+	return &quot;[&quot;+res.join(&quot;,&quot;)+&quot;]&quot;;
+}
+
+Lich.compilePercMods = function(ast)
+{
+	var res = [];
+
+	for(var i = 0; i &lt; ast.list.length; ++i)
+	{
+		res.push(Lich.compileAST(ast.list[i]));
+	}
+
+	return &quot;[&quot;+res.join(&quot;,&quot;)+&quot;]&quot;; 	
+}
+
+Lich.compileSoloStream = function(ast)
+{
+	Lich.verifyDef(ast.id);
+
+	var list = Lich.compileAST(ast.list)
+	var mods = Lich.compileAST(ast.mods);
+	var rmods = Lich.compileAST(ast.rmods);
+	var res;
+	if(eval (&quot;typeof &quot;+ast.id+&quot; !== \&quot;undefined\&quot;&quot;))
+	{
+		res = ast.id+&quot;.update(&quot;+ast.synth+&quot;,&quot;+list+&quot;,&quot;+mods+&quot;,&quot;+rmods+&quot;);&quot;;
+		res += &quot;Lich.post(\&quot;&quot; + ast.id + &quot; \&quot;+ Lich.VM.PrettyPrint(&quot; + ast.id + &quot;));&quot;;
+	}
+				
+	else
+	{
+		res = ast.id+&quot;=new Soliton.SoloStream(&quot;+ast.synth+&quot;,&quot;+list+&quot;,&quot;+mods+&quot;,&quot;+rmods+&quot;);&quot;;
+		if(Lich.parseType !== &quot;library&quot;)
+		{
+			res += ast.id + &quot;.play();&quot;;
+			//res += &quot;Lich.scheduler.addScheduledEvent(&quot;+ast.id+&quot;);&quot;;
+			res += &quot;Lich.post(\&quot;&quot; + ast.id + &quot; \&quot;+ Lich.VM.PrettyPrint(&quot; + ast.id + &quot;));&quot;;
+		}
+	}
+
+	return res;
+}
+
+Lich.compileSoloList = function(ast)
+{
+	var res = [];
+
+	for(var i = 0; i &lt; ast.list.length; ++i)
+	{
+		res.push(Lich.compileAST(ast.list[i]));
+	}
+
+	return &quot;[&quot;+res.join(&quot;,&quot;)+&quot;]&quot;; 
+}
+
+Lich.compileSoloMods = function(ast)
+{
+	var res = [];
+
+	for(var i = 0; i &lt; ast.list.length; ++i)
+	{
+		res.push(Lich.compileAST(ast.list[i]));
+	}	
+
+	return &quot;[&quot;+res.join(&quot;,&quot;)+&quot;]&quot;;
+}
+
+Lich.compileSynthDef = function(ast)
+{
+	ast.astType = &quot;decl-fun&quot;;
+	ast.noCollapse = true;
+	var res = Lich.compileAST(ast)+&quot;;Soliton.synthDefs[\&quot;&quot;+ast.ident.id+&quot;\&quot;]=&quot;+ast.ident.id;
+
+	if(Lich.parseType !== &quot;library&quot;)
+		res += &quot;;Lich.VM.Print(&quot;+ast.ident.id+&quot;);&quot;;
+
+	return res;
+}
+
+    </pre>
+</div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="../assets/vendor/prettify/prettify-min.js"></script>
+<script>prettyPrint();</script>
+<script src="../assets/js/yui-prettify.js"></script>
+<script src="../assets/../api.js"></script>
+<script src="../assets/js/api-filter.js"></script>
+<script src="../assets/js/api-list.js"></script>
+<script src="../assets/js/api-search.js"></script>
+<script src="../assets/js/apidocs.js"></script>
+</body>
+</html>

@@ -4,6 +4,6 @@
     "version": "0.1",
     "url": "https://github.com/ChadMcKinney/Lich.js",
     "options": {
-        "outdir": "Lich.sc.docs"
+        "outdir": "Docs"
     }
 }
