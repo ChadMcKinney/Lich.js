@@ -1433,8 +1433,10 @@ function _synthDef(name, def)
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// File and OSC
 	
-	buf = buf.slice(0, offset);
+	// buf = buf.slice(0, offset);
+	s.sendMsg('/d_recv', [buf.slice(0, offset)]);
 	// console.log(buf.toString());
+	/*
 	var path = "/tmp/"+name+".scsyndef";
 	
 	fs.writeFile(
@@ -1447,7 +1449,7 @@ function _synthDef(name, def)
 				s.sendMsg('/d_load', [path]);
 			}
 		}
-	); 
+	);*/
 	
 	return Lich.VM.Void;
 }
