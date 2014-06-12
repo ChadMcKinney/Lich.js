@@ -1481,6 +1481,7 @@ function _synthDef(name, def)
 	s.sendMsg('/d_recv', [buf.slice(0, offset)]);
 	// console.log(buf.toString());
 
+    	/*
     	var path = "/tmp/"+name+".scsyndef";
 	
 	fs.writeFile(
