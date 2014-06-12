@@ -1542,6 +1542,11 @@ function stop(synth)
 	return Lich.VM.Void;
 }
 
+function freeAll()
+{
+    s.sendMsg('/g_freeAll', [1]);
+}
+
 // Redefine Lich.compileSynthDef to use SuperCollider behavior instead of web audio
 Lich.compileSynthDef = function(ast)
 {
