@@ -1,17 +1,15 @@
-#!/usr/bin/node
+// #!/usr/bin/node
 
 // Lich.js Node based interactive compiler for the command line or embedding
 var fs = require('fs');
 var readline = require('readline');
 
-//Make sure we are in the correct directory, since we are using relative paths here.
 try {
   process.chdir(__dirname);
 }
 catch (err) {
   console.log('chdir: ' + err);
 }
-
 
 // jison adds node.js code to compile files, but we don't need this in interactive mode, so we're going to strip it out.
 var fileCompileString = "if (typeof require !== \'undefined\' && typeof exports !== \'undefined\') {";
@@ -78,7 +76,8 @@ _quit = function()
 var readline = require('readline'),
 rl = readline.createInterface(process.stdin, process.stdout);
 
-rl.setPrompt('Lich> ');
+// rl.setPrompt('Lich> ');
+rl.setPrompt('');
 rl.prompt();
 
 rl.on('line', function(line) {

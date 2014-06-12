@@ -73,12 +73,26 @@ var defaultServerOptions = {
 // process.env.SC_JACK_DEFAULT_OUTPUTS = "system";
 // process.env.JACK_START_SERVER = "false";
 
+var isWin = /^win/.test(process.platform);
+
 var scsynth = require('supercolliderjs').scsynth;
 var server = new scsynth({
-	path:"/usr/local/bin",
+	path: getSCPath(),
 	debug: false,
 	echo: false,
 });
+
+function getSCPath()
+{
+    if(isWin)
+    {
+	return "C:\Program Files (x86)\SuperCollider-3.6.6"
+    }
+    else
+    {
+	return "/usr/local/bin";
+    }
+}
 
 var fs = require('fs');
 
@@ -1465,8 +1479,18 @@ function _synthDef(name, def)
 	
 	buf = buf.slice(0, offset);
 	// console.log(buf.toString());
-	var path = "/tmp/"+name+".scsyndef";
-	
+
+    	var path;
+
+    	if(isWin)
+    	{
+	    path = "/tmp/"+name+".scsyndef";
+	}
+    	else
+    	{
+	    path = "/tmp/"+name+".scsyndef";
+	}
+    
 	fs.writeFile(
 		path,
 		buf,
