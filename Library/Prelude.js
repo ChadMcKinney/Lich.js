@@ -291,7 +291,7 @@ function actorChat(chatString)
 	_evalInMainThread("sendChat", [chatString]);
 	return Lich.VM.Void;
 }
-
+/*
 function spawn(name, closure, args)
 {
 	if(typeof closure !== "function")
@@ -304,12 +304,12 @@ function spawn(name, closure, args)
 
 	var funcAndArgs = _extractFunctionAndArgs(closure); // Uncurry the function and collect the curried arguments.
 	var funcString = funcAndArgs[0].toString(); // Translate the function to a string representation.
-	/*var func = funcString.match(/function ([^\(]+)/);
+	// var func = funcString.match(/function ([^\(]+)/);
 
-	if(func == null || typeof func === "undefined")
-		func = funcString;
-	else
-		func = func[1];*/
+	// if(func == null || typeof func === "undefined")
+	// 	func = funcString;
+	// else
+	// 	func = func[1];
 
 	// allows for assignment in the actor thread
 	func = Lich.stringify({_lichType:CLOSURE, value: "((function(){return "+funcString+"})())"});
@@ -340,7 +340,7 @@ function send(msg, actor)
 
 _createPrimitive(":>>", send, "send");
 _createPrimitive("send", send);
-
+*/
 function numArgs(func)
 {
 	if(typeof func !== "function")

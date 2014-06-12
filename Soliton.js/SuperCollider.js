@@ -41,40 +41,7 @@
 // Server setup
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-/*
-var defaultServerOptions = { 
-	sNumAudioBusChannels: 128,
-	sNumControlBusChannels: 4096,
-	sMaxLogins: 64,
-	sMaxNodes: 1024,
-	sNumInputBusChannels: 8,
-	sNumOutputBusChannels: 8,
-	sNumBuffers: 1024,
-	sMaxSynthDefs: 2048,
-	sProtocol: Udp,
-	sBufLength: 64,
-	sNumRGens: 64,
-	sMaxWireBufs: 64,
-	sPreferredSampleRate: 44100,
-	sLoadGraphDefs: True,
-	sVerbosity: 0,
-	sRendezvous: False,
-	sRemoteControlVolume: False,
-	sMemoryLocking: False,
-	sPreferredHardwareBufferFrameSize: 512,
-	sRealTimeMemorySize: 81920, // Increased
-	sBlockSize: 512,
-	sPortNum: 57110, // Don't use the default SuperCollider scsynth port to prevent clashes
-	sNumPrivateAudioBusChannels: 112
-}*/
-
-// process.env.SC_JACK_DEFAULT_INPUTS = "system";
-// process.env.SC_JACK_DEFAULT_OUTPUTS = "system";
-// process.env.JACK_START_SERVER = "false";
-
-var isWin = /^win/.test(process.platform);
-
+var spawn = require('child_process').spawn;
 var scsynth = require('supercolliderjs').scsynth;
 var server = new scsynth({
 	path: getSCPath(),
@@ -84,36 +51,103 @@ var server = new scsynth({
 
 function getSCPath()
 {
-    if(isWin)
-    {
-	return "C:\Program Files (x86)\SuperCollider-3.6.6"
-    }
-    else
-    {
-	return "/usr/local/bin";
-    }
+	switch(process.platform)
+	{
+	case "win32":
+	case "win64":
+		return "C:\Program Files (x86)\SuperCollider-3.6.6\scsynth";
+		break;
+		
+	case "darwin":
+		return "/Applications/SuperCollider/SuperCollider.app/Contents/Resources/scsynth";
+		break;
+
+	case "linux":
+		process.env["SC_JACK_DEFAULT_INPUTS"] = "system";
+		process.env["SC_JACK_DEFAULT_OUTPUTS"] = "system";
+		process.env["JACK_START_SERVER"] = "true";
+		return "/usr/local/bin/scsynth";
+		break;
+	}
 }
+
+var _options = { 
+	sNumAudioBusChannels: 128,
+	sNumControlBusChannels: 4096,
+	sMaxLogins: 64,
+	sMaxNodes: 1024,
+	sNumInputBusChannels: 2,
+	sNumOutputBusChannels: 2,
+	sNumBuffers: 1024,
+	sMaxSynthDefs: 8192,
+	sProtocol: "Udp",
+	sBufLength: 64,
+	sNumRGens: 64,
+	sMaxWireBufs: 64,
+	sPreferredSampleRate: 44100,
+	sLoadGraphDefs: 0,
+	sVerbosity: 0,
+	sRendezvous: 0,
+	sRemoteControlVolume: 0,
+	sMemoryLocking: 0,
+	sPreferredHardwareBufferFrameSize: 512,
+	sRealTimeMemorySize: 81920, // Increased
+	sBlockSize: 512,
+	sPortNum: 57110,
+	sNumPrivateAudioBusChannels: 112
+}
+
+var _optionsArray = [
+	"-u", _options.sPortNum,
+	"-a", _options.sNumAudioBusChannels,
+	"-c", _options.sNumControlBusChannels,
+	"-i", _options.sNumInputBusChannels,
+	"-o", _options.sNumOutputBusChannels,
+	"-z", _options.sBlockSize,
+	"-Z", _options.sPreferredHardwareBufferFrameSize,
+	"-S", _options.sPreferredSampleRate,
+	"-b", _options.sNumBuffers,
+	"-n", _options.sMaxNodes,
+	"-d", _options.sMaxSynthDefs,
+	"-m", _options.sRealTimeMemorySize,
+	"-w", _options.sMaxWireBufs,
+	"-l", _options.sMaxLogins
+];
 
 var fs = require('fs');
 
+var _scsynthpid = spawn(getSCPath(), _optionsArray, { env: process.env, stdio: ['pipe', process.stdout, process.stderr] });
 var _currentNodeID = 1000;
 var s = server;
-s.connect();
+
+/*_scsynthpid.stderr.setEncoding('utf8');
+_scsynthpid.stderr.on('data', function (data) {
+	if (/^execvp\(\)/.test(data))
+	{
+		console.log('Failed to start child process.');
+	}
+});*/
+
+process.on('exit', function(code){ console.log("quitting scsynth... "); _scsynthpid.kill(); });
+
 //s.boot();
 
 
-/*
+
 // Wait for server to boot ... perhaps there's a better way here.
 setTimeout( // Initial messages
 	function()
 	{
 		s.connect();
+		s.sendMsg("/g_new", [1, 0, 0]); // default group
 		s.sendMsg('/notify', [1]);
 		s.sendMsg('/status', []);
 	},
-	1000
+	2000
 );
 
+
+/*
 setInterval( // Initial messages
 	function()
 	{
@@ -122,8 +156,8 @@ setInterval( // Initial messages
 		s.sendMsg('/status', []);
 	},
 	2000
-);*/
-
+);
+*/
 
 /*
 s.on('OSC', function(addr, msg) {
@@ -181,7 +215,7 @@ var AddReplace = 4;
 var rootNodeID = 0;
 var defaultGroupID = 1;
 var grainNodeID = -1;
-s.nodeID = 1;
+s.nodeID = 1; // default group
 
 function Node()
 {	
@@ -1561,18 +1595,3 @@ Lich.compileSynthDef = function(ast)
 
 	return res;
 }
-
-/*
-Example usage of Synth.grain
-function spawnSynths(num)
-{
-	for(var i = 0; i < num; ++i)
-	{
-		setTimeout(function() {
-			Synth.grain("TestGrain", ["freq", Math.random() * 1000 + 200]);
-		}, i * 100);
-	}
-
-	return Lich.VM.Void;
-}
-*/
