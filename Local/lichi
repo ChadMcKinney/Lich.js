@@ -75,6 +75,7 @@ _quit = function()
   	process.exit(0);
 }
 
+/*
 var readline = require('readline'),
 rl = readline.createInterface(process.stdin, process.stdout);
 
@@ -95,4 +96,26 @@ rl.on('line', function(line) {
 	rl.prompt();
 }).on('close', function() {
   	_quit();
+});*/
+
+
+
+process.stdin.on('readable', function() {
+    var chunk = process.stdin.read();
+  	if(chunk !== null)
+	{
+  	    switch(chunk)
+	 	{
+  	 	case ':quit':
+		case ':q':
+    	case 'exit':
+      	    _quit();
+      		break;
+	    default:
+    	    _compile(""+chunk);
+    		break;
+		}
+	}
 });
+
+
