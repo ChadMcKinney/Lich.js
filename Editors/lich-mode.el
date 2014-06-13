@@ -3,6 +3,23 @@
 (global-unset-key (kbd "C-<return>"))
 (setq cua-rectangle-mark-key (kbd "C-S-<return>"))
 
+;; check OS type
+(cond
+ ((string-equal system-type "windows-nt") ; Microsoft Windows
+  (progn
+    (setq lich-folder-path "Lich.js\\Local\\lichi.js") )
+  )
+ ((string-equal system-type "darwin")   ; Mac OS X
+  (progn
+    (setq lich-folder-path "Lich.js/Local/lichi.js")
+    )
+  )
+ ((string-equal system-type "gnu/linux") ; linux
+  (progn
+    (setq lich-folder-path "Lich.js/Local/lichi.js") )
+  )
+ )
+
 ;;Define lich-mode
 (define-minor-mode lich-mode
   "Toggle Lich mode.
@@ -26,6 +43,7 @@
   :keymap
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "C-<return>") 'lich-compile-line)
+	(define-key map (kbd "S-<return>") 'lich-compile-line)
     (define-key map (kbd "C-T") 'lich-chat)
     (define-key map (kbd "C-U") 'lich-add-user)
     (define-key map (kbd "C-<up>") 'lich-backward-paragraph-onto-line)
@@ -62,7 +80,7 @@
 (defun lich-setup-process ()
   "Sets up the lichi process for lich-mode, assumes node is in path, and the Lich.js folder is in lich-path"
   
-  (setq lich-process (start-process "lich-process" "*lich-post*" "node" (concat lich-path "Lich.js\\Local\\lichi.js")) )
+  (setq lich-process (start-process "lich-process" "*lich-post*" "node" (concat lich-path lich-folder-path)) )
   (set-process-query-on-exit-flag lich-process nil ))
 
 
