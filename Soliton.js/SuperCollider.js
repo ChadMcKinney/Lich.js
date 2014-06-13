@@ -55,7 +55,7 @@ function getSCPath()
 	{
 	case "win32":
 	case "win64":
-		return "C:\Program Files (x86)\SuperCollider-3.6.6\scsynth";
+		return "C:/Program Files (x86)/SuperCollider-3.6.6/scsynth";
 		break;
 		
 	case "darwin":
@@ -73,14 +73,14 @@ function getSCPath()
 
 var _options = { 
 	sNumAudioBusChannels: 128,
-	sNumControlBusChannels: 4096,
+	sNumControlBusChannels: 4096 * 0.25,
 	sMaxLogins: 64,
 	sMaxNodes: 1024,
-	sNumInputBusChannels: 2,
+    	sNumInputBusChannels: 2,
 	sNumOutputBusChannels: 2,
 	sNumBuffers: 1024,
 	sMaxSynthDefs: 8192,
-	sProtocol: "Udp",
+    	sProtocol: "Udp",
 	sBufLength: 64,
 	sNumRGens: 64,
 	sMaxWireBufs: 64,
@@ -92,8 +92,9 @@ var _options = {
 	sMemoryLocking: 0,
 	sPreferredHardwareBufferFrameSize: 512,
 	sRealTimeMemorySize: 81920, // Increased
-	sBlockSize: 512,
-	sPortNum: 57110,
+    	// sBlockSize: 512,
+    	// sBlockSize: 1024,
+    	sPortNum: 57110,
 	sNumPrivateAudioBusChannels: 112
 }
 

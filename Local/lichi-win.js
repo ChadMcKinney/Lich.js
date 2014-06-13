@@ -37,8 +37,6 @@ post = console.log;
 Lich.post = console.log;
 console.log("{- Lich.js -}\n");
 
-
-
 _compile = function(lc)
 {
     try
@@ -75,44 +73,26 @@ _quit = function()
     process.exit(0);
 }
 
-var readline = require('readline'),
-rl = readline.createInterface(process.stdin, process.stdout);
-
-// rl.setPrompt('Lich> ');
-rl.setPrompt('');
-rl.prompt();
-
-rl.on('line', function(line) {
-    switch(line.trim()) {
-    case '':
-	break;
-    case '\n':
-	break;
-    case 'freeAll':
-	freeAll();
-	break;
-    case ':quit':
-    case 'exit':
-      	_quit();
-      	break;
-    default:
-    	_compile(replaceEscapeSequences(line.trim()));
-    	break;
-    }
-    
-    rl.prompt();
-}).on('close', function() {
-    _quit();
+process.stdin.on('readable', function() {
+    var chunk = process.stdin.read();
+    if(chunk !== null)
+    {
+  	    switch(chunk)
+	    {
+	    case '':
+		break;
+	    case 'freeAll':
+		freeAll();
+  	    case ':quit':
+	    case ':q':
+    	    case 'exit':
+      		_quit();
+      		break;
+	    default:
+    		_compile(""+chunk);
+    		break;
+	    }
+	}
 });
 
-//Replace readline with Chad's different method
-//This is needed for multi-line input
-function replaceEscapeSequences(s)
-{
-    var newString = s.replace(/\f/g,"\n");
 
-    console.log("Replaced string: ");
-    console.log(newString);
-    
-    return newString;
-}
