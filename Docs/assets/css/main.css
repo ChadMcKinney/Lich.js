@@ -398,6 +398,14 @@ specific tabview, see the other sections below.
 }
 .apidocs .tabview .yui3-tabview-panel {
   background: black; /* #fff;*/
+  overflow : auto;
+  height: 400px;
+}
+.apidocs .tabview ::-webkit-scrollbar {
+    background: rgb(48,144,144);
+}
+.apidocs .tabview ::-webkit-scrollbar-thumb:vertical{
+    background: rgb(121,22,65);
 }
 /* -- Generic Content Styles ------------------------------------------------ */
 /* Headings */

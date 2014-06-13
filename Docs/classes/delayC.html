@@ -282,8 +282,8 @@
         <div class="example">
             <h3>Example:</h3>
 
-            <div class="example-content">
-                <code><p> let test del =&gt; impulse 1 &gt;&gt; delayC del del &gt;&gt; out 0</p>
+            <div class="example-content" id="editor">
+               <code><p> let test del =&gt; impulse 1 &gt;&gt; delayC del del &gt;&gt; out 0</p>
 <p> let t = test 0.1</p>
 <p> stop t</p>
 </code>
@@ -336,5 +336,13 @@
 <script src="../assets/js/api-list.js"></script>
 <script src="../assets/js/api-search.js"></script>
 <script src="../assets/js/apidocs.js"></script>
+<script type="text/javascript" src="../assets/../../third-party/ace/ace.js"></script>
+<!--
+<script>
+    var editor = ace.edit("editor");
+    editor.setTheme("ace/lich3");
+    editor.getSession().setMode("haskell");
+</script>
+-->
 </body>
 </html>
