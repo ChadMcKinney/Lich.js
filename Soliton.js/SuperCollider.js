@@ -1179,6 +1179,7 @@ function _prEnv(levels, times, shape, input, doneAction)
  * @param levels The levels that the envelope will move through
  * @param times The times it takes for the env to move between levels. Should be 1 item less than levels
  * @param shape Either a shape number or string. Some examples: -4, 0, 1, "linear", "squared"
+ * @param input Either a ugen or 1
  * @example let test amp => white amp >> env [0,1,0] [1,1] "linear" >> out 0
  * @example test $ random 0.1 1.0
  */
@@ -1200,6 +1201,9 @@ function env(levels, times, shape, input)
  * @param levels The levels that the envelope will move through
  * @param times The times it takes for the env to move between levels. Should be 1 item less than levels
  * @param shape Either a shape number or string. Some examples: -4, 0, 1, "linear", "squared"
+ * @param input Either a ugen or 1
+ * @example let test f => sin (env2[f,f*2,f] [1,1] "linear" 1) >> env [0,0.3,0] [2,2] "linear" >> out 0
+ * @example test $ random 440 880
  */
 function env2(levels, times, shape, input)
 {	
