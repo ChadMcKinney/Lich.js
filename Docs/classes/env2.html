@@ -34,7 +34,7 @@
         </ul>
 
         <div id="api-tabview-filter">
-            <input type="search" id="api-filter" placeholder="Type to filter APIs">
+            <input type="search" id="api-filter" placeholder="Type to filter APIs" style="display: none;">
         </div>
 
         <div id="api-tabview-panel">
@@ -219,6 +219,12 @@
                     
                 </li>
             
+                <li class="arg">
+                    
+                        <code>input</code>
+                    
+                </li>
+            
             </ul><span class="paren"></span>
         </div>
     
@@ -293,12 +299,39 @@
                     
                 </li>
             
+                <li class="param">
+                    
+                        <code class="param-name">input</code>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>Either a ugen or 1</p>
+
+                    </div>
+
+                    
+                </li>
+            
             </ul>
         </div>
     
 
     
 
+    
+        <div class="example">
+            <h3>Example:</h3>
+
+            <div class="example-content">
+            <pre class="code prettyprint"
+               <p> let test f =&gt; sin (env2[f,f*2,f] [1,1] &quot;linear&quot; 1) &gt;&gt; env [0,0.3,0] [2,2] &quot;linear&quot; &gt;&gt; out 0</p>
+<p> test $ random 440 880</p>
+
+               </pre>
+            </div>
+        </div>
     
 
     
@@ -313,7 +346,7 @@
         <div id="index" class="api-class-tabpanel index">
             
         <div class="foundat">
-            Defined in: <a href="../files/Soliton.js_SuperCollider.js.html#l1196"><code>Soliton.js&#x2F;SuperCollider.js:1196</code></a>
+            Defined in: <a href="../files/Soliton.js_SuperCollider.js.html#l1197"><code>Soliton.js&#x2F;SuperCollider.js:1197</code></a>
         </div>
     
 
@@ -346,5 +379,13 @@
 <script src="../assets/js/api-list.js"></script>
 <script src="../assets/js/api-search.js"></script>
 <script src="../assets/js/apidocs.js"></script>
+<script type="text/javascript" src="../assets/../../third-party/ace/ace.js"></script>
+<!--
+<script>
+    var editor = ace.edit("editor");
+    editor.setTheme("ace/lich3");
+    editor.getSession().setMode("haskell");
+</script>
+-->
 </body>
 </html>

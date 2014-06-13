@@ -34,7 +34,7 @@
         </ul>
 
         <div id="api-tabview-filter">
-            <input type="search" id="api-filter" placeholder="Type to filter APIs">
+            <input type="search" id="api-filter" placeholder="Type to filter APIs" style="display: none;">
         </div>
 
         <div id="api-tabview-panel">
@@ -2594,5 +2594,13 @@ testVim(&#x27;ex_map_key2key_from_colon&#x27;, function(cm, vim, helpers) {
 <script src="../assets/js/api-list.js"></script>
 <script src="../assets/js/api-search.js"></script>
 <script src="../assets/js/apidocs.js"></script>
+<script type="text/javascript" src="../assets/../../third-party/ace/ace.js"></script>
+<!--
+<script>
+    var editor = ace.edit("editor");
+    editor.setTheme("ace/lich3");
+    editor.getSession().setMode("haskell");
+</script>
+-->
 </body>
 </html>

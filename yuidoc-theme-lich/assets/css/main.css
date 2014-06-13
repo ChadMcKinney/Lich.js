@@ -398,6 +398,14 @@ specific tabview, see the other sections below.
 }
 .apidocs .tabview .yui3-tabview-panel {
   background: black; /* #fff;*/
+  overflow : auto;
+  height: 400px;
+}
+.apidocs .tabview ::-webkit-scrollbar {
+    background: rgb(48,144,144);
+}
+.apidocs .tabview ::-webkit-scrollbar-thumb:vertical{
+    background: rgb(121,22,65);
 }
 /* -- Generic Content Styles ------------------------------------------------ */
 /* Headings */
@@ -467,6 +475,8 @@ specific tabview, see the other sections below.
 #bd.loading .apidocs .content,
 #api-list.loading .yui3-tabview-panel .apis {
   display: none;
+  overflow: auto;
+  height: 400px;
 }
 .apidocs .no-visible-items {
   color: #666;
@@ -661,8 +671,8 @@ kbd .cmd {
 }
 /* -- File Source View ------------------------------------------------------ */
 .apidocs .file pre.code,
-#doc .apidocs .file pre.prettyprint {
-  background: inherit;
+#doc .apidocs pre.prettyprint {
+  background: transparent;/*inherit;*/
   border: none;
   overflow: visible;
   padding: 0;

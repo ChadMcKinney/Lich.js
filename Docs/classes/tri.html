@@ -34,7 +34,7 @@
         </ul>
 
         <div id="api-tabview-filter">
-            <input type="search" id="api-filter" placeholder="Type to filter APIs">
+            <input type="search" id="api-filter" placeholder="Type to filter APIs" style="display: none;">
         </div>
 
         <div id="api-tabview-panel">
@@ -262,10 +262,12 @@
             <h3>Example:</h3>
 
             <div class="example-content">
-                <code><p> let test f =&gt; tri f &gt;&gt; out 0</p>
+            <pre class="code prettyprint"
+               <p> let test f =&gt; tri f &gt;&gt; out 0</p>
 <p> let t = test 440</p>
 <p> stop t</p>
-</code>
+
+               </pre>
             </div>
         </div>
     
@@ -315,5 +317,13 @@
 <script src="../assets/js/api-list.js"></script>
 <script src="../assets/js/api-search.js"></script>
 <script src="../assets/js/apidocs.js"></script>
+<script type="text/javascript" src="../assets/../../third-party/ace/ace.js"></script>
+<!--
+<script>
+    var editor = ace.edit("editor");
+    editor.setTheme("ace/lich3");
+    editor.getSession().setMode("haskell");
+</script>
+-->
 </body>
 </html>

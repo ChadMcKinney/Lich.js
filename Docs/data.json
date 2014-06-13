@@ -534,7 +534,7 @@
             "namespaces": {},
             "tag": "module",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1238,
+            "line": 1242,
             "description": "Lich.sc UGen bindings."
         },
         "Oscillators": {
@@ -660,7 +660,7 @@
             "module": "Lich.sc UGens",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1225,
+            "line": 1229,
             "description": "Envelopes."
         },
         "InputOutput": {
@@ -675,7 +675,7 @@
             "module": "Lich.sc UGens",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1238,
+            "line": 1242,
             "description": "Inputs and Outputs"
         }
     },
@@ -1861,6 +1861,10 @@
                 {
                     "name": "shape",
                     "description": "Either a shape number or string. Some examples: -4, 0, 1, \"linear\", \"squared\""
+                },
+                {
+                    "name": "input",
+                    "description": "Either a ugen or 1"
                 }
             ],
             "example": [
@@ -1880,7 +1884,7 @@
             "submodule": "Envelopes",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1196,
+            "line": 1197,
             "description": "Envelope generator. Used for amplitude envelopes, will NOT automatically free the synth when finished.",
             "is_constructor": 1,
             "params": [
@@ -1895,7 +1899,15 @@
                 {
                     "name": "shape",
                     "description": "Either a shape number or string. Some examples: -4, 0, 1, \"linear\", \"squared\""
+                },
+                {
+                    "name": "input",
+                    "description": "Either a ugen or 1"
                 }
+            ],
+            "example": [
+                " let test f => sin (env2[f,f*2,f] [1,1] \"linear\" 1) >> env [0,0.3,0] [2,2] \"linear\" >> out 0",
+                " test $ random 440 880"
             ]
         },
         "perc": {
@@ -1910,7 +1922,7 @@
             "submodule": "Envelopes",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1210,
+            "line": 1214,
             "description": "Envelope generator. Used for amplitude envelopes, will automatically free the synth when finished.",
             "is_constructor": 1,
             "params": [
@@ -1944,7 +1956,7 @@
             "submodule": "Envelopes",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1225,
+            "line": 1229,
             "description": "Envelope generator. Used for amplitude envelopes, will NOT automatically free the synth when finished.",
             "is_constructor": 1,
             "params": [
@@ -1974,7 +1986,7 @@
             "submodule": "InputOutput",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1238,
+            "line": 1242,
             "description": "Send a signal to an output bus.",
             "is_constructor": 1,
             "params": [
