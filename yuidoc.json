@@ -4,6 +4,8 @@
     "version": "0.1",
     "url": "https://github.com/ChadMcKinney/Lich.js",
     "options": {
-        "outdir": "Docs"
+        "outdir": "Docs",
+        "paths": ".",
+        "themedir": "yuidoc-theme-lich"
     }
 }

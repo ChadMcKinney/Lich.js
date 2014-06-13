@@ -1,25 +1,24 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="yui-overrride">
 <head>
     <meta charset="utf-8">
     <title>Soliton.js/SuperCollider.js - Lich.sc</title>
     <link rel="stylesheet" href="http://yui.yahooapis.com/3.9.1/build/cssgrids/cssgrids-min.css">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
-    <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
+    <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700' rel='stylesheet' type='text/css'>
     <link rel="shortcut icon" type="image/png" href="../assets/favicon.png">
     <script src="http://yui.yahooapis.com/combo?3.9.1/build/yui/yui-min.js"></script>
+    <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
 </head>
 <body class="yui3-skin-sam">
 
 <div id="doc">
     <div id="hd" class="yui3-g header">
         <div class="yui3-u-3-4">
-            
-                <h1><img src="../assets/css/logo.png" title="Lich.sc"></h1>
-            
+            <h1 class="blue-main-title">Lich.sc</h1>
         </div>
-        <div class="yui3-u-1-4 version">
-            <em>API Docs for: 0.1</em>
+        <div class="yui3-u-1-4 version project-version">
+            API Docs for: 0.1
         </div>
     </div>
     <div id="bd" class="yui3-g">
@@ -229,65 +228,113 @@
 // Server setup
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-/*
-var defaultServerOptions = { 
-	sNumAudioBusChannels: 128,
-	sNumControlBusChannels: 4096,
-	sMaxLogins: 64,
-	sMaxNodes: 1024,
-	sNumInputBusChannels: 8,
-	sNumOutputBusChannels: 8,
-	sNumBuffers: 1024,
-	sMaxSynthDefs: 2048,
-	sProtocol: Udp,
-	sBufLength: 64,
-	sNumRGens: 64,
-	sMaxWireBufs: 64,
-	sPreferredSampleRate: 44100,
-	sLoadGraphDefs: True,
-	sVerbosity: 0,
-	sRendezvous: False,
-	sRemoteControlVolume: False,
-	sMemoryLocking: False,
-	sPreferredHardwareBufferFrameSize: 512,
-	sRealTimeMemorySize: 81920, // Increased
-	sBlockSize: 512,
-	sPortNum: 57110, // Don&#x27;t use the default SuperCollider scsynth port to prevent clashes
-	sNumPrivateAudioBusChannels: 112
-}*/
-
-// process.env.SC_JACK_DEFAULT_INPUTS = &quot;system&quot;;
-// process.env.SC_JACK_DEFAULT_OUTPUTS = &quot;system&quot;;
-// process.env.JACK_START_SERVER = &quot;false&quot;;
-
+var spawn = require(&#x27;child_process&#x27;).spawn;
 var scsynth = require(&#x27;supercolliderjs&#x27;).scsynth;
 var server = new scsynth({
-	path:&quot;/usr/local/bin&quot;,
+	path: getSCPath(),
 	debug: false,
 	echo: false,
 });
 
+function getSCPath()
+{
+	switch(process.platform)
+	{
+	case &quot;win32&quot;:
+	case &quot;win64&quot;:
+		return &quot;C:\Program Files (x86)\SuperCollider-3.6.6\scsynth&quot;;
+		break;
+		
+	case &quot;darwin&quot;:
+		return &quot;/Applications/SuperCollider/SuperCollider.app/Contents/Resources/scsynth&quot;;
+		break;
+
+	case &quot;linux&quot;:
+		process.env[&quot;SC_JACK_DEFAULT_INPUTS&quot;] = &quot;system&quot;;
+		process.env[&quot;SC_JACK_DEFAULT_OUTPUTS&quot;] = &quot;system&quot;;
+		process.env[&quot;JACK_START_SERVER&quot;] = &quot;true&quot;;
+		return &quot;/usr/local/bin/scsynth&quot;;
+		break;
+	}
+}
+
+var _options = { 
+	sNumAudioBusChannels: 128,
+	sNumControlBusChannels: 4096,
+	sMaxLogins: 64,
+	sMaxNodes: 1024,
+	sNumInputBusChannels: 2,
+	sNumOutputBusChannels: 2,
+	sNumBuffers: 1024,
+	sMaxSynthDefs: 8192,
+	sProtocol: &quot;Udp&quot;,
+	sBufLength: 64,
+	sNumRGens: 64,
+	sMaxWireBufs: 64,
+	sPreferredSampleRate: 44100,
+	sLoadGraphDefs: 0,
+	sVerbosity: 0,
+	sRendezvous: 0,
+	sRemoteControlVolume: 0,
+	sMemoryLocking: 0,
+	sPreferredHardwareBufferFrameSize: 512,
+	sRealTimeMemorySize: 81920, // Increased
+	sBlockSize: 512,
+	sPortNum: 57110,
+	sNumPrivateAudioBusChannels: 112
+}
+
+var _optionsArray = [
+	&quot;-u&quot;, _options.sPortNum,
+	&quot;-a&quot;, _options.sNumAudioBusChannels,
+	&quot;-c&quot;, _options.sNumControlBusChannels,
+	&quot;-i&quot;, _options.sNumInputBusChannels,
+	&quot;-o&quot;, _options.sNumOutputBusChannels,
+	&quot;-z&quot;, _options.sBlockSize,
+	&quot;-Z&quot;, _options.sPreferredHardwareBufferFrameSize,
+	&quot;-S&quot;, _options.sPreferredSampleRate,
+	&quot;-b&quot;, _options.sNumBuffers,
+	&quot;-n&quot;, _options.sMaxNodes,
+	&quot;-d&quot;, _options.sMaxSynthDefs,
+	&quot;-m&quot;, _options.sRealTimeMemorySize,
+	&quot;-w&quot;, _options.sMaxWireBufs,
+	&quot;-l&quot;, _options.sMaxLogins
+];
+
 var fs = require(&#x27;fs&#x27;);
 
+var _scsynthpid = spawn(getSCPath(), _optionsArray, { env: process.env, stdio: [&#x27;pipe&#x27;, process.stdout, process.stderr] });
 var _currentNodeID = 1000;
 var s = server;
-s.connect();
+
+/*_scsynthpid.stderr.setEncoding(&#x27;utf8&#x27;);
+_scsynthpid.stderr.on(&#x27;data&#x27;, function (data) {
+	if (/^execvp\(\)/.test(data))
+	{
+		console.log(&#x27;Failed to start child process.&#x27;);
+	}
+});*/
+
+process.on(&#x27;exit&#x27;, function(code){ console.log(&quot;quitting scsynth... &quot;); _scsynthpid.kill(); });
+
 //s.boot();
 
 
-/*
+
 // Wait for server to boot ... perhaps there&#x27;s a better way here.
 setTimeout( // Initial messages
 	function()
 	{
 		s.connect();
+		s.sendMsg(&quot;/g_new&quot;, [1, 0, 0]); // default group
 		s.sendMsg(&#x27;/notify&#x27;, [1]);
 		s.sendMsg(&#x27;/status&#x27;, []);
 	},
-	1000
+	2000
 );
 
+
+/*
 setInterval( // Initial messages
 	function()
 	{
@@ -296,8 +343,8 @@ setInterval( // Initial messages
 		s.sendMsg(&#x27;/status&#x27;, []);
 	},
 	2000
-);*/
-
+);
+*/
 
 /*
 s.on(&#x27;OSC&#x27;, function(addr, msg) {
@@ -355,7 +402,7 @@ var AddReplace = 4;
 var rootNodeID = 0;
 var defaultGroupID = 1;
 var grainNodeID = -1;
-s.nodeID = 1;
+s.nodeID = 1; // default group
 
 function Node()
 {	
@@ -1651,9 +1698,12 @@ function _synthDef(name, def)
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// File and OSC
 	
-	buf = buf.slice(0, offset);
+	// buf = buf.slice(0, offset);
+	s.sendMsg(&#x27;/d_recv&#x27;, [buf.slice(0, offset)]);
 	// console.log(buf.toString());
-	var path = &quot;/tmp/&quot;+name+&quot;.scsyndef&quot;;
+
+    	/*
+    	var path = &quot;/tmp/&quot;+name+&quot;.scsyndef&quot;;
 	
 	fs.writeFile(
 		path,
@@ -1665,7 +1715,7 @@ function _synthDef(name, def)
 				s.sendMsg(&#x27;/d_load&#x27;, [path]);
 			}
 		}
-	); 
+	);*/
 	
 	return Lich.VM.Void;
 }
@@ -1677,6 +1727,11 @@ function stop(synth)
 
 	synth.freeNode();
 	return Lich.VM.Void;
+}
+
+function freeAll()
+{
+    s.sendMsg(&#x27;/g_freeAll&#x27;, [1]);
 }
 
 // Redefine Lich.compileSynthDef to use SuperCollider behavior instead of web audio
@@ -1732,21 +1787,6 @@ Lich.compileSynthDef = function(ast)
 
 	return res;
 }
-
-/*
-Example usage of Synth.grain
-function spawnSynths(num)
-{
-	for(var i = 0; i &lt; num; ++i)
-	{
-		setTimeout(function() {
-			Synth.grain(&quot;TestGrain&quot;, [&quot;freq&quot;, Math.random() * 1000 + 200]);
-		}, i * 100);
-	}
-
-	return Lich.VM.Void;
-}
-*/
 
     </pre>
 </div>
