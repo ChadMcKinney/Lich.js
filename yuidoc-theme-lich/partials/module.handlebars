@@ -1,32 +1,4 @@
 <h1>{{name}} Module</h1>
-<div class="clearfix meta">
-    {{#extra}}
-        {{#selleck}}
-            <a class="button link-docs" href="/yui/docs/{{name}}">User Guide &amp; Examples</a>
-        {{/selleck}}
-    {{/extra}}
-
-    {{#if requires}}
-        <div class="uses">
-            Requires
-            <ul class="inline commas">
-                {{#requires}}
-                    <li>{{#crossLinkModule .}}{{/crossLinkModule}}</li>
-                {{/requires}}
-            </ul>
-        </div>
-    {{/if}}
-
-    {{#if foundAt}}
-        <div class="foundat">
-            Defined in: <a href="{{foundAt}}">`{{{file}}}:{{{line}}}`</a>
-        </div>
-    {{/if}}
-
-    {{#if since}}
-        <p>Available since {{since}}</p>
-    {{/if}}
-</div>
 
 {{#if deprecated}}
     <div class="deprecated">
