@@ -1,5 +1,5 @@
 /* 
-    Soliton.js - JavaScript audio framework
+    Lich.js - JavaScript audio framework
     Copyright (C) 2012 Chad McKinney
 
 	http://chadmckinneyaudio.com/

@@ -32,7 +32,7 @@ eval(
 	+ fs.readFileSync("../Parser/iterL.js") + fs.readFileSync("../Parser/parse.js")
 );
 
-eval(fs.readFileSync("../Library/Prelude.js") + "" + fs.readFileSync("../Soliton.js/SuperCollider.js") + "");
+eval(fs.readFileSync("../Library/Prelude.js") + "" + fs.readFileSync("../Soliton.js/SuperCollider.js") + ""/* + fs.readFileSync("../Soliton.js/Patterns.js") + ""*/);
 
 // Overwrite global printing so that we can use the console instead of the DOM.
 post = console.log;
@@ -99,11 +99,14 @@ rl.on('line', function(line) {
 });*/
 
 
+process.stdin.setEncoding('utf8');
 
 process.stdin.on('readable', function() {
     var chunk = process.stdin.read();
+	
   	if(chunk !== null)
 	{
+		chunk = chunk.toString();
   	    switch(chunk)
 	 	{
   	 	case ':quit':
@@ -112,10 +115,8 @@ process.stdin.on('readable', function() {
       	    _quit();
       		break;
 	    default:
-    	    _compile(""+chunk);
+    	    _compile(chunk);
     		break;
 		}
 	}
-});
-
-
+})
