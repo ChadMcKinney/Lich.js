@@ -1,3 +1,4 @@
+
 /* 
     Lich.js - JavaScript audio framework
     Copyright (C) 2012 Chad McKinney
@@ -36,15 +37,26 @@
 */
 
 Soliton = {};
+Soliton.synthDefs = {};
+Soliton.pbinds = {};
 
-console.log(process.hrtime());
+//var _startDate = new Date();
+//var _startSeconds = _date.
+
+function _currentTime()
+{
+	var t = process.hrtime();
+	return t[0] + (t[1] * 1e-09);
+}
+
+var _initialStartTime = _currentTime();
 
 Soliton.PercStream = function(_events, _modifiers)
 {
 	var events = _events;
 	var modifiers = _modifiers;
 	this.nextTime = 0;
-	// this.nextTime = Math.floor((Soliton.context.currentTime / Lich.scheduler.tempoSeconds) + 0.5) * Lich.scheduler.tempoSeconds;
+	// this.nextTime = Math.floor((_currentTime() / Lich.scheduler.tempoSeconds) + 0.5) * Lich.scheduler.tempoSeconds;
 	var macroBeat = 0;
 	var infiniteBeat = 0;
 	var modifierBeat = 0;
@@ -75,7 +87,7 @@ Soliton.PercStream = function(_events, _modifiers)
 	{
 		if(!playing)
 		{
-			this.nextTime = Math.floor((Soliton.context.currentTime / Lich.scheduler.tempoSeconds) + 0.5) * Lich.scheduler.tempoSeconds;
+			this.nextTime = Math.floor((_currentTime() / Lich.scheduler.tempoSeconds) + 0.5) * Lich.scheduler.tempoSeconds;
 			// Push to the next metric down beat
 			this.nextTime += ((this.nextTime / Lich.scheduler.tempoSeconds) % _events.length) * Lich.scheduler.tempoSeconds;
 			playing = true;
@@ -100,7 +112,7 @@ Soliton.PercStream = function(_events, _modifiers)
 		else if(nevent != Lich.VM.Nothing)
 		{
 			try
-			{
+			{				
 				var synth;
 
 				if(nevent._datatype === "Pattern")
@@ -167,7 +179,7 @@ Soliton.PercStream = function(_events, _modifiers)
 		this.nextTime += beatDuration;
 
 		//Lich.post("PercStream nextTime = " + this.nextTime);
-		//Lich.post("Soliton.context.currentTime = " + Soliton.context.currentTime);
+		//Lich.post("_currentTime() = " + _currentTime());
 		return this.nextTime;
 	}
 
@@ -188,7 +200,7 @@ Soliton.PercStream = function(_events, _modifiers)
 
 		if(!playing)
 		{
-			this.nextTime = Math.floor((Soliton.context.currentTime / Lich.scheduler.tempoSeconds) + 0.5) * Lich.scheduler.tempoSeconds;
+			this.nextTime = Math.floor((_currentTime() / Lich.scheduler.tempoSeconds) + 0.5) * Lich.scheduler.tempoSeconds;
 			this.nextTime += ((this.nextTime / Lich.scheduler.tempoSeconds) % _events.length) * Lich.scheduler.tempoSeconds;
 		}
 
@@ -206,7 +218,7 @@ Soliton.SoloStream = function(_instrument, _events, _modifiers, _rmodifiers)
 	var modifiers = _modifiers;
 	var rmodifiers = _rmodifiers;
 	this.nextTime = 0;
-	//this.nextTime = Math.floor((Soliton.context.currentTime / Lich.scheduler.tempoSeconds) + 0.5) * Lich.scheduler.tempoSeconds;
+	//this.nextTime = Math.floor((_currentTime() / Lich.scheduler.tempoSeconds) + 0.5) * Lich.scheduler.tempoSeconds;
 	var macroBeat = 0;
 	var infiniteBeat = 0;
 	var modifierBeat = 0;
@@ -237,7 +249,7 @@ Soliton.SoloStream = function(_instrument, _events, _modifiers, _rmodifiers)
 	{
 		if(!playing)
 		{
-			this.nextTime = Math.floor((Soliton.context.currentTime / Lich.scheduler.tempoSeconds) + 0.5) * Lich.scheduler.tempoSeconds;
+			this.nextTime = Math.floor((_currentTime() / Lich.scheduler.tempoSeconds) + 0.5) * Lich.scheduler.tempoSeconds;
 			// Push to the next metric down beat
 			this.nextTime += ((this.nextTime / Lich.scheduler.tempoSeconds) % _events.length) * Lich.scheduler.tempoSeconds;
 			playing = true;
@@ -342,7 +354,7 @@ Soliton.SoloStream = function(_instrument, _events, _modifiers, _rmodifiers)
 		}
 
 		//Lich.post("PercStream nextTime = " + this.nextTime);
-		//Lich.post("Soliton.context.currentTime = " + Soliton.context.currentTime);
+		//Lich.post("_currentTime() = " + _currentTime());
 		return this.nextTime;
 	}
 
@@ -368,7 +380,7 @@ Soliton.SoloStream = function(_instrument, _events, _modifiers, _rmodifiers)
 
 		if(!playing)
 		{
-			this.nextTime = Math.floor((Soliton.context.currentTime / Lich.scheduler.tempoSeconds) + 0.5) * Lich.scheduler.tempoSeconds;
+			this.nextTime = Math.floor((_currentTime() / Lich.scheduler.tempoSeconds) + 0.5) * Lich.scheduler.tempoSeconds;
 			this.nextTime += ((this.nextTime / Lich.scheduler.tempoSeconds) % _events.length) * Lich.scheduler.tempoSeconds;
 		}
 
@@ -384,7 +396,7 @@ Soliton.pbind = function(patternName, func, _arguments, duration)
 	this.duration = duration;
 	var beatDuration = 0;
 	this.value = null;
-	// this.nextTime = Math.floor((Soliton.context.currentTime / Lich.scheduler.tempoSeconds) + 0.5) * Lich.scheduler.tempoSeconds;
+	// this.nextTime = Math.floor((_currentTime() / Lich.scheduler.tempoSeconds) + 0.5) * Lich.scheduler.tempoSeconds;
 	var infiniteBeat = 0;
 	this._lichType = SOLOSTREAM;
 	var playing = false;
@@ -402,7 +414,7 @@ Soliton.pbind = function(patternName, func, _arguments, duration)
 	{
 		if(!playing)
 		{
-			this.nextTime = Math.floor((Soliton.context.currentTime / Lich.scheduler.tempoSeconds) + 0.5) * Lich.scheduler.tempoSeconds;
+			this.nextTime = Math.floor((_currentTime() / Lich.scheduler.tempoSeconds) + 0.5) * Lich.scheduler.tempoSeconds;
 			playing = true;
 			Lich.scheduler.addScheduledEvent(this);
 		}
@@ -484,7 +496,7 @@ Soliton.pbind = function(patternName, func, _arguments, duration)
 
 		if(!playing)
 		{
-			this.nextTime = Math.floor((Soliton.context.currentTime / Lich.scheduler.tempoSeconds) + 0.5) * Lich.scheduler.tempoSeconds;
+			this.nextTime = Math.floor((_currentTime() / Lich.scheduler.tempoSeconds) + 0.5) * Lich.scheduler.tempoSeconds;
 			//this.nextTime += (this.nextTime / Lich.scheduler.tempoSeconds) * Lich.scheduler.tempoSeconds;
 		}
 
@@ -563,7 +575,7 @@ Soliton.SteadyScheduler = function()
 	{
 		// requiresSchedule ss the current time + the schedule ahead time. 
 		// This allows us to reduce jitter while still being reactive to pattern and tempo changes.
-		requiresSchedule = Soliton.context.currentTime + scheduleAhead;
+		requiresSchedule = _currentTime() + scheduleAhead;
 		//Lich.post("Requires schedule = " + requiresSchedule);
 		for(var i = 0; i < currentQueue.length; ++i)
 		{
@@ -587,7 +599,8 @@ Soliton.SteadyScheduler = function()
 		nextQueue = tempQueue; // swap the next queue with the previous current Queue, stored in the temporary variable.
 
 		// Reschedule visitScheduledEvents, keeping track of the ID for stopping/pausing.
-		timerID = setTimeout(Lich.scheduler.visitScheduledEvents, lookAhead);
+		// timerID = setTimeout(Lich.scheduler.visitScheduledEvents, lookAhead);
+		timerID = setTimeout(Lich.scheduler.visitScheduledEvents, 0);
 	}
 
 	this.start = function()
@@ -687,7 +700,7 @@ Soliton.SteadyScheduler = function()
 
 function currentBeat()
 {
-	return Math.floor((Soliton.context.currentTime / Lich.scheduler.tempoSeconds) + 0.5);
+	return Math.floor((_currentTime() / Lich.scheduler.tempoSeconds) + 0.5);
 }
 
 Lich.scheduler = new Soliton.SteadyScheduler();

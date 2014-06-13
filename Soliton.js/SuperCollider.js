@@ -1578,12 +1578,21 @@ function _synthDef(name, def)
 	return Lich.VM.Void;
 }
 
-function stop(synth)
+function stop(object)
 {
-	if(!(synth instanceof Synth))
-	   throw new Error("stop can only be called on Synths.");
+	if(object instanceof Synth)
+	{
+		object.freeNode();
+	}
 
-	synth.freeNode();
+	else if(object._lichType == IMPSTREAM || object._lichType == SOLOSTREAM)
+	{
+		object.stop();
+	}
+	
+	else
+	   throw new Error("stop can only be called on Synths and Patterns");
+	
 	return Lich.VM.Void;
 }
 
@@ -1639,7 +1648,8 @@ Lich.compileSynthDef = function(ast)
 	}
 	
 	res += ast.ident.id + "=function("+localArgs.join(",")+"){return new Synth(\""+ast.ident.id+"\",["+argsAndIndexes.join(",")+"]);};";
-	 
+	res += "Soliton.synthDefs[\""+ast.ident.id+"\"]="+ast.ident.id;
+	
 	if(Lich.parseType !== "library")
 		res += ";Lich.VM.Print("+ast.ident.id+");";
 
