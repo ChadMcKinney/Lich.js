@@ -475,6 +475,8 @@ specific tabview, see the other sections below.
 #bd.loading .apidocs .content,
 #api-list.loading .yui3-tabview-panel .apis {
   display: none;
+  overflow: auto;
+  height: 400px;
 }
 .apidocs .no-visible-items {
   color: #666;
