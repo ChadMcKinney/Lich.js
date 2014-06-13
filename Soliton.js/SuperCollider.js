@@ -1,5 +1,5 @@
 /* 
-    Soliton.js - JavaScript audio framework
+    Lich.js - JavaScript audio framework
     Copyright (C) 2012 Chad McKinney
 
 	http://chadmckinneyaudio.com/
@@ -55,7 +55,7 @@ function getSCPath()
 	{
 	case "win32":
 	case "win64":
-		return "C:\Program Files (x86)\SuperCollider-3.6.6\scsynth";
+		return "C:/Program Files (x86)/SuperCollider-3.6.6/scsynth";
 		break;
 		
 	case "darwin":
@@ -73,14 +73,14 @@ function getSCPath()
 
 var _options = { 
 	sNumAudioBusChannels: 128,
-	sNumControlBusChannels: 4096,
+	sNumControlBusChannels: 4096 * 0.25,
 	sMaxLogins: 64,
 	sMaxNodes: 1024,
-	sNumInputBusChannels: 2,
+    	sNumInputBusChannels: 2,
 	sNumOutputBusChannels: 2,
 	sNumBuffers: 1024,
 	sMaxSynthDefs: 8192,
-	sProtocol: "Udp",
+    	sProtocol: "Udp",
 	sBufLength: 64,
 	sNumRGens: 64,
 	sMaxWireBufs: 64,
@@ -92,8 +92,9 @@ var _options = {
 	sMemoryLocking: 0,
 	sPreferredHardwareBufferFrameSize: 512,
 	sRealTimeMemorySize: 81920, // Increased
-	sBlockSize: 512,
-	sPortNum: 57110,
+    	// sBlockSize: 512,
+    	// sBlockSize: 1024,
+    	sPortNum: 57110,
 	sNumPrivateAudioBusChannels: 112
 }
 
@@ -1578,12 +1579,21 @@ function _synthDef(name, def)
 	return Lich.VM.Void;
 }
 
-function stop(synth)
+function stop(object)
 {
-	if(!(synth instanceof Synth))
-	   throw new Error("stop can only be called on Synths.");
+	if(object instanceof Synth)
+	{
+		object.freeNode();
+	}
 
-	synth.freeNode();
+	else if(object._lichType == IMPSTREAM || object._lichType == SOLOSTREAM)
+	{
+		object.stop();
+	}
+	
+	else
+	   throw new Error("stop can only be called on Synths and Patterns");
+	
 	return Lich.VM.Void;
 }
 
@@ -1639,7 +1649,8 @@ Lich.compileSynthDef = function(ast)
 	}
 	
 	res += ast.ident.id + "=function("+localArgs.join(",")+"){return new Synth(\""+ast.ident.id+"\",["+argsAndIndexes.join(",")+"]);};";
-	 
+	res += "Soliton.synthDefs[\""+ast.ident.id+"\"]="+ast.ident.id;
+	
 	if(Lich.parseType !== "library")
 		res += ";Lich.VM.Print("+ast.ident.id+");";
 
