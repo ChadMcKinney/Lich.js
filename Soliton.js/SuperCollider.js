@@ -503,9 +503,10 @@ function _audioDivision(a, b)
  * @class dc
  * @constructor
  * @param value Value to be output
- * @example let test value => dc value >> out 0
- * @example let t = test 1
- * @example stop t
+ * @example
+ * let test value => dc value >> out 0<br>
+ * let t = test 1<br>
+ * stop t
  */
 function dc(value)
 {
@@ -523,9 +524,10 @@ function dc(value)
  * @class sin
  * @constructor
  * @param freq Frequency
- * @example let test f => sin f >> out 0
- * @example let t = test 440
- * @example stop t
+ * @example
+ * let test f => sin f >> out 0<br>
+ * let t = test 440<br>
+ * stop t
  */
 function sin(freq)
 {
@@ -538,9 +540,10 @@ function sin(freq)
  * @class saw 
  * @constructor
  * @param freq Frequency
- * @example let test f => saw f >> out 0
- * @example let t = test 440
- * @example stop t
+ * @example
+ * let test f => saw f >> out 0<br>
+ * let t = test 440<br>
+ * stop t
  */
 function saw(freq)
 {
@@ -553,9 +556,10 @@ function saw(freq)
  * @class tri
  * @constructor
  * @param freq Frequency
- * @example let test f => tri f >> out 0
- * @example let t = test 440
- * @example stop t
+ * @example
+ * let test f => tri f >> out 0<br>
+ * let t = test 440<br>
+ * stop t
  */
 function tri(freq)
 {
@@ -568,9 +572,10 @@ function tri(freq)
  * @class square
  * @constructor
  * @param freq Frequency
- * @example let test f => square f >> out 0
- * @example let t = test 440
- * @example stop t
+ * @example
+ * let test f => square f >> out 0<br>
+ * let t = test 440<br>
+ * stop t
  */
 function square(freq)
 {
@@ -584,9 +589,10 @@ function square(freq)
  * @constructor
  * @param freq Frequency
  * @param width Pulse width from 0.0 to 1.0
- * @example let test f w => pulse f w >> out 0
- * @example let t = test 440 0.2
- * @example stop t
+ * @example
+ * let test f w => pulse f w >> out 0<br>
+ * let t = test 440 0.2<br>
+ * stop t
  */
 function pulse(freq,width)
 {
@@ -600,9 +606,10 @@ function pulse(freq,width)
  * @constructor
  * @param freq Frequency
  * @param nharm Number of harmonics
- * @example let test f n => blip f n >> out 0
- * @example let t = test 440 5
- * @example stop t
+ * @example
+ * let test f n => blip f n >> out 0<br>
+ * let t = test 440 5<br>
+ * stop t
  */
 function blip(freq,nharm)
 {
@@ -617,9 +624,10 @@ function blip(freq,nharm)
  * @param fundf Fundamental frequency
  * @param formf Formant frequency
  * @param bwf Pulse width frequency. Must be >= fundf.
- * @example let test fund form bwf => blip fund form bwf >> out 0
- * @example let t = test 440 1760 880
- * @example stop t
+ * @example
+ * let test fund form bwf => blip fund form bwf >> out 0<br>
+ * let t = test 440 1760 880<br>
+ * stop t
  */
 function formant(fundf,formf,bwf)
 {
@@ -632,9 +640,10 @@ function formant(fundf,formf,bwf)
  * @class impulse
  * @constructor
  * @param freq Frequency
- * @example let test f => impulse f >> out 0
- * @example let t = test 5
- * @example stop t
+ * @example
+ * let test f => impulse f >> out 0<br>
+ * let t = test 5<br>
+ * stop t
  */
 function impulse(freq)
 {
@@ -647,9 +656,10 @@ function impulse(freq)
  * @class white 
  * @constructor
  * @param amp Amplitude of the noise
- * @example let test a => white a >> out 0
- * @example let t = test 1
- * @example stop t
+ * @example
+ * let test a => white a >> out 0<br>
+ * let t = test 1<br>
+ * stop t
  */
 function white(amp)
 {
@@ -667,9 +677,10 @@ function white(amp)
  * @class pink
  * @constructor
  * @param amp Amplitude of the noise
- * @example let test a => pink a >> out 0
- * @example let t = test 1
- * @example stop t
+ * @example
+ * let test a => pink a >> out 0<br>
+ * let t = test 1<br>
+ * stop t
  */
 function pink(amp)
 {
@@ -682,9 +693,10 @@ function pink(amp)
  * @class brown
  * @constructor
  * @param amp Amplitude of the noise
- * @example let test a => brown a >> out 0
- * @example let t = test 1
- * @example stop t
+ * @example
+ * let test a => brown a >> out 0<br>
+ * let t = test 1<br>
+ * stop t
  */
 function brown(amp)
 {
@@ -697,9 +709,10 @@ function brown(amp)
  * @class gray
  * @constructor
  * @param amp Amplitude of the noise
- * @example let test a => gray a >> out 0
- * @example let t = test 1
- * @example stop t
+ * @example
+ * let test a => gray a >> out 0<br>
+ * let t = test 1<br>
+ * stop t
  */
 function gray(amp)
 {
@@ -712,9 +725,10 @@ function gray(amp)
  * @class clipNoise
  * @constructor
  * @param amp Amplitude of the noise
- * @example let test a => clipNoise a >> out 0
- * @example let t = test 1
- * @example stop t
+ * @example
+ * let test a => clipNoise a >> out 0<br>
+ * let t = test 1<br>
+ * stop t
  */
 function clipNoise(amp)
 {
@@ -727,9 +741,10 @@ function clipNoise(amp)
  * @class crackle
  * @constructor
  * @param chaos A parameter of the chaotic function with useful values from just below 1.0 to just above 2.0. Towards 2.0 the sound crackles.
- * @example let test c => crackle c >> out 0
- * @example let t = test 1.5
- * @example stop t
+ * @example
+ * let test c => crackle c >> out 0<br>
+ * let t = test 1.5<br>
+ * stop t
  */
 // fix this?
 function crackle(chaos)
@@ -743,9 +758,10 @@ function crackle(chaos)
  * @class dust
  * @constructor
  * @param density Average number of impulses per second.
- * @example let test d => dust d >> out 0
- * @example let t = test 1.5
- * @example stop t
+ * @example
+ * let test d => dust d >> out 0<br>
+ * let t = test 1.5<br>
+ * stop t
  */
 function dust(density)
 {
@@ -758,9 +774,10 @@ function dust(density)
  * @class noiseN
  * @constructor
  * @param freq Frequency of random number generation
- * @example let test f => noiseN f >> out 0
- * @example let t = test 440
- * @example stop t
+ * @example
+ * let test f => noiseN f >> out 0<br>
+ * let t = test 440<br>
+ * stop t
  */
 function noiseN(freq)
 {
@@ -773,9 +790,10 @@ function noiseN(freq)
  * @class noiseL
  * @constructor
  * @param freq Frequency of random number generation
- * @example let test f => noiseL f >> out 0
- * @example let t = test 440
- * @example stop t
+ * @example
+ * let test f => noiseL f >> out 0<br>
+ * let t = test 440<br>
+ * stop t
  */
 function noiseL(freq)
 {
@@ -788,9 +806,10 @@ function noiseL(freq)
  * @class noiseX
  * @constructor
  * @param freq Frequency of random number generation
- * @example let test f => noiseX f >> out 0
- * @example let t = test 440
- * @example stop t
+ * @example
+ * let test f => noiseX f >> out 0<br>
+ * let t = test 440<br>
+ * stop t
  */
 function noiseX(freq)
 {
@@ -806,9 +825,10 @@ function noiseX(freq)
  * @param a Equation variable
  * @param b Equation variable
  * @param xi Initial value of x
- * @example let test f a b xi => cuspN f a b xi >> out 0
- * @example let t = test 22050 1 1.9 0
- * @example stop t
+ * @example
+ * let test f a b xi => cuspN f a b xi >> out 0<br>
+ * let t = test 22050 1 1.9 0<br>
+ * stop t
  */
 function cuspN(freq,a,b,xi)
 {
@@ -829,9 +849,10 @@ function cuspN(freq,a,b,xi)
  * @param a Equation variable
  * @param b Equation variable
  * @param xi Initial value of x
- * @example let test f a b xi => cuspL f a b xi >> out 0
- * @example let t = test 22050 1 1.9 0
- * @example stop t
+ * @example
+ * let test f a b xi => cuspL f a b xi >> out 0<br>
+ * let t = test 22050 1 1.9 0<br>
+ * stop t
  */
 function cuspL(freq,a,b,xi)
 {
@@ -846,9 +867,10 @@ function cuspL(freq,a,b,xi)
  * @param freq Frequency
  * @param xi Initial value of x
  * @param yi Initial value of y
- * @example let test f xi yi => gbmanN f xi yi >> out 0
- * @example let t = test 22050 1.2 2.1
- * @example stop t
+ * @example
+ * let test f xi yi => gbmanN f xi yi >> out 0<br>
+ * let t = test 22050 1.2 2.1<br>
+ * stop t
  */
 function gbmanN(freq,xi,yi)
 {
@@ -863,9 +885,10 @@ function gbmanN(freq,xi,yi)
  * @param freq Frequency
  * @param xi Initial value of x
  * @param yi Initial value of y
- * @example let test f xi yi => gbmanL f xi yi >> out 0
- * @example let t = test 22050 1.2 2.1
- * @example stop t
+ * @example
+ * let test f xi yi => gbmanL f xi yi >> out 0<br>
+ * let t = test 22050 1.2 2.1<br>
+ * stop t
  */
 function gbmanL(freq,xi,yi)
 {
@@ -879,9 +902,10 @@ function gbmanL(freq,xi,yi)
  * @constructor
  * @param freq Cutoff frequency for the filter
  * @param q Quality of the filter
- * @example let test f q => white 1 >> lowpass f q >> out 0
- * @example let t = test 440 10
- * @example stop t
+ * @example
+ * let test f q => white 1 >> lowpass f q >> out 0<br>
+ * let t = test 440 10<br>
+ * stop t
  */
 function lowpass(freq, q, input)
 {
@@ -900,9 +924,10 @@ function lowpass(freq, q, input)
  * @constructor
  * @param freq Cutoff frequency for the filter
  * @param q Quality of the filter
- * @example let test f q => white 1 >> highpass f q >> out 0
- * @example let t = test 440 10
- * @example stop t
+ * @example
+ * let test f q => white 1 >> highpass f q >> out 0<br>
+ * let t = test 440 10<br>
+ * stop t
  */
 function highpass(freq, q, input)
 {
@@ -916,9 +941,10 @@ function highpass(freq, q, input)
  * @constructor
  * @param freq Cutoff frequency for the filter
  * @param q Quality of the filter
- * @example let test f q => white 1 >> bandpass f q >> out 0
- * @example let t = test 440 10
- * @example stop t
+ * @example
+ * let test f q => white 1 >> bandpass f q >> out 0<br>
+ * let t = test 440 10<br>
+ * stop t
  */
 function bandpass(freq, q, input)
 {
@@ -931,9 +957,10 @@ function bandpass(freq, q, input)
  * @class lag
  * @constructor
  * @param lagtime Ramp time in seconds
- * @example let test lagtime => noiseN 100 >> lag lagtime >> out 0
- * @example let t = test 0.001
- * @example stop t
+ * @example
+ * let test lagtime => noiseN 100 >> lag lagtime >> out 0<br>
+ * let t = test 0.001<br>
+ * stop t
  */
 function lag(lagtime, input)
 {
@@ -946,24 +973,25 @@ function lag(lagtime, input)
  * @class crush
  * @constructor
  * @param bits Bitdepth of resulting signal (1-64)
- * @example let test b => sin 440 >> crush b >> out 0
- * @example let t = test 4
- * @example stop t
+ * @example
+ * let test b => sin 440 >> crush b >> out 0<br>
+ * let t = test 4<br>
+ * stop t
  */
 function crush(bits, input)
 {
 	return multiNewUGen("Decimator", AudioRate, [input,44100,bits], 1, 0);
 }
-
 /**
  * Sample rate reduction on a signal.
  *
  * @class decimate
  * @constructor
  * @param rate Sample rate of resulting signel (1-44100)
- * @example let test r => sin 440 >> decimate r >> out 0
- * @example let t = test 11000
- * @example stop t
+ * @example
+ * let test r => sin 440 >> decimate r >> out 0<br>
+ * let t = test 11000<br>
+ * stop t
  */
 function decimate(rate, input)
 {
@@ -978,9 +1006,10 @@ function decimate(rate, input)
  * @param maxDel Max delay time in seconds
  * @param del Delay time in seconds
  * @param decay Time for the echoes to decay by 60 decibels.
- * @example let test del => impulse 1 >> allpassN del del 1 >> out 0
- * @example let t = test 0.1
- * @example stop t
+ * @example
+ * let test del => impulse 1 >> allpassN del del 1 >> out 0<br>
+ * let t = test 0.1<br>
+ * stop t
  */
 function allpassN(maxDel, del, decay, input)
 {
@@ -1000,9 +1029,10 @@ function allpassN(maxDel, del, decay, input)
  * @param maxDel Max delay time in seconds
  * @param del Delay time in seconds
  * @param decay Time for the echoes to decay by 60 decibels.
- * @example let test del => impulse 1 >> allpassL del del 1 >> out 0
- * @example let t = test 0.1
- * @example stop t
+ * @example
+ * let test del => impulse 1 >> allpassL del del 1 >> out 0<br>
+ * let t = test 0.1<br>
+ * stop t
  */
 function allpassL(maxDel, del, decay, input)
 {
@@ -1017,9 +1047,10 @@ function allpassL(maxDel, del, decay, input)
  * @param maxDel Max delay time in seconds
  * @param del Delay time in seconds
  * @param decay Time for the echoes to decay by 60 decibels.
- * @example let test del => impulse 1 >> allpassC del del 1 >> out 0
- * @example let t = test 0.1
- * @example stop t
+ * @example
+ * let test del => impulse 1 >> allpassC del del 1 >> out 0<br>
+ * let t = test 0.1<br>
+ * stop t
  */
 function allpassC(maxDel, del, decay, input)
 {
@@ -1034,9 +1065,10 @@ function allpassC(maxDel, del, decay, input)
  * @param maxDel Max delay time in seconds
  * @param del Delay time in seconds
  * @param decay Time for the echoes to decay by 60 decibels.
- * @example let test del => impulse 1 >> combN del del 1 >> out 0
- * @example let t = test 0.1
- * @example stop t
+ * @example
+ * let test del => impulse 1 >> combN del del 1 >> out 0<br>
+ * let t = test 0.1<br>
+ * stop t
  */
 function combN(maxDel, del, decay, input)
 {
@@ -1051,9 +1083,10 @@ function combN(maxDel, del, decay, input)
  * @param maxDel Max delay time in seconds
  * @param del Delay time in seconds
  * @param decay Time for the echoes to decay by 60 decibels.
- * @example let test del => impulse 1 >> combL del del 1 >> out 0
- * @example let t = test 0.1
- * @example stop t
+ * @example
+ * let test del => impulse 1 >> combL del del 1 >> out 0<br>
+ * let t = test 0.1<br>
+ * stop t
  */
 function combL(maxDel, del, decay, input)
 {
@@ -1068,9 +1101,10 @@ function combL(maxDel, del, decay, input)
  * @param maxDel Max delay time in seconds
  * @param del Delay time in seconds
  * @param decay Time in seconds for the echoes to decay by 60 decibels.
- * @example let test del => impulse 1 >> combC del del 1 >> out 0
- * @example let t = test 0.1
- * @example stop t
+ * @example
+ * let test del => impulse 1 >> combC del del 1 >> out 0<br>
+ * let t = test 0.1<br>
+ * stop t
  */
 function combC(maxDel, del, decay, input)
 {
@@ -1084,9 +1118,10 @@ function combC(maxDel, del, decay, input)
  * @constructor
  * @param maxDel Max delay time in seconds
  * @param del Delay time in seconds
- * @example let test del => impulse 1 >> delayN del del >> out 0
- * @example let t = test 0.1
- * @example stop t
+ * @example
+ * let test del => impulse 1 >> delayN del del >> out 0<br>
+ * let t = test 0.1<br>
+ * stop t
  */
 function delayN(maxDel, del, input)
 {
@@ -1100,9 +1135,10 @@ function delayN(maxDel, del, input)
  * @constructor
  * @param maxDel Max delay time in seconds
  * @param del Delay time in seconds
- * @example let test del => impulse 1 >> delayL del del >> out 0
- * @example let t = test 0.1
- * @example stop t
+ * @example
+ * let test del => impulse 1 >> delayL del del >> out 0<br>
+ * let t = test 0.1<br>
+ * stop t
  */
 function delayL(maxDel, del, input)
 {
@@ -1116,9 +1152,10 @@ function delayL(maxDel, del, input)
  * @constructor
  * @param maxDel Max delay time in seconds
  * @param del Delay time in seconds
- * @example let test del => impulse 1 >> delayC del del >> out 0
- * @example let t = test 0.1
- * @example stop t
+ * @example
+ * let test del => impulse 1 >> delayC del del >> out 0<br>
+ * let t = test 0.1<br>
+ * stop t
  */
 function delayC(maxDel, del, input)
 {
@@ -1180,8 +1217,9 @@ function _prEnv(levels, times, shape, input, doneAction)
  * @param times The times it takes for the env to move between levels. Should be 1 item less than levels
  * @param shape Either a shape number or string. Some examples: -4, 0, 1, "linear", "squared"
  * @param input Either a ugen or 1
- * @example let test amp => white amp >> env [0,1,0] [1,1] "linear" >> out 0
- * @example test $ random 0.1 1.0
+ * @example 
+ * let test amp => white amp >> env [0,1,0] [1,1] "linear" >> out 0<br>
+ * test $ random 0.1 1.0
  */
 function env(levels, times, shape, input)
 {	
@@ -1202,8 +1240,9 @@ function env(levels, times, shape, input)
  * @param times The times it takes for the env to move between levels. Should be 1 item less than levels
  * @param shape Either a shape number or string. Some examples: -4, 0, 1, "linear", "squared"
  * @param input Either a ugen or 1
- * @example let test f => sin (env2[f,f*2,f] [1,1] "linear" 1) >> env [0,0.3,0] [2,2] "linear" >> out 0
- * @example test $ random 440 880
+ * @example
+ * let test f => sin (env2[f,f*2,f] [1,1] "linear" 1) >> env [0,0.3,0] [2,2] "linear" >> out 0<br
+ * test $ random 440 880
  */
 function env2(levels, times, shape, input)
 {	
@@ -1218,8 +1257,9 @@ function env2(levels, times, shape, input)
  * @param attackTime Time for the envelope to go from 0 to the peak
  * @param peak The highest level the envelope with reach
  * @param decayTime Time for the envelope to go from the peak to 0
- * @example let test amp => white amp >> perc 0 1 1 >> out 0
- * @example test $ random 0.1 1.0
+ * @example
+ * let test amp => white amp >> perc 0 1 1 >> out 0<br>
+ * test $ random 0.1 1.0
  */
 function perc(attackTime, peak, decayTime, input)
 {
@@ -1245,9 +1285,10 @@ function perc2(attackTime, peak, decayTime, input)
  * @class out
  * @constructor
  * @param busNum The bus index to send to
- * @example let test bus => white 1 >> out bus
- * @example let t = test 0
- * @example stop t
+ * @example
+ * let test bus => white 1 >> out bus<br>
+ * let t = test 0<br>
+ * stop t
  */
 function out(busNum, value)
 {

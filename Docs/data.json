@@ -534,7 +534,7 @@
             "namespaces": {},
             "tag": "module",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1242,
+            "line": 1282,
             "description": "Lich.sc UGen bindings."
         },
         "Oscillators": {
@@ -557,7 +557,7 @@
             "module": "Lich.sc UGens",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 629,
+            "line": 637,
             "description": "Oscillators."
         },
         "Noise": {
@@ -581,7 +581,7 @@
             "module": "Lich.sc UGens",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 785,
+            "line": 803,
             "description": "Noise."
         },
         "Chaos": {
@@ -599,7 +599,7 @@
             "module": "Lich.sc UGens",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 858,
+            "line": 880,
             "description": "Chaotic Oscillators."
         },
         "Filters": {
@@ -619,7 +619,7 @@
             "module": "Lich.sc UGens",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 958,
+            "line": 985,
             "description": "Filters."
         },
         "Delays": {
@@ -642,7 +642,7 @@
             "module": "Lich.sc UGens",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1112,
+            "line": 1148,
             "description": "Delays."
         },
         "Envelopes": {
@@ -660,7 +660,7 @@
             "module": "Lich.sc UGens",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1229,
+            "line": 1269,
             "description": "Envelopes."
         },
         "InputOutput": {
@@ -675,7 +675,7 @@
             "module": "Lich.sc UGens",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1242,
+            "line": 1282,
             "description": "Inputs and Outputs"
         }
     },
@@ -701,9 +701,7 @@
                 }
             ],
             "example": [
-                " let test value => dc value >> out 0",
-                " let t = test 1",
-                " stop t"
+                "\nlet test value => dc value >> out 0<br>\nlet t = test 1<br>\nstop t"
             ],
             "submodule": "Oscillators"
         },
@@ -719,7 +717,7 @@
             "submodule": "Oscillators",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 520,
+            "line": 521,
             "description": "A sine wave oscillator.",
             "is_constructor": 1,
             "params": [
@@ -729,9 +727,7 @@
                 }
             ],
             "example": [
-                " let test f => sin f >> out 0",
-                " let t = test 440",
-                " stop t"
+                "\nlet test f => sin f >> out 0<br>\nlet t = test 440<br>\nstop t"
             ]
         },
         "saw": {
@@ -746,7 +742,7 @@
             "submodule": "Oscillators",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 535,
+            "line": 537,
             "description": "A saw wave oscillator.",
             "is_constructor": 1,
             "params": [
@@ -756,9 +752,7 @@
                 }
             ],
             "example": [
-                " let test f => saw f >> out 0",
-                " let t = test 440",
-                " stop t"
+                "\nlet test f => saw f >> out 0<br>\nlet t = test 440<br>\nstop t"
             ]
         },
         "tri": {
@@ -773,7 +767,7 @@
             "submodule": "Oscillators",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 550,
+            "line": 553,
             "description": "A triangle wave oscillator.",
             "is_constructor": 1,
             "params": [
@@ -783,9 +777,7 @@
                 }
             ],
             "example": [
-                " let test f => tri f >> out 0",
-                " let t = test 440",
-                " stop t"
+                "\nlet test f => tri f >> out 0<br>\nlet t = test 440<br>\nstop t"
             ]
         },
         "square": {
@@ -800,7 +792,7 @@
             "submodule": "Oscillators",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 565,
+            "line": 569,
             "description": "A square wave oscillator.",
             "is_constructor": 1,
             "params": [
@@ -810,9 +802,7 @@
                 }
             ],
             "example": [
-                " let test f => square f >> out 0",
-                " let t = test 440",
-                " stop t"
+                "\nlet test f => square f >> out 0<br>\nlet t = test 440<br>\nstop t"
             ]
         },
         "pulse": {
@@ -827,7 +817,7 @@
             "submodule": "Oscillators",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 580,
+            "line": 585,
             "description": "A pulse wave oscillator with variable duty cycle.",
             "is_constructor": 1,
             "params": [
@@ -841,9 +831,7 @@
                 }
             ],
             "example": [
-                " let test f w => pulse f w >> out 0",
-                " let t = test 440 0.2",
-                " stop t"
+                "\nlet test f w => pulse f w >> out 0<br>\nlet t = test 440 0.2<br>\nstop t"
             ]
         },
         "blip": {
@@ -858,7 +846,7 @@
             "submodule": "Oscillators",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 596,
+            "line": 602,
             "description": "An oscillator with a variable number of harmonics of equal amplitude.",
             "is_constructor": 1,
             "params": [
@@ -872,9 +860,7 @@
                 }
             ],
             "example": [
-                " let test f n => blip f n >> out 0",
-                " let t = test 440 5",
-                " stop t"
+                "\nlet test f n => blip f n >> out 0<br>\nlet t = test 440 5<br>\nstop t"
             ]
         },
         "formant": {
@@ -889,7 +875,7 @@
             "submodule": "Oscillators",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 612,
+            "line": 619,
             "description": "Generates a set of harmonics around a formant frequency at a given fundamental frequency.",
             "is_constructor": 1,
             "params": [
@@ -907,9 +893,7 @@
                 }
             ],
             "example": [
-                " let test fund form bwf => blip fund form bwf >> out 0",
-                " let t = test 440 1760 880",
-                " stop t"
+                "\nlet test fund form bwf => blip fund form bwf >> out 0<br>\nlet t = test 440 1760 880<br>\nstop t"
             ]
         },
         "impulse": {
@@ -924,7 +908,7 @@
             "submodule": "Oscillators",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 629,
+            "line": 637,
             "description": "Generates single sample impulses at a frequency.",
             "is_constructor": 1,
             "params": [
@@ -934,9 +918,7 @@
                 }
             ],
             "example": [
-                " let test f => impulse f >> out 0",
-                " let t = test 5",
-                " stop t"
+                "\nlet test f => impulse f >> out 0<br>\nlet t = test 5<br>\nstop t"
             ]
         },
         "white": {
@@ -951,7 +933,7 @@
             "submodule": "Noise",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 644,
+            "line": 653,
             "description": "White noise generator.",
             "is_constructor": 1,
             "params": [
@@ -961,9 +943,7 @@
                 }
             ],
             "example": [
-                " let test a => white a >> out 0",
-                " let t = test 1",
-                " stop t"
+                "\nlet test a => white a >> out 0<br>\nlet t = test 1<br>\nstop t"
             ]
         },
         "pink": {
@@ -978,7 +958,7 @@
             "submodule": "Noise",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 664,
+            "line": 674,
             "description": "Pink noise generator.",
             "is_constructor": 1,
             "params": [
@@ -988,9 +968,7 @@
                 }
             ],
             "example": [
-                " let test a => pink a >> out 0",
-                " let t = test 1",
-                " stop t"
+                "\nlet test a => pink a >> out 0<br>\nlet t = test 1<br>\nstop t"
             ]
         },
         "brown": {
@@ -1005,7 +983,7 @@
             "submodule": "Noise",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 679,
+            "line": 690,
             "description": "Brownian noise generator.",
             "is_constructor": 1,
             "params": [
@@ -1015,9 +993,7 @@
                 }
             ],
             "example": [
-                " let test a => brown a >> out 0",
-                " let t = test 1",
-                " stop t"
+                "\nlet test a => brown a >> out 0<br>\nlet t = test 1<br>\nstop t"
             ]
         },
         "gray": {
@@ -1032,7 +1008,7 @@
             "submodule": "Noise",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 694,
+            "line": 706,
             "description": "Gray noise generator.",
             "is_constructor": 1,
             "params": [
@@ -1042,9 +1018,7 @@
                 }
             ],
             "example": [
-                " let test a => gray a >> out 0",
-                " let t = test 1",
-                " stop t"
+                "\nlet test a => gray a >> out 0<br>\nlet t = test 1<br>\nstop t"
             ]
         },
         "clipNoise": {
@@ -1059,7 +1033,7 @@
             "submodule": "Noise",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 709,
+            "line": 722,
             "description": "Generates noise whose values are either -1 or 1.",
             "is_constructor": 1,
             "params": [
@@ -1069,9 +1043,7 @@
                 }
             ],
             "example": [
-                " let test a => clipNoise a >> out 0",
-                " let t = test 1",
-                " stop t"
+                "\nlet test a => clipNoise a >> out 0<br>\nlet t = test 1<br>\nstop t"
             ]
         },
         "crackle": {
@@ -1086,7 +1058,7 @@
             "submodule": "Noise",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 724,
+            "line": 738,
             "description": "A noise generator based on a chaotic function.",
             "is_constructor": 1,
             "params": [
@@ -1096,9 +1068,7 @@
                 }
             ],
             "example": [
-                " let test c => crackle c >> out 0",
-                " let t = test 1.5",
-                " stop t"
+                "\nlet test c => crackle c >> out 0<br>\nlet t = test 1.5<br>\nstop t"
             ]
         },
         "dust": {
@@ -1113,7 +1083,7 @@
             "submodule": "Noise",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 740,
+            "line": 755,
             "description": "Generates random impulses from 0 to +1.",
             "is_constructor": 1,
             "params": [
@@ -1123,9 +1093,7 @@
                 }
             ],
             "example": [
-                " let test d => dust d >> out 0",
-                " let t = test 1.5",
-                " stop t"
+                "\nlet test d => dust d >> out 0<br>\nlet t = test 1.5<br>\nstop t"
             ]
         },
         "noiseN": {
@@ -1140,7 +1108,7 @@
             "submodule": "Noise",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 755,
+            "line": 771,
             "description": "A stepped random number generator",
             "is_constructor": 1,
             "params": [
@@ -1150,9 +1118,7 @@
                 }
             ],
             "example": [
-                " let test f => noiseN f >> out 0",
-                " let t = test 440",
-                " stop t"
+                "\nlet test f => noiseN f >> out 0<br>\nlet t = test 440<br>\nstop t"
             ]
         },
         "noiseL": {
@@ -1167,7 +1133,7 @@
             "submodule": "Noise",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 770,
+            "line": 787,
             "description": "A linearly interpolated random number generator",
             "is_constructor": 1,
             "params": [
@@ -1177,9 +1143,7 @@
                 }
             ],
             "example": [
-                " let test f => noiseL f >> out 0",
-                " let t = test 440",
-                " stop t"
+                "\nlet test f => noiseL f >> out 0<br>\nlet t = test 440<br>\nstop t"
             ]
         },
         "noiseX": {
@@ -1194,7 +1158,7 @@
             "submodule": "Noise",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 785,
+            "line": 803,
             "description": "A cubic interpolated random number generator",
             "is_constructor": 1,
             "params": [
@@ -1204,9 +1168,7 @@
                 }
             ],
             "example": [
-                " let test f => noiseX f >> out 0",
-                " let t = test 440",
-                " stop t"
+                "\nlet test f => noiseX f >> out 0<br>\nlet t = test 440<br>\nstop t"
             ]
         },
         "cuspN": {
@@ -1221,7 +1183,7 @@
             "submodule": "Chaos",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 800,
+            "line": 819,
             "description": "A non-interpolating sound generator based on the difference equation: x[n+1] = a - b * sqrt(abs(x[n]))",
             "is_constructor": 1,
             "params": [
@@ -1243,9 +1205,7 @@
                 }
             ],
             "example": [
-                " let test f a b xi => cuspN f a b xi >> out 0",
-                " let t = test 22050 1 1.9 0",
-                " stop t"
+                "\nlet test f a b xi => cuspN f a b xi >> out 0<br>\nlet t = test 22050 1 1.9 0<br>\nstop t"
             ]
         },
         "cuspL": {
@@ -1260,7 +1220,7 @@
             "submodule": "Chaos",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 823,
+            "line": 843,
             "description": "A linearly interpolating sound generator based on the difference equation: x[n+1] = a - b * sqrt(abs(x[n]))",
             "is_constructor": 1,
             "params": [
@@ -1282,9 +1242,7 @@
                 }
             ],
             "example": [
-                " let test f a b xi => cuspL f a b xi >> out 0",
-                " let t = test 22050 1 1.9 0",
-                " stop t"
+                "\nlet test f a b xi => cuspL f a b xi >> out 0<br>\nlet t = test 22050 1 1.9 0<br>\nstop t"
             ]
         },
         "gbmanN": {
@@ -1299,7 +1257,7 @@
             "submodule": "Chaos",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 841,
+            "line": 862,
             "description": "A non-interpolating sound generator based on the difference equation: x[n+1] = 1 - y[n] + abs(x[n]); y[n+1] = x[n];",
             "is_constructor": 1,
             "params": [
@@ -1317,9 +1275,7 @@
                 }
             ],
             "example": [
-                " let test f xi yi => gbmanN f xi yi >> out 0",
-                " let t = test 22050 1.2 2.1",
-                " stop t"
+                "\nlet test f xi yi => gbmanN f xi yi >> out 0<br>\nlet t = test 22050 1.2 2.1<br>\nstop t"
             ]
         },
         "gbmanL": {
@@ -1334,7 +1290,7 @@
             "submodule": "Chaos",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 858,
+            "line": 880,
             "description": "A linearly interpolating sound generator based on the difference equation: x[n+1] = 1 - y[n] + abs(x[n]); y[n+1] = x[n];",
             "is_constructor": 1,
             "params": [
@@ -1352,9 +1308,7 @@
                 }
             ],
             "example": [
-                " let test f xi yi => gbmanL f xi yi >> out 0",
-                " let t = test 22050 1.2 2.1",
-                " stop t"
+                "\nlet test f xi yi => gbmanL f xi yi >> out 0<br>\nlet t = test 22050 1.2 2.1<br>\nstop t"
             ]
         },
         "lowpass": {
@@ -1369,7 +1323,7 @@
             "submodule": "Filters",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 875,
+            "line": 898,
             "description": "A low pass filter.",
             "is_constructor": 1,
             "params": [
@@ -1383,9 +1337,7 @@
                 }
             ],
             "example": [
-                " let test f q => white 1 >> lowpass f q >> out 0",
-                " let t = test 440 10",
-                " stop t"
+                "\nlet test f q => white 1 >> lowpass f q >> out 0<br>\nlet t = test 440 10<br>\nstop t"
             ]
         },
         "highpass": {
@@ -1400,7 +1352,7 @@
             "submodule": "Filters",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 896,
+            "line": 920,
             "description": "A high pass filter.",
             "is_constructor": 1,
             "params": [
@@ -1414,9 +1366,7 @@
                 }
             ],
             "example": [
-                " let test f q => white 1 >> highpass f q >> out 0",
-                " let t = test 440 10",
-                " stop t"
+                "\nlet test f q => white 1 >> highpass f q >> out 0<br>\nlet t = test 440 10<br>\nstop t"
             ]
         },
         "bandpass": {
@@ -1431,7 +1381,7 @@
             "submodule": "Filters",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 912,
+            "line": 937,
             "description": "A band pass filter.",
             "is_constructor": 1,
             "params": [
@@ -1445,9 +1395,7 @@
                 }
             ],
             "example": [
-                " let test f q => white 1 >> bandpass f q >> out 0",
-                " let t = test 440 10",
-                " stop t"
+                "\nlet test f q => white 1 >> bandpass f q >> out 0<br>\nlet t = test 440 10<br>\nstop t"
             ]
         },
         "lag": {
@@ -1462,7 +1410,7 @@
             "submodule": "Filters",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 928,
+            "line": 954,
             "description": "Ramp a signal between two values over time.",
             "is_constructor": 1,
             "params": [
@@ -1472,9 +1420,7 @@
                 }
             ],
             "example": [
-                " let test lagtime => noiseN 100 >> lag lagtime >> out 0",
-                " let t = test 0.001",
-                " stop t"
+                "\nlet test lagtime => noiseN 100 >> lag lagtime >> out 0<br>\nlet t = test 0.001<br>\nstop t"
             ]
         },
         "crush": {
@@ -1489,7 +1435,7 @@
             "submodule": "Filters",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 943,
+            "line": 970,
             "description": "Bit crush a signal.",
             "is_constructor": 1,
             "params": [
@@ -1499,9 +1445,7 @@
                 }
             ],
             "example": [
-                " let test b => sin 440 >> crush b >> out 0",
-                " let t = test 4",
-                " stop t"
+                "\nlet test b => sin 440 >> crush b >> out 0<br>\nlet t = test 4<br>\nstop t"
             ]
         },
         "decimate": {
@@ -1516,7 +1460,7 @@
             "submodule": "Filters",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 958,
+            "line": 985,
             "description": "Sample rate reduction on a signal.",
             "is_constructor": 1,
             "params": [
@@ -1526,9 +1470,7 @@
                 }
             ],
             "example": [
-                " let test r => sin 440 >> decimate r >> out 0",
-                " let t = test 11000",
-                " stop t"
+                "\nlet test r => sin 440 >> decimate r >> out 0<br>\nlet t = test 11000<br>\nstop t"
             ]
         },
         "allpassN": {
@@ -1543,7 +1485,7 @@
             "submodule": "Delays",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 973,
+            "line": 1001,
             "description": "An allpass delay line with no interpolation.",
             "is_constructor": 1,
             "params": [
@@ -1561,9 +1503,7 @@
                 }
             ],
             "example": [
-                " let test del => impulse 1 >> allpassN del del 1 >> out 0",
-                " let t = test 0.1",
-                " stop t"
+                "\nlet test del => impulse 1 >> allpassN del del 1 >> out 0<br>\nlet t = test 0.1<br>\nstop t"
             ]
         },
         "allpassL": {
@@ -1578,7 +1518,7 @@
             "submodule": "Delays",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 995,
+            "line": 1024,
             "description": "An allpass delay line with linear interpolation.",
             "is_constructor": 1,
             "params": [
@@ -1596,9 +1536,7 @@
                 }
             ],
             "example": [
-                " let test del => impulse 1 >> allpassL del del 1 >> out 0",
-                " let t = test 0.1",
-                " stop t"
+                "\nlet test del => impulse 1 >> allpassL del del 1 >> out 0<br>\nlet t = test 0.1<br>\nstop t"
             ]
         },
         "allpassC": {
@@ -1613,7 +1551,7 @@
             "submodule": "Delays",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1012,
+            "line": 1042,
             "description": "An allpass delay line with cubic interpolation.",
             "is_constructor": 1,
             "params": [
@@ -1631,9 +1569,7 @@
                 }
             ],
             "example": [
-                " let test del => impulse 1 >> allpassC del del 1 >> out 0",
-                " let t = test 0.1",
-                " stop t"
+                "\nlet test del => impulse 1 >> allpassC del del 1 >> out 0<br>\nlet t = test 0.1<br>\nstop t"
             ]
         },
         "combN": {
@@ -1648,7 +1584,7 @@
             "submodule": "Delays",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1029,
+            "line": 1060,
             "description": "A comb delay line with no interpolation.",
             "is_constructor": 1,
             "params": [
@@ -1666,9 +1602,7 @@
                 }
             ],
             "example": [
-                " let test del => impulse 1 >> combN del del 1 >> out 0",
-                " let t = test 0.1",
-                " stop t"
+                "\nlet test del => impulse 1 >> combN del del 1 >> out 0<br>\nlet t = test 0.1<br>\nstop t"
             ]
         },
         "combL": {
@@ -1683,7 +1617,7 @@
             "submodule": "Delays",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1046,
+            "line": 1078,
             "description": "A comb delay line with linear interpolation.",
             "is_constructor": 1,
             "params": [
@@ -1701,9 +1635,7 @@
                 }
             ],
             "example": [
-                " let test del => impulse 1 >> combL del del 1 >> out 0",
-                " let t = test 0.1",
-                " stop t"
+                "\nlet test del => impulse 1 >> combL del del 1 >> out 0<br>\nlet t = test 0.1<br>\nstop t"
             ]
         },
         "combC": {
@@ -1718,7 +1650,7 @@
             "submodule": "Delays",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1063,
+            "line": 1096,
             "description": "A comb delay line with cubic interpolation.",
             "is_constructor": 1,
             "params": [
@@ -1736,9 +1668,7 @@
                 }
             ],
             "example": [
-                " let test del => impulse 1 >> combC del del 1 >> out 0",
-                " let t = test 0.1",
-                " stop t"
+                "\nlet test del => impulse 1 >> combC del del 1 >> out 0<br>\nlet t = test 0.1<br>\nstop t"
             ]
         },
         "delayN": {
@@ -1753,7 +1683,7 @@
             "submodule": "Delays",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1080,
+            "line": 1114,
             "description": "A simple delay with no interpolation.",
             "is_constructor": 1,
             "params": [
@@ -1767,9 +1697,7 @@
                 }
             ],
             "example": [
-                " let test del => impulse 1 >> delayN del del >> out 0",
-                " let t = test 0.1",
-                " stop t"
+                "\nlet test del => impulse 1 >> delayN del del >> out 0<br>\nlet t = test 0.1<br>\nstop t"
             ]
         },
         "delayL": {
@@ -1784,7 +1712,7 @@
             "submodule": "Delays",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1096,
+            "line": 1131,
             "description": "A simple delay with linear interpolation.",
             "is_constructor": 1,
             "params": [
@@ -1798,9 +1726,7 @@
                 }
             ],
             "example": [
-                " let test del => impulse 1 >> delayL del del >> out 0",
-                " let t = test 0.1",
-                " stop t"
+                "\nlet test del => impulse 1 >> delayL del del >> out 0<br>\nlet t = test 0.1<br>\nstop t"
             ]
         },
         "delayC": {
@@ -1815,7 +1741,7 @@
             "submodule": "Delays",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1112,
+            "line": 1148,
             "description": "A simple delay with cubic interpolation.",
             "is_constructor": 1,
             "params": [
@@ -1829,9 +1755,7 @@
                 }
             ],
             "example": [
-                " let test del => impulse 1 >> delayC del del >> out 0",
-                " let t = test 0.1",
-                " stop t"
+                "\nlet test del => impulse 1 >> delayC del del >> out 0<br>\nlet t = test 0.1<br>\nstop t"
             ]
         },
         "env": {
@@ -1846,7 +1770,7 @@
             "submodule": "Envelopes",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1175,
+            "line": 1212,
             "description": "Envelope generator. Used for amplitude envelopes, will automatically free the synth when finished.",
             "is_constructor": 1,
             "params": [
@@ -1868,8 +1792,7 @@
                 }
             ],
             "example": [
-                " let test amp => white amp >> env [0,1,0] [1,1] \"linear\" >> out 0",
-                " test $ random 0.1 1.0"
+                " \nlet test amp => white amp >> env [0,1,0] [1,1] \"linear\" >> out 0<br>\ntest $ random 0.1 1.0"
             ]
         },
         "env2": {
@@ -1884,7 +1807,7 @@
             "submodule": "Envelopes",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1197,
+            "line": 1235,
             "description": "Envelope generator. Used for amplitude envelopes, will NOT automatically free the synth when finished.",
             "is_constructor": 1,
             "params": [
@@ -1906,8 +1829,7 @@
                 }
             ],
             "example": [
-                " let test f => sin (env2[f,f*2,f] [1,1] \"linear\" 1) >> env [0,0.3,0] [2,2] \"linear\" >> out 0",
-                " test $ random 440 880"
+                "\nlet test f => sin (env2[f,f*2,f] [1,1] \"linear\" 1) >> env [0,0.3,0] [2,2] \"linear\" >> out 0<br\ntest $ random 440 880"
             ]
         },
         "perc": {
@@ -1922,7 +1844,7 @@
             "submodule": "Envelopes",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1214,
+            "line": 1253,
             "description": "Envelope generator. Used for amplitude envelopes, will automatically free the synth when finished.",
             "is_constructor": 1,
             "params": [
@@ -1940,8 +1862,7 @@
                 }
             ],
             "example": [
-                " let test amp => white amp >> perc 0 1 1 >> out 0",
-                " test $ random 0.1 1.0"
+                "\nlet test amp => white amp >> perc 0 1 1 >> out 0<br>\ntest $ random 0.1 1.0"
             ]
         },
         "perc2": {
@@ -1956,7 +1877,7 @@
             "submodule": "Envelopes",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1229,
+            "line": 1269,
             "description": "Envelope generator. Used for amplitude envelopes, will NOT automatically free the synth when finished.",
             "is_constructor": 1,
             "params": [
@@ -1986,7 +1907,7 @@
             "submodule": "InputOutput",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1242,
+            "line": 1282,
             "description": "Send a signal to an output bus.",
             "is_constructor": 1,
             "params": [
@@ -1996,9 +1917,7 @@
                 }
             ],
             "example": [
-                " let test bus => white 1 >> out bus",
-                " let t = test 0",
-                " stop t"
+                "\nlet test bus => white 1 >> out bus<br>\nlet t = test 0<br>\nstop t"
             ]
         }
     },
