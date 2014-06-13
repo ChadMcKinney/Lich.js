@@ -62,7 +62,7 @@
 (defun lich-setup-process ()
   "Sets up the lichi process for lich-mode, assumes node is in path, and the Lich.js folder is in lich-path"
   
-  (setq lich-process (start-process "lich-process" "*lich-post*" "node" (concat lich-path "Lich.js\\Local\\lichi-win.js")) )
+  (setq lich-process (start-process "lich-process" "*lich-post*" "node" (concat lich-path "Lich.js\\Local\\lichi.js")) )
   (set-process-query-on-exit-flag lich-process nil ))
 
 
