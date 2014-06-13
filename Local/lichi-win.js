@@ -5,10 +5,10 @@ var fs = require('fs');
 var readline = require('readline');
 
 try {
-  process.chdir(__dirname);
+    process.chdir(__dirname);
 }
 catch (err) {
-  console.log('chdir: ' + err);
+    console.log('chdir: ' + err);
 }
 
 // jison adds node.js code to compile files, but we don't need this in interactive mode, so we're going to strip it out.
@@ -20,13 +20,13 @@ interactiveParser = interactiveParser.substring(0, interactiveParser.indexOf(fil
 eval(interactiveParser);
 
 eval(
-	fs.readFileSync("../Compiler/Objects.js") + "" + fs.readFileSync("../Compiler/VM.js") 
+    fs.readFileSync("../Compiler/Objects.js") + "" + fs.readFileSync("../Compiler/VM.js") 
 	+ fs.readFileSync("../Compiler/Compiler.js") + fs.readFileSync("../Parser/ParseUtility.js") 
 	+ fs.readFileSync("../Parser/Types.js")
 );
 
 eval(
-	fs.readFileSync("../Parser/Lexeme.js") + "" + fs.readFileSync("../Parser/preL.js")
+    fs.readFileSync("../Parser/Lexeme.js") + "" + fs.readFileSync("../Parser/preL.js")
 	+ fs.readFileSync("../Parser/iterL.js") + fs.readFileSync("../Parser/parse.js")
 );
 
@@ -37,40 +37,42 @@ post = console.log;
 Lich.post = console.log;
 console.log("{- Lich.js -}\n");
 
+
+
 _compile = function(lc)
 {
-	try
+    try
+    {
+	var ast = Lich.parse(lc);
+	var res = Lich.compileAST(ast);
+	
+	if(res instanceof Array)
 	{
-		var ast = Lich.parse(lc);
-		var res = Lich.compileAST(ast);
-		
-		if(res instanceof Array)
-		{
-			for(var i = 0; i < res.length; ++i)
-			{
-				eval(res[i]);
-			}
-		}
-
-		else
-		{
-			eval(res);
-		}
-
-		return res;
+	    for(var i = 0; i < res.length; ++i)
+	    {
+		eval(res[i]);
+	    }
 	}
 
-	catch(e)
+	else
 	{
-		console.log(e);
-		return "";
+	    eval(res);
 	}
+
+	return res;
+    }
+
+    catch(e)
+    {
+	console.log(e);
+	return "";
+    }
 }
 
 _quit = function()
 {
-	console.log('Exiting Lich.js ...');
-  	process.exit(0);
+    console.log('Exiting Lich.js ...');
+    process.exit(0);
 }
 
 var readline = require('readline'),
@@ -81,17 +83,36 @@ rl.setPrompt('');
 rl.prompt();
 
 rl.on('line', function(line) {
-	switch(line.trim()) {
-		case ':quit':
-    	case 'exit':
+    switch(line.trim()) {
+    case '':
+	break;
+    case '\n':
+	break;
+    case 'freeAll':
+	freeAll();
+	break;
+    case ':quit':
+    case 'exit':
       	_quit();
       	break;
     default:
-    	_compile(line.trim());
+    	_compile(replaceEscapeSequences(line.trim()));
     	break;
     }
-
-	rl.prompt();
+    
+    rl.prompt();
 }).on('close', function() {
-  	_quit();
+    _quit();
 });
+
+//Replace readline with Chad's different method
+//This is needed for multi-line input
+function replaceEscapeSequences(s)
+{
+    var newString = s.replace(/\f/g,"\n");
+
+    console.log("Replaced string: ");
+    console.log(newString);
+    
+    return newString;
+}
