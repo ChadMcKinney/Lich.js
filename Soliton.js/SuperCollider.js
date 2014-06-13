@@ -1179,7 +1179,8 @@ function _prEnv(levels, times, shape, input, doneAction)
  * @param levels The levels that the envelope will move through
  * @param times The times it takes for the env to move between levels. Should be 1 item less than levels
  * @param shape Either a shape number or string. Some examples: -4, 0, 1, "linear", "squared"
- * @param input The input will be scaled according to the envelope. This can be a ugen or number.
+ * @example let test amp => white amp >> env [0,1,0] [1,1] "linear" >> out 0
+ * @example test $ random 0.1 1.0
  */
 function env(levels, times, shape, input)
 {	
@@ -1199,7 +1200,6 @@ function env(levels, times, shape, input)
  * @param levels The levels that the envelope will move through
  * @param times The times it takes for the env to move between levels. Should be 1 item less than levels
  * @param shape Either a shape number or string. Some examples: -4, 0, 1, "linear", "squared"
- * @param input The input will be scaled according to the envelope. This can be a ugen or number.
  */
 function env2(levels, times, shape, input)
 {	
@@ -1214,7 +1214,8 @@ function env2(levels, times, shape, input)
  * @param attackTime Time for the envelope to go from 0 to the peak
  * @param peak The highest level the envelope with reach
  * @param decayTime Time for the envelope to go from the peak to 0
- * @param input The input will be scaled according to the envelope. This can be a ugen or number.
+ * @example let test amp => white amp >> perc 0 1 1 >> out 0
+ * @example test $ random 0.1 1.0
  */
 function perc(attackTime, peak, decayTime, input)
 {
@@ -1228,7 +1229,6 @@ function perc(attackTime, peak, decayTime, input)
  * @param attackTime Time for the envelope to go from 0 to the peak
  * @param peak The highest level the envelope with reach
  * @param decayTime Time for the envelope to go from the peak to 0
- * @param input The input will be scaled according to the envelope. This can be a ugen or number.
  */
 function perc2(attackTime, peak, decayTime, input)
 {

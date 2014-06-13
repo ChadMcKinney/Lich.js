@@ -660,7 +660,7 @@
             "module": "Lich.sc UGens",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1224,
+            "line": 1225,
             "description": "Envelopes."
         },
         "InputOutput": {
@@ -1861,11 +1861,11 @@
                 {
                     "name": "shape",
                     "description": "Either a shape number or string. Some examples: -4, 0, 1, \"linear\", \"squared\""
-                },
-                {
-                    "name": "input",
-                    "description": "The input will be scaled according to the envelope. This can be a ugen or number."
                 }
+            ],
+            "example": [
+                " let test amp => white amp >> env [0,1,0] [1,1] \"linear\" >> out 0",
+                " test $ random 0.1 1.0"
             ]
         },
         "env2": {
@@ -1880,7 +1880,7 @@
             "submodule": "Envelopes",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1195,
+            "line": 1196,
             "description": "Envelope generator. Used for amplitude envelopes, will NOT automatically free the synth when finished.",
             "is_constructor": 1,
             "params": [
@@ -1895,10 +1895,6 @@
                 {
                     "name": "shape",
                     "description": "Either a shape number or string. Some examples: -4, 0, 1, \"linear\", \"squared\""
-                },
-                {
-                    "name": "input",
-                    "description": "The input will be scaled according to the envelope. This can be a ugen or number."
                 }
             ]
         },
@@ -1929,11 +1925,11 @@
                 {
                     "name": "decayTime",
                     "description": "Time for the envelope to go from the peak to 0"
-                },
-                {
-                    "name": "input",
-                    "description": "The input will be scaled according to the envelope. This can be a ugen or number."
                 }
+            ],
+            "example": [
+                " let test amp => white amp >> perc 0 1 1 >> out 0",
+                " test $ random 0.1 1.0"
             ]
         },
         "perc2": {
@@ -1948,7 +1944,7 @@
             "submodule": "Envelopes",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1224,
+            "line": 1225,
             "description": "Envelope generator. Used for amplitude envelopes, will NOT automatically free the synth when finished.",
             "is_constructor": 1,
             "params": [
@@ -1963,10 +1959,6 @@
                 {
                     "name": "decayTime",
                     "description": "Time for the envelope to go from the peak to 0"
-                },
-                {
-                    "name": "input",
-                    "description": "The input will be scaled according to the envelope. This can be a ugen or number."
                 }
             ]
         },
