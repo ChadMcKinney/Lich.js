@@ -1241,7 +1241,7 @@ function env(levels, times, shape, input)
  * @param shape Either a shape number or string. Some examples: -4, 0, 1, "linear", "squared"
  * @param input Either a ugen or 1
  * @example
- * let test f => sin (env2[f,f*2,f] [1,1] "linear" 1) >> env [0,0.3,0] [2,2] "linear" >> out 0<br
+ * let test f => sin (env2[f,f*2,f] [1,1] "linear" 1) >> env [0,0.3,0] [2,2] "linear" >> out 0<br>
  * test $ random 440 880
  */
 function env2(levels, times, shape, input)
