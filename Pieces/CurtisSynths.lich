@@ -110,7 +110,7 @@ iceChords3 ~> ice10
     | (d2f prometheus)
     
 
-let ice10 freqq => osc >> dec >> filt >> panner >> delay 0.25 0.5 >> gain 0.1 >> myenv
+let ice10 freqq => osc >> dec >> filt >> fold 0.25 >> panner >> delay 0.25 0.5 >> gain 0.05 >> myenv
     where
         freq	= freqq * 2
         myenv	= perc 1 0.6 4
@@ -133,7 +133,7 @@ stop iceChords3
 stop spinTime2
 
 
-let us => osc freq >> filt >> gain 0.5 >> panner  >> myEnv
+let us => osc freq >> filt >> fold 0.25 >> gain 0.3 >> panner  >> myEnv
     where
         osc f = (saw (f/2)) + (saw (f*0.99)) + (saw (f*1.01))
         peak = rand 0.15 0.3
@@ -157,7 +157,7 @@ let us => osc freq >> filt >> gain 0.5 >> panner  >> myEnv
         filt = lowpass (myEnv (freq * (rand 3 6))) 15
         panner	= pan $ random (-0.5) 0.5
 
-let us2 => osc freq >> filt >> gain 0.5 >> panner >> myEnv
+let us2 => osc freq >> filt >> fold 0.25 >> gain 0.3 >> panner >> myEnv
     where
         osc f = (tri f) + (tri (f*0.99)) + (tri (f*1.01))
         dur = rand 0.1 0.3
@@ -257,3 +257,272 @@ uSnrer +>
     [_ uSnr] uSnr uSnr _
     _ uSnr uSnr _
 stop oSnrer
+
+-- ambient-- ambient
+let dronezzz f p => o + m >> d >> i >> gain 2 >> v >> pan p >> e
+    where
+        m = sin 0.1 + sin (rand 0.05 0.1)
+        o = sin f + sin (f*2.001) + sin (f*2.499) + sin (f*0.999) + sin (f*1.001) + sin (f*0.501)
+        d = clip 0.95
+        i = lowpass (f*1* (sin (rand 0.0.05 0.1) >> range 0.25 1)) 0.125
+        v = reverb 0.5 200 3 0.5
+        e = env [0,1,1,0] [3,360,3] "linear"
+
+let mel f => o >> clip 0.1 >> gain 8 >> i >> v >> e >> auxOut 0
+    where
+        m = (tri 0.1 + tri (rand 0.05 0.1)) >> range 0.99 1.01
+        n = (tri 0.1 + tri (rand 0.05 0.1)) >> range 0.99 1.01
+        o = tri (f*m) + (tri (f*n*2) >> gain 0.5)
+        r = env2 [0,1,0.5,0.1] [0.1,0.75,3] "linear"
+        i = lowpass (f*16 >> r) 3
+        v = reverb 0.5 100 2 0.5
+        e = env [0,1,0.25,0] [0.1,0.75,3] "linear"
+
+let drone1 = dronezzz (d2f coleJI (-24)) (-0.75) >> play
+let drone2 = dronezzz (d2f coleJI (-24)) 0.75 >> play
+
+let delaySynth = play $ delay 0.9 0.4999 $ auxIn 0
+stop delaySynth
+
+melody ~> mel 
+    [4 2] 7 [5 3] _ _
+    0 _  _ 0 3
+    
+    [4 2] 7 [5 3] _ _
+    0 _  _ 0 _  _ 0 3 
+    
+    8 _ 8 _ _
+    _ 4 _ 3 
+    
+    6 _ 6 _ _
+    _ 4 _ 3
+    
+    | (d2f coleJI) | (*4)
+    
+melody2 ~> mel
+    _ 0 _ _ _
+    0 _ _ _ _
+    
+    _ 0 _ _ _
+    0 _ _ _ _
+    
+    0 _ _ _ _
+    _ 0 _ _
+    
+    0 _ _ _ _
+    _ 0 _ _
+    | (d2f coleJI . (- 24)) | (*4)
+
+melody >> stop
+melody2 >> stop
+
+-- Define synths
+let dissonance f => o >> g >> i >> gain 16 >> p >> gain 4 >> e >> auxOut 0
+    where
+        d = fold $ rand 0.05 0.1
+        i = fold 0.7
+        m = sin (f * (rand 0.025 0.05)) >> gain 1000
+        n = sin (f * (rand 0.25 0.5)) >> gain 1000
+        o = sin $ f + ( (m + n) >> d ) * (sin (rand 0.2 0.4) >> range 0.5 1.5)
+        g = gain $ sin (rand 0.25 1) >> d
+        p = pan $ rand (-1) 1
+        e = perc 6 0.1 6
+        
+let lowContra f => o >> d >> i >> g >> p >> gain 2 >> e >> auxOut 0
+    where
+        o = saw f + saw (f * (rand 0.98 1.02)) + saw (f * (rand 0.98 1.02)) + saw (f * (rand 0.98 1.02))
+        i = lowpass (f * (rand 2 4)) $ 3
+        g = gain (saw (rand 0.05 0.1) >> range 0.75 1)
+        d = fold $ rand 0.1 0.2
+        e = env [0,1,1,0] [12,60,12] 0
+        p = pan $ rand (-1) 1
+
+let hit f => n >> \x -> (i x * 0.05) + (b*0.5) >> gain 4 >> e >> auxOut 1
+    where
+        b = sin (f*0.1249) + sin (f*0.25) + sin (f*0.25)
+        n = white 0.5
+        bf m i = bandpass (f*m*32) 18 i
+        i s = bf 4 s + bf 2.1 s + bf 3.5 s + bf 5.25 s >> highpass (f*32) 1 >> lowpass (f*64) 1 >> gain 1
+        e = perc 0.01 0.5 0.125
+        
+let lowDissonance f => o >> g >> gain 16 >> p >> gain 0.2 >> e >> auxOut 0
+    where
+        d = fold $ rand 0.05 0.1
+        m = sin (f * (rand 0.025 0.05)) >> gain 1000
+        n = sin (f * (rand 0.25 0.5)) >> gain 1000
+        o = sin $ f + ( (m + n) >> d ) * (sin (rand 0.05 0.1) >> range 0.5 1.5)
+        g = gain $ sin (rand 0.25 1) >> d
+        p = pan $ rand (-1) 1
+        e = env [0,1,1,0] [6,180,6] 0
+        
+let feedIAM p f => o (f*2) + o f + o 5 + o 10 >> i 200 >> gain 0.25 >> fold 0.05 >> gain 20 >> i 800 >> d >> auxThrough 2 >> gain 0.125  >> v >> pan p >> e
+    where
+        feed = (auxIn 2) * 20
+        m f = square (feed * f * 0.05) >> gain 10
+        o f = square $ f + m f + feed * (square 10 >> range 1 6)
+        i f = bandpass (noiseX 3 >> range (f*0.5) (f*4)) 0.5
+        e = env [0,1,1,0] [0.001,60,6] 0
+        d = delay 0.25 0.4
+        v = reverb 0.25 200 1 1
+        
+let mergeVerse f => o >> distortion 10 >> gain 1 >> i >> p >> e >> auxOut 3
+    where
+        o = sin f + sin (f*0.99*(square 0.333>>range 0.5 1)) + sin (f*1.01*(square 0.333>>range 0.5 1)) + sin (f*0.5*(square 0.333>>range 0.5 1)) + sin (f*0.499*(square 0.333>>range 0.5 1))
+        e2 = env2 [0.0001,1,1,0.0001] [6,0.01,6] "exp"
+        i = lowpass (f*16 >> e2) 3
+        e = env [0.0001,1,1,0.0001] [6,0.01,6] "exp"
+        p = pan $ rand (-1) 1
+
+-- Reverb aux synths
+let percVerb = auxIn 1 >> reverb 1 50 5 0 >> gain 2 >> auxThrough 2 >> gain 0.125  >> play
+let reverberator = auxIn 0 >> reverb 0.5 100 3 0.5 >> gain 0.25 >> play
+let reverberator2 = auxIn 3 >> reverb 0.5 100 1 0.5 >> gain 0.25 >> play
+
+-- section 1
+map play $ map lowContra $ foldl (++) [] $ map (replicate 4) [100,105,200,210,49,56]
+map play $ map dissonance $ [rand 1000 3000,rand 1000 3000,rand 1000 3000]
+map play $ map mergeVerse $ map (*0.5) [400,420,600,200,210,105,100,800]
+
+
+-- section 2
+map play $ map hit [500,250,100,200,250,50]
+map play $ map lowDissonance $ [300,250,275]
+
+-- Next Level
+map play $ map hit [500,250,100,200,250] ++ [feedIAM 0 300,feedIAM (-0.95) 1000,feedIAM 0.95 900,feedIAM 0.5 1100,feedIAM (-0.5) 1200]
+
+-- ambient-- ambient
+let dronezzz f => sig f 1 -1 + sig f 2 1 + sig f 2 -1 + sig f 1 1 >> v >> lowshelf f 9 >> gain 0.15 >> e
+    where
+        v = reverb 1 300 3 1
+        e = env [0,1,0.5,0] [3,0.75,6] "linear"
+        sig f fm p = (o + m) >> fold 0.95 >> i >> gain 0.75 >> pan p
+            where
+                m = sin f + (sin (rand 0.25 0.75) * rand 0.5 1)
+                o = sin f + sin (f*2.0001) + sin (f*2.4999) + sin (f*0.999) + sin (f*1.0001) + sin (f*0.5010)
+                i = lowpass (f*fm* (sin (rand 0.05 0.1) >> range 0.125 1)) 1
+
+let mel f => o >> clip 0.15 >> gain 1.75 >> i >> pan (rand (-0.25) 0.25) >> v >> e >> auxOut 0
+    where
+        m = (tri 0.1 + tri (rand 0.05 0.1)) >> range 0.99 1.01
+        n = (tri 0.1 + tri (rand 0.05 0.1)) >> range 0.99 1.01
+        o = tri (f*m) + (tri (f*n*2) >> gain 0.5)
+        r = env2 [0,1,0.5,0.1] [0.1,1,4] "linear"
+        i = lowpass (f*36 >> r) 4
+        v = reverb 0.5 100 2 0.5
+        e = env [0,1,0.175,0] [0.1,1,4] "linear"
+        
+let chorder f => ((o >> pan (-1)) + (o2 >> pan (1)) ) + sin (f*0.25) >> i >> gain 0.025 >> e >> auxOut 0
+    where
+        o = tri (f*1.001) + sin (f*0.499) + sin (f*0.251) + tri (f*2.001)
+        o2 = tri (f*0.999) + sin (f*0.501) + sin (f*0.249) + tri (f*1.999)
+        r = env2 [0,1,0.5,0.1] [3,0.75,6] "linear"
+        e = env [0,1,0.5,0] [3,0.75,6] "linear"
+        i = lowpass (f*32 * (saw (tempoSeconds*6) >> range 0.125 1) >> r) 24
+        
+        
+let droneHit f => n >> \x -> (i x * 0.1) + (b*0.5) >> lowshelf f 6 >> gain 4 >> e >> auxOut 1
+    where
+        b = sin (f*0.1249) + sin (f*0.12501) + sin (f*0.25) + sin (f*0.25)
+        n = white 0.5
+        bf m i = bandpass (f*m*32) 18 i
+        i s = bf 4 s + bf 2.1 s + bf 3.5 s + bf 5.25 s >> highpass (f*32) 1 >> lowpass (f*64) 1 >> gain 1
+        e = perc 0.01 0.5 0.125
+        
+let wave f => sig f 1 -1 + sig f 2 1 + sig f 3 -1 + sig f 4 1 >> i >> gain 0.075 >> v >> e >> auxOut 0
+    where
+        v = reverb 0.5 100 5 0.1
+        e = env [0,1,0] [10,3] "linear"
+        r = env2 [0,1,0] [10,3] "linear"
+        i = lowpass (f*36 >> r) 4
+        sig f fm p = o >> pan p
+            where
+                m = stepper 0 4 1 $ impulse $ fm * rand 0.9 1.1
+                o = saw (f * m)
+            
+wave (d2f coleJI -24) >> play
+wave (d2f coleJI 4) >> play
+wave (d2f coleJI -5) >> play
+
+let delaySynth =  auxIn 0 >> delay 0.9 0.4999 >> play
+stop delaySynth
+
+let percVerb = auxIn 1 >> reverb 1 50 20 1 >> gain 0.25 >> play
+stop percVerb
+
+waves ~> wave
+    [-24 4 -5] _ _ _ _
+    _ _ _ _ _
+    
+    _ _ _ _ _
+    _ _ _ _ _ _ _ _
+    
+    _ _ _ _ _
+    _ _ _ _ 
+    
+    _ _ _ _ _
+    _ _ _ _
+    | (d2f coleJI) | (*4)
+
+hits ~> droneHit
+    0 _ _ _ _
+    _ _ _ _ _
+    
+    _ _ _ _ _
+    _ _ _ _ _ _ _ _
+    
+    0 _ _ _ _
+    _ _ _ _ 
+    
+    _ _ _ _ _
+    _ _ _ _
+    | (d2f coleJI) | (*4)
+
+drones ~> dronezzz
+    -24 _ _ _ _
+    _ _ _ _ _
+    
+    _ _ _ _ _
+    _ _ _ _ _ _ _ _ 
+    
+    -16 _ _ _ _
+    _ _ _ _ 
+    
+    -21 _ _ _ _
+    _ _ _ _
+    | (d2f coleJI) | (*4)
+
+chords ~> chorder
+    [0 16 7 12] _ _ _ _
+    _ _ _ _ _
+    24 _ _ _ _
+    _ _ _ _ _ _ _ _
+    
+    [8 -16] _ _ _ _
+    _ _ _ _
+    
+    [15 3] _ _ _ _
+    _ _ _ _
+    | (d2f coleJI . (- 0)) | (*4)
+
+melody ~> mel 
+    [4 2] 7 [5 3] _ _
+    0 _  _ 0 3
+    
+    [4 2] 7 [5 3] _ _
+    0 _  _ 0 _  _ 0 3 
+    
+    8 _ 8 _ _
+    _ 4 _ 3 
+    
+    6 _ 6 _ _
+    _ 3 _ 3
+    | (d2f coleJI) | (*4)
+
+melody >> stop
+
+stop drones
+stop waves
+stop hits
+stop chords
+stop melody
