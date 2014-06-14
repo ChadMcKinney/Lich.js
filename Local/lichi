@@ -4,6 +4,15 @@
 var fs = require('fs');
 var readline = require('readline');
 
+//Make sure we are in the correct directory, since we are using relative paths here.
+try {
+  process.chdir(__dirname);
+}
+catch (err) {
+  console.log('chdir: ' + err);
+}
+
+
 // jison adds node.js code to compile files, but we don't need this in interactive mode, so we're going to strip it out.
 var fileCompileString = "if (typeof require !== \'undefined\' && typeof exports !== \'undefined\') {";
 var interactiveParser = fs.readFileSync("../Parser/LichParser.js")+"";
@@ -23,7 +32,7 @@ eval(
 	+ fs.readFileSync("../Parser/iterL.js") + fs.readFileSync("../Parser/parse.js")
 );
 
-eval(fs.readFileSync("../Library/Prelude.js") + "");
+eval(fs.readFileSync("../Library/Prelude.js") + "" + fs.readFileSync("../Soliton.js/SuperCollider.js") + "" + fs.readFileSync("../Soliton.js/Patterns.js") + "");
 
 // Overwrite global printing so that we can use the console instead of the DOM.
 post = console.log;
@@ -66,6 +75,7 @@ _quit = function()
   	process.exit(0);
 }
 
+/*
 var readline = require('readline'),
 rl = readline.createInterface(process.stdin, process.stdout);
 
@@ -86,4 +96,27 @@ rl.on('line', function(line) {
 	rl.prompt();
 }).on('close', function() {
   	_quit();
-});
+});*/
+
+
+process.stdin.setEncoding('utf8');
+
+process.stdin.on('readable', function() {
+    var chunk = process.stdin.read();
+	
+  	if(chunk !== null)
+	{
+		chunk = chunk.toString();
+  	    switch(chunk)
+	 	{
+  	 	case ':quit':
+		case ':q':
+    	case 'exit':
+      	    _quit();
+      		break;
+	    default:
+    	    _compile(chunk);
+    		break;
+		}
+	}
+})

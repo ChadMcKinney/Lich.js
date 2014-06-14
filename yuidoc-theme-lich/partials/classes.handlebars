@@ -1,0 +1,47 @@
+<h1>{{name}}</h1>
+{{#if deprecated}}
+    <div class="box deprecated">
+        <p>
+        {{#if deprecationMessage}}
+            <strong>Deprecated:</strong> {{deprecationMessage}}
+        {{else}}
+            This class is deprecated.
+        {{/if}}
+        </p>
+    </div>
+{{/if}}
+
+<div class="intro">
+    {{{classDescription}}}
+</div>
+
+{{#is_constructor}}
+    <div class="constructor">
+        {{>method}}
+    </div>
+{{/is_constructor}}
+
+<hr>
+    <div>
+        <div id="index" class="api-class-tabpanel index">
+            {{#if foundAt}}
+        <div class="foundat">
+            Defined in: <a href="{{foundAt}}">`{{{file}}}:{{{line}}}`</a>
+        </div>
+    {{/if}}
+
+    {{#if module}}
+        {{#if submodule}}
+            Module: {{#crossLinkModule submodule}}{{/crossLinkModule}}<br>
+            Parent Module: {{#crossLinkModule module}}{{/crossLinkModule}}
+        {{else}}
+            Module: {{#crossLinkModule module}}{{/crossLinkModule}}
+        {{/if}}
+    {{/if}}
+
+</div>
+
+
+
+{{> exampleurl }}
+

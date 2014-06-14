@@ -235,6 +235,12 @@ chordDegree2Freq progression chordDegree = mul mult $ d2f scale degree
 c2f = chordDegree2Freq
 chord2Bass progression = chordDegree2Freq progression 0 
 c2b = chord2Bass
+blockChord progression = map (\degree -> mul mult $ d2f scale degree) (chord::degrees)  
+    where
+        chord = progression::value
+        scale = chord::scale
+        mult = octave2Mul (chord::octave)
+
 
 ----------------
 -- | Patterns

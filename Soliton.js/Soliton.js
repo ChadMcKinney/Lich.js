@@ -7438,7 +7438,7 @@ function limiter(threshold, input)
 
 _createUGen("limiter", limiter);
 
-/*
+
 function pan(position, input)
 {
 	if(typeof position !== "number")
@@ -7476,8 +7476,8 @@ function pan(position, input)
 }
 
 _createUGen("pan", pan);
-*/
 
+/*
 function pan(position, input)
 {
 	if(typeof position !== "number")
@@ -7504,23 +7504,23 @@ function pan(position, input)
 	//panner.distanceModel = "linear";
 	panner._lichType = AUDIO;
 
-	/*
-	var xd = position * 90;
-	var zd = xd + 90;
-	if(zd > 90)
-		zd = 180 - zd;
-
-	var x = Math.sin(xd * Math.PI / 180);
-	var z = Math.sin(zd * Math.PI / 180);
-
-	//panner.setPosition(x, 0, z);
-	//input.connect(panner);
-
-	Lich.post("x: " + x);
-	Lich.post("z: " + z);
 	
-	l.gain.value = x;
-	r.gain.value = z;*/
+	// var xd = position * 90;
+	// var zd = xd + 90;
+	// if(zd > 90)
+	// 	zd = 180 - zd;
+
+	// var x = Math.sin(xd * Math.PI / 180);
+	// var z = Math.sin(zd * Math.PI / 180);
+
+	// //panner.setPosition(x, 0, z);
+	// //input.connect(panner);
+
+	// Lich.post("x: " + x);
+	// Lich.post("z: " + z);
+	
+	// l.gain.value = x;
+	// r.gain.value = z;
 	
 	panner.startAll = function(time)
 	{
@@ -7534,7 +7534,7 @@ function pan(position, input)
 	}
 
 	return panner;
-}
+}*/
 
 _createUGen("pan", pan);
 
@@ -10677,7 +10677,7 @@ function pbind(patternName, func, args, duration)
 
 Soliton.SteadyScheduler = function()
 {
-	this.tempo = 260; // bpm
+	this.tempo = 280; // bpm
 	this.tempoSeconds = (60 / this.tempo); 
 	this.tempoMillis = this.tempoSeconds * 1000;
 	tempo = this.tempo;

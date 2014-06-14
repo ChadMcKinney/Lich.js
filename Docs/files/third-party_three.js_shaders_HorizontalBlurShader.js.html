@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en" class="yui-overrride">
+<head>
+    <meta charset="utf-8">
+    <title>third-party/three.js/shaders/HorizontalBlurShader.js - Lich.sc</title>
+    <link rel="stylesheet" href="http://yui.yahooapis.com/3.9.1/build/cssgrids/cssgrids-min.css">
+    <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
+    <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700' rel='stylesheet' type='text/css'>
+    <link rel="shortcut icon" type="image/png" href="../assets/favicon.png">
+    <script src="http://yui.yahooapis.com/combo?3.9.1/build/yui/yui-min.js"></script>
+    <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
+</head>
+<body class="yui3-skin-sam">
+
+<div id="doc">
+    <div id="hd" class="yui3-g header">
+        <div class="yui3-u-3-4">
+            <h1 class="blue-main-title">Lich.sc</h1>
+        </div>
+        <div class="yui3-u-1-4 version project-version">
+            API Docs for: 0.1
+        </div>
+    </div>
+    <div id="bd" class="yui3-g">
+
+        <div class="yui3-u-1-4">
+            <div id="docs-sidebar" class="sidebar apidocs">
+                <div id="api-list">
+    <h2 class="off-left">APIs</h2>
+    <div id="api-tabview" class="tabview">
+        <ul class="tabs">
+            <li><a href="#api-classes">Functions</a></li>
+            <li><a href="#api-modules">Modules</a></li>
+        </ul>
+
+        <div id="api-tabview-filter">
+            <input type="search" id="api-filter" placeholder="Type to filter APIs" style="display: none;">
+        </div>
+
+        <div id="api-tabview-panel">
+            <ul id="api-classes" class="apis classes">
+            
+                <li><a href="../classes/allpassC.html">allpassC</a></li>
+            
+                <li><a href="../classes/allpassL.html">allpassL</a></li>
+            
+                <li><a href="../classes/allpassN.html">allpassN</a></li>
+            
+                <li><a href="../classes/bandpass.html">bandpass</a></li>
+            
+                <li><a href="../classes/blip.html">blip</a></li>
+            
+                <li><a href="../classes/brown.html">brown</a></li>
+            
+                <li><a href="../classes/clipNoise.html">clipNoise</a></li>
+            
+                <li><a href="../classes/combC.html">combC</a></li>
+            
+                <li><a href="../classes/combL.html">combL</a></li>
+            
+                <li><a href="../classes/combN.html">combN</a></li>
+            
+                <li><a href="../classes/crackle.html">crackle</a></li>
+            
+                <li><a href="../classes/crush.html">crush</a></li>
+            
+                <li><a href="../classes/cuspL.html">cuspL</a></li>
+            
+                <li><a href="../classes/cuspN.html">cuspN</a></li>
+            
+                <li><a href="../classes/dc.html">dc</a></li>
+            
+                <li><a href="../classes/decimate.html">decimate</a></li>
+            
+                <li><a href="../classes/delayC.html">delayC</a></li>
+            
+                <li><a href="../classes/delayL.html">delayL</a></li>
+            
+                <li><a href="../classes/delayN.html">delayN</a></li>
+            
+                <li><a href="../classes/dust.html">dust</a></li>
+            
+                <li><a href="../classes/env.html">env</a></li>
+            
+                <li><a href="../classes/env2.html">env2</a></li>
+            
+                <li><a href="../classes/formant.html">formant</a></li>
+            
+                <li><a href="../classes/gbmanL.html">gbmanL</a></li>
+            
+                <li><a href="../classes/gbmanN.html">gbmanN</a></li>
+            
+                <li><a href="../classes/gray.html">gray</a></li>
+            
+                <li><a href="../classes/highpass.html">highpass</a></li>
+            
+                <li><a href="../classes/impulse.html">impulse</a></li>
+            
+                <li><a href="../classes/lag.html">lag</a></li>
+            
+                <li><a href="../classes/lowpass.html">lowpass</a></li>
+            
+                <li><a href="../classes/noiseL.html">noiseL</a></li>
+            
+                <li><a href="../classes/noiseN.html">noiseN</a></li>
+            
+                <li><a href="../classes/noiseX.html">noiseX</a></li>
+            
+                <li><a href="../classes/out.html">out</a></li>
+            
+                <li><a href="../classes/perc.html">perc</a></li>
+            
+                <li><a href="../classes/perc2.html">perc2</a></li>
+            
+                <li><a href="../classes/pink.html">pink</a></li>
+            
+                <li><a href="../classes/pulse.html">pulse</a></li>
+            
+                <li><a href="../classes/saw.html">saw</a></li>
+            
+                <li><a href="../classes/sin.html">sin</a></li>
+            
+                <li><a href="../classes/square.html">square</a></li>
+            
+                <li><a href="../classes/tri.html">tri</a></li>
+            
+                <li><a href="../classes/white.html">white</a></li>
+            
+            </ul>
+
+            <ul id="api-modules" class="apis modules">
+            
+                <li><a href="../modules/Chaos.html">Chaos</a></li>
+            
+                <li><a href="../modules/Delays.html">Delays</a></li>
+            
+                <li><a href="../modules/Envelopes.html">Envelopes</a></li>
+            
+                <li><a href="../modules/Filters.html">Filters</a></li>
+            
+                <li><a href="../modules/InputOutput.html">InputOutput</a></li>
+            
+                <li><a href="../modules/Lich.sc UGens.html">Lich.sc UGens</a></li>
+            
+                <li><a href="../modules/Noise.html">Noise</a></li>
+            
+                <li><a href="../modules/Oscillators.html">Oscillators</a></li>
+            
+            </ul>
+        </div>
+    </div>
+</div>
+
+            </div>
+        </div>
+        <div class="yui3-u-3-4">
+                <div id="api-options" style="visibility:hidden">
+        Show:
+        <label for="api-show-inherited">
+            <input type="checkbox" id="api-show-inherited" checked>
+            Inherited
+        </label>
+
+        <label for="api-show-protected">
+            <input type="checkbox" id="api-show-protected">
+            Protected
+        </label>
+
+        <label for="api-show-private">
+            <input type="checkbox" id="api-show-private">
+            Private
+        </label>
+        <label for="api-show-deprecated">
+            <input type="checkbox" id="api-show-deprecated">
+            Deprecated
+        </label>
+
+    </div>
+
+
+            <div class="apidocs">
+                <div id="docs-main">
+                    <div class="content">
+                        <h1 class="file-heading">File: third-party/three.js/shaders/HorizontalBlurShader.js</h1>
+
+<div class="file">
+    <pre class="code prettyprint linenums">
+/**
+ * @author zz85 / http://www.lab4games.net/zz85/blog
+ *
+ * Two pass Gaussian blur filter (horizontal and vertical blur shaders)
+ * - described in http://www.gamerendering.com/2008/10/11/gaussian-blur-filter-shader/
+ *   and used in http://www.cake23.de/traveling-wavefronts-lit-up.html
+ *
+ * - 9 samples per pass
+ * - standard deviation 2.7
+ * - &quot;h&quot; and &quot;v&quot; parameters should be set to &quot;1 / width&quot; and &quot;1 / height&quot;
+ */
+
+THREE.HorizontalBlurShader = {
+
+	uniforms: {
+
+		&quot;tDiffuse&quot;: { type: &quot;t&quot;, value: null },
+		&quot;h&quot;:        { type: &quot;f&quot;, value: 1.0 / 512.0 }
+
+	},
+
+	vertexShader: [
+
+		&quot;varying vec2 vUv;&quot;,
+
+		&quot;void main() {&quot;,
+
+			&quot;vUv = uv;&quot;,
+			&quot;gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );&quot;,
+
+		&quot;}&quot;
+
+	].join(&quot;\n&quot;),
+
+	fragmentShader: [
+
+		&quot;uniform sampler2D tDiffuse;&quot;,
+		&quot;uniform float h;&quot;,
+
+		&quot;varying vec2 vUv;&quot;,
+
+		&quot;void main() {&quot;,
+
+			&quot;vec4 sum = vec4( 0.0 );&quot;,
+
+			&quot;sum += texture2D( tDiffuse, vec2( vUv.x - 4.0 * h, vUv.y ) ) * 0.051;&quot;,
+			&quot;sum += texture2D( tDiffuse, vec2( vUv.x - 3.0 * h, vUv.y ) ) * 0.0918;&quot;,
+			&quot;sum += texture2D( tDiffuse, vec2( vUv.x - 2.0 * h, vUv.y ) ) * 0.12245;&quot;,
+			&quot;sum += texture2D( tDiffuse, vec2( vUv.x - 1.0 * h, vUv.y ) ) * 0.1531;&quot;,
+			&quot;sum += texture2D( tDiffuse, vec2( vUv.x, vUv.y ) ) * 0.1633;&quot;,
+			&quot;sum += texture2D( tDiffuse, vec2( vUv.x + 1.0 * h, vUv.y ) ) * 0.1531;&quot;,
+			&quot;sum += texture2D( tDiffuse, vec2( vUv.x + 2.0 * h, vUv.y ) ) * 0.12245;&quot;,
+			&quot;sum += texture2D( tDiffuse, vec2( vUv.x + 3.0 * h, vUv.y ) ) * 0.0918;&quot;,
+			&quot;sum += texture2D( tDiffuse, vec2( vUv.x + 4.0 * h, vUv.y ) ) * 0.051;&quot;,
+
+			&quot;gl_FragColor = sum;&quot;,
+
+		&quot;}&quot;
+
+	].join(&quot;\n&quot;)
+
+};
+
+    </pre>
+</div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="../assets/vendor/prettify/prettify-min.js"></script>
+<script>prettyPrint();</script>
+<script src="../assets/js/yui-prettify.js"></script>
+<script src="../assets/../api.js"></script>
+<script src="../assets/js/api-filter.js"></script>
+<script src="../assets/js/api-list.js"></script>
+<script src="../assets/js/api-search.js"></script>
+<script src="../assets/js/apidocs.js"></script>
+<script type="text/javascript" src="../assets/../../third-party/ace/ace.js"></script>
+<!--
+<script>
+    var editor = ace.edit("editor");
+    editor.setTheme("ace/lich3");
+    editor.getSession().setMode("haskell");
+</script>
+-->
+</body>
+</html>

@@ -1,0 +1,257 @@
+<!-- 
+    Lich.js - JavaScript a networked audio/visual live coding language
+    Copyright (C) 2012-2013 Chad McKinney
+	
+	http://chadmckinneyaudio.com/
+	seppukuzombie@gmail.com
+	
+	LICENSE
+	=======
+
+	Licensed under the Simplified BSD License:
+
+	Redistribution and use in source and binary forms, with or without
+	modification, are permitted provided that the following conditions are met: 
+
+	1. Redistributions of source code must retain the above copyright notice, this
+	   list of conditions and the following disclaimer. 
+	2. Redistributions in binary form must reproduce the above copyright notice,
+	   this list of conditions and the following disclaimer in the documentation
+	   and/or other materials provided with the distribution. 
+
+	THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+	ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+	WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+	DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+	ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+	(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+	LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+	ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+	(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+	The views and conclusions contained in the software and documentation are those
+	of the authors and should not be interpreted as representing official policies, 
+	either expressed or implied, of the FreeBSD Project.
+-->
+
+<!DOCTYPE html>
+
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Lich.js</title>
+	<meta name="keywords" content="Experimental, Computer Music, Multimedia, Live Coding" />
+	<meta name="description" content="Lich.js is a very simple live coding audio and visual language implemented in javascript." />
+	<!--<link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>-->
+	<link rel="stylesheet" type="text/css" href="WP-Content/LichStyle.css" media="all" />
+	<script type="text/javascript" src="third-party/glMatrix-0.9.5.min.js"></script>
+	<script type="text/javascript" src="third-party/webgl-utils.js"></script>
+	<script type="text/javascript" src="third-party/three.js/three.min.js"></script>
+	<script type="text/javascript" src="third-party/three.js/three.shaders.min.js"></script>
+	<script type="text/javascript" src="third-party/ace/ace.js"></script>
+
+	<!-- <script type="text/javascript" src="third-party/cycle.js"></script> -->
+	<!--
+	<script type="text/javascript" src="Compiler/Objects.js"></script>
+	<script type="text/javascript" src="Compiler/VM.js"></script>
+	<script type="text/javascript" src="Compiler/Compiler.js"></script>
+	<script type="text/javascript" src="third-party/AudioContextMonkeyPatch.js"></script>
+	<script type="text/javascript" src="Soliton.js/Soliton.js"></script>
+	<script type="text/javascript" src="CloudChamber.js/CloudChamber.js"></script>
+	<script type="text/javascript" src="CloudChamber.js/MarchingCubes.js"></script>
+	<script type="text/javascript" src="Parser/ParseUtility.js"></script>
+	<script type="text/javascript" src="Parser/Types.js"></script>	
+	<script type="text/javascript" src="Parser/Lexeme.js"></script>
+	<script type="text/javascript" src="Parser/preL.js"></script>
+	<script type="text/javascript" src="Parser/iterL.js"></script>
+	<script type="text/javascript" src="Parser/parse.js"></script>
+	<script type="text/javascript" src="Parser/LichParser.js"></script>
+	<script type="text/javascript" src="Parser/LichLibraryParser.js"></script>
+	<script type="text/javascript" src="Library/Prelude.js"></script>
+	<script type="text/javascript" src="Lich.js"></script>
+	<script type="text/javascript" src="Networking/LichClient.js"></script>
+	<script type="text/javascript" src="Networking/LichChat.js"></script>
+	<script type="text/javascript" src="Networking/LichTerminal.js"></script>
+	<script type="text/javascript" src="Pieces/MountainsOfMadnessPanel.js"></script>-->
+	<script type="text/javascript" src="lich.min.js"></script>
+	<script src="socket.io/socket.io.js"></script>
+	<!--<script type="text/javascript" src="Pieces/MountainsOfMadness.js"></script>-->
+</head>
+
+<body>
+
+	<canvas id="canvas">
+
+    </canvas>
+
+    <div id="pageDiv">
+    <textarea id="chatInput" rows="2" spellcheck="true" readonly="false">Chat...</textarea>
+	 <textarea id="connectionStatus" rows="1" spellcheck="false" readonly="true">Connected</textarea>
+    <div id="textdiv">
+    </div>
+    <textarea id="post" rows="6" spellcheck="false" readonly="true">Lich.js&#10;</textarea>
+    </div>
+        
+    <script LANGUAGE="JavaScript" type="text/javascript">
+            compileLich();
+    </script>
+
+	<textarea  id="demoCode" style="display:none">
+{-
+    Welcome to Lich.js!
+    Lich.js is a new language for live coding music and graphics directly in a web browser. 
+    This is a little demo page to give you an idea of what's possible. 
+    The language isn't quite done yet, and there's still some bugs, but there is much fun to be had. 
+    The syntax is similar to Haskell, but if you haven't used it, don't be scared. 
+-}
+
+
+
+-- Hacker Tip #1: Comments begin with --
+
+-- Lets warm up with some math. Put your cursor on the next line and hold shift, then press enter. You should see 4 post.
+2 + 2
+
+-- Lich.js uses normal order of operations. For example, this will return 7:
+1 + 2 * 3
+
+-- The keyword let is used to declare variables at global scope. The next line defines monster as the string Cthulhu.
+let monster = "Cthulhu"
+
+-- Functions are evaluated simply by supplying arguments with spaces. 
+reverse monster
+
+-- New functions can be composed by using argument names after variable declarations, like so:
+let addFive x = x + 5
+addFive 1
+addFive 2
+addFive 1337
+
+
+-- OK. You came here for music right? Let's make some noise. 
+let sineWave = play (sin 440)
+stop sineWave -- when you've heard enough
+
+-- Hacker Tip #2: Ctrl-Period will make all the sound stop. 
+-- Sometimes you accidently make zombies. Ctrl-. is your nuclear option.
+
+-- Lich.js makes it easy to get sound going and there's a large collection of custom functions to do just that. 
+-- Evaluate the next line to see the collection of audio functions.
+ugenList
+
+-- Let's try another, how about something a bit more interesting?
+let sawz = saw 40 >> lowpass 792 15 >> play
+stop sawz
+
+-- What's going on hear? We're using the >> operator to chain different functions together.
+-- The >> operator just passes the left hand side to the function on the right. 
+-- This is useful for audio because it makes function chains look like a signal path, like guitar pedals.
+-- In the previous example we have a saw wave at 40hz fed into a lowpass filter with a cutoff of 792 hz and 15 for the res.
+-- If you want to know what arguments a particular function has, just evaluate it with no arguments. For example:
+lowpass
+
+-- If you evaluation lowpass you will see this print: (\freq q input ->)
+
+-- Ok This is fine and all but how about we make a melody?
+-- First we need to make a synth definition, we'll use the new operator =>
+let sawSynth freq => saw freq >> lowpass (freq * 16) 1 >> perc 0 0.3 0.7
+
+
+-- Synth definitions are like functions, they can take arguments and can be evaluated like this:
+play (sawSynth 440) -- You can evaluate this multiple times, it will free itself because of the perc above
+sawSynth 440 >> play -- These are equivelent.
+
+-- Now lets make a melody using a Solo Pattern
+sawMelody ~> sawSynth 0 1 2 3 4 5 6 7 | (d2f minor)
+
+-- This isn't a terribly interesting melody. We can change it just be redefining it:
+sawMelody ~> sawSynth 5 5 5 4 4 7 7 1 11 1 12 2 4 0 | (d2f minor)
+stop sawMelody -- When you've heard enough
+
+
+-- The ~> operator creates a new Solo Pattern. The first argument is a synth definition (sawSynth from above)
+-- After that we get a list of numbers. The | pipe indicates that we want to use a modifier on these values.
+-- The d2f function simply translates the numbers as scale degrees into frequencies in hz. 
+-- If that's a bit too much, don't worry, just make your pattern look like above and you're in business.
+
+-- This melody is a little fast, wouldn't it be nice if we could use rests in our melody?
+sawMelody ~> sawSynth 5 5 5 _ 4 4 _ 7 7 _ 1 11 1 12 2 _ 4 0 _ | (d2f minor)
+
+-- The _ is a rest, and no synth will be played on those beats. We can use [] to make faster notes:
+sawMelody ~> sawSynth 0 1 2 3 [4 5] [6 7] | (d2f minor)
+
+-- Note that there's no commas in these []. That's because we're using a special syntax, this is unique to these patterns. 
+-- How about we mix _ and []
+sawMelody ~> sawSynth 0 _ 1 2 3 [_ 4] [_ 5] [6 7] | (d2f minor)
+stop sawMelody -- when you've heard enough
+
+
+
+-- How about some drums?
+-- We can make some very simple drums using the => again.
+-- They don't need arguments for our purpose as you'll see.
+-- Evaluate these lines one at a time.
+let bd => square 39 >> lowpass 1000 0 >> perc 0 1 0.2
+let sn => pink 1 >> perc 0 1 0.2
+let hh => violet 1 >> perc 0 0.3 (wchoose [0.8,0.2] [0.1,0.5])
+
+-- Now we can create an Impulse Pattern using the +> operator
+drums +> bd hh sn hh
+
+
+-- just like before we can edit them on the fly. Evaluating each line in turn will change the pattern
+drums +> bd hh sn hh bd [hh hh] sn [hh sn]
+drums +> [_ hh] hh
+drums +> [bd bd]
+
+-- We can use modifiers to change the durations. 
+-- The | (*2) makes all the durations twice as long
+drums +> bd hh sn hh bd [hh hh] sn [hh sn] | (*2)
+drums +> bd hh sn hh bd [hh hh] sn [hh sn] -- back to normal
+
+-- Hey, we can bring that melody back in
+sawMelody ~> sawSynth 5 5 5 _ 4 4 _ 7 7 _ [1 11] [1 12] 4 0 _ 4 0 _ | (d2f minor)
+
+-- OK what about some cool generative melody?
+sawMelody ~> sawSynth (psin 0.1 >> prange 0 10) | (d2f minor)
+
+-- Lets change it up more
+sawMelody ~> sawSynth (psin 0.2 >> prange 0 10 >> pwarp (psin 0.7)) | (d2f minor)
+
+-- how about some bass? 
+-- HackerTip #3: Head phones or nicer speakers will make everything sound better
+sawBass ~> sawSynth (psin 0.2 >> prange -2 -16 >> pstutter 14) | (d2f minor)
+
+-- And some harmony?
+sawHarmony ~> sawSynth (psaw 0.15 >> prange -2 5 >> pstutter 6)  | (d2f minor)
+
+-- Break it down
+drums +> bd hh sn hh [hh bd] [hh hh] sn [hh [sn sn]] | (*2)
+
+-- When you've heard enough, compile these in turn
+stop drums 
+stop sawMelody
+stop sawBass
+stop sawHarmony
+
+
+
+
+
+
+
+
+
+
+
+
+</textarea>
+	
+    <script LANGUAGE="JavaScript" type="text/javascript">
+	  connectToWebSocketServer();
+	  fillClientTerminal(document.getElementById("demoCode").value);
+    </script>
+
+</body>
+
+</html>
