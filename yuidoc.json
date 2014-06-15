@@ -5,7 +5,7 @@
     "url": "https://github.com/ChadMcKinney/Lich.js",
     "options": {
         "outdir": "Docs",
-        "paths": ".",
+        "paths": "Solition.js",
         "themedir": "yuidoc-theme-lich"
     }
 }

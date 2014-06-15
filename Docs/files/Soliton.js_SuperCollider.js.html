@@ -186,7 +186,7 @@
 <div class="file">
     <pre class="code prettyprint linenums">
 /* 
-    Soliton.js - JavaScript audio framework
+    Lich.js - JavaScript audio framework
     Copyright (C) 2012 Chad McKinney
 
 	http://chadmckinneyaudio.com/
@@ -242,7 +242,7 @@ function getSCPath()
 	{
 	case &quot;win32&quot;:
 	case &quot;win64&quot;:
-		return &quot;C:\Program Files (x86)\SuperCollider-3.6.6\scsynth&quot;;
+		return &quot;C:/Program Files (x86)/SuperCollider-3.6.6/scsynth&quot;;
 		break;
 		
 	case &quot;darwin&quot;:
@@ -260,14 +260,14 @@ function getSCPath()
 
 var _options = { 
 	sNumAudioBusChannels: 128,
-	sNumControlBusChannels: 4096,
+	sNumControlBusChannels: 4096 * 0.25,
 	sMaxLogins: 64,
 	sMaxNodes: 1024,
-	sNumInputBusChannels: 2,
+    	sNumInputBusChannels: 2,
 	sNumOutputBusChannels: 2,
 	sNumBuffers: 1024,
 	sMaxSynthDefs: 8192,
-	sProtocol: &quot;Udp&quot;,
+    	sProtocol: &quot;Udp&quot;,
 	sBufLength: 64,
 	sNumRGens: 64,
 	sMaxWireBufs: 64,
@@ -279,8 +279,9 @@ var _options = {
 	sMemoryLocking: 0,
 	sPreferredHardwareBufferFrameSize: 512,
 	sRealTimeMemorySize: 81920, // Increased
-	sBlockSize: 512,
-	sPortNum: 57110,
+    	// sBlockSize: 512,
+    	// sBlockSize: 1024,
+    	sPortNum: 57110,
 	sNumPrivateAudioBusChannels: 112
 }
 
@@ -1428,7 +1429,7 @@ function env(levels, times, shape, input)
  * @param shape Either a shape number or string. Some examples: -4, 0, 1, &quot;linear&quot;, &quot;squared&quot;
  * @param input Either a ugen or 1
  * @example
- * let test f =&gt; sin (env2[f,f*2,f] [1,1] &quot;linear&quot; 1) &gt;&gt; env [0,0.3,0] [2,2] &quot;linear&quot; &gt;&gt; out 0&lt;br
+ * let test f =&gt; sin (env2[f,f*2,f] [1,1] &quot;linear&quot; 1) &gt;&gt; env [0,0.3,0] [2,2] &quot;linear&quot; &gt;&gt; out 0&lt;br&gt;
  * test $ random 440 880
  */
 function env2(levels, times, shape, input)
@@ -1765,12 +1766,21 @@ function _synthDef(name, def)
 	return Lich.VM.Void;
 }
 
-function stop(synth)
+function stop(object)
 {
-	if(!(synth instanceof Synth))
-	   throw new Error(&quot;stop can only be called on Synths.&quot;);
+	if(object instanceof Synth)
+	{
+		object.freeNode();
+	}
 
-	synth.freeNode();
+	else if(object._lichType == IMPSTREAM || object._lichType == SOLOSTREAM)
+	{
+		object.stop();
+	}
+	
+	else
+	   throw new Error(&quot;stop can only be called on Synths and Patterns&quot;);
+	
 	return Lich.VM.Void;
 }
 
@@ -1826,7 +1836,8 @@ Lich.compileSynthDef = function(ast)
 	}
 	
 	res += ast.ident.id + &quot;=function(&quot;+localArgs.join(&quot;,&quot;)+&quot;){return new Synth(\&quot;&quot;+ast.ident.id+&quot;\&quot;,[&quot;+argsAndIndexes.join(&quot;,&quot;)+&quot;]);};&quot;;
-	 
+	res += &quot;Soliton.synthDefs[\&quot;&quot;+ast.ident.id+&quot;\&quot;]=&quot;+ast.ident.id;
+	
 	if(Lich.parseType !== &quot;library&quot;)
 		res += &quot;;Lich.VM.Print(&quot;+ast.ident.id+&quot;);&quot;;
 
