@@ -139,12 +139,8 @@
   (if (get-buffer "*lich-post*" )
       (kill-buffer "*lich-post*" ))
 
-<<<<<<< HEAD
   (if (not (null lich-process))
-	  (process-send-string lich-process "close" ))
-=======
-  (process-send-string lich-process ":quit\n")
->>>>>>> fa975ba70a17e10c5ae2b11fbfe0f4d938b3c594
+	  (process-send-string lich-process ":quit\n" ))
   
   ;; (send-
   ;; (interrupt-process lich-process)
