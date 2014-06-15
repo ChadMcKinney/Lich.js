@@ -23,9 +23,26 @@
 let testSynth = sin 440 >> perc 0 0.3 1 >> auxOut 2 >> play
 let test = auxIn 2 >> pan -1 >> auxThrough 2 >> play
 
-2 + 3
+
+let test = a + b
+    where
+        a = 10
+        b = 12
+let a = 2 + 3
+
+:quit
+2 + 6
+let test = z where z = 10
+
+
+
+let testSynth freq => saw [freq, freq/2] >> perc 1 0.1 2 >> out 0
+
+testSynth (110 * choose [1..12])
+
+
 -- coleJI
-ff = degree2Freq coleJI
+let ff = degree2Freq coleJI
 
 -- section 1 stuff
 let ff = degree2Freq coleJI

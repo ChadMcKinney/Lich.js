@@ -129,6 +129,11 @@ _scsynthpid.stderr.on('data', function (data) {
 	}
 });*/
 
+server.quit = function()
+{
+	s.sendMsg('/quit', []);
+}
+
 process.on('exit', function(code){ console.log("quitting scsynth... "); _scsynthpid.kill(); });
 
 //s.boot();

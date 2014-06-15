@@ -222,11 +222,13 @@ Lich.post = function(text)
 
 Lich.VM.PrettyPrint = function(object)
 {
-	var lichType = object._lichType;
 	//Lich.post(Lich.VM.printData(object));
 	if(object == null || typeof object === "undefined")
 		return "Nothing"; // undefined == Nothing
-	else if(lichType == SYNTH)
+
+	var lichType = object._lichType;
+	
+	if(lichType == SYNTH)
 		return Lich.VM.printSynthDef(object);
 	else if(lichType == DATA)
 		return Lich.VM.printData(object);
@@ -260,8 +262,9 @@ Lich.VM.PrettyPrint = function(object)
 
 Lich.VM.Print = function(object)
 {
-	//Lich.post("PRINT OBJECT: " + object);
-	if(object._lichType != VOID)
+	if(typeof object === "undefined")
+		Lich.post("Nothing");
+	else if(object._lichType != VOID)
 		Lich.post(Lich.VM.PrettyPrint(object));
 		// Lich.post(Lich.VM.PrettyPrint(JSON.parse(JSON.stringify(object)))); // Message passing translation		
 }
