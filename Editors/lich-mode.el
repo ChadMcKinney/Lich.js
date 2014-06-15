@@ -139,7 +139,7 @@
   (if (get-buffer "*lich-post*" )
       (kill-buffer "*lich-post*" ))
 
-  (process-send-string lich-process "close")
+  (process-send-string lich-process ":quit\n")
   
   ;; (send-
   ;; (interrupt-process lich-process)
@@ -335,7 +335,8 @@
     ;; grab the string
     (setq code-string (buffer-substring-no-properties p1 p2) )
 
-    (process-send-string lich-process (concat code-string "\n") )
+	(process-send-string lich-process (concat code-string "␄\n") )
+    ;(process-send-string lich-process (concat code-string "\n") )
 
     (let (temp-buf)
 
@@ -419,4 +420,4 @@
   "This frees all the nodes running on scsynth"
   (interactive)
   
-  (process-send-string lich-process "freeAll\n"))
+  (process-send-string lich-process "freeAll 0␄\n"))

@@ -21,13 +21,13 @@ eval(interactiveParser);
 
 eval(
     fs.readFileSync("../Compiler/Objects.js") + "" + fs.readFileSync("../Compiler/VM.js") 
-	+ fs.readFileSync("../Compiler/Compiler.js") + fs.readFileSync("../Parser/ParseUtility.js") 
-	+ fs.readFileSync("../Parser/Types.js")
+		+ fs.readFileSync("../Compiler/Compiler.js") + fs.readFileSync("../Parser/ParseUtility.js") 
+		+ fs.readFileSync("../Parser/Types.js")
 );
 
 eval(
     fs.readFileSync("../Parser/Lexeme.js") + "" + fs.readFileSync("../Parser/preL.js")
-	+ fs.readFileSync("../Parser/iterL.js") + fs.readFileSync("../Parser/parse.js")
+		+ fs.readFileSync("../Parser/iterL.js") + fs.readFileSync("../Parser/parse.js")
 );
 
 eval(fs.readFileSync("../Library/Prelude.js") + "" + fs.readFileSync("../Soliton.js/SuperCollider.js") + "");
@@ -41,58 +41,83 @@ _compile = function(lc)
 {
     try
     {
-	var ast = Lich.parse(lc);
-	var res = Lich.compileAST(ast);
-	
-	if(res instanceof Array)
-	{
-	    for(var i = 0; i < res.length; ++i)
-	    {
-		eval(res[i]);
-	    }
-	}
+		var ast = Lich.parse(lc);
+		var res = Lich.compileAST(ast);
+		
+		if(res instanceof Array)
+		{
+			for(var i = 0; i < res.length; ++i)
+			{
+				eval(res[i]);
+			}
+		}
 
-	else
-	{
-	    eval(res);
-	}
+		else
+		{
+			eval(res);
+		}
 
-	return res;
+		return res;
     }
 
     catch(e)
     {
-	console.log(e);
-	return "";
+		console.log(e);
+		return "";
     }
 }
 
 _quit = function()
 {
+	server.quit();
     console.log('Exiting Lich.js ...');
     process.exit(0);
 }
+
+var _codeString = "";
 
 process.stdin.on('readable', function() {
     var chunk = process.stdin.read();
     if(chunk !== null)
     {
-  	    switch(chunk)
-	    {
-	    case '':
-		break;
-	    case 'freeAll':
-		freeAll();
-  	    case ':quit':
-	    case ':q':
-    	    case 'exit':
-      		_quit();
-      		break;
-	    default:
-    		_compile(""+chunk);
-    		break;
-	    }
+		chunk = chunk.toString();
+
+		if(chunk == ":quit\n")
+		{
+			return _quit();
+		}
+		
+		var eot = chunk.indexOf('␄');
+		
+		if(eot != -1)
+		{
+			_codeString += chunk.slice(0, eot);
+
+			switch(_codeString)
+			{
+			case '':
+				break;
+			/*
+			case 'freeAll':
+				freeAll();
+				break;
+  			case ':quit':
+			case ':q':
+    		case 'exit':
+      			_quit();
+      			break;*/
+			default:
+				_compile(_codeString);
+				break;
+			}
+			
+			_codeString = chunk.slice(eot + 2, chunk.length);
+			return;
+		}
+
+		else
+		{
+			_codeString += chunk;
+		}
 	}
 });
-
-
