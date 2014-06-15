@@ -526,3 +526,8 @@ stop waves
 stop hits
 stop chords
 stop melody
+
+
+let x y = x + y
+
+

@@ -139,7 +139,8 @@
   (if (get-buffer "*lich-post*" )
       (kill-buffer "*lich-post*" ))
 
-  (process-send-string lich-process "close")
+  (if (not (null lich-process))
+	  (process-send-string lich-process "close" ))
   
   ;; (send-
   ;; (interrupt-process lich-process)
