@@ -16,8 +16,11 @@ var fileCompileString = "if (typeof require !== \'undefined\' && typeof exports 
 var interactiveParser = fs.readFileSync("../Parser/LichParser.js")+"";
 interactiveParser = interactiveParser.substring(0, interactiveParser.indexOf(fileCompileString));
 
+var libraryParser = fs.readFileSync("../Parser/LichLibraryParser.js")+"";
+libraryParser = libraryParser.substring(0, libraryParser.indexOf(fileCompileString));
+
 // We want to pollute the local namespace. We can't use normal Node module exporting because the same code is used in non-Node web based contexts.
-eval(interactiveParser);
+eval(interactiveParser + "" + libraryParser);
 
 eval(
     fs.readFileSync("../Compiler/Objects.js") + "" + fs.readFileSync("../Compiler/VM.js") 
@@ -35,6 +38,15 @@ eval(fs.readFileSync("../Library/Prelude.js") + "" + fs.readFileSync("../Soliton
 // Overwrite global printing so that we can use the console instead of the DOM.
 post = console.log;
 Lich.post = console.log;
+
+
+var clientName = "Noob";
+var ast = Lich.parseLibrary(fs.readFileSync("../Library/Prelude.lich") + "");
+var preludeSource = Lich.compileAST(ast);
+
+setTimeout(function(){eval(preludeSource);}, 2000);
+
+
 console.log("{- Lich.js -}\n");
 
 _compile = function(lc)
