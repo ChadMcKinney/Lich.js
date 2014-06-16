@@ -46,13 +46,13 @@ let testSynth2 freq => saw (freq/2) >> perc 0.0001 0.3 0.15 >> out 1
 testSynth (55 * choose [1..12])
 
 
-testMel ~> testSynth 1 2 3 4 | (*220) | (*1)
+testMel ~> testSynth2 1 2 3 4 | (*220) | (/2)
 
-testMel2 ~> testSynth2 [6 6] [7 7] [8 8] [5 5] | (*110) | (*2)
+testMel2 ~> testSynth [6 6] [7 7] [8 8] [5 5] | (*110) | (*1)
 
-testMel3 ~> testSynth2 [3 4] [6 6] [7 7] [8 8] [9 9] | (*110) | (*3/2)
+testMel3 ~> testSynth [3 4] [6 6] [7 7] [8 8] [9 9] | (*110) | (*3/2)
 
-stop testMel3
+stop testMel
 
 let testBind = pbind "testBind" "testSynth" 440 1
 
