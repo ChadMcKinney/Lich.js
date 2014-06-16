@@ -37,7 +37,7 @@ function createTextAreas()
 {
 	users = users.sort(function(a,b){return a.name != clientName});
 	for (var i=0;i<users.length;i++)
-	{ 
+	{
 		//console.log(users[i]);
 		createTextArea(users[i].name,i,users.length);
 	}
@@ -92,13 +92,6 @@ function createTextArea(name,num,total)
 		//document.body.appendChild(input);
 		var editor = ace.edit("terminal"+name);
 		editor.setTheme(_themes[num%3]);
-		
-		/*
-		if(name == clientName)
-			editor.setTheme("ace/theme/lich");
-		else
-			editor.setTheme("ace/theme/lich");
-		*/
 
 		editor.getSession().setMode("ace/mode/haskell");
 		//editor.$highlightBrackets = function(){};
