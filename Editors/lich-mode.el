@@ -3,23 +3,6 @@
 (global-unset-key (kbd "C-<return>"))
 (setq cua-rectangle-mark-key (kbd "C-S-<return>"))
 
-;; check OS type
-(cond
- ((string-equal system-type "windows-nt") ; Microsoft Windows
-  (progn
-    (setq lich-folder-path "Lich.js\\Local\\lichi.js") )
-  )
- ((string-equal system-type "darwin")   ; Mac OS X
-  (progn
-    (setq lich-folder-path "Lich.js/Local/lichi.js")
-    )
-  )
- ((string-equal system-type "gnu/linux") ; linux
-  (progn
-    (setq lich-folder-path "Lich.js/Local/lichi.js") )
-  )
- )
-
 ;;Define lich-mode
 (define-minor-mode lich-mode
   "Toggle Lich mode.
@@ -67,19 +50,32 @@
   (setq lich-users (list user-login-name) )
   (lich-setup-process )
   (if (null lich-path)
-       (setq lich-path "" )) )
+       (setq lich-path ""  )))
 
 
 
 (defun lich-set-path (path)
   "Sets the path to your Lich.js folder"
-  (setq lich-path path))
+  (setq lich-path path)
+  (cond
+   ((string-equal system-type "windows-nt") ; Microsoft Windows
+	(progn
+	  (setq lich-folder-path "Lich.js\\Local\\lichi.js" )
+	  (setenv "PATH" (concat (getenv "PATH") (concat ":" (concat lich-path "Lich.js"))) )))
+   ((string-equal system-type "darwin")   ; Mac OS X
+	(progn
+	  (setq lich-folder-path "Lich.js/Local/lichi.js" )
+	  (setenv "PATH" (concat (getenv "PATH") (concat ":" (concat lich-path "Lich.js"))) )))
+   ((string-equal system-type "gnu/linux") ; linux
+	(progn
+	  (setq lich-folder-path "Lich.js/Local/lichi.js" )
+	  (setenv "PATH" (concat (getenv "PATH") (concat ":" (concat lich-path "Lich.js"))) )))))
 
 
 
 (defun lich-setup-process ()
   "Sets up the lichi process for lich-mode, assumes node is in path, and the Lich.js folder is in lich-path"
-  
+
   (setq lich-process (start-process "lich-process" "*lich-post*" "node" (concat lich-path lich-folder-path)) )
   (set-process-query-on-exit-flag lich-process nil ))
 
