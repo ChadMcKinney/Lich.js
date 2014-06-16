@@ -42,12 +42,59 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 var spawn = require('child_process').spawn;
-var scsynth = require('supercolliderjs').scsynth;
-var server = new scsynth({
-	path: getSCPath(),
-	debug: false,
-	echo: false,
-});
+var exec = require('child_process').exec;
+var osc = require("osc");
+
+function _Server(options) {
+	this.options = options;
+}
+
+_Server.prototype.connect = function() {
+	var self = this;
+
+	this.udp = new osc.UDPPort({
+		localAddress: "0.0.0.0",
+		localPort: 57120
+	});
+	
+	/*
+	this.udp.on("bundle", function (oscBundle) {
+		console.log(oscBundle);
+	});
+
+	this.udp.on("message", function (oscMessage) {
+		console.log(oscMessage);
+	});*/
+
+	this.udp.open();
+}
+
+_Server.prototype.disconnect = function() {
+	if(typeof this.udp !== "undefined")
+	{
+		this.udp.close();
+		delete this.udp;
+	}
+}
+
+_Server.prototype.sendMsg = function(address, args) {
+	this.udp.send({
+		address: address,
+		args: args
+	}, this.options.sHost, this.options.sPortNum);
+}
+
+// Useful for scheduling events in the future, makes for better timing!
+_Server.prototype.scheduleMsg = function(secondsFromNow, address, args) {
+
+	this.udp.send({
+		timeTag: osc.timeTag(secondsFromNow),
+		packets: [{
+			address: address,
+			args: args
+		}]
+	}, this.options.sHost, this.options.sPortNum);
+}
 
 function getSCPath()
 {
@@ -76,11 +123,11 @@ var _options = {
 	sNumControlBusChannels: 4096 * 0.25,
 	sMaxLogins: 64,
 	sMaxNodes: 1024,
-    	sNumInputBusChannels: 2,
+    sNumInputBusChannels: 2,
 	sNumOutputBusChannels: 2,
 	sNumBuffers: 1024,
 	sMaxSynthDefs: 8192,
-    	sProtocol: "Udp",
+    sProtocol: "Udp",
 	sBufLength: 64,
 	sNumRGens: 64,
 	sMaxWireBufs: 64,
@@ -92,9 +139,10 @@ var _options = {
 	sMemoryLocking: 0,
 	sPreferredHardwareBufferFrameSize: 512,
 	sRealTimeMemorySize: 81920, // Increased
-    	// sBlockSize: 512,
-    	// sBlockSize: 1024,
-    	sPortNum: 57110,
+    // sBlockSize: 512,
+    // sBlockSize: 1024,
+    sPortNum: 57110,
+	sHost: "127.0.0.1",
 	sNumPrivateAudioBusChannels: 112
 }
 
@@ -117,27 +165,44 @@ var _optionsArray = [
 
 var fs = require('fs');
 
+function _startJack()
+{
+	return spawn("/usr/bin/jackd", ["-d", "alsa", "-P", "hw:0,0", "-r", 44100], { env: process.env, stdio: ['pipe', process.stdout, process.stderr] });
+}
+
+// var _jack = process.platform == "linux" ? _startJack() : null;
 var _scsynthpid = spawn(getSCPath(), _optionsArray, { env: process.env, stdio: ['pipe', process.stdout, process.stderr] });
 var _currentNodeID = 1000;
-var s = server;
 
-/*_scsynthpid.stderr.setEncoding('utf8');
-_scsynthpid.stderr.on('data', function (data) {
-	if (/^execvp\(\)/.test(data))
-	{
-		console.log('Failed to start child process.');
-	}
-});*/
+var server = new _Server(_options);
+var s = server;
 
 server.quit = function()
 {
 	s.sendMsg('/quit', []);
 }
 
-process.on('exit', function(code){ console.log("quitting scsynth... "); _scsynthpid.kill(); });
+process.on('exit', function(code){
+	console.log("quitting scsynth... ");
+	_scsynthpid.kill('SIGTERM');
 
-//s.boot();
+	/*
+	if(_jack != null)
+	{
+		_jack.kill('SIGTERM');
+		var child = exec("killall jackd", function (error, stdout, stderr) {
+			console.log(stdout);
+			console.log(stderr);
+			console.log(error);
+		});
 
+		var child2 = exec("killall jackdbus", function (error, stdout, stderr) {
+			console.log(stdout);
+			console.log(stderr);
+			console.log(error);
+		});
+	}*/
+});
 
 
 // Wait for server to boot ... perhaps there's a better way here.
@@ -152,39 +217,6 @@ setTimeout( // Initial messages
 	2000
 );
 
-
-/*
-setInterval( // Initial messages
-	function()
-	{
-		s.connect();
-		s.sendMsg('/notify', [1]);
-		s.sendMsg('/status', []);
-	},
-	2000
-);
-*/
-
-/*
-s.on('OSC', function(addr, msg) {
-	//console.log(addr+msg);
-	if(addr == "/fail")
-		console.log('scsynth ERROR:' + msg);
-});
-
-scsynth.on('sendosc', function() {
-	
-});
-
-scsynth.on('rcvosc', function(addr, msg) {
-	if(addr == "/fail")
-		console.log('scsynth ERROR:' + msg);
-});
-
-scsynth.on('debug', function(d) {
-  //console.log('scsynth ERROR:' + d);
-});
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Nodes
@@ -1564,7 +1596,6 @@ function _synthDef(name, def)
 	
 	// buf = buf.slice(0, offset);
 	s.sendMsg('/d_recv', [buf.slice(0, offset)]);
-	// console.log(buf.toString());
 
     	/*
     	var path = "/tmp/"+name+".scsyndef";
@@ -1604,7 +1635,10 @@ function stop(object)
 
 function freeAll()
 {
+	s.sendMsg('/clearSched', []);
     s.sendMsg('/g_freeAll', [1]);
+	Lich.scheduler.freeScheduledEvents();
+	_currentNodeID = 1000;
 }
 
 // Redefine Lich.compileSynthDef to use SuperCollider behavior instead of web audio

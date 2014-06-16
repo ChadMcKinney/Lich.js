@@ -33,12 +33,45 @@ let a = 2 + 3
 :quit
 2 + 6
 let test = z where z = 10
+let a = 1
+let b = 2
 
 
+setTempo 240
 
-let testSynth freq => saw [freq, freq/2] >> perc 1 0.1 2 >> out 0
+let testSynth freq => saw freq >> perc 0.0001 0.3 0.15 >> out 0
+    
+let testSynth2 freq => saw (freq/2) >> perc 0.0001 0.3 0.15 >> out 1
 
-testSynth (110 * choose [1..12])
+testSynth (55 * choose [1..12])
+
+
+testMel ~> testSynth 1 2 3 4 | (*220) | (*1)
+
+testMel2 ~> testSynth2 [6 6] [7 7] [8 8] [5 5] | (*110) | (*2)
+
+testMel3 ~> testSynth2 [3 4] [6 6] [7 7] [8 8] [9 9] | (*110) | (*3/2)
+
+stop testMel3
+
+let testBind = pbind "testBind" "testSynth" 440 1
+
+stop testBind
+
+let sn => white 1 >> perc 0.0 0.15 0.02 >> out 0
+let sn2 => white 1 >> perc 0.0 0.15 0.02 >> out 1
+sn 0
+
+drums +> sn | (/1)
+drums2 +> _ sn2 [_ sn2] sn2 [sn2 sn2] | (/1)
+
+let bd => square [80, 40] >> perc 0.001 0.1 0.1 >> out 0
+drums2 +> bd _ bd bd | (/1)
+
+stop drums
+stop drums2
+
+map (testSynth . (mul 110)) [8..40]
 
 
 -- coleJI

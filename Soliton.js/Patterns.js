@@ -121,11 +121,15 @@ Soliton.PercStream = function(_events, _modifiers)
 					nevent = nevent.p((infiniteBeat - wt) * lm);
 				}
 
+				s.scheduleMsg(this.nextTime + offset - _currentTime(), "/s_new", [nevent, -1, AddToHead, 1]);
+				
+				/*
 				if(typeof nevent === "string")
 					synth = Soliton.synthDefs[nevent]();
 				else
 					synth = nevent();
-				
+				*/
+					
 				/* RESTORE FOR WEB AUDIO VERSION
 				if(synth._lichType == AUDIO)
 				{
@@ -294,8 +298,9 @@ Soliton.SoloStream = function(_instrument, _events, _modifiers, _rmodifiers)
 					}
 				}
 
+				s.scheduleMsg(this.nextTime + offset - _currentTime(), "/s_new", [instrument, -1, AddToHead, 1, 0, nevent]);
 				
-				var synth = Soliton.synthDefs[instrument](nevent);
+				// var synth = Soliton.synthDefs[instrument](nevent);
 
 				/* Restore for Web Audio version
 				if(synth._lichType == AUDIO)
@@ -447,6 +452,7 @@ Soliton.pbind = function(patternName, func, _arguments, duration)
 					if(arg._datatype === "Pattern")
 						arg = arg.p(infiniteBeat);
 
+					args.push(i);
 					args.push(arg);
 				}
 			}
@@ -454,20 +460,24 @@ Soliton.pbind = function(patternName, func, _arguments, duration)
 			else
 			{
 				if(this.args._datatype === "Pattern")
-					args = [this.args.p(infiniteBeat)];
+					args = [0, this.args.p(infiniteBeat)];
 				else
-					args = [this.args];
+					args = [0, this.args];
 			}
 			
 			var synth = currentValue;
 			
 			if(typeof synth === "string")		
-				synth = Soliton.synthDefs[currentValue];
+			{
+				//synth = Soliton.synthDefs[currentValue];
+				s.scheduleMsg(this.nextTime - _currentTime(), "/s_new", [currentValue, -1, AddToHead, 1].concat(args));
+			}
 
-			if(typeof synth === "function")
+			else if(typeof synth === "function")
+			{
 				synth = synth.curry.apply(synth, args);
-
-			this.value = synth;
+				this.value = synth;
+			}
 
 			/* Restore for Web Audio Version
 			if(synth._lichType == AUDIO)
@@ -534,8 +544,8 @@ Soliton.SteadyScheduler = function()
 	tempoMillis = this.tempoMillis;
 	var playing = false;
 	var startTime = null;
-	var lookAhead = 25; // How frequently to call scheduling, in milliseconds
-	var scheduleAhead = 0.1; // How far ahead to actually schedule events, in seconds
+	var lookAhead = 10; // How frequently to call scheduling, in milliseconds
+	var scheduleAhead = 0.15; // How far ahead to actually schedule events, in seconds
 	 // We use 2 queues and a temporary variable to efficiently filter called events by swapping variables, only using push, 
 	 // and reassining currentQueue.length = 0
 	var currentQueue = [];
@@ -599,8 +609,7 @@ Soliton.SteadyScheduler = function()
 		nextQueue = tempQueue; // swap the next queue with the previous current Queue, stored in the temporary variable.
 
 		// Reschedule visitScheduledEvents, keeping track of the ID for stopping/pausing.
-		// timerID = setTimeout(Lich.scheduler.visitScheduledEvents, lookAhead);
-		timerID = setTimeout(Lich.scheduler.visitScheduledEvents, 0);
+		timerID = setTimeout(Lich.scheduler.visitScheduledEvents, lookAhead);
 	}
 
 	this.start = function()

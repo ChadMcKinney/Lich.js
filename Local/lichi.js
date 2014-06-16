@@ -30,7 +30,7 @@ eval(
 		+ fs.readFileSync("../Parser/iterL.js") + fs.readFileSync("../Parser/parse.js")
 );
 
-eval(fs.readFileSync("../Library/Prelude.js") + "" + fs.readFileSync("../Soliton.js/SuperCollider.js") + "");
+eval(fs.readFileSync("../Library/Prelude.js") + "" + fs.readFileSync("../Soliton.js/SuperCollider.js") + "" + fs.readFileSync("../Soliton.js/Patterns.js") + "");
 
 // Overwrite global printing so that we can use the console instead of the DOM.
 post = console.log;
