@@ -51,7 +51,7 @@ let testSynth freq => sw >> bufCombC (localBuf sampleRate 2) (tempoSeconds/2) 30
     
 let testSynth2 freq => saw (freq/2) >> env [0, 0.5, 0.3, 0] [0.001, 0.5, 1] -8 >> out 20
 
-let testSynth3 freq => saw (freq/2) >> env [0, 0.3, 0.2, 0] [0.005, 0.3, 2] -4 >> pan (square $ 1/tempoSeconds) >> out 0
+let testSynth3 freq => saw (freq/2) >> env [0, 0.7, 0.3, 0] [0.005, 0.3, 2] -4 >> pan (square $ 1/tempoSeconds) >> out 0
 
 testSynth (55 * choose [1..12])
 
@@ -66,15 +66,25 @@ testMel2 ~> testSynth [6 6] [4 4] [8 8] [5 5] 7 7 6 2 [2 2] [3 3] | (d2f justMaj
 
 testMel3 ~> testSynth2 [3 3] [4 4] [[_ 6] 6] [[_ 7] 7] [[_ 2] 2] | ((/4) . d2f justMajor) | (*8)
 
+
+let fxSynth => auxIn 20 1 >> combC tempoSeconds [tempoSeconds/1, tempoSeconds/2] 10 >> out 0
+
+let fx = Synth::after "fxSynth" [] server
+
+
 stop testMel
 
 
 
+let simpleSynth freq => sin freq * square (2*tempoSeconds) * 0.25 >> out 20
 
+let sSynth = simpleSynth 440
 
-let fxSynth => auxIn 20 1 >> combC tempoSeconds [tempoSeconds, tempoSeconds/2] 10 >> out 0
+let fxSynth => auxIn 20 1 >> combC tempoSeconds [tempoSeconds/1, tempoSeconds/2] 10 >> out 0
 
 let fx = Synth::after "fxSynth" [] server
+
+stop sSynth
 stop fx
 
 
@@ -90,7 +100,7 @@ let sn2 => pink 1 >> crush 8 >> perc 0.0001 1 0.25 >> out 1
 drums +> sn _ [_ sn] _ | (*2)
 drums2 +> _ sn2 [_ sn2] _ sn2 | (*1)
 
-let bd => brown 1.5 >> perc 0.001 0.35 0.2 >> dup >> out 0
+let bd => brown 2 >> perc 0.001 0.35 0.2 >> dup >> out 0
 drums3 +> bd _ bd bd bd _ bd _ bd _ bd bd bd _ bd bd bd _ [_ bd] bd | (/1)
 
 let hh => white 1 >> bandpass 4000 0.9 >> perc 0.0001 0.3 0.05 >> out 1
