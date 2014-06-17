@@ -4,6 +4,7 @@ au BufNewFile,BufRead *.lich syntax on
 au BufNewFile,BufRead *.lich set filetype=haskell
 
 au BufNewFile,BufRead *.lich nnoremap <Leader>l :call LichToggle()<CR>
+au BufNewFile,BufRead *.lich nnoremap <F12> :call LichHardStop()<CR>
 
 " line ending for the interpreter
 "let lichi_endl = "␄\n";
@@ -53,6 +54,14 @@ function! LichModeEnd()
     exe g:lich_interp_win . "wincmd w | q"
 
     exe "echo 'Lich Mode ended'"
+endfunction
+
+function! LichHardStop()
+    " make this get sent to the terminal
+python << EOF
+import vim
+vim.command("call g:lich_term.write(\"freeAll 0␄\n\")")
+EOF
 endfunction
 
 " test stuff
@@ -111,10 +120,21 @@ fun! s:send_text(mode, all)
     endif
     call term.focus()
     for line in text
-        call term.write("\n" . line)
+        "call term.write("\n" . line)
     endfor
-    " add lichi line ending to compile
-    call term.write("␄\n")
+python << EOF
+import vim
+
+lines = vim.eval("text")
+
+code = ""
+
+for line in lines:
+    code = code + str(line) + "\n"
+
+# add lichi line ending to compile
+vim.command("call g:lich_term.write(\"" + code + "␄\n\")")
+EOF
     " scroll buffer left
     startinsert!
     normal! 0zH
