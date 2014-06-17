@@ -596,6 +596,97 @@ function _audioDivision(a, b)
 	return _binaryOpUGen(_BIN_DIV, a, b);
 }
 
+var _OP_NEG = 0;
+var _OP_NOT = 1;
+var _OP_ISNIL = 2;
+var _OP_NOTNIL = 3;
+var _OP_BITNOT = 4;
+var _OP_ABS = 5;
+var _OP_ASFLOAT = 6;
+var _OP_ASINT = 7;
+var _OP_CEIL = 8;
+var _OP_FLOOR = 9;
+var _OP_FRAC = 10;
+var _OP_SIGN = 11;
+var _OP_SQUARED = 12;
+var _OP_CUBED = 13;
+var _OP_SQRT = 14;
+var _OP_EXP = 15;
+var _OP_RECIP = 16;
+var _OP_MIDICPS = 17;
+var _OP_CPSMIDI = 18;
+var _OP_MIDIRATIO = 19;
+var _OP_RATIOMIDI = 20;
+var _OP_DBAMP = 21;
+var _OP_AMPDB = 22;
+var _OP_OCTCPS = 23;
+var _OP_CPSOCT = 24;
+var _OP_LOG = 25;
+var _OP_LOG2 = 26;
+var _OP_LOG10 = 27;
+var _OP_SIN = 28;
+var _OP_COS = 29;
+var _OP_TAN = 30;
+var _OP_ARCSIN = 31;
+var _OP_ARCCOS = 32;
+var _OP_ARCTAN = 33;
+var _OP_SINH = 34;
+var _OP_COSH = 35;
+var _OP_TANH = 36;
+var _OP_RAND = 37;
+var _OP_RAND2 = 38;
+var _OP_LINRAND = 39;
+var _OP_BILINRAND = 40;
+var _OP_SUM3RAND = 41;
+var _OP_DISTORT = 42;
+var _OP_SOFTCLIP = 43;
+var _OP_COIN = 44;
+
+function _unaryOpUGen(selector, a)
+{
+	var rate = ControlRate;
+	
+	if(a.rate == AudioRate || b.rate == AudioRate)
+		rate = AudioRate;
+	
+	return multiNewUGen("UnaryOpUGen", rate, [a], 1, selector);
+}
+
+/**
+ * Distort a signal. This is the same as using .distort in SuperCollider
+ *
+ * @class scDistort
+ * @constructor
+ * @example
+ * let test amp => sin 440 >> gain amp >> distort >> out 0<br>
+ * let t = test 1<br>
+ * stop t
+ */
+function scDistort(a)
+{
+	return _unaryOpUGen(_OP_DISTORT, a);
+}
+
+/**
+ * Distortion with a perfectly linear region from -0.5 to +0.5. This is the same as using .softclip in SuperCollider
+ *
+ * @class scSoftClip
+ * @constructor
+ * @example
+ * let test amp => sin 440 >> gain amp >> scSoftClip >> out 0<br>
+ * let t = test 1<br>
+ * stop t
+ */
+function scSoftClip(a)
+{
+	return _unaryOpUGen(_OP_SOFTCLIP, a);
+}
+
+/**
+ * Distortions.
+ * @submodule Distortions
+ */
+
 /**
  * Output a constant value
  *
