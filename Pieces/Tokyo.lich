@@ -37,36 +37,48 @@ let a = 1
 let b = 2
 
 
+fst [1,2]
+
+
+replicateN [3,3,3] 5
+
 setTempo 240
 
-let testSynth freq => saw freq >> perc 0.0001 0.3 0.15 >> out 0
+
+let testSynth freq => saw freq >> env [0, 0.3, 0.05, 0] [0.005, 0.15, 1] -4 >> out 0
     
-let testSynth2 freq => saw (freq/2) >> perc 0.0001 0.3 0.15 >> out 1
+let testSynth2 freq => saw (freq/2) >> env [0, 0.5, 0.1, 0] [0.005, 0.15, 1] -4 >> out 1
+
+let testSynth3 freq => saw (freq/2) >> env [0, 0.3, 0.2, 0] [0.005, 0.3, 2] -4 >> pan (square $ 1/tempoSeconds) >> out 0
 
 testSynth (55 * choose [1..12])
 
+testSynth2 (55 * choose [1..12])
 
-testMel ~> testSynth2 1 2 3 4 | (*220) | (/2)
+testSynth3 (55 * choose [1..12])
 
-testMel2 ~> testSynth [6 6] [7 7] [8 8] [5 5] | (*110) | (*1)
 
-testMel3 ~> testSynth [3 4] [6 6] [7 7] [8 8] [9 9] | (*110) | (*3/2)
+testMel ~> testSynth3 1 2 -1 4 5  [7 7 7 7 7] [3 3] [6 6 6 6 6] [[10 10] [10 10] [_ 10] [_ 10] 10] | (d2f justMajor) | (*5)
+
+testMel2 ~> testSynth [6 6] [4 4] [8 8] [5 5] | (d2f justMajor) | (*3)
+
+testMel3 ~> testSynth2 [3 4] [6 6] [7 7] [8 8] [9 9] | (d2f justMajor) | (*2)
 
 stop testMel
 
-let testBind = pbind "testBind" "testSynth" 440 1
+let ff = d2f justMajor
+let testBind = pbind "testBind" "testSynth" [pseq [ff 13, ff 14, ff 13, ff 11] >> pstutter (psaw 0.4 >> prange 4 16)] (pseq [1,0.5,1,1,0.5] * pseq [1,1,2,3])
 
 stop testBind
 
-let sn => white 1 >> perc 0.0 0.15 0.02 >> out 0
-let sn2 => white 1 >> perc 0.0 0.15 0.02 >> out 1
-sn 0
+let sn => white 1 >> crush 1 >> perc 0.0001 0.3 0.25 >> out 0
+let sn2 => pink 1 >> crush 8 >> perc 0.0001 1 0.25 >> out 1
 
-drums +> sn | (/1)
-drums2 +> _ sn2 [_ sn2] sn2 [sn2 sn2] | (/1)
+drums +> sn _ [_ sn] _ | (*2)
+drums2 +> _ sn2 [_ sn2] _ sn2 | (*1)
 
-let bd => square [80, 40] >> perc 0.001 0.1 0.1 >> out 0
-drums2 +> bd _ bd bd | (/1)
+let bd => brown 1.5 >> perc 0.001 [0.4, 0.4] 0.2 >> out 0
+drums3 +> bd _ bd bd bd _ bd _ bd _ bd bd bd _ bd bd bd _ [_ bd] bd | (/1)
 
 stop drums
 stop drums2
