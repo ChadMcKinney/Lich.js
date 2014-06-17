@@ -176,6 +176,7 @@ var _currentNodeID = 1000;
 
 var server = new _Server(_options);
 var s = server;
+var sampleRate = _options.sPreferredSampleRate
 
 server.quit = function()
 {
@@ -450,6 +451,7 @@ function UGen(name, rate, inputs, numOutputs, specialIndex)
 	this._lichType = AUDIO;
 	this._collected = false; // used internally to cull duplicates in the synth graph
 	this.addToSynth = true;
+	this.isLocalBuf = false;
 }
 
 // Don't indicate outputs explicity, instead we indicate this with an array of rates.
@@ -482,6 +484,7 @@ function MultiOutUGen(name, rates, inputs, specialIndex)
 	this._lichType = AUDIO;
 	this._collected = false; // used internally to cull duplicates in the synth graph
 	this.addToSynth = true;
+	this.isLocalBuf = false;
 }
 
 Number.prototype.setSynthIndex = function(){};
@@ -1210,6 +1213,11 @@ function combC(maxDel, del, decay, input)
 	return multiNewUGen("CombC", AudioRate, [input,maxDel,del,decay], 1, 0);
 }
 
+function bufCombC(buf, del, decay, input)
+{
+	return multiNewUGen("BufCombC", AudioRate, [buf, input, del, decay], 1, 0);
+}
+
 /**
  * A simple delay with no interpolation.
  *
@@ -1471,6 +1479,23 @@ function _Control(numControls)
 	return multiNewUGen("Control", ControlRate, values, numControls, 0);
 }
 
+// Used internally to keep track of local bufs
+function _MaxLocalBufs()
+{
+	return new UGen("MaxLocalBufs", ScalarRate, [0], 1, 0);
+}
+
+function localBuf(frames, channels)
+{
+	var lb = multiNewUGen("LocalBuf", ScalarRate, [channels, frames], 1, 0);
+
+	if(lb instanceof Array)
+		return lb.map(function(e) { e.isLocalBuf = true; return e; });
+
+	lb.isLocalBuf = true;
+	return lb;
+}
+
 //////////////////////////////////////////////
 //// Write input spec protoype inheritance
 //////////////////////////////////////////////
@@ -1647,12 +1672,21 @@ function _ugenToDefList(ugen, constants, controls)
 		return [];
 	}
 	   
-	//var defList = ugen.addToSynth ? [ugen] : [];
 	var defList = [ugen];
 	
 	for(var i = ugen.inputs.length - 1; i >= 0; --i)
 	{
 		defList = defList.concat(_ugenToDefList(ugen.inputs[i], constants, controls));
+	}
+
+	if(ugen.isLocalBuf) // LocalBuf support
+	{
+		if(!constants.hasOwnProperty("maxLocalBufs"))
+		   constants["maxLocalBufs"] = _MaxLocalBufs();
+
+		constants["maxLocalBufs"].inputs[0] += 1; // increment maxLocalBufs
+		ugen.inputs = ugen.inputs.concat([constants["maxLocalBufs"]]);
+		ugen.numInputs += 1;
 	}
 	
 	return defList;
@@ -1688,21 +1722,36 @@ function _synthDef(name, def)
 {
 	var offset = 4; // default offset to for becase we always start with the same header
 	var numBytes = 11 + name.length;
-	var buf = new Buffer(1024);
+	var buf = new Buffer(1024); // NEED TO FIGURE OUT A WAY TO DYNAMICALLY SET THIS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Initialize controls, constants, and children
 	
 	var controls = { numControls: 0, arr: [] };
-	var constants = { numConstants: 1, arr: [0], 0:0 }; // We always need the zero constat for controls
+	var constants = { numConstants: 1, arr: [0], 0:0 }; // We always need the zero constant for controls
 	var children = _ugenToDefList(def, constants, controls).reverse();
-
+	var numChildren = 0;
+	
 	children = _removeDuplicateChildren(children);
+
+	if(constants.hasOwnProperty("maxLocalBufs")) // LocalBuf support
+	{
+		var maxLocalBufs = constants["maxLocalBufs"];
+		var numMaxLocalBufs = maxLocalBufs.inputs[0];
+		
+		children = [maxLocalBufs].concat(children);
+
+		if(!constants.hasOwnProperty(numMaxLocalBufs))
+		{
+			constants[numMaxLocalBufs] = constants.numConstants;
+			constants.arr.push(numMaxLocalBufs);
+			constants.numConstants += 1;
+		}
+	}
 	
 	if(controls.numControls > 0)
 		children = [_Control(controls.numControls)].concat(children);
 
-	var numChildren = 0;
 	for(var i = 0; i < children.length; ++i)
 	{
 		if(children[i].synthIndex == null)
