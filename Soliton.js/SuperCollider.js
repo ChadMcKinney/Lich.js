@@ -568,6 +568,40 @@ var _BIN_PLUS = 0;
 var _BIN_MINUS = 1;
 var _BIN_MUL = 2;
 var _BIN_DIV = 4;
+var _BIN_MOD = 5;
+var _BIN_EQ = 6;
+var _BIN_NE = 7;
+var _BIN_LT = 8;
+var _BIN_GT = 9;
+var _BIN_LE = 10;
+var _BIN_GE = 11;
+var _BIN_MIN = 12;
+var _BIN_MAX = 13;
+var _BIN_BITAND = 14;
+var _BIN_BITOR = 15;
+var _BIN_BITXOR = 16;
+var _BIN_LCM = 17;
+var _BIN_GCD = 18;
+var _BIN_ROUND = 19;
+var _BIN_ROUNDUP = 20;
+var _BIN_TRUNC = 21;
+var _BIN_ATAN2 = 22;
+var _BIN_HYPOT = 23;
+var _BIN_HYPOTX = 24;
+var _BIN_POW = 25;
+var _BIN_SHIFTLEFT = 26;
+var _BIN_SHIFTRIGHT = 27;
+var _BIN_UNSIGNEDSHIFT = 28;
+var _BIN_FILL = 29;
+var _BIN_RING1 = 30;
+var _BIN_RING2 = 31;
+var _BIN_RING3 = 32;
+var _BIN_RING4 = 33;
+var _BIN_DIFSQR = 34;
+var _BIN_SUMSQR = 35;
+var _BIN_SQRSUM = 36;
+var _BIN_SQRDIF = 37;
+var _BIN_ABSDIF = 38;
 
 function _binaryOpUGen(selector, a, b)
 {
@@ -598,6 +632,199 @@ function _audioDivision(a, b)
 {
 	return _binaryOpUGen(_BIN_DIV, a, b);
 }
+
+var _UN_NEG = 0;
+var _UN_NOT = 1;
+var _UN_ISNIL = 2;
+var _UN_NOTNIL = 3;
+var _UN_BITNOT = 4;
+var _UN_ABS = 5;
+var _UN_ASFLOAT = 6;
+var _UN_ASINT = 7;
+var _UN_CEIL = 8;
+var _UN_FLOOR = 9;
+var _UN_FRAC = 10;
+var _UN_SIGN = 11;
+var _UN_SQUARED = 12;
+var _UN_CUBED = 13;
+var _UN_SQRT = 14;
+var _UN_EXP = 15;
+var _UN_RECIP = 16;
+var _UN_MIDICPS = 17;
+var _UN_CPSMIDI = 18;
+var _UN_MIDIRATIO = 19;
+var _UN_RATIOMIDI = 20;
+var _UN_DBAMP = 21;
+var _UN_AMPDB = 22;
+var _UN_OCTCPS = 23;
+var _UN_CPSOCT = 24;
+var _UN_LOG = 25;
+var _UN_LOG2 = 26;
+var _UN_LOG10 = 27;
+var _UN_SIN = 28;
+var _UN_COS = 29;
+var _UN_TAN = 30;
+var _UN_ARCSIN = 31;
+var _UN_ARCCOS = 32;
+var _UN_ARCTAN = 33;
+var _UN_SINH = 34;
+var _UN_COSH = 35;
+var _UN_TANH = 36;
+var _UN_RAND = 37;
+var _UN_RAND2 = 38;
+var _UN_LINRAND = 39;
+var _UN_BILINRAND = 40;
+var _UN_SUM3RAND = 41;
+var _UN_DISTORT = 42;
+var _UN_SOFTCLIP = 43;
+var _UN_COIN = 44;
+
+function _unaryOpUGen(selector, a)
+{
+	var rate = ControlRate;
+	
+	if(a.rate == AudioRate || b.rate == AudioRate)
+		rate = AudioRate;
+	
+	return multiNewUGen("UnaryOpUGen", rate, [a], 1, selector);
+}
+
+/**
+ * Distort a signal. This is the same as using .distort in SuperCollider.
+ *
+ * @class scDistort
+ * @constructor
+ * @example
+ * let test amp => sin 440 >> gain amp >> distort >> out 0<br>
+ * let t = test 1<br>
+ * stop t
+ */
+function scDistort(a)
+{
+	return _unaryOpUGen(_UN_DISTORT, a);
+}
+
+/**
+ * Distortions.
+ * @submodule Distortions
+ */
+
+/**
+ * Distortion with a perfectly linear region from -0.5 to +0.5. This is the same as using .softclip in SuperCollider.
+ *
+ * @class scSoftClip
+ * @constructor
+ * @example
+ * let test amp => sin 440 >> gain amp >> scSoftClip >> out 0<br>
+ * let t = test 1<br>
+ * stop t
+ */
+function scSoftClip(a)
+{
+	return _unaryOpUGen(_UN_SOFTCLIP, a);
+}
+
+/**
+ * Foldback distortion.
+ * 
+ * @class scFold
+ * @constructor
+ * @param lo Low boundry to fold at
+ * @param hi High boundry to fold at
+ * @example
+ * let test l h => white 1 >> scFold l h >> out 0<br>
+ * let t = test -0.5 0.5<br>
+ * stop t
+ */
+function scFold(lo, hi, input)
+{
+	return multiNewUGen("Fold", AudioRate, [input,lo,hi], 1, 0);
+}
+
+/**
+ * Wrap distortion.
+ * 
+ * @class scWrap
+ * @constructor
+ * @param lo Low boundry to fold at
+ * @param hi High boundry to fold at
+ * @example
+ * let test l h => white 1 >> scWrap l h >> out 0<br>
+ * let t = test -0.5 0.5<br>
+ * stop t
+ */
+function scWrap(lo, hi, input)
+{
+	return multiNewUGen("Wrap", AudioRate, [input,lo,hi], 1, 0);
+}
+
+/**
+ * Clip distortion.
+ * 
+ * @class scClip
+ * @constructor
+ * @param lo Low boundry to fold at
+ * @param hi High boundry to fold at
+ * @example
+ * let test l h => white 1 >> scClip l h >> out 0<br>
+ * let t = test -0.5 0.5<br>
+ * stop t
+ */
+function scClip(lo, hi, input)
+{
+	return multiNewUGen("Clip", AudioRate, [input,lo,hi], 1, 0);
+}
+
+/**
+ * Return the inverse of a signal.
+ *
+ * @class scNeg
+ * @constructor
+ * @example
+ * let test amp => sin 440 >> gain amp >> scNeg >> out 0<br>
+ * let t = test 1<br>
+ * stop t
+ */
+function scNeg(a)
+{
+	return _unaryOpUGen(_UN_NEG, a);
+}
+
+/**
+ * Signal Math.
+ * @submodule Signal Math
+ */
+
+/**
+ * Convert a value from cycles per second to MIDI.
+ *
+ * @class scCpsMidi
+ * @constructor
+ * @example
+ * let test amp => sin 440 >> gain amp >> scCpsMidi >> out 0<br>
+ * let t = test 1<br>
+ * stop t
+ */
+function scCpsMidi(a)
+{
+	return _unaryOpUGen(_UN_CPSMIDI, a);
+}
+
+/**
+ * Convert a value from MITI to cycles per second.
+ *
+ * @class scMidiCps
+ * @constructor
+ * @example
+ * let test amp => sin 440 >> gain amp >> scMidiCps >> out 0<br>
+ * let t = test 1<br>
+ * stop t
+ */
+function scMidiCps(a)
+{
+	return _unaryOpUGen(_UN_MIDICPS, a);
+}
+
 
 /**
  * Output a constant value
