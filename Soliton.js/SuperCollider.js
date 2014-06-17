@@ -54,7 +54,7 @@ _Server.prototype.connect = function() {
 
 	this.udp = new osc.UDPPort({
 		localAddress: "0.0.0.0",
-		localPort: 57120
+		localPort: 57121
 	});
 	
 	/*
@@ -437,18 +437,54 @@ var DemandRate = 3;
 
 function UGen(name, rate, inputs, numOutputs, specialIndex)
 {
-	
+	var self = this;
 	this.name = name;
 	this.rate = rate;
 	this.inputs = inputs;
 	this.numInputs = inputs.length;
 	this.numOutputs = numOutputs;
 	this.specialIndex = typeof specialIndex === "undefined" ? 0 : specialIndex;
-	this.synthIndex = -1;
+	this.synthIndex = null;
+	this.setSynthIndex = function(index) { self.synthIndex = index; }; 
 	this.outputIndex = 0;
 	this._lichType = AUDIO;
 	this._collected = false; // used internally to cull duplicates in the synth graph
+	this.addToSynth = true;
 }
+
+// Don't indicate outputs explicity, instead we indicate this with an array of rates.
+function MultiOutUGen(name, rates, inputs, specialIndex)
+{
+	var self = this;
+	this.name = name;
+	this.rate = rates[0];
+	this.inputs = inputs;
+	this.numOutputs = rates.length;
+	this.numInputs = inputs.length;
+	this.specialIndex = typeof specialIndex === "undefined" ? 0 : specialIndex;
+	this.channels = [];
+
+	for(var i = 0; i < this.numOutputs; ++i)
+	{
+		self.channels.push(outputProxy(rates[i], self, i));
+	}
+
+	this.synthIndex = null;
+	this.setSynthIndex = function(index) {
+		self.synthIndex = index;
+		for(var i = 0; i < self.numOutputs; ++i)
+		{
+			self.channels[i].setSynthIndex(index);
+		}
+	};
+	
+	this.outputIndex = 0;
+	this._lichType = AUDIO;
+	this._collected = false; // used internally to cull duplicates in the synth graph
+	this.addToSynth = true;
+}
+
+Number.prototype.setSynthIndex = function(){};
 
 // supports multi-channel expansion
 function multiNewUGen(name, rate, inputs, numOutputs, specialIndex)
@@ -491,6 +527,31 @@ function multiNewUGen(name, rate, inputs, numOutputs, specialIndex)
 	}
 }
 
+function outputProxy(rate, sourceUGen, channel)
+{
+	// var u = new UGen("OutputProxy", rate, [rate, sourceUGen, input], 1, 0);
+	var u = new UGen("OutputProxy", rate, [sourceUGen], 1, 0);
+	u.addToSynth = false;
+	u.outputIndex = channel;
+	return u;
+}
+
+// !!! We indicate number of outputs using an array of rates.  !!!
+function newMultiOutUGen(name, rates, inputs, specialIndex)
+{
+	var expandError = false;
+
+	for(var i = 0; i < inputs.length; ++i)
+	{
+		if(inputs[i] instanceof Array)
+			throw new Error("You can't use multi-channel expansion with: " + name);
+	}
+	
+	var mUgen = new MultiOutUGen(name, rates, inputs, specialIndex);
+
+	return mUgen.channels; 
+}
+							   
 ////////////////////
 // UGen Bindings
 ////////////////////
@@ -1348,6 +1409,47 @@ function out(busNum, value)
  * @submodule InputOutput
  */
 
+/**
+ * Pans a single channel input across a stereo field using equal power panning.
+ *
+ * @class pan
+ * @constructor
+ * @param position The position in the stereo field where the input will be panned. Range of -1 (left) to 1 (right).
+ * @param input. The audio input to be panned.
+ * @example
+ * let test panSynth pos => white 1 >> pan pos >> out 0<br>
+ * let t = panSynth -0.3 <br>
+ * stop t
+ */
+
+function pan(position, input)
+{
+	// !!! We indicate number of outputs using an array of rates. This is 2 audio rate outputs !!!
+	return newMultiOutUGen("Pan2", [AudioRate, AudioRate], [input, position, 1], 0);
+}
+
+/**
+ * Panning UGens
+ * @submodule Panning
+ */
+
+/**
+ * Duplicates an input across a 2 index array.
+ *
+ * @class dup
+ * @constructor
+ * @param input. The audio input to be expanded.
+ * @example
+ * let test dupSynth freq => sin freq >> dup >> out 0<br>
+ * let t = dupSynth 440 <br>
+ * stop t
+ */
+
+function dup(input)
+{
+	return [input, input];
+}
+
 // Control is used internally for SynthDef arguments/controls
 function _ControlName(name, controlIndex)
 {
@@ -1369,10 +1471,47 @@ function _Control(numControls)
 	return multiNewUGen("Control", ControlRate, values, numControls, 0);
 }
 
+//////////////////////////////////////////////
+//// Write input spec protoype inheritance
+//////////////////////////////////////////////
+
+Number.prototype.writeInputSpec = function(buf, offset, constants, controls)
+{
+	buf.writeInt32BE(-1, offset);
+	offset += 4;
+	buf.writeInt32BE(constants[this.valueOf()], offset);
+	return offset + 4;
+}
+
+_ControlName.prototype.writeInputSpec = function(buf, offset, constants, controls)
+{
+	buf.writeInt32BE(0, offset); // The control ugen is always in the 0 index
+	offset += 4;
+	buf.writeInt32BE(controls[this.name], offset);
+	return offset + 4;
+}
+
+UGen.prototype.writeInputSpec = function(buf, offset, constants, controls)
+{
+	buf.writeInt32BE(this.synthIndex, offset);
+	offset += 4;
+	buf.writeInt32BE(this.outputIndex, offset);
+	return offset + 4;
+}
+
+MultiOutUGen.prototype.writeInputSpec = function(buf, offset, constants, controls)
+{
+	buf.writeInt32BE(this.synthIndex, offset);
+	offset += 4;
+	buf.writeInt32BE(this.outputIndex, offset);
+	return offset + 4;
+}
+
 function _writeInputSpec(buf, ugen, offset, constants, controls)
 {
+	/*
 	var isNum = typeof ugen === "number";
-
+	
 	if(isNum)
 	{
 		buf.writeInt32BE(-1, offset);
@@ -1394,11 +1533,42 @@ function _writeInputSpec(buf, ugen, offset, constants, controls)
 		buf.writeInt32BE(ugen.outputIndex, offset);
 	}
 
-	return offset + 4;
+	return offset + 4;*/
+
+	return ugen.writeInputSpec(buf, offset, constants, controls);
+}
+
+//////////////////////////////////////////////
+//// Write output spec protoype inheritance
+//////////////////////////////////////////////
+
+
+UGen.prototype.writeOutputSpec = function(buf, offset, constants, controls)
+{
+	for(var i = 0; i < this.numOutputs; ++i)
+	{
+		buf.writeInt8(this.rate, offset);
+		++offset;
+	}
+
+	return offset;
+}
+
+MultiOutUGen.prototype.writeOutputSpec = function(buf, offset, constants, controls)
+{
+	for(var i = 0; i < this.numOutputs; ++i)
+	{
+		offset = this.channels[i].writeOutputSpec(buf, offset, constants, controls);
+	}
+
+	return offset;
 }
 
 function _writeUGenBytes(buf, ugen, offset, constants, controls)
 {
+	if(!ugen.addToSynth) // don't write proxies
+		return offset;
+	
 	offset = _pstring(buf, ugen.name, offset);
 	buf.writeInt8(ugen.rate, offset);
 	offset += 1;
@@ -1414,13 +1584,16 @@ function _writeUGenBytes(buf, ugen, offset, constants, controls)
 		offset = _writeInputSpec(buf, ugen.inputs[i], offset, constants, controls);
 	}
 
+	/*
 	for(var i = 0; i < ugen.numOutputs; ++i)
 	{
 		buf.writeInt8(ugen.rate, offset);
 		++offset;
 	}
+
+	return offset;*/
 	
-	return offset;
+	return ugen.writeOutputSpec(buf, offset, constants, controls);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1474,8 +1647,9 @@ function _ugenToDefList(ugen, constants, controls)
 		return [];
 	}
 	   
+	//var defList = ugen.addToSynth ? [ugen] : [];
 	var defList = [ugen];
-
+	
 	for(var i = ugen.inputs.length - 1; i >= 0; --i)
 	{
 		defList = defList.concat(_ugenToDefList(ugen.inputs[i], constants, controls));
@@ -1527,10 +1701,14 @@ function _synthDef(name, def)
 	
 	if(controls.numControls > 0)
 		children = [_Control(controls.numControls)].concat(children);
-	
+
+	var numChildren = 0;
 	for(var i = 0; i < children.length; ++i)
 	{
-		children[i].synthIndex = i;
+		if(children[i].synthIndex == null)
+		{
+			children[i].setSynthIndex(numChildren++);
+		}
 	}
 	
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1580,7 +1758,7 @@ function _synthDef(name, def)
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// UGens
 	
-	buf.writeInt32BE(children.length, offset); // Number of UGens
+	buf.writeInt32BE(numChildren, offset); // Number of UGens
 	offset += 4;
 	
 	offset = _writeDef(buf, children, offset, constants, controls); // Compile the ugen list
