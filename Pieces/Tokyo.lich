@@ -45,11 +45,11 @@ replicateN [3,3,3] 5
 setTempo 240
 
 
-let testSynth freq => sw >> bufCombC (localBuf sampleRate 2) (tempoSeconds/2) 30 >> add sw >> env [0, 0.3, 0.2, 0] [0.005, 0.15, 1] -4 >> out 0
+let testSynth freq => sw >> bufCombC (localBuf sampleRate 2) (tempoSeconds/2) 30 >> add sw >> env [0, 1, 0.6, 0] [0.005, 0.15, 1] -4 >> out 0
     where
         sw = saw freq >> perc2 0.01 0.5 (tempoSeconds/2)
     
-let testSynth2 freq => saw (freq/2) >> env [0, 0.9, 0.3, 0] [0.001, 0.5, 1] -8 >> out 1
+let testSynth2 freq => saw (freq/2) >> env [0, 0.5, 0.3, 0] [0.001, 0.5, 1] -8 >> out 20
 
 let testSynth3 freq => saw (freq/2) >> env [0, 0.3, 0.2, 0] [0.005, 0.3, 2] -4 >> pan (square $ 1/tempoSeconds) >> out 0
 
@@ -62,11 +62,22 @@ testSynth3 (55 * choose [1..12])
 
 testMel ~> testSynth3 -1 1 -2 0 4  [5 5 5 5 5] [2 2] [6 6 6 6 6] [[9 9] [9 9] [_ 9] [_ 9] 9] | (d2f justMajor) | (*5)
 
-testMel2 ~> testSynth [6 6] [4 4] [8 8] [5 5] | (d2f justMajor) | (*3)
+testMel2 ~> testSynth [6 6] [4 4] [8 8] [5 5] 7 7 6 2 [2 2] [3 3] | (d2f justMajor) | (*3)
 
 testMel3 ~> testSynth2 [3 3] [4 4] [[_ 6] 6] [[_ 7] 7] [[_ 2] 2] | ((/4) . d2f justMajor) | (*8)
 
-stop testMel3
+stop testMel
+
+
+
+
+
+let fxSynth => auxIn 20 1 >> combC tempoSeconds [tempoSeconds, tempoSeconds/2] 10 >> out 0
+
+let fx = Synth::after "fxSynth" [] server
+stop fx
+
+
 
 let ff = d2f justMajor
 let testBind = pbind "testBind" "testSynth" [pseq [ff 13, ff 14, ff 13, ff 11] >> pstutter (psaw 0.4 >> prange 4 16)] (pseq [1,0.5,1,1,0.5] * pseq [1,1,2,3])
@@ -87,6 +98,7 @@ drums4 +> hh | (/2)
 
 stop drums
 stop drums2
+stop drums3
 
 map (testSynth . (mul 110)) [8..40]
 
