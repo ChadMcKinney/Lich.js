@@ -791,9 +791,114 @@ function scNeg(a)
 }
 
 /**
- * Signal Math.
+ * Signal Math. TODO: fix all the examples
  * @submodule Signal Math
  */
+
+/**
+ * Return the absolute value of a signal.
+ *
+ * @class scAbs
+ * @constructor
+ * @example
+ * let test amp => sin 440 >> gain amp >> scAbs >> out 0<br>
+ * let t = test 1<br>
+ * stop t
+ */
+function scAbs(a)
+{
+	return _unaryOpUGen(_UN_ABS, a);
+}
+
+/**
+ * Return the ceil of a signal.
+ *
+ * @class scCeil
+ * @constructor
+ * @example
+ * let test amp => sin 440 >> gain amp >> scCeil >> out 0<br>
+ * let t = test 1<br>
+ * stop t
+ */
+function scCeil(a)
+{
+	return _unaryOpUGen(_UN_CEIL, a);
+}
+
+/**
+ * Return the floor of a signal.
+ *
+ * @class scFloor
+ * @constructor
+ * @example
+ * let test amp => sin 440 >> gain amp >> scFloor >> out 0<br>
+ * let t = test 1<br>
+ * stop t
+ */
+function scFloor(a)
+{
+	return _unaryOpUGen(_UN_FLOOR, a);
+}
+
+/**
+ * Return the square of a signal.
+ *
+ * @class scSquared
+ * @constructor
+ * @example
+ * let test amp => sin 440 >> gain amp >> scSquared >> out 0<br>
+ * let t = test 1<br>
+ * stop t
+ */
+function scSquared(a)
+{
+	return _unaryOpUGen(_UN_SQUARED, a);
+}
+
+/**
+ * Return the cube of a signal.
+ *
+ * @class scCubed
+ * @constructor
+ * @example
+ * let test amp => sin 440 >> gain amp >> scCubed >> out 0<br>
+ * let t = test 1<br>
+ * stop t
+ */
+function scCubed(a)
+{
+	return _unaryOpUGen(_UN_CUBED, a);
+}
+
+/**
+ * Return the square root of a signal.
+ *
+ * @class scSqrt
+ * @constructor
+ * @example
+ * let test amp => sin 440 >> gain amp >> scSqrt >> out 0<br>
+ * let t = test 1<br>
+ * stop t
+ */
+function scSqrt(a)
+{
+	return _unaryOpUGen(_UN_SQRT, a);
+}
+
+/**
+ * Return the reciprocal of a signal.
+ *
+ * @class scReciprocal
+ * @constructor
+ * @example
+ * let test amp => sin 440 >> gain amp >> scReciprocal >> out 0<br>
+ * let t = test 1<br>
+ * stop t
+ */
+function scReciprocal(a)
+{
+	return _unaryOpUGen(_UN_RECIP, a);
+}
 
 /**
  * Convert a value from cycles per second to MIDI.
@@ -811,7 +916,7 @@ function scCpsMidi(a)
 }
 
 /**
- * Convert a value from MITI to cycles per second.
+ * Convert a value from MIDI to cycles per second.
  *
  * @class scMidiCps
  * @constructor
@@ -825,6 +930,340 @@ function scMidiCps(a)
 	return _unaryOpUGen(_UN_MIDICPS, a);
 }
 
+/**
+ * Convert a value dB to RMS amplitude.
+ *
+ * @class scDbAmp
+ * @constructor
+ * @example
+ * let test amp => sin 440 >> gain amp >> scDbAmp >> out 0<br>
+ * let t = test 1<br>
+ * stop t
+ */
+function scDbAmp(a)
+{
+	return _unaryOpUGen(_UN_DBAMP, a);
+}
+
+/**
+ * Convert a value RMS amplitude to dB.
+ *
+ * @class scAmpDb
+ * @constructor
+ * @example
+ * let test amp => sin 440 >> gain amp >> scAmpDb >> out 0<br>
+ * let t = test 1<br>
+ * stop t
+ */
+function scAmpDb(a)
+{
+	return _unaryOpUGen(_UN_DBAMP, a);
+}
+
+/**
+ * Return the log of a signal.
+ *
+ * @class scLog
+ * @constructor
+ * @example
+ * let test amp => sin 440 >> gain amp >> scLog >> out 0<br>
+ * let t = test 1<br>
+ * stop t
+ */
+function scLog(a)
+{
+	return _unaryOpUGen(_UN_LOG, a);
+}
+
+/**
+ * Return the log2 of a signal.
+ *
+ * @class scLog2
+ * @constructor
+ * @example
+ * let test amp => sin 440 >> gain amp >> scLog2 >> out 0<br>
+ * let t = test 1<br>
+ * stop t
+ */
+function scLog2(a)
+{
+	return _unaryOpUGen(_UN_LOG2, a);
+}
+
+/**
+ * Return the log10 of a signal.
+ *
+ * @class scLog10
+ * @constructor
+ * @example
+ * let test amp => sin 440 >> gain amp >> scLog10 >> out 0<br>
+ * let t = test 1<br>
+ * stop t
+ */
+function scLog10(a)
+{
+	return _unaryOpUGen(_UN_LOG10, a);
+}
+
+/**
+ * Return the sin of a signal.
+ *
+ * @class scSin
+ * @constructor
+ * @example
+ * let test amp => sin 440 >> gain amp >> scSin >> out 0<br>
+ * let t = test 1<br>
+ * stop t
+ */
+function scSin(a)
+{
+	return _unaryOpUGen(_UN_SIN, a);
+}
+
+/**
+ * Return the cos of a signal.
+ *
+ * @class scCos
+ * @constructor
+ * @example
+ * let test amp => sin 440 >> gain amp >> scCos >> out 0<br>
+ * let t = test 1<br>
+ * stop t
+ */
+function scCos(a)
+{
+	return _unaryOpUGen(_UN_COS, a);
+}
+
+/**
+ * Return the tan of a signal.
+ *
+ * @class scTan
+ * @constructor
+ * @example
+ * let test amp => sin 440 >> gain amp >> scTan >> out 0<br>
+ * let t = test 1<br>
+ * stop t
+ */
+function scTan(a)
+{
+	return _unaryOpUGen(_UN_TAN, a);
+}
+
+/**
+ * Return the arc sin of a signal.
+ *
+ * @class scASin
+ * @constructor
+ * @example
+ * let test amp => sin 440 >> gain amp >> scASin >> out 0<br>
+ * let t = test 1<br>
+ * stop t
+ */
+function scASin(a)
+{
+	return _unaryOpUGen(_UN_ARCSIN, a);
+}
+
+/**
+ * Return the arc cos of a signal.
+ *
+ * @class scACos
+ * @constructor
+ * @example
+ * let test amp => sin 440 >> gain amp >> scACos >> out 0<br>
+ * let t = test 1<br>
+ * stop t
+ */
+function scACos(a)
+{
+	return _unaryOpUGen(_UN_ARCCOS, a);
+}
+
+/**
+ * Return the arc tan of a signal.
+ *
+ * @class scATan
+ * @constructor
+ * @example
+ * let test amp => sin 440 >> gain amp >> scATan >> out 0<br>
+ * let t = test 1<br>
+ * stop t
+ */
+function scATan(a)
+{
+	return _unaryOpUGen(_UN_ARCTAN, a);
+}
+
+/**
+ * Return the sinh of a signal.
+ *
+ * @class scSinh
+ * @constructor
+ * @example
+ * let test amp => sin 440 >> gain amp >> scSinh >> out 0<br>
+ * let t = test 1<br>
+ * stop t
+ */
+function scSinh(a)
+{
+	return _unaryOpUGen(_UN_SINH, a);
+}
+
+/**
+ * Return the cosh of a signal.
+ *
+ * @class scCosh
+ * @constructor
+ * @example
+ * let test amp => sin 440 >> gain amp >> scCosh >> out 0<br>
+ * let t = test 1<br>
+ * stop t
+ */
+function scCosh(a)
+{
+	return _unaryOpUGen(_UN_COSH, a);
+}
+
+/**
+ * Return the tanh of a signal.
+ *
+ * @class scTanh
+ * @constructor
+ * @example
+ * let test amp => sin 440 >> gain amp >> scTanh >> out 0<br>
+ * let t = test 1<br>
+ * stop t
+ */
+function scTanh(a)
+{
+	return _unaryOpUGen(_UN_TANH, a);
+}
+
+/**
+ * Return the modulo of two signals. a % b
+ *
+ * @class scMod
+ * @constructor
+ * @param a Signal a
+ * @param b Signal b
+ * @example
+ * TODO
+ */
+function scMod(a, b)
+{
+	return _binaryOpUGen(_BIN_MOD, a, b);
+}
+
+/**
+ * Return the signal rounded to the nearest value of b.
+ *
+ * @class scRound
+ * @constructor
+ * @param a Signal a
+ * @param b Value to round to
+ * @example
+ * TODO
+ */
+function scRound(a, b)
+{
+	return _binaryOpUGen(_BIN_ROUND, a, b);
+}
+
+/**
+ * Return the signal to the power of b.
+ *
+ * @class scPow
+ * @constructor
+ * @param a Signal a
+ * @param b Value to round to
+ * @example
+ * TODO
+ */
+function scPow(a, b)
+{
+	return _binaryOpUGen(_BIN_POW, a, b);
+}
+
+/**
+ * Bitwise & a signal.
+ *
+ * @class scBitAnd
+ * @constructor
+ * @param a Signal a
+ * @param b Signal b
+ * @example
+ * TODO
+ */
+function scBitAnd(a, b)
+{
+	return _binaryOpUGen(_BIN_BITAND, a, b);
+}
+
+/**
+ * Bitwise Operators. TODO: fix all examples
+ * @submodule Bitwise Operators
+ */
+
+/**
+ * Bitwise | a signal.
+ *
+ * @class scBitOr
+ * @constructor
+ * @param a Signal a
+ * @param b Signal b
+ * @example
+ * TODO
+ */
+function scBitOr(a, b)
+{
+	return _binaryOpUGen(_BIN_BITOR, a, b);
+}
+
+/**
+ * Bitwise xor a signal.
+ *
+ * @class scBitXor
+ * @constructor
+ * @param a Signal a
+ * @param b Signal b
+ * @example
+ * TODO
+ */
+function scBitXor(a, b)
+{
+	return _binaryOpUGen(_BIN_BITXOR, a, b);
+}
+
+/**
+ * Bitwise << a signal.
+ *
+ * @class scBitLeftShift
+ * @constructor
+ * @param a Signal a
+ * @param b Signal b
+ * @example
+ * TODO
+ */
+function scBitLeftShift(a, b)
+{
+	return _binaryOpUGen(_BIN_SHIFTLEFT, a, b);
+}
+
+/**
+ * Bitwise >> a signal.
+ *
+ * @class scBitRightShift
+ * @constructor
+ * @param a Signal a
+ * @param b Signal b
+ * @example
+ * TODO
+ */
+function scBitRightShift(a, b)
+{
+	return _binaryOpUGen(_BIN_SHIFTRIGHT, a, b);
+}
 
 /**
  * Output a constant value
@@ -1794,6 +2233,11 @@ function out(busNum, value)
 }
 
 /**
+ * Inputs and Outputs
+ * @submodule InputOutput
+ */
+
+/**
  * Reads audio from a range of audio buses.
  *
  * @class auxIn
@@ -1801,11 +2245,11 @@ function out(busNum, value)
  * @param busNum The bus index to start reading from.
  * @param numChannels The number of channels to read from.
  * @example
- * let simpleSynth freq => sin freq * square (2*tempoSeconds) * 0.25 >> out 20
- * let sSynth = simpleSynth 440
- * let fxSynth => auxIn 20 1 >> combC tempoSeconds [tempoSeconds/1, tempoSeconds/2] 10 >> out 0
- * let fx = Synth::after "fxSynth" [] server
- * stop sSynth
+ * let simpleSynth freq => sin freq \* square (2\*tempoSeconds) * 0.25 >> out 20<br>
+ * let sSynth = simpleSynth 440<br>
+ * let fxSynth => auxIn 20 1 >> combC tempoSeconds [tempoSeconds/1, tempoSeconds/2] 10 >> out 0<br>
+ * let fx = Synth::after "fxSynth" [] server<br>
+ * stop sSynth<br>
  * stop fx
  */
 function auxIn(busNum, numChannels)
@@ -1820,11 +2264,6 @@ function auxIn(busNum, numChannels)
 	// !!! We indicate number of outputs using an array of rates. !!!
 	return newMultiOutUGen("In", rates, [busNum], 0);
 }
-
-/**
- * Inputs and Outputs
- * @submodule InputOutput
- */
 
 /**
  * Pans a single channel input across a stereo field using equal power panning.
@@ -1893,6 +2332,18 @@ function _MaxLocalBufs()
 	return new UGen("MaxLocalBufs", ScalarRate, [0], 1, 0);
 }
 
+/**
+ * A buffer local to a synth.
+ *
+ * @class localBuf
+ * @constructor
+ * @param frames Size of the buffer in samples
+ * @param channels Number of channels for the buffer
+ * @example
+ * let test del => impulse 1 >> bufCombC (localBuf 44100 1) del 1 >> out 0<br>
+ * let t = test 0.1<br>
+ * stop t
+ */
 function localBuf(frames, channels)
 {
 	var lb = multiNewUGen("LocalBuf", ScalarRate, [channels, frames], 1, 0);
@@ -1903,6 +2354,11 @@ function localBuf(frames, channels)
 	lb.isLocalBuf = true;
 	return lb;
 }
+
+/**
+ * Buffers.
+ * @submodule Buffers
+ */
 
 //////////////////////////////////////////////
 //// Write input spec protoype inheritance
