@@ -1660,10 +1660,26 @@ function clipNoise(amp)
  * let t = test 1.5<br>
  * stop t
  */
-// fix this?
 function crackle(chaos)
 {
 	return multiNewUGen("Crackle", AudioRate, [chaos], 1, 0);
+}
+
+/**
+ * When CoinGate receives a trigger, it tosses a coin and either passes the trigger or doesn't.
+ *
+ * @class coingate
+ * @constructor
+ * @param probability Value between 0.0 and 1.0 for chance of passing the trigger
+ * @param input The trigger
+ * @example
+ * let test p => sin (scTRand 440 880 (coingate p (impulse 2))) >> out 0<br>
+ * let t = test 0.5<br>
+ * stop t
+ */
+function coingate(probability,input)
+{
+	return multiNewUGen("CoinGate", AudioRate, [probability,input], 1, 0);
 }
 
 /**
@@ -1680,6 +1696,39 @@ function crackle(chaos)
 function dust(density)
 {
 	return multiNewUGen("Dust", AudioRate, [density], 1, 0);
+}
+
+/**
+ * Generates random impulses from -1 to +1.
+ *
+ * @class dust2
+ * @constructor
+ * @param density Average number of impulses per second.
+ * @example
+ * let test d => dust2 d >> out 0<br>
+ * let t = test 1.5<br>
+ * stop t
+ */
+function dust2(density)
+{
+	return multiNewUGen("Dust2", AudioRate, [density], 1, 0);
+}
+
+/**
+ * Generates impulses centered around a frequency with gaussian distribution.
+ *
+ * @class gausstrig
+ * @constructor
+ * @param freq Mean frequency
+ * @param dev Random deviation from mean (0 <= dev < 1)
+ * @example
+ * let test d => sin (scTRand 440 880 (gausstrig 2 d)) >> out 0<br>
+ * let t = test 0.2<br>
+ * stop t
+ */
+function gausstrig(freq,dev)
+{
+	return multiNewUGen("GaussTrig", AudioRate, [freq,dev], 1, 0);
 }
 
 /**
@@ -1832,6 +1881,39 @@ function lowpass(freq, q, input)
  */
 
 /**
+ * Removes DC offset from a signal.
+ * 
+ * @class leakdc
+ * @constructor
+ * @param coef Leak coefficient
+ * @param input Input signal
+ * @example
+ * let test c => white 1 >> leakdc c >> out 0<br>
+ * let t = test 0.995<br>
+ * stop t
+ */
+function leakdc(coef, input)
+{
+	return multiNewUGen("LeakDC", AudioRate, [input,coef], 1, 0);
+}
+
+/**
+ * Removes DC offset from a signal with a default coefficient.
+ * 
+ * @class leakdc1
+ * @constructor
+ * @param input Input signal
+ * @example
+ * let test a => white a >> leakdc >> out 0<br>
+ * let t = test 0.5<br>
+ * stop t
+ */
+function leakdc1(input)
+{
+	return multiNewUGen("LeakDC", AudioRate, [input,0.995], 1, 0);
+}
+
+/**
  * A high pass filter.
  * 
  * @class highpass
@@ -1896,6 +1978,7 @@ function crush(bits, input)
 {
 	return multiNewUGen("Decimator", AudioRate, [input,44100,bits], 1, 0);
 }
+
 /**
  * Sample rate reduction on a signal.
  *
@@ -1913,6 +1996,76 @@ function decimate(rate, input)
 }
 
 /**
+ * General purpose (hard-knee) dynamics processor.
+ *
+ * @class compander
+ * @constructor
+ * @param control Control signal. Same as input for compression, different for ducking.
+ * @param thresh Control signal amplitude threshold.
+ * @param slopeBelow Compression slope below the threshold
+ * @param slopeAbove Compression slope above the threshold
+ * @param clampTime Time until compression fully active
+ * @param relaxTime Time until compression fully inactive
+ * @param input The signal to be compressed
+ * @example
+ * TODO
+ */
+ function compander(control,thresh,slopeBelow,slopeAbove,clampTime,relaxTime,input)
+{
+	return multiNewUGen("Compander", AudioRate, [control,thresh,slopeBelow,slopeAbove,clampTime,relaxTime,input], 1, 0);
+}
+
+/**
+ * Limits the amplitude of the the input to a given level.
+ *
+ * @class limiter 
+ * @constructor
+ * @param level Amplitude level to limit input to
+ * @param dur Lookahead time
+ * @param input Signal to be limited
+ * @example
+ * TODO
+ */
+function limiter(level,dur,input)
+{
+	return multiNewUGen("Limiter", AudioRate, [input,level,dur], 1, 0);
+}
+
+/**
+ * A time domain granular pitch shifter. Grains have a triangular amplitude envelope and an overlap of 4:1.
+ *
+ * @class pitchshift
+ * @constructor
+ * @param windowSize Grain window size
+ * @param pitchRatio Ratio of the pitch shift. Between 0 and 4
+ * @param pitchDispersion Maximum random deviation from the pitchRatio
+ * @param timeDispersion Random time offset of each grain
+ * @param input Signal to be pitch shifted
+ * @example
+ * TODO
+ */
+function pitchshift(windowSize,pitchRatio,pitchDispersion,timeDispersion,input)
+{
+	return multiNewUGen("PitchShift", AudioRate, [windowSize,pitchRatio,pitchDispersion,timeDispersion,input], 1, 0);
+}
+
+/**
+ * Single sideband amplitude modulation based frequency shifting.
+ *
+ * @class freqshift
+ * @constructor
+ * @param freq Shift amount in Hz
+ * @param phase Amount of phase
+ * @param input Signal to be limited
+ * @example
+ * TODO
+ */
+function freqshift(freq,phase,input)
+{
+	return multiNewUGen("FreqShift", AudioRate, [input,freq,phase], 1, 0);
+}
+
+/**
  * An allpass delay line with no interpolation.
  * 
  * @class allpassN
@@ -1925,6 +2078,7 @@ function decimate(rate, input)
  * let t = test 0.1<br>
  * stop t
  */
+
 function allpassN(maxDel, del, decay, input)
 {
 	return multiNewUGen("AllpassN", AudioRate, [input,maxDel,del,decay], 1, 0);
