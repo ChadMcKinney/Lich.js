@@ -742,6 +742,22 @@ function scFold(lo, hi, input)
 }
 
 /**
+ * Foldback distortion.
+ * 
+ * @class fold
+ * @constructor
+ * @param level Boundry to fold at
+ * @example
+ * let test l => white 1 >> fold l >> out 0<br>
+ * let t = test 0.5<br>
+ * stop t
+ */
+function fold(level, input)
+{
+	return multiNewUGen("Fold", AudioRate, [input,-1*level,level], 1, 0);
+}
+
+/**
  * Wrap distortion.
  * 
  * @class scWrap
@@ -759,6 +775,22 @@ function scWrap(lo, hi, input)
 }
 
 /**
+ * Wrap distortion.
+ * 
+ * @class wrap
+ * @constructor
+ * @param level Boundry to wrap at
+ * @example
+ * let test l => white 1 >> wrap l >> out 0<br>
+ * let t = test 0.5<br>
+ * stop t
+ */
+function wrap(level, input)
+{
+	return multiNewUGen("Wrap", AudioRate, [input,-1*level,level], 1, 0);
+}
+
+/**
  * Clip distortion.
  * 
  * @class scClip
@@ -773,6 +805,22 @@ function scWrap(lo, hi, input)
 function scClip(lo, hi, input)
 {
 	return multiNewUGen("Clip", AudioRate, [input,lo,hi], 1, 0);
+}
+
+/**
+ * Clip distortion.
+ * 
+ * @class clip
+ * @constructor
+ * @param level Boundry to clip at
+ * @example
+ * let test l => white 1 >> clip l >> out 0<br>
+ * let t = test 0.5<br>
+ * stop t
+ */
+function clip(level, input)
+{
+	return multiNewUGen("Clip", AudioRate, [input,-1*level,level], 1, 0);
 }
 
 /**
