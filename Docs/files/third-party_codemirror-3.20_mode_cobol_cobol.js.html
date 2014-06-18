@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en" class="yui-overrride">
+<head>
+    <meta charset="utf-8">
+    <title>third-party/codemirror-3.20/mode/cobol/cobol.js - Lich.sc</title>
+    <link rel="stylesheet" href="http://yui.yahooapis.com/3.9.1/build/cssgrids/cssgrids-min.css">
+    <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
+    <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700' rel='stylesheet' type='text/css'>
+    <link rel="shortcut icon" type="image/png" href="../assets/favicon.png">
+    <script src="http://yui.yahooapis.com/combo?3.9.1/build/yui/yui-min.js"></script>
+    <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
+</head>
+<body class="yui3-skin-sam">
+
+<div id="doc">
+    <div id="hd" class="yui3-g header">
+        <div class="yui3-u-3-4">
+            <h1 class="blue-main-title">Lich.sc</h1>
+        </div>
+        <div class="yui3-u-1-4 version project-version">
+            API Docs for: 0.1
+        </div>
+    </div>
+    <div id="bd" class="yui3-g">
+
+        <div class="yui3-u-1-4">
+            <div id="docs-sidebar" class="sidebar apidocs">
+                <div id="api-list">
+    <h2 class="off-left">APIs</h2>
+    <div id="api-tabview" class="tabview">
+        <ul class="tabs">
+            <li><a href="#api-classes">Functions</a></li>
+            <li><a href="#api-modules">Modules</a></li>
+        </ul>
+
+        <div id="api-tabview-filter">
+            <input type="search" id="api-filter" placeholder="Type to filter APIs" style="display: none;">
+        </div>
+
+        <div id="api-tabview-panel">
+            <ul id="api-classes" class="apis classes">
+            
+                <li><a href="../classes/allpassC.html">allpassC</a></li>
+            
+                <li><a href="../classes/allpassL.html">allpassL</a></li>
+            
+                <li><a href="../classes/allpassN.html">allpassN</a></li>
+            
+                <li><a href="../classes/auxIn.html">auxIn</a></li>
+            
+                <li><a href="../classes/bandpass.html">bandpass</a></li>
+            
+                <li><a href="../classes/blip.html">blip</a></li>
+            
+                <li><a href="../classes/brown.html">brown</a></li>
+            
+                <li><a href="../classes/bufAllpassC.html">bufAllpassC</a></li>
+            
+                <li><a href="../classes/bufAllpassL.html">bufAllpassL</a></li>
+            
+                <li><a href="../classes/bufAllpassN.html">bufAllpassN</a></li>
+            
+                <li><a href="../classes/bufCombC.html">bufCombC</a></li>
+            
+                <li><a href="../classes/bufCombL.html">bufCombL</a></li>
+            
+                <li><a href="../classes/bufCombN.html">bufCombN</a></li>
+            
+                <li><a href="../classes/bufDelayC.html">bufDelayC</a></li>
+            
+                <li><a href="../classes/bufDelayL.html">bufDelayL</a></li>
+            
+                <li><a href="../classes/bufDelayN.html">bufDelayN</a></li>
+            
+                <li><a href="../classes/clipNoise.html">clipNoise</a></li>
+            
+                <li><a href="../classes/combC.html">combC</a></li>
+            
+                <li><a href="../classes/combL.html">combL</a></li>
+            
+                <li><a href="../classes/combN.html">combN</a></li>
+            
+                <li><a href="../classes/crackle.html">crackle</a></li>
+            
+                <li><a href="../classes/crush.html">crush</a></li>
+            
+                <li><a href="../classes/cuspL.html">cuspL</a></li>
+            
+                <li><a href="../classes/cuspN.html">cuspN</a></li>
+            
+                <li><a href="../classes/dc.html">dc</a></li>
+            
+                <li><a href="../classes/decimate.html">decimate</a></li>
+            
+                <li><a href="../classes/delayC.html">delayC</a></li>
+            
+                <li><a href="../classes/delayL.html">delayL</a></li>
+            
+                <li><a href="../classes/delayN.html">delayN</a></li>
+            
+                <li><a href="../classes/dup.html">dup</a></li>
+            
+                <li><a href="../classes/dust.html">dust</a></li>
+            
+                <li><a href="../classes/env.html">env</a></li>
+            
+                <li><a href="../classes/env2.html">env2</a></li>
+            
+                <li><a href="../classes/formant.html">formant</a></li>
+            
+                <li><a href="../classes/gbmanL.html">gbmanL</a></li>
+            
+                <li><a href="../classes/gbmanN.html">gbmanN</a></li>
+            
+                <li><a href="../classes/gray.html">gray</a></li>
+            
+                <li><a href="../classes/highpass.html">highpass</a></li>
+            
+                <li><a href="../classes/impulse.html">impulse</a></li>
+            
+                <li><a href="../classes/lag.html">lag</a></li>
+            
+                <li><a href="../classes/localBuf.html">localBuf</a></li>
+            
+                <li><a href="../classes/lowpass.html">lowpass</a></li>
+            
+                <li><a href="../classes/noiseL.html">noiseL</a></li>
+            
+                <li><a href="../classes/noiseN.html">noiseN</a></li>
+            
+                <li><a href="../classes/noiseX.html">noiseX</a></li>
+            
+                <li><a href="../classes/out.html">out</a></li>
+            
+                <li><a href="../classes/pan.html">pan</a></li>
+            
+                <li><a href="../classes/perc.html">perc</a></li>
+            
+                <li><a href="../classes/perc2.html">perc2</a></li>
+            
+                <li><a href="../classes/pink.html">pink</a></li>
+            
+                <li><a href="../classes/pulse.html">pulse</a></li>
+            
+                <li><a href="../classes/saw.html">saw</a></li>
+            
+                <li><a href="../classes/scAbs.html">scAbs</a></li>
+            
+                <li><a href="../classes/scACos.html">scACos</a></li>
+            
+                <li><a href="../classes/scAmpDb.html">scAmpDb</a></li>
+            
+                <li><a href="../classes/scASin.html">scASin</a></li>
+            
+                <li><a href="../classes/scATan.html">scATan</a></li>
+            
+                <li><a href="../classes/scBitAnd.html">scBitAnd</a></li>
+            
+                <li><a href="../classes/scBitLeftShift.html">scBitLeftShift</a></li>
+            
+                <li><a href="../classes/scBitOr.html">scBitOr</a></li>
+            
+                <li><a href="../classes/scBitRightShift.html">scBitRightShift</a></li>
+            
+                <li><a href="../classes/scBitXor.html">scBitXor</a></li>
+            
+                <li><a href="../classes/scCeil.html">scCeil</a></li>
+            
+                <li><a href="../classes/scClip.html">scClip</a></li>
+            
+                <li><a href="../classes/scCos.html">scCos</a></li>
+            
+                <li><a href="../classes/scCosh.html">scCosh</a></li>
+            
+                <li><a href="../classes/scCpsMidi.html">scCpsMidi</a></li>
+            
+                <li><a href="../classes/scCubed.html">scCubed</a></li>
+            
+                <li><a href="../classes/scDbAmp.html">scDbAmp</a></li>
+            
+                <li><a href="../classes/scDistort.html">scDistort</a></li>
+            
+                <li><a href="../classes/scExpRand.html">scExpRand</a></li>
+            
+                <li><a href="../classes/scFloor.html">scFloor</a></li>
+            
+                <li><a href="../classes/scFold.html">scFold</a></li>
+            
+                <li><a href="../classes/scIRand.html">scIRand</a></li>
+            
+                <li><a href="../classes/scLinRand.html">scLinRand</a></li>
+            
+                <li><a href="../classes/scLog.html">scLog</a></li>
+            
+                <li><a href="../classes/scLog10.html">scLog10</a></li>
+            
+                <li><a href="../classes/scLog2.html">scLog2</a></li>
+            
+                <li><a href="../classes/scMidiCps.html">scMidiCps</a></li>
+            
+                <li><a href="../classes/scMod.html">scMod</a></li>
+            
+                <li><a href="../classes/scNeg.html">scNeg</a></li>
+            
+                <li><a href="../classes/scNRand.html">scNRand</a></li>
+            
+                <li><a href="../classes/scPow.html">scPow</a></li>
+            
+                <li><a href="../classes/scRand.html">scRand</a></li>
+            
+                <li><a href="../classes/scReciprocal.html">scReciprocal</a></li>
+            
+                <li><a href="../classes/scRound.html">scRound</a></li>
+            
+                <li><a href="../classes/scSin.html">scSin</a></li>
+            
+                <li><a href="../classes/scSinh.html">scSinh</a></li>
+            
+                <li><a href="../classes/scSoftClip.html">scSoftClip</a></li>
+            
+                <li><a href="../classes/scSqrt.html">scSqrt</a></li>
+            
+                <li><a href="../classes/scSquared.html">scSquared</a></li>
+            
+                <li><a href="../classes/scTan.html">scTan</a></li>
+            
+                <li><a href="../classes/scTanh.html">scTanh</a></li>
+            
+                <li><a href="../classes/scTExpRand.html">scTExpRand</a></li>
+            
+                <li><a href="../classes/scTIRand.html">scTIRand</a></li>
+            
+                <li><a href="../classes/scTRand.html">scTRand</a></li>
+            
+                <li><a href="../classes/scWrap.html">scWrap</a></li>
+            
+                <li><a href="../classes/sin.html">sin</a></li>
+            
+                <li><a href="../classes/square.html">square</a></li>
+            
+                <li><a href="../classes/tri.html">tri</a></li>
+            
+                <li><a href="../classes/white.html">white</a></li>
+            
+            </ul>
+
+            <ul id="api-modules" class="apis modules">
+            
+                <li><a href="../modules/Bitwise Operators.html">Bitwise Operators</a></li>
+            
+                <li><a href="../modules/Buffers.html">Buffers</a></li>
+            
+                <li><a href="../modules/Chaos.html">Chaos</a></li>
+            
+                <li><a href="../modules/Delays.html">Delays</a></li>
+            
+                <li><a href="../modules/Distortions.html">Distortions</a></li>
+            
+                <li><a href="../modules/Envelopes.html">Envelopes</a></li>
+            
+                <li><a href="../modules/Filters.html">Filters</a></li>
+            
+                <li><a href="../modules/InputOutput.html">InputOutput</a></li>
+            
+                <li><a href="../modules/Lich.sc UGens.html">Lich.sc UGens</a></li>
+            
+                <li><a href="../modules/Noise.html">Noise</a></li>
+            
+                <li><a href="../modules/Oscillators.html">Oscillators</a></li>
+            
+                <li><a href="../modules/Panning.html">Panning</a></li>
+            
+                <li><a href="../modules/Random.html">Random</a></li>
+            
+                <li><a href="../modules/Signal Math.html">Signal Math</a></li>
+            
+            </ul>
+        </div>
+    </div>
+</div>
+
+            </div>
+        </div>
+        <div class="yui3-u-3-4">
+                <div id="api-options" style="visibility:hidden">
+        Show:
+        <label for="api-show-inherited">
+            <input type="checkbox" id="api-show-inherited" checked>
+            Inherited
+        </label>
+
+        <label for="api-show-protected">
+            <input type="checkbox" id="api-show-protected">
+            Protected
+        </label>
+
+        <label for="api-show-private">
+            <input type="checkbox" id="api-show-private">
+            Private
+        </label>
+        <label for="api-show-deprecated">
+            <input type="checkbox" id="api-show-deprecated">
+            Deprecated
+        </label>
+
+    </div>
+
+
+            <div class="apidocs">
+                <div id="docs-main">
+                    <div class="content">
+                        <h1 class="file-heading">File: third-party/codemirror-3.20/mode/cobol/cobol.js</h1>
+
+<div class="file">
+    <pre class="code prettyprint linenums">
+/**
+ * Author: Gautam Mehta
+ * Branched from CodeMirror&#x27;s Scheme mode
+ */
+CodeMirror.defineMode(&quot;cobol&quot;, function () {
+  var BUILTIN = &quot;builtin&quot;, COMMENT = &quot;comment&quot;, STRING = &quot;string&quot;,
+      ATOM = &quot;atom&quot;, NUMBER = &quot;number&quot;, KEYWORD = &quot;keyword&quot;, MODTAG = &quot;header&quot;,
+      COBOLLINENUM = &quot;def&quot;, PERIOD = &quot;link&quot;;
+  function makeKeywords(str) {
+    var obj = {}, words = str.split(&quot; &quot;);
+    for (var i = 0; i &lt; words.length; ++i) obj[words[i]] = true;
+    return obj;
+  }
+  var atoms = makeKeywords(&quot;TRUE FALSE ZEROES ZEROS ZERO SPACES SPACE LOW-VALUE LOW-VALUES &quot;);
+  var keywords = makeKeywords(
+      &quot;ACCEPT ACCESS ACQUIRE ADD ADDRESS &quot; +
+      &quot;ADVANCING AFTER ALIAS ALL ALPHABET &quot; +
+      &quot;ALPHABETIC ALPHABETIC-LOWER ALPHABETIC-UPPER ALPHANUMERIC ALPHANUMERIC-EDITED &quot; +
+      &quot;ALSO ALTER ALTERNATE AND ANY &quot; +
+      &quot;ARE AREA AREAS ARITHMETIC ASCENDING &quot; +
+      &quot;ASSIGN AT ATTRIBUTE AUTHOR AUTO &quot; +
+      &quot;AUTO-SKIP AUTOMATIC B-AND B-EXOR B-LESS &quot; +
+      &quot;B-NOT B-OR BACKGROUND-COLOR BACKGROUND-COLOUR BEEP &quot; +
+      &quot;BEFORE BELL BINARY BIT BITS &quot; +
+      &quot;BLANK BLINK BLOCK BOOLEAN BOTTOM &quot; +
+      &quot;BY CALL CANCEL CD CF &quot; +
+      &quot;CH CHARACTER CHARACTERS CLASS CLOCK-UNITS &quot; +
+      &quot;CLOSE COBOL CODE CODE-SET COL &quot; +
+      &quot;COLLATING COLUMN COMMA COMMIT COMMITMENT &quot; +
+      &quot;COMMON COMMUNICATION COMP COMP-0 COMP-1 &quot; +
+      &quot;COMP-2 COMP-3 COMP-4 COMP-5 COMP-6 &quot; +
+      &quot;COMP-7 COMP-8 COMP-9 COMPUTATIONAL COMPUTATIONAL-0 &quot; +
+      &quot;COMPUTATIONAL-1 COMPUTATIONAL-2 COMPUTATIONAL-3 COMPUTATIONAL-4 COMPUTATIONAL-5 &quot; +
+      &quot;COMPUTATIONAL-6 COMPUTATIONAL-7 COMPUTATIONAL-8 COMPUTATIONAL-9 COMPUTE &quot; +
+      &quot;CONFIGURATION CONNECT CONSOLE CONTAINED CONTAINS &quot; +
+      &quot;CONTENT CONTINUE CONTROL CONTROL-AREA CONTROLS &quot; +
+      &quot;CONVERTING COPY CORR CORRESPONDING COUNT &quot; +
+      &quot;CRT CRT-UNDER CURRENCY CURRENT CURSOR &quot; +
+      &quot;DATA DATE DATE-COMPILED DATE-WRITTEN DAY &quot; +
+      &quot;DAY-OF-WEEK DB DB-ACCESS-CONTROL-KEY DB-DATA-NAME DB-EXCEPTION &quot; +
+      &quot;DB-FORMAT-NAME DB-RECORD-NAME DB-SET-NAME DB-STATUS DBCS &quot; +
+      &quot;DBCS-EDITED DE DEBUG-CONTENTS DEBUG-ITEM DEBUG-LINE &quot; +
+      &quot;DEBUG-NAME DEBUG-SUB-1 DEBUG-SUB-2 DEBUG-SUB-3 DEBUGGING &quot; +
+      &quot;DECIMAL-POINT DECLARATIVES DEFAULT DELETE DELIMITED &quot; +
+      &quot;DELIMITER DEPENDING DESCENDING DESCRIBED DESTINATION &quot; +
+      &quot;DETAIL DISABLE DISCONNECT DISPLAY DISPLAY-1 &quot; +
+      &quot;DISPLAY-2 DISPLAY-3 DISPLAY-4 DISPLAY-5 DISPLAY-6 &quot; +
+      &quot;DISPLAY-7 DISPLAY-8 DISPLAY-9 DIVIDE DIVISION &quot; +
+      &quot;DOWN DROP DUPLICATE DUPLICATES DYNAMIC &quot; +
+      &quot;EBCDIC EGI EJECT ELSE EMI &quot; +
+      &quot;EMPTY EMPTY-CHECK ENABLE END END. END-ACCEPT END-ACCEPT. &quot; +
+      &quot;END-ADD END-CALL END-COMPUTE END-DELETE END-DISPLAY &quot; +
+      &quot;END-DIVIDE END-EVALUATE END-IF END-INVOKE END-MULTIPLY &quot; +
+      &quot;END-OF-PAGE END-PERFORM END-READ END-RECEIVE END-RETURN &quot; +
+      &quot;END-REWRITE END-SEARCH END-START END-STRING END-SUBTRACT &quot; +
+      &quot;END-UNSTRING END-WRITE END-XML ENTER ENTRY &quot; +
+      &quot;ENVIRONMENT EOP EQUAL EQUALS ERASE &quot; +
+      &quot;ERROR ESI EVALUATE EVERY EXCEEDS &quot; +
+      &quot;EXCEPTION EXCLUSIVE EXIT EXTEND EXTERNAL &quot; +
+      &quot;EXTERNALLY-DESCRIBED-KEY FD FETCH FILE FILE-CONTROL &quot; +
+      &quot;FILE-STREAM FILES FILLER FINAL FIND &quot; +
+      &quot;FINISH FIRST FOOTING FOR FOREGROUND-COLOR &quot; +
+      &quot;FOREGROUND-COLOUR FORMAT FREE FROM FULL &quot; +
+      &quot;FUNCTION GENERATE GET GIVING GLOBAL &quot; +
+      &quot;GO GOBACK GREATER GROUP HEADING &quot; +
+      &quot;HIGH-VALUE HIGH-VALUES HIGHLIGHT I-O I-O-CONTROL &quot; +
+      &quot;ID IDENTIFICATION IF IN INDEX &quot; +
+      &quot;INDEX-1 INDEX-2 INDEX-3 INDEX-4 INDEX-5 &quot; +
+      &quot;INDEX-6 INDEX-7 INDEX-8 INDEX-9 INDEXED &quot; +
+      &quot;INDIC INDICATE INDICATOR INDICATORS INITIAL &quot; +
+      &quot;INITIALIZE INITIATE INPUT INPUT-OUTPUT INSPECT &quot; +
+      &quot;INSTALLATION INTO INVALID INVOKE IS &quot; +
+      &quot;JUST JUSTIFIED KANJI KEEP KEY &quot; +
+      &quot;LABEL LAST LD LEADING LEFT &quot; +
+      &quot;LEFT-JUSTIFY LENGTH LENGTH-CHECK LESS LIBRARY &quot; +
+      &quot;LIKE LIMIT LIMITS LINAGE LINAGE-COUNTER &quot; +
+      &quot;LINE LINE-COUNTER LINES LINKAGE LOCAL-STORAGE &quot; +
+      &quot;LOCALE LOCALLY LOCK &quot; +
+      &quot;MEMBER MEMORY MERGE MESSAGE METACLASS &quot; +
+      &quot;MODE MODIFIED MODIFY MODULES MOVE &quot; +
+      &quot;MULTIPLE MULTIPLY NATIONAL NATIVE NEGATIVE &quot; +
+      &quot;NEXT NO NO-ECHO NONE NOT &quot; +
+      &quot;NULL NULL-KEY-MAP NULL-MAP NULLS NUMBER &quot; +
+      &quot;NUMERIC NUMERIC-EDITED OBJECT OBJECT-COMPUTER OCCURS &quot; +
+      &quot;OF OFF OMITTED ON ONLY &quot; +
+      &quot;OPEN OPTIONAL OR ORDER ORGANIZATION &quot; +
+      &quot;OTHER OUTPUT OVERFLOW OWNER PACKED-DECIMAL &quot; +
+      &quot;PADDING PAGE PAGE-COUNTER PARSE PERFORM &quot; +
+      &quot;PF PH PIC PICTURE PLUS &quot; +
+      &quot;POINTER POSITION POSITIVE PREFIX PRESENT &quot; +
+      &quot;PRINTING PRIOR PROCEDURE PROCEDURE-POINTER PROCEDURES &quot; +
+      &quot;PROCEED PROCESS PROCESSING PROGRAM PROGRAM-ID &quot; +
+      &quot;PROMPT PROTECTED PURGE QUEUE QUOTE &quot; +
+      &quot;QUOTES RANDOM RD READ READY &quot; +
+      &quot;REALM RECEIVE RECONNECT RECORD RECORD-NAME &quot; +
+      &quot;RECORDS RECURSIVE REDEFINES REEL REFERENCE &quot; +
+      &quot;REFERENCE-MONITOR REFERENCES RELATION RELATIVE RELEASE &quot; +
+      &quot;REMAINDER REMOVAL RENAMES REPEATED REPLACE &quot; +
+      &quot;REPLACING REPORT REPORTING REPORTS REPOSITORY &quot; +
+      &quot;REQUIRED RERUN RESERVE RESET RETAINING &quot; +
+      &quot;RETRIEVAL RETURN RETURN-CODE RETURNING REVERSE-VIDEO &quot; +
+      &quot;REVERSED REWIND REWRITE RF RH &quot; +
+      &quot;RIGHT RIGHT-JUSTIFY ROLLBACK ROLLING ROUNDED &quot; +
+      &quot;RUN SAME SCREEN SD SEARCH &quot; +
+      &quot;SECTION SECURE SECURITY SEGMENT SEGMENT-LIMIT &quot; +
+      &quot;SELECT SEND SENTENCE SEPARATE SEQUENCE &quot; +
+      &quot;SEQUENTIAL SET SHARED SIGN SIZE &quot; +
+      &quot;SKIP1 SKIP2 SKIP3 SORT SORT-MERGE &quot; +
+      &quot;SORT-RETURN SOURCE SOURCE-COMPUTER SPACE-FILL &quot; +
+      &quot;SPECIAL-NAMES STANDARD STANDARD-1 STANDARD-2 &quot; +
+      &quot;START STARTING STATUS STOP STORE &quot; +
+      &quot;STRING SUB-QUEUE-1 SUB-QUEUE-2 SUB-QUEUE-3 SUB-SCHEMA &quot; +
+      &quot;SUBFILE SUBSTITUTE SUBTRACT SUM SUPPRESS &quot; +
+      &quot;SYMBOLIC SYNC SYNCHRONIZED SYSIN SYSOUT &quot; +
+      &quot;TABLE TALLYING TAPE TENANT TERMINAL &quot; +
+      &quot;TERMINATE TEST TEXT THAN THEN &quot; +
+      &quot;THROUGH THRU TIME TIMES TITLE &quot; +
+      &quot;TO TOP TRAILING TRAILING-SIGN TRANSACTION &quot; +
+      &quot;TYPE TYPEDEF UNDERLINE UNEQUAL UNIT &quot; +
+      &quot;UNSTRING UNTIL UP UPDATE UPON &quot; +
+      &quot;USAGE USAGE-MODE USE USING VALID &quot; +
+      &quot;VALIDATE VALUE VALUES VARYING VLR &quot; +
+      &quot;WAIT WHEN WHEN-COMPILED WITH WITHIN &quot; +
+      &quot;WORDS WORKING-STORAGE WRITE XML XML-CODE &quot; +
+      &quot;XML-EVENT XML-NTEXT XML-TEXT ZERO ZERO-FILL &quot; );
+
+  var builtins = makeKeywords(&quot;- * ** / + &lt; &lt;= = &gt; &gt;= &quot;);
+  var tests = {
+    digit: /\d/,
+    digit_or_colon: /[\d:]/,
+    hex: /[0-9a-f]/i,
+    sign: /[+-]/,
+    exponent: /e/i,
+    keyword_char: /[^\s\(\[\;\)\]]/,
+    symbol: /[\w*+\-]/
+  };
+  function isNumber(ch, stream){
+    // hex
+    if ( ch === &#x27;0&#x27; &amp;&amp; stream.eat(/x/i) ) {
+      stream.eatWhile(tests.hex);
+      return true;
+    }
+    // leading sign
+    if ( ( ch == &#x27;+&#x27; || ch == &#x27;-&#x27; ) &amp;&amp; ( tests.digit.test(stream.peek()) ) ) {
+      stream.eat(tests.sign);
+      ch = stream.next();
+    }
+    if ( tests.digit.test(ch) ) {
+      stream.eat(ch);
+      stream.eatWhile(tests.digit);
+      if ( &#x27;.&#x27; == stream.peek()) {
+        stream.eat(&#x27;.&#x27;);
+        stream.eatWhile(tests.digit);
+      }
+      if ( stream.eat(tests.exponent) ) {
+        stream.eat(tests.sign);
+        stream.eatWhile(tests.digit);
+      }
+      return true;
+    }
+    return false;
+  }
+  return {
+    startState: function () {
+      return {
+        indentStack: null,
+        indentation: 0,
+        mode: false
+      };
+    },
+    token: function (stream, state) {
+      if (state.indentStack == null &amp;&amp; stream.sol()) {
+        // update indentation, but only if indentStack is empty
+        state.indentation = 6 ; //stream.indentation();
+      }
+      // skip spaces
+      if (stream.eatSpace()) {
+        return null;
+      }
+      var returnType = null;
+      switch(state.mode){
+      case &quot;string&quot;: // multi-line string parsing mode
+        var next = false;
+        while ((next = stream.next()) != null) {
+          if (next == &quot;\&quot;&quot; || next == &quot;\&#x27;&quot;) {
+            state.mode = false;
+            break;
+          }
+        }
+        returnType = STRING; // continue on in string mode
+        break;
+      default: // default parsing mode
+        var ch = stream.next();
+        var col = stream.column();
+        if (col &gt;= 0 &amp;&amp; col &lt;= 5) {
+          returnType = COBOLLINENUM;
+        } else if (col &gt;= 72 &amp;&amp; col &lt;= 79) {
+          stream.skipToEnd();
+          returnType = MODTAG;
+        } else if (ch == &quot;*&quot; &amp;&amp; col == 6) { // comment
+          stream.skipToEnd(); // rest of the line is a comment
+          returnType = COMMENT;
+        } else if (ch == &quot;\&quot;&quot; || ch == &quot;\&#x27;&quot;) {
+          state.mode = &quot;string&quot;;
+          returnType = STRING;
+        } else if (ch == &quot;&#x27;&quot; &amp;&amp; !( tests.digit_or_colon.test(stream.peek()) )) {
+          returnType = ATOM;
+        } else if (ch == &quot;.&quot;) {
+          returnType = PERIOD;
+        } else if (isNumber(ch,stream)){
+          returnType = NUMBER;
+        } else {
+          if (stream.current().match(tests.symbol)) {
+            while (col &lt; 71) {
+              if (stream.eat(tests.symbol) === undefined) {
+                break;
+              } else {
+                col++;
+              }
+            }
+          }
+          if (keywords &amp;&amp; keywords.propertyIsEnumerable(stream.current().toUpperCase())) {
+            returnType = KEYWORD;
+          } else if (builtins &amp;&amp; builtins.propertyIsEnumerable(stream.current().toUpperCase())) {
+            returnType = BUILTIN;
+          } else if (atoms &amp;&amp; atoms.propertyIsEnumerable(stream.current().toUpperCase())) {
+            returnType = ATOM;
+          } else returnType = null;
+        }
+      }
+      return returnType;
+    },
+    indent: function (state) {
+      if (state.indentStack == null) return state.indentation;
+      return state.indentStack.indent;
+    }
+  };
+});
+
+CodeMirror.defineMIME(&quot;text/x-cobol&quot;, &quot;cobol&quot;);
+
+    </pre>
+</div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="../assets/vendor/prettify/prettify-min.js"></script>
+<script>prettyPrint();</script>
+<script src="../assets/js/yui-prettify.js"></script>
+<script src="../assets/../api.js"></script>
+<script src="../assets/js/api-filter.js"></script>
+<script src="../assets/js/api-list.js"></script>
+<script src="../assets/js/api-search.js"></script>
+<script src="../assets/js/apidocs.js"></script>
+<script type="text/javascript" src="../assets/../../third-party/ace/ace.js"></script>
+<!--
+<script>
+    var editor = ace.edit("editor");
+    editor.setTheme("ace/lich3");
+    editor.getSession().setMode("haskell");
+</script>
+-->
+</body>
+</html>

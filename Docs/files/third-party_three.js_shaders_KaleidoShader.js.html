@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en" class="yui-overrride">
+<head>
+    <meta charset="utf-8">
+    <title>third-party/three.js/shaders/KaleidoShader.js - Lich.sc</title>
+    <link rel="stylesheet" href="http://yui.yahooapis.com/3.9.1/build/cssgrids/cssgrids-min.css">
+    <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
+    <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700' rel='stylesheet' type='text/css'>
+    <link rel="shortcut icon" type="image/png" href="../assets/favicon.png">
+    <script src="http://yui.yahooapis.com/combo?3.9.1/build/yui/yui-min.js"></script>
+    <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
+</head>
+<body class="yui3-skin-sam">
+
+<div id="doc">
+    <div id="hd" class="yui3-g header">
+        <div class="yui3-u-3-4">
+            <h1 class="blue-main-title">Lich.sc</h1>
+        </div>
+        <div class="yui3-u-1-4 version project-version">
+            API Docs for: 0.1
+        </div>
+    </div>
+    <div id="bd" class="yui3-g">
+
+        <div class="yui3-u-1-4">
+            <div id="docs-sidebar" class="sidebar apidocs">
+                <div id="api-list">
+    <h2 class="off-left">APIs</h2>
+    <div id="api-tabview" class="tabview">
+        <ul class="tabs">
+            <li><a href="#api-classes">Functions</a></li>
+            <li><a href="#api-modules">Modules</a></li>
+        </ul>
+
+        <div id="api-tabview-filter">
+            <input type="search" id="api-filter" placeholder="Type to filter APIs" style="display: none;">
+        </div>
+
+        <div id="api-tabview-panel">
+            <ul id="api-classes" class="apis classes">
+            
+                <li><a href="../classes/allpassC.html">allpassC</a></li>
+            
+                <li><a href="../classes/allpassL.html">allpassL</a></li>
+            
+                <li><a href="../classes/allpassN.html">allpassN</a></li>
+            
+                <li><a href="../classes/auxIn.html">auxIn</a></li>
+            
+                <li><a href="../classes/bandpass.html">bandpass</a></li>
+            
+                <li><a href="../classes/blip.html">blip</a></li>
+            
+                <li><a href="../classes/brown.html">brown</a></li>
+            
+                <li><a href="../classes/bufAllpassC.html">bufAllpassC</a></li>
+            
+                <li><a href="../classes/bufAllpassL.html">bufAllpassL</a></li>
+            
+                <li><a href="../classes/bufAllpassN.html">bufAllpassN</a></li>
+            
+                <li><a href="../classes/bufCombC.html">bufCombC</a></li>
+            
+                <li><a href="../classes/bufCombL.html">bufCombL</a></li>
+            
+                <li><a href="../classes/bufCombN.html">bufCombN</a></li>
+            
+                <li><a href="../classes/bufDelayC.html">bufDelayC</a></li>
+            
+                <li><a href="../classes/bufDelayL.html">bufDelayL</a></li>
+            
+                <li><a href="../classes/bufDelayN.html">bufDelayN</a></li>
+            
+                <li><a href="../classes/clipNoise.html">clipNoise</a></li>
+            
+                <li><a href="../classes/combC.html">combC</a></li>
+            
+                <li><a href="../classes/combL.html">combL</a></li>
+            
+                <li><a href="../classes/combN.html">combN</a></li>
+            
+                <li><a href="../classes/crackle.html">crackle</a></li>
+            
+                <li><a href="../classes/crush.html">crush</a></li>
+            
+                <li><a href="../classes/cuspL.html">cuspL</a></li>
+            
+                <li><a href="../classes/cuspN.html">cuspN</a></li>
+            
+                <li><a href="../classes/dc.html">dc</a></li>
+            
+                <li><a href="../classes/decimate.html">decimate</a></li>
+            
+                <li><a href="../classes/delayC.html">delayC</a></li>
+            
+                <li><a href="../classes/delayL.html">delayL</a></li>
+            
+                <li><a href="../classes/delayN.html">delayN</a></li>
+            
+                <li><a href="../classes/dup.html">dup</a></li>
+            
+                <li><a href="../classes/dust.html">dust</a></li>
+            
+                <li><a href="../classes/env.html">env</a></li>
+            
+                <li><a href="../classes/env2.html">env2</a></li>
+            
+                <li><a href="../classes/formant.html">formant</a></li>
+            
+                <li><a href="../classes/gbmanL.html">gbmanL</a></li>
+            
+                <li><a href="../classes/gbmanN.html">gbmanN</a></li>
+            
+                <li><a href="../classes/gray.html">gray</a></li>
+            
+                <li><a href="../classes/highpass.html">highpass</a></li>
+            
+                <li><a href="../classes/impulse.html">impulse</a></li>
+            
+                <li><a href="../classes/lag.html">lag</a></li>
+            
+                <li><a href="../classes/localBuf.html">localBuf</a></li>
+            
+                <li><a href="../classes/lowpass.html">lowpass</a></li>
+            
+                <li><a href="../classes/noiseL.html">noiseL</a></li>
+            
+                <li><a href="../classes/noiseN.html">noiseN</a></li>
+            
+                <li><a href="../classes/noiseX.html">noiseX</a></li>
+            
+                <li><a href="../classes/out.html">out</a></li>
+            
+                <li><a href="../classes/pan.html">pan</a></li>
+            
+                <li><a href="../classes/perc.html">perc</a></li>
+            
+                <li><a href="../classes/perc2.html">perc2</a></li>
+            
+                <li><a href="../classes/pink.html">pink</a></li>
+            
+                <li><a href="../classes/pulse.html">pulse</a></li>
+            
+                <li><a href="../classes/saw.html">saw</a></li>
+            
+                <li><a href="../classes/scAbs.html">scAbs</a></li>
+            
+                <li><a href="../classes/scACos.html">scACos</a></li>
+            
+                <li><a href="../classes/scAmpDb.html">scAmpDb</a></li>
+            
+                <li><a href="../classes/scASin.html">scASin</a></li>
+            
+                <li><a href="../classes/scATan.html">scATan</a></li>
+            
+                <li><a href="../classes/scBitAnd.html">scBitAnd</a></li>
+            
+                <li><a href="../classes/scBitLeftShift.html">scBitLeftShift</a></li>
+            
+                <li><a href="../classes/scBitOr.html">scBitOr</a></li>
+            
+                <li><a href="../classes/scBitRightShift.html">scBitRightShift</a></li>
+            
+                <li><a href="../classes/scBitXor.html">scBitXor</a></li>
+            
+                <li><a href="../classes/scCeil.html">scCeil</a></li>
+            
+                <li><a href="../classes/scClip.html">scClip</a></li>
+            
+                <li><a href="../classes/scCos.html">scCos</a></li>
+            
+                <li><a href="../classes/scCosh.html">scCosh</a></li>
+            
+                <li><a href="../classes/scCpsMidi.html">scCpsMidi</a></li>
+            
+                <li><a href="../classes/scCubed.html">scCubed</a></li>
+            
+                <li><a href="../classes/scDbAmp.html">scDbAmp</a></li>
+            
+                <li><a href="../classes/scDistort.html">scDistort</a></li>
+            
+                <li><a href="../classes/scExpRand.html">scExpRand</a></li>
+            
+                <li><a href="../classes/scFloor.html">scFloor</a></li>
+            
+                <li><a href="../classes/scFold.html">scFold</a></li>
+            
+                <li><a href="../classes/scIRand.html">scIRand</a></li>
+            
+                <li><a href="../classes/scLinRand.html">scLinRand</a></li>
+            
+                <li><a href="../classes/scLog.html">scLog</a></li>
+            
+                <li><a href="../classes/scLog10.html">scLog10</a></li>
+            
+                <li><a href="../classes/scLog2.html">scLog2</a></li>
+            
+                <li><a href="../classes/scMidiCps.html">scMidiCps</a></li>
+            
+                <li><a href="../classes/scMod.html">scMod</a></li>
+            
+                <li><a href="../classes/scNeg.html">scNeg</a></li>
+            
+                <li><a href="../classes/scNRand.html">scNRand</a></li>
+            
+                <li><a href="../classes/scPow.html">scPow</a></li>
+            
+                <li><a href="../classes/scRand.html">scRand</a></li>
+            
+                <li><a href="../classes/scReciprocal.html">scReciprocal</a></li>
+            
+                <li><a href="../classes/scRound.html">scRound</a></li>
+            
+                <li><a href="../classes/scSin.html">scSin</a></li>
+            
+                <li><a href="../classes/scSinh.html">scSinh</a></li>
+            
+                <li><a href="../classes/scSoftClip.html">scSoftClip</a></li>
+            
+                <li><a href="../classes/scSqrt.html">scSqrt</a></li>
+            
+                <li><a href="../classes/scSquared.html">scSquared</a></li>
+            
+                <li><a href="../classes/scTan.html">scTan</a></li>
+            
+                <li><a href="../classes/scTanh.html">scTanh</a></li>
+            
+                <li><a href="../classes/scTExpRand.html">scTExpRand</a></li>
+            
+                <li><a href="../classes/scTIRand.html">scTIRand</a></li>
+            
+                <li><a href="../classes/scTRand.html">scTRand</a></li>
+            
+                <li><a href="../classes/scWrap.html">scWrap</a></li>
+            
+                <li><a href="../classes/sin.html">sin</a></li>
+            
+                <li><a href="../classes/square.html">square</a></li>
+            
+                <li><a href="../classes/tri.html">tri</a></li>
+            
+                <li><a href="../classes/white.html">white</a></li>
+            
+            </ul>
+
+            <ul id="api-modules" class="apis modules">
+            
+                <li><a href="../modules/Bitwise Operators.html">Bitwise Operators</a></li>
+            
+                <li><a href="../modules/Buffers.html">Buffers</a></li>
+            
+                <li><a href="../modules/Chaos.html">Chaos</a></li>
+            
+                <li><a href="../modules/Delays.html">Delays</a></li>
+            
+                <li><a href="../modules/Distortions.html">Distortions</a></li>
+            
+                <li><a href="../modules/Envelopes.html">Envelopes</a></li>
+            
+                <li><a href="../modules/Filters.html">Filters</a></li>
+            
+                <li><a href="../modules/InputOutput.html">InputOutput</a></li>
+            
+                <li><a href="../modules/Lich.sc UGens.html">Lich.sc UGens</a></li>
+            
+                <li><a href="../modules/Noise.html">Noise</a></li>
+            
+                <li><a href="../modules/Oscillators.html">Oscillators</a></li>
+            
+                <li><a href="../modules/Panning.html">Panning</a></li>
+            
+                <li><a href="../modules/Random.html">Random</a></li>
+            
+                <li><a href="../modules/Signal Math.html">Signal Math</a></li>
+            
+            </ul>
+        </div>
+    </div>
+</div>
+
+            </div>
+        </div>
+        <div class="yui3-u-3-4">
+                <div id="api-options" style="visibility:hidden">
+        Show:
+        <label for="api-show-inherited">
+            <input type="checkbox" id="api-show-inherited" checked>
+            Inherited
+        </label>
+
+        <label for="api-show-protected">
+            <input type="checkbox" id="api-show-protected">
+            Protected
+        </label>
+
+        <label for="api-show-private">
+            <input type="checkbox" id="api-show-private">
+            Private
+        </label>
+        <label for="api-show-deprecated">
+            <input type="checkbox" id="api-show-deprecated">
+            Deprecated
+        </label>
+
+    </div>
+
+
+            <div class="apidocs">
+                <div id="docs-main">
+                    <div class="content">
+                        <h1 class="file-heading">File: third-party/three.js/shaders/KaleidoShader.js</h1>
+
+<div class="file">
+    <pre class="code prettyprint linenums">
+/**
+ * @author felixturner / http://airtight.cc/
+ *
+ * Kaleidoscope Shader
+ * Radial reflection around center point
+ * Ported from: http://pixelshaders.com/editor/
+ * by Toby Schachman / http://tobyschachman.com/
+ *
+ * sides: number of reflections
+ * angle: initial angle in radians
+ */
+
+THREE.KaleidoShader = {
+
+	uniforms: {
+
+		&quot;tDiffuse&quot;: { type: &quot;t&quot;, value: null },
+		&quot;sides&quot;:    { type: &quot;f&quot;, value: 6.0 },
+		&quot;angle&quot;:    { type: &quot;f&quot;, value: 0.0 }
+
+	},
+
+	vertexShader: [
+
+		&quot;varying vec2 vUv;&quot;,
+
+		&quot;void main() {&quot;,
+
+			&quot;vUv = uv;&quot;,
+			&quot;gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );&quot;,
+
+		&quot;}&quot;
+
+	].join(&quot;\n&quot;),
+
+	fragmentShader: [
+
+		&quot;uniform sampler2D tDiffuse;&quot;,
+		&quot;uniform float sides;&quot;,
+		&quot;uniform float angle;&quot;,
+		
+		&quot;varying vec2 vUv;&quot;,
+
+		&quot;void main() {&quot;,
+
+			&quot;vec2 p = vUv - 0.5;&quot;,
+			&quot;float r = length(p);&quot;,
+			&quot;float a = atan(p.y, p.x) + angle;&quot;,
+			&quot;float tau = 2. * 3.1416 ;&quot;,
+			&quot;a = mod(a, tau/sides);&quot;,
+			&quot;a = abs(a - tau/sides/2.) ;&quot;,
+			&quot;p = r * vec2(cos(a), sin(a));&quot;,
+			&quot;vec4 color = texture2D(tDiffuse, p + 0.5);&quot;,
+			&quot;gl_FragColor = color;&quot;,
+
+		&quot;}&quot;
+
+	].join(&quot;\n&quot;)
+
+};
+
+    </pre>
+</div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="../assets/vendor/prettify/prettify-min.js"></script>
+<script>prettyPrint();</script>
+<script src="../assets/js/yui-prettify.js"></script>
+<script src="../assets/../api.js"></script>
+<script src="../assets/js/api-filter.js"></script>
+<script src="../assets/js/api-list.js"></script>
+<script src="../assets/js/api-search.js"></script>
+<script src="../assets/js/apidocs.js"></script>
+<script type="text/javascript" src="../assets/../../third-party/ace/ace.js"></script>
+<!--
+<script>
+    var editor = ace.edit("editor");
+    editor.setTheme("ace/lich3");
+    editor.getSession().setMode("haskell");
+</script>
+-->
+</body>
+</html>

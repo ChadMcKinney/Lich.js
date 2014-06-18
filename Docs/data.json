@@ -6,19 +6,84 @@
         "url": "https://github.com/ChadMcKinney/Lich.js"
     },
     "files": {
+        "CloudChamber.js/CloudChamber.js": {
+            "name": "CloudChamber.js/CloudChamber.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "Compiler/Compiler.js": {
+            "name": "Compiler/Compiler.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
         "Soliton.js/SuperCollider.js": {
             "name": "Soliton.js/SuperCollider.js",
             "modules": {
                 "Lich.sc UGens": 1,
+                "Distortions": 1,
+                "Signal Math": 1,
+                "Bitwise Operators": 1,
+                "Random": 1,
                 "Oscillators": 1,
                 "Noise": 1,
                 "Chaos": 1,
                 "Filters": 1,
                 "Delays": 1,
                 "Envelopes": 1,
-                "InputOutput": 1
+                "InputOutput": 1,
+                "Panning": 1,
+                "Buffers": 1
             },
             "classes": {
+                "scDistort": 1,
+                "scSoftClip": 1,
+                "scFold": 1,
+                "scWrap": 1,
+                "scClip": 1,
+                "scNeg": 1,
+                "scAbs": 1,
+                "scCeil": 1,
+                "scFloor": 1,
+                "scSquared": 1,
+                "scCubed": 1,
+                "scSqrt": 1,
+                "scReciprocal": 1,
+                "scCpsMidi": 1,
+                "scMidiCps": 1,
+                "scDbAmp": 1,
+                "scAmpDb": 1,
+                "scLog": 1,
+                "scLog2": 1,
+                "scLog10": 1,
+                "scSin": 1,
+                "scCos": 1,
+                "scTan": 1,
+                "scASin": 1,
+                "scACos": 1,
+                "scATan": 1,
+                "scSinh": 1,
+                "scCosh": 1,
+                "scTanh": 1,
+                "scMod": 1,
+                "scRound": 1,
+                "scPow": 1,
+                "scBitAnd": 1,
+                "scBitOr": 1,
+                "scBitXor": 1,
+                "scBitLeftShift": 1,
+                "scBitRightShift": 1,
+                "scRand": 1,
+                "scNRand": 1,
+                "scLinRand": 1,
+                "scIRand": 1,
+                "scExpRand": 1,
+                "scTRand": 1,
+                "scTIRand": 1,
+                "scTExpRand": 1,
                 "dc": 1,
                 "sin": 1,
                 "saw": 1,
@@ -49,20 +114,425 @@
                 "crush": 1,
                 "decimate": 1,
                 "allpassN": 1,
+                "bufAllpassN": 1,
                 "allpassL": 1,
+                "bufAllpassL": 1,
                 "allpassC": 1,
+                "bufAllpassC": 1,
                 "combN": 1,
+                "bufCombN": 1,
                 "combL": 1,
+                "bufCombL": 1,
                 "combC": 1,
+                "bufCombC": 1,
                 "delayN": 1,
+                "bufDelayN": 1,
                 "delayL": 1,
+                "bufDelayL": 1,
                 "delayC": 1,
+                "bufDelayC": 1,
                 "env": 1,
                 "env2": 1,
                 "perc": 1,
                 "perc2": 1,
-                "out": 1
+                "out": 1,
+                "auxIn": 1,
+                "pan": 1,
+                "dup": 1,
+                "localBuf": 1
             },
+            "fors": {},
+            "namespaces": {}
+        },
+        "third-party/codemirror-3.20/addon/edit/closetag.js": {
+            "name": "third-party/codemirror-3.20/addon/edit/closetag.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "third-party/codemirror-3.20/keymap/vim.js": {
+            "name": "third-party/codemirror-3.20/keymap/vim.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "third-party/codemirror-3.20/mode/clojure/clojure.js": {
+            "name": "third-party/codemirror-3.20/mode/clojure/clojure.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "third-party/codemirror-3.20/mode/cobol/cobol.js": {
+            "name": "third-party/codemirror-3.20/mode/cobol/cobol.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "third-party/codemirror-3.20/mode/coffeescript/coffeescript.js": {
+            "name": "third-party/codemirror-3.20/mode/coffeescript/coffeescript.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "third-party/codemirror-3.20/mode/livescript/livescript.js": {
+            "name": "third-party/codemirror-3.20/mode/livescript/livescript.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "third-party/codemirror-3.20/mode/nginx/nginx.js": {
+            "name": "third-party/codemirror-3.20/mode/nginx/nginx.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "third-party/codemirror-3.20/mode/ntriples/ntriples.js": {
+            "name": "third-party/codemirror-3.20/mode/ntriples/ntriples.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "third-party/codemirror-3.20/mode/scheme/scheme.js": {
+            "name": "third-party/codemirror-3.20/mode/scheme/scheme.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "third-party/codemirror-3.20/mode/smarty/smarty.js": {
+            "name": "third-party/codemirror-3.20/mode/smarty/smarty.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "third-party/codemirror-3.20/mode/smartymixed/smartymixed.js": {
+            "name": "third-party/codemirror-3.20/mode/smartymixed/smartymixed.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "third-party/codemirror-3.20/mode/tiddlywiki/tiddlywiki.js": {
+            "name": "third-party/codemirror-3.20/mode/tiddlywiki/tiddlywiki.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "third-party/codemirror-3.20/test/mode_test.js": {
+            "name": "third-party/codemirror-3.20/test/mode_test.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "third-party/codemirror-3.20/test/vim_test.js": {
+            "name": "third-party/codemirror-3.20/test/vim_test.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "third-party/three.js/postprocessing/BloomPass.js": {
+            "name": "third-party/three.js/postprocessing/BloomPass.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "third-party/three.js/postprocessing/DotScreenPass.js": {
+            "name": "third-party/three.js/postprocessing/DotScreenPass.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "third-party/three.js/postprocessing/EffectComposer.js": {
+            "name": "third-party/three.js/postprocessing/EffectComposer.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "third-party/three.js/postprocessing/FilmPass.js": {
+            "name": "third-party/three.js/postprocessing/FilmPass.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "third-party/three.js/postprocessing/MaskPass.js": {
+            "name": "third-party/three.js/postprocessing/MaskPass.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "third-party/three.js/postprocessing/RenderPass.js": {
+            "name": "third-party/three.js/postprocessing/RenderPass.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "third-party/three.js/postprocessing/SavePass.js": {
+            "name": "third-party/three.js/postprocessing/SavePass.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "third-party/three.js/postprocessing/ShaderPass.js": {
+            "name": "third-party/three.js/postprocessing/ShaderPass.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "third-party/three.js/postprocessing/TexturePass.js": {
+            "name": "third-party/three.js/postprocessing/TexturePass.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "third-party/three.js/shaders/BasicShader.js": {
+            "name": "third-party/three.js/shaders/BasicShader.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "third-party/three.js/shaders/BleachBypassShader.js": {
+            "name": "third-party/three.js/shaders/BleachBypassShader.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "third-party/three.js/shaders/BlendShader.js": {
+            "name": "third-party/three.js/shaders/BlendShader.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "third-party/three.js/shaders/BokehShader.js": {
+            "name": "third-party/three.js/shaders/BokehShader.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "third-party/three.js/shaders/BrightnessContrastShader.js": {
+            "name": "third-party/three.js/shaders/BrightnessContrastShader.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "third-party/three.js/shaders/ColorCorrectionShader.js": {
+            "name": "third-party/three.js/shaders/ColorCorrectionShader.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "third-party/three.js/shaders/ColorifyShader.js": {
+            "name": "third-party/three.js/shaders/ColorifyShader.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "third-party/three.js/shaders/ConvolutionShader.js": {
+            "name": "third-party/three.js/shaders/ConvolutionShader.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "third-party/three.js/shaders/CopyShader.js": {
+            "name": "third-party/three.js/shaders/CopyShader.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "third-party/three.js/shaders/DOFMipMapShader.js": {
+            "name": "third-party/three.js/shaders/DOFMipMapShader.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "third-party/three.js/shaders/DotScreenShader.js": {
+            "name": "third-party/three.js/shaders/DotScreenShader.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "third-party/three.js/shaders/EdgeShader.js": {
+            "name": "third-party/three.js/shaders/EdgeShader.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "third-party/three.js/shaders/EdgeShader2.js": {
+            "name": "third-party/three.js/shaders/EdgeShader2.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "third-party/three.js/shaders/FXAAShader.js": {
+            "name": "third-party/three.js/shaders/FXAAShader.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "third-party/three.js/shaders/FilmShader.js": {
+            "name": "third-party/three.js/shaders/FilmShader.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "third-party/three.js/shaders/FocusShader.js": {
+            "name": "third-party/three.js/shaders/FocusShader.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "third-party/three.js/shaders/FresnelShader.js": {
+            "name": "third-party/three.js/shaders/FresnelShader.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "third-party/three.js/shaders/HorizontalBlurShader.js": {
+            "name": "third-party/three.js/shaders/HorizontalBlurShader.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "third-party/three.js/shaders/HorizontalTiltShiftShader.js": {
+            "name": "third-party/three.js/shaders/HorizontalTiltShiftShader.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "third-party/three.js/shaders/HueSaturationShader.js": {
+            "name": "third-party/three.js/shaders/HueSaturationShader.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "third-party/three.js/shaders/KaleidoShader.js": {
+            "name": "third-party/three.js/shaders/KaleidoShader.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "third-party/three.js/shaders/LuminosityShader.js": {
+            "name": "third-party/three.js/shaders/LuminosityShader.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "third-party/three.js/shaders/MirrorShader.js": {
+            "name": "third-party/three.js/shaders/MirrorShader.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "third-party/three.js/shaders/NormalMapShader.js": {
+            "name": "third-party/three.js/shaders/NormalMapShader.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "third-party/three.js/shaders/RGBShiftShader.js": {
+            "name": "third-party/three.js/shaders/RGBShiftShader.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "third-party/three.js/shaders/SSAOShader.js": {
+            "name": "third-party/three.js/shaders/SSAOShader.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "third-party/three.js/shaders/SepiaShader.js": {
+            "name": "third-party/three.js/shaders/SepiaShader.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "third-party/three.js/shaders/TriangleBlurShader.js": {
+            "name": "third-party/three.js/shaders/TriangleBlurShader.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "third-party/three.js/shaders/UnpackDepthRGBAShader.js": {
+            "name": "third-party/three.js/shaders/UnpackDepthRGBAShader.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "third-party/three.js/shaders/VerticalBlurShader.js": {
+            "name": "third-party/three.js/shaders/VerticalBlurShader.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "third-party/three.js/shaders/VerticalTiltShiftShader.js": {
+            "name": "third-party/three.js/shaders/VerticalTiltShiftShader.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "third-party/three.js/shaders/VignetteShader.js": {
+            "name": "third-party/three.js/shaders/VignetteShader.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "third-party/webgl-utils.js": {
+            "name": "third-party/webgl-utils.js",
+            "modules": {},
+            "classes": {},
             "fors": {},
             "namespaces": {}
         }
@@ -71,15 +541,66 @@
         "Lich.sc UGens": {
             "name": "Lich.sc UGens",
             "submodules": {
+                "Distortions": 1,
+                "Signal Math": 1,
+                "Bitwise Operators": 1,
+                "Random": 1,
                 "Oscillators": 1,
                 "Noise": 1,
                 "Chaos": 1,
                 "Filters": 1,
                 "Delays": 1,
                 "Envelopes": 1,
-                "InputOutput": 1
+                "InputOutput": 1,
+                "Panning": 1,
+                "Buffers": 1
             },
             "classes": {
+                "scDistort": 1,
+                "scSoftClip": 1,
+                "scFold": 1,
+                "scWrap": 1,
+                "scClip": 1,
+                "scNeg": 1,
+                "scAbs": 1,
+                "scCeil": 1,
+                "scFloor": 1,
+                "scSquared": 1,
+                "scCubed": 1,
+                "scSqrt": 1,
+                "scReciprocal": 1,
+                "scCpsMidi": 1,
+                "scMidiCps": 1,
+                "scDbAmp": 1,
+                "scAmpDb": 1,
+                "scLog": 1,
+                "scLog2": 1,
+                "scLog10": 1,
+                "scSin": 1,
+                "scCos": 1,
+                "scTan": 1,
+                "scASin": 1,
+                "scACos": 1,
+                "scATan": 1,
+                "scSinh": 1,
+                "scCosh": 1,
+                "scTanh": 1,
+                "scMod": 1,
+                "scRound": 1,
+                "scPow": 1,
+                "scBitAnd": 1,
+                "scBitOr": 1,
+                "scBitXor": 1,
+                "scBitLeftShift": 1,
+                "scBitRightShift": 1,
+                "scRand": 1,
+                "scNRand": 1,
+                "scLinRand": 1,
+                "scIRand": 1,
+                "scExpRand": 1,
+                "scTRand": 1,
+                "scTIRand": 1,
+                "scTExpRand": 1,
                 "dc": 1,
                 "sin": 1,
                 "saw": 1,
@@ -110,26 +631,140 @@
                 "crush": 1,
                 "decimate": 1,
                 "allpassN": 1,
+                "bufAllpassN": 1,
                 "allpassL": 1,
+                "bufAllpassL": 1,
                 "allpassC": 1,
+                "bufAllpassC": 1,
                 "combN": 1,
+                "bufCombN": 1,
                 "combL": 1,
+                "bufCombL": 1,
                 "combC": 1,
+                "bufCombC": 1,
                 "delayN": 1,
+                "bufDelayN": 1,
                 "delayL": 1,
+                "bufDelayL": 1,
                 "delayC": 1,
+                "bufDelayC": 1,
                 "env": 1,
                 "env2": 1,
                 "perc": 1,
                 "perc2": 1,
-                "out": 1
+                "out": 1,
+                "auxIn": 1,
+                "pan": 1,
+                "dup": 1,
+                "localBuf": 1
             },
             "fors": {},
             "namespaces": {},
             "tag": "module",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1283,
+            "line": 2481,
             "description": "Lich.sc UGen bindings."
+        },
+        "Distortions": {
+            "name": "Distortions",
+            "submodules": {},
+            "classes": {
+                "scDistort": 1,
+                "scSoftClip": 1,
+                "scFold": 1,
+                "scWrap": 1,
+                "scClip": 1
+            },
+            "fors": {},
+            "is_submodule": 1,
+            "namespaces": {},
+            "module": "Lich.sc UGens",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 761,
+            "description": "Distortions."
+        },
+        "Signal Math": {
+            "name": "Signal Math",
+            "submodules": {},
+            "classes": {
+                "scNeg": 1,
+                "scAbs": 1,
+                "scCeil": 1,
+                "scFloor": 1,
+                "scSquared": 1,
+                "scCubed": 1,
+                "scSqrt": 1,
+                "scReciprocal": 1,
+                "scCpsMidi": 1,
+                "scMidiCps": 1,
+                "scDbAmp": 1,
+                "scAmpDb": 1,
+                "scLog": 1,
+                "scLog2": 1,
+                "scLog10": 1,
+                "scSin": 1,
+                "scCos": 1,
+                "scTan": 1,
+                "scASin": 1,
+                "scACos": 1,
+                "scATan": 1,
+                "scSinh": 1,
+                "scCosh": 1,
+                "scTanh": 1,
+                "scMod": 1,
+                "scRound": 1,
+                "scPow": 1
+            },
+            "fors": {},
+            "is_submodule": 1,
+            "namespaces": {},
+            "module": "Lich.sc UGens",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 1173,
+            "description": "Signal Math. TODO: fix all the examples"
+        },
+        "Bitwise Operators": {
+            "name": "Bitwise Operators",
+            "submodules": {},
+            "classes": {
+                "scBitAnd": 1,
+                "scBitOr": 1,
+                "scBitXor": 1,
+                "scBitLeftShift": 1,
+                "scBitRightShift": 1,
+                "scRand": 1
+            },
+            "fors": {},
+            "is_submodule": 1,
+            "namespaces": {},
+            "module": "Lich.sc UGens",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 1268,
+            "description": "Bitwise Operators. TODO: fix all examples"
+        },
+        "Random": {
+            "name": "Random",
+            "submodules": {},
+            "classes": {
+                "scNRand": 1,
+                "scLinRand": 1,
+                "scIRand": 1,
+                "scExpRand": 1,
+                "scTRand": 1,
+                "scTIRand": 1,
+                "scTExpRand": 1
+            },
+            "fors": {},
+            "is_submodule": 1,
+            "namespaces": {},
+            "module": "Lich.sc UGens",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 1396,
+            "description": "Random Number Generators."
         },
         "Oscillators": {
             "name": "Oscillators",
@@ -151,7 +786,7 @@
             "module": "Lich.sc UGens",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 638,
+            "line": 1551,
             "description": "Oscillators."
         },
         "Noise": {
@@ -175,7 +810,7 @@
             "module": "Lich.sc UGens",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 804,
+            "line": 1717,
             "description": "Noise."
         },
         "Chaos": {
@@ -193,7 +828,7 @@
             "module": "Lich.sc UGens",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 881,
+            "line": 1794,
             "description": "Chaotic Oscillators."
         },
         "Filters": {
@@ -205,7 +840,8 @@
                 "bandpass": 1,
                 "lag": 1,
                 "crush": 1,
-                "decimate": 1
+                "decimate": 1,
+                "allpassN": 1
             },
             "fors": {},
             "is_submodule": 1,
@@ -213,22 +849,30 @@
             "module": "Lich.sc UGens",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 986,
+            "line": 1915,
             "description": "Filters."
         },
         "Delays": {
             "name": "Delays",
             "submodules": {},
             "classes": {
-                "allpassN": 1,
+                "bufAllpassN": 1,
                 "allpassL": 1,
+                "bufAllpassL": 1,
                 "allpassC": 1,
+                "bufAllpassC": 1,
                 "combN": 1,
+                "bufCombN": 1,
                 "combL": 1,
+                "bufCombL": 1,
                 "combC": 1,
+                "bufCombC": 1,
                 "delayN": 1,
+                "bufDelayN": 1,
                 "delayL": 1,
-                "delayC": 1
+                "bufDelayL": 1,
+                "delayC": 1,
+                "bufDelayC": 1
             },
             "fors": {},
             "is_submodule": 1,
@@ -236,7 +880,7 @@
             "module": "Lich.sc UGens",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1149,
+            "line": 2221,
             "description": "Delays."
         },
         "Envelopes": {
@@ -254,14 +898,15 @@
             "module": "Lich.sc UGens",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1270,
+            "line": 2342,
             "description": "Envelopes."
         },
         "InputOutput": {
             "name": "InputOutput",
             "submodules": {},
             "classes": {
-                "out": 1
+                "out": 1,
+                "auxIn": 1
             },
             "fors": {},
             "is_submodule": 1,
@@ -269,11 +914,1103 @@
             "module": "Lich.sc UGens",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1283,
+            "line": 2386,
             "description": "Inputs and Outputs"
+        },
+        "Panning": {
+            "name": "Panning",
+            "submodules": {},
+            "classes": {
+                "pan": 1,
+                "dup": 1
+            },
+            "fors": {},
+            "is_submodule": 1,
+            "namespaces": {},
+            "module": "Lich.sc UGens",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 2438,
+            "description": "Panning UGens"
+        },
+        "Buffers": {
+            "name": "Buffers",
+            "submodules": {},
+            "classes": {
+                "localBuf": 1
+            },
+            "fors": {},
+            "is_submodule": 1,
+            "namespaces": {},
+            "module": "Lich.sc UGens",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 2481,
+            "description": "Buffers."
         }
     },
     "classes": {
+        "scDistort": {
+            "name": "scDistort",
+            "shortname": "scDistort",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 692,
+            "description": "Distort a signal. This is the same as using .distort in SuperCollider.",
+            "is_constructor": 1,
+            "example": [
+                "\nlet test amp => sin 440 >> gain amp >> distort >> out 0<br>\nlet t = test 1<br>\nstop t"
+            ],
+            "submodule": "Distortions"
+        },
+        "scSoftClip": {
+            "name": "scSoftClip",
+            "shortname": "scSoftClip",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Distortions",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 712,
+            "description": "Distortion with a perfectly linear region from -0.5 to +0.5. This is the same as using .softclip in SuperCollider.",
+            "is_constructor": 1,
+            "example": [
+                "\nlet test amp => sin 440 >> gain amp >> scSoftClip >> out 0<br>\nlet t = test 1<br>\nstop t"
+            ]
+        },
+        "scFold": {
+            "name": "scFold",
+            "shortname": "scFold",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Distortions",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 727,
+            "description": "Foldback distortion.",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "lo",
+                    "description": "Low boundry to fold at"
+                },
+                {
+                    "name": "hi",
+                    "description": "High boundry to fold at"
+                }
+            ],
+            "example": [
+                "\nlet test l h => white 1 >> scFold l h >> out 0<br>\nlet t = test -0.5 0.5<br>\nstop t"
+            ]
+        },
+        "scWrap": {
+            "name": "scWrap",
+            "shortname": "scWrap",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Distortions",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 744,
+            "description": "Wrap distortion.",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "lo",
+                    "description": "Low boundry to wrap at"
+                },
+                {
+                    "name": "hi",
+                    "description": "High boundry to wrap at"
+                }
+            ],
+            "example": [
+                "\nlet test l h => white 1 >> scWrap l h >> out 0<br>\nlet t = test -0.5 0.5<br>\nstop t"
+            ]
+        },
+        "scClip": {
+            "name": "scClip",
+            "shortname": "scClip",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Distortions",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 761,
+            "description": "Clip distortion.",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "lo",
+                    "description": "Low boundry to clip at"
+                },
+                {
+                    "name": "hi",
+                    "description": "High boundry to clip at"
+                }
+            ],
+            "example": [
+                "\nlet test l h => white 1 >> scClip l h >> out 0<br>\nlet t = test -0.5 0.5<br>\nstop t"
+            ]
+        },
+        "scNeg": {
+            "name": "scNeg",
+            "shortname": "scNeg",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Signal Math",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 778,
+            "description": "Return the inverse of a signal.",
+            "is_constructor": 1,
+            "example": [
+                "\nlet test amp => sin 440 >> gain amp >> scNeg >> out 0<br>\nlet t = test 1<br>\nstop t"
+            ]
+        },
+        "scAbs": {
+            "name": "scAbs",
+            "shortname": "scAbs",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Signal Math",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 798,
+            "description": "Return the absolute value of a signal.",
+            "is_constructor": 1,
+            "example": [
+                "\nlet test amp => sin 440 >> gain amp >> scAbs >> out 0<br>\nlet t = test 1<br>\nstop t"
+            ]
+        },
+        "scCeil": {
+            "name": "scCeil",
+            "shortname": "scCeil",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Signal Math",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 813,
+            "description": "Return the ceil of a signal.",
+            "is_constructor": 1,
+            "example": [
+                "\nlet test amp => sin 440 >> gain amp >> scCeil >> out 0<br>\nlet t = test 1<br>\nstop t"
+            ]
+        },
+        "scFloor": {
+            "name": "scFloor",
+            "shortname": "scFloor",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Signal Math",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 828,
+            "description": "Return the floor of a signal.",
+            "is_constructor": 1,
+            "example": [
+                "\nlet test amp => sin 440 >> gain amp >> scFloor >> out 0<br>\nlet t = test 1<br>\nstop t"
+            ]
+        },
+        "scSquared": {
+            "name": "scSquared",
+            "shortname": "scSquared",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Signal Math",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 843,
+            "description": "Return the square of a signal.",
+            "is_constructor": 1,
+            "example": [
+                "\nlet test amp => sin 440 >> gain amp >> scSquared >> out 0<br>\nlet t = test 1<br>\nstop t"
+            ]
+        },
+        "scCubed": {
+            "name": "scCubed",
+            "shortname": "scCubed",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Signal Math",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 858,
+            "description": "Return the cube of a signal.",
+            "is_constructor": 1,
+            "example": [
+                "\nlet test amp => sin 440 >> gain amp >> scCubed >> out 0<br>\nlet t = test 1<br>\nstop t"
+            ]
+        },
+        "scSqrt": {
+            "name": "scSqrt",
+            "shortname": "scSqrt",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Signal Math",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 873,
+            "description": "Return the square root of a signal.",
+            "is_constructor": 1,
+            "example": [
+                "\nlet test amp => sin 440 >> gain amp >> scSqrt >> out 0<br>\nlet t = test 1<br>\nstop t"
+            ]
+        },
+        "scReciprocal": {
+            "name": "scReciprocal",
+            "shortname": "scReciprocal",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Signal Math",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 888,
+            "description": "Return the reciprocal of a signal.",
+            "is_constructor": 1,
+            "example": [
+                "\nlet test amp => sin 440 >> gain amp >> scReciprocal >> out 0<br>\nlet t = test 1<br>\nstop t"
+            ]
+        },
+        "scCpsMidi": {
+            "name": "scCpsMidi",
+            "shortname": "scCpsMidi",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Signal Math",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 903,
+            "description": "Convert a value from cycles per second to MIDI.",
+            "is_constructor": 1,
+            "example": [
+                "\nlet test amp => sin 440 >> gain amp >> scCpsMidi >> out 0<br>\nlet t = test 1<br>\nstop t"
+            ]
+        },
+        "scMidiCps": {
+            "name": "scMidiCps",
+            "shortname": "scMidiCps",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Signal Math",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 918,
+            "description": "Convert a value from MIDI to cycles per second.",
+            "is_constructor": 1,
+            "example": [
+                "\nlet test amp => sin 440 >> gain amp >> scMidiCps >> out 0<br>\nlet t = test 1<br>\nstop t"
+            ]
+        },
+        "scDbAmp": {
+            "name": "scDbAmp",
+            "shortname": "scDbAmp",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Signal Math",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 933,
+            "description": "Convert a value dB to RMS amplitude.",
+            "is_constructor": 1,
+            "example": [
+                "\nlet test amp => sin 440 >> gain amp >> scDbAmp >> out 0<br>\nlet t = test 1<br>\nstop t"
+            ]
+        },
+        "scAmpDb": {
+            "name": "scAmpDb",
+            "shortname": "scAmpDb",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Signal Math",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 948,
+            "description": "Convert a value RMS amplitude to dB.",
+            "is_constructor": 1,
+            "example": [
+                "\nlet test amp => sin 440 >> gain amp >> scAmpDb >> out 0<br>\nlet t = test 1<br>\nstop t"
+            ]
+        },
+        "scLog": {
+            "name": "scLog",
+            "shortname": "scLog",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Signal Math",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 963,
+            "description": "Return the log of a signal.",
+            "is_constructor": 1,
+            "example": [
+                "\nlet test amp => sin 440 >> gain amp >> scLog >> out 0<br>\nlet t = test 1<br>\nstop t"
+            ]
+        },
+        "scLog2": {
+            "name": "scLog2",
+            "shortname": "scLog2",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Signal Math",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 978,
+            "description": "Return the log2 of a signal.",
+            "is_constructor": 1,
+            "example": [
+                "\nlet test amp => sin 440 >> gain amp >> scLog2 >> out 0<br>\nlet t = test 1<br>\nstop t"
+            ]
+        },
+        "scLog10": {
+            "name": "scLog10",
+            "shortname": "scLog10",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Signal Math",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 993,
+            "description": "Return the log10 of a signal.",
+            "is_constructor": 1,
+            "example": [
+                "\nlet test amp => sin 440 >> gain amp >> scLog10 >> out 0<br>\nlet t = test 1<br>\nstop t"
+            ]
+        },
+        "scSin": {
+            "name": "scSin",
+            "shortname": "scSin",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Signal Math",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 1008,
+            "description": "Return the sin of a signal.",
+            "is_constructor": 1,
+            "example": [
+                "\nlet test amp => sin 440 >> gain amp >> scSin >> out 0<br>\nlet t = test 1<br>\nstop t"
+            ]
+        },
+        "scCos": {
+            "name": "scCos",
+            "shortname": "scCos",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Signal Math",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 1023,
+            "description": "Return the cos of a signal.",
+            "is_constructor": 1,
+            "example": [
+                "\nlet test amp => sin 440 >> gain amp >> scCos >> out 0<br>\nlet t = test 1<br>\nstop t"
+            ]
+        },
+        "scTan": {
+            "name": "scTan",
+            "shortname": "scTan",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Signal Math",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 1038,
+            "description": "Return the tan of a signal.",
+            "is_constructor": 1,
+            "example": [
+                "\nlet test amp => sin 440 >> gain amp >> scTan >> out 0<br>\nlet t = test 1<br>\nstop t"
+            ]
+        },
+        "scASin": {
+            "name": "scASin",
+            "shortname": "scASin",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Signal Math",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 1053,
+            "description": "Return the arc sin of a signal.",
+            "is_constructor": 1,
+            "example": [
+                "\nlet test amp => sin 440 >> gain amp >> scASin >> out 0<br>\nlet t = test 1<br>\nstop t"
+            ]
+        },
+        "scACos": {
+            "name": "scACos",
+            "shortname": "scACos",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Signal Math",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 1068,
+            "description": "Return the arc cos of a signal.",
+            "is_constructor": 1,
+            "example": [
+                "\nlet test amp => sin 440 >> gain amp >> scACos >> out 0<br>\nlet t = test 1<br>\nstop t"
+            ]
+        },
+        "scATan": {
+            "name": "scATan",
+            "shortname": "scATan",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Signal Math",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 1083,
+            "description": "Return the arc tan of a signal.",
+            "is_constructor": 1,
+            "example": [
+                "\nlet test amp => sin 440 >> gain amp >> scATan >> out 0<br>\nlet t = test 1<br>\nstop t"
+            ]
+        },
+        "scSinh": {
+            "name": "scSinh",
+            "shortname": "scSinh",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Signal Math",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 1098,
+            "description": "Return the sinh of a signal.",
+            "is_constructor": 1,
+            "example": [
+                "\nlet test amp => sin 440 >> gain amp >> scSinh >> out 0<br>\nlet t = test 1<br>\nstop t"
+            ]
+        },
+        "scCosh": {
+            "name": "scCosh",
+            "shortname": "scCosh",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Signal Math",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 1113,
+            "description": "Return the cosh of a signal.",
+            "is_constructor": 1,
+            "example": [
+                "\nlet test amp => sin 440 >> gain amp >> scCosh >> out 0<br>\nlet t = test 1<br>\nstop t"
+            ]
+        },
+        "scTanh": {
+            "name": "scTanh",
+            "shortname": "scTanh",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Signal Math",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 1128,
+            "description": "Return the tanh of a signal.",
+            "is_constructor": 1,
+            "example": [
+                "\nlet test amp => sin 440 >> gain amp >> scTanh >> out 0<br>\nlet t = test 1<br>\nstop t"
+            ]
+        },
+        "scMod": {
+            "name": "scMod",
+            "shortname": "scMod",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Signal Math",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 1143,
+            "description": "Return the modulo of two signals. a % b",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "a",
+                    "description": "Signal a"
+                },
+                {
+                    "name": "b",
+                    "description": "Signal b"
+                }
+            ],
+            "example": [
+                "\nTODO"
+            ]
+        },
+        "scRound": {
+            "name": "scRound",
+            "shortname": "scRound",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Signal Math",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 1158,
+            "description": "Return the signal rounded to the nearest value of b.",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "a",
+                    "description": "Signal a"
+                },
+                {
+                    "name": "b",
+                    "description": "Value to round to"
+                }
+            ],
+            "example": [
+                "\nTODO"
+            ]
+        },
+        "scPow": {
+            "name": "scPow",
+            "shortname": "scPow",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Signal Math",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 1173,
+            "description": "Return the signal to the power of b.",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "a",
+                    "description": "Signal a"
+                },
+                {
+                    "name": "b",
+                    "description": "Value to round to"
+                }
+            ],
+            "example": [
+                "\nTODO"
+            ]
+        },
+        "scBitAnd": {
+            "name": "scBitAnd",
+            "shortname": "scBitAnd",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Bitwise Operators",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 1188,
+            "description": "Bitwise & a signal.",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "a",
+                    "description": "Signal a"
+                },
+                {
+                    "name": "b",
+                    "description": "Signal b"
+                }
+            ],
+            "example": [
+                "\nTODO"
+            ]
+        },
+        "scBitOr": {
+            "name": "scBitOr",
+            "shortname": "scBitOr",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Bitwise Operators",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 1208,
+            "description": "Bitwise | a signal.",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "a",
+                    "description": "Signal a"
+                },
+                {
+                    "name": "b",
+                    "description": "Signal b"
+                }
+            ],
+            "example": [
+                "\nTODO"
+            ]
+        },
+        "scBitXor": {
+            "name": "scBitXor",
+            "shortname": "scBitXor",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Bitwise Operators",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 1223,
+            "description": "Bitwise xor a signal.",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "a",
+                    "description": "Signal a"
+                },
+                {
+                    "name": "b",
+                    "description": "Signal b"
+                }
+            ],
+            "example": [
+                "\nTODO"
+            ]
+        },
+        "scBitLeftShift": {
+            "name": "scBitLeftShift",
+            "shortname": "scBitLeftShift",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Bitwise Operators",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 1238,
+            "description": "Bitwise << a signal.",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "a",
+                    "description": "Signal a"
+                },
+                {
+                    "name": "b",
+                    "description": "Signal b"
+                }
+            ],
+            "example": [
+                "\nTODO"
+            ]
+        },
+        "scBitRightShift": {
+            "name": "scBitRightShift",
+            "shortname": "scBitRightShift",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Bitwise Operators",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 1253,
+            "description": "Bitwise >> a signal.",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "a",
+                    "description": "Signal a"
+                },
+                {
+                    "name": "b",
+                    "description": "Signal b"
+                }
+            ],
+            "example": [
+                "\nTODO"
+            ]
+        },
+        "scRand": {
+            "name": "scRand",
+            "shortname": "scRand",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Bitwise Operators",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 1268,
+            "description": "Generate a random number with uniform distribution when synth starts playing.",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "lo",
+                    "description": "Lowest possible value"
+                },
+                {
+                    "name": "hi",
+                    "description": "Highest possible value"
+                }
+            ],
+            "example": [
+                "\nlet test a => sin (scRand 220 440) >> out 0<br>\nlet t = test 1<br>\nstop t"
+            ]
+        },
+        "scNRand": {
+            "name": "scNRand",
+            "shortname": "scNRand",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Random",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 1285,
+            "description": "Generate a random number with distribution based on the sum of n random numbers when synth starts playing.",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "lo",
+                    "description": "Lowest possible value"
+                },
+                {
+                    "name": "hi",
+                    "description": "Highest possible value"
+                },
+                {
+                    "name": "n",
+                    "description": "Number of random numbers to sum. 1 = uniform distribution, 2 = triangular, etc. Higher numbers approach gaussian"
+                }
+            ],
+            "example": [
+                "\nlet test a => sin (scNRand 220 440 4) >> out 0<br>\nlet t = test 1<br>\nstop t"
+            ]
+        },
+        "scLinRand": {
+            "name": "scLinRand",
+            "shortname": "scLinRand",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Random",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 1308,
+            "description": "Generate a random number with linear distribution when synth starts playing.",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "lo",
+                    "description": "Lowest possible value"
+                },
+                {
+                    "name": "hi",
+                    "description": "Highest possible value"
+                }
+            ],
+            "example": [
+                "\nlet test a => sin (scLinRand 220 440) >> out 0<br>\nlet t = test 1<br>\nstop t"
+            ]
+        },
+        "scIRand": {
+            "name": "scIRand",
+            "shortname": "scIRand",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Random",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 1325,
+            "description": "Generate a random integer with uniform distribution when synth starts playing.",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "lo",
+                    "description": "Lowest possible value"
+                },
+                {
+                    "name": "hi",
+                    "description": "Highest possible value"
+                }
+            ],
+            "example": [
+                "\nlet test a => sin (scIRand 220 440) >> out 0<br>\nlet t = test 1<br>\nstop t"
+            ]
+        },
+        "scExpRand": {
+            "name": "scExpRand",
+            "shortname": "scExpRand",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Random",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 1343,
+            "description": "Generate a random number with exponential distribution when synth starts playing.",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "lo",
+                    "description": "Lowest possible value"
+                },
+                {
+                    "name": "hi",
+                    "description": "Highest possible value"
+                }
+            ],
+            "example": [
+                "\nlet test a => sin (scExpRand 220 440) >> out 0<br>\nlet t = test 1<br>\nstop t"
+            ]
+        },
+        "scTRand": {
+            "name": "scTRand",
+            "shortname": "scTRand",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Random",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 1360,
+            "description": "Generate a random number with uniform distribution on each trigger.",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "lo",
+                    "description": "Lowest possible value"
+                },
+                {
+                    "name": "hi",
+                    "description": "Highest possible value"
+                },
+                {
+                    "name": "trigger",
+                    "description": "A trigger happens when the signal changes from non-positive to positive"
+                }
+            ],
+            "example": [
+                "\nlet test a => sin (scTRand 220 440 (impulse 1)) >> out 0<br>\nlet t = test 1<br>\nstop t"
+            ]
+        },
+        "scTIRand": {
+            "name": "scTIRand",
+            "shortname": "scTIRand",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Random",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 1378,
+            "description": "Generate a random integer with uniform distribution on each trigger.",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "lo",
+                    "description": "Lowest possible value"
+                },
+                {
+                    "name": "hi",
+                    "description": "Highest possible value"
+                },
+                {
+                    "name": "trigger",
+                    "description": "A trigger happens when the signal changes from non-positive to positive"
+                }
+            ],
+            "example": [
+                "\nlet test a => sin (scTIRand 220 440 (impulse 1)) >> out 0<br>\nlet t = test 1<br>\nstop t"
+            ]
+        },
+        "scTExpRand": {
+            "name": "scTExpRand",
+            "shortname": "scTExpRand",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Random",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 1396,
+            "description": "Generate a random number with exponential distribution on each trigger.",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "lo",
+                    "description": "Lowest possible value"
+                },
+                {
+                    "name": "hi",
+                    "description": "Highest possible value"
+                },
+                {
+                    "name": "trigger",
+                    "description": "A trigger happens when the signal changes from non-positive to positive"
+                }
+            ],
+            "example": [
+                "\nlet test a => sin (scTExpRand 220 440 (impulse 1)) >> out 0<br>\nlet t = test 1<br>\nstop t"
+            ]
+        },
         "dc": {
             "name": "dc",
             "shortname": "dc",
@@ -283,9 +2020,10 @@
             "plugin_for": [],
             "extension_for": [],
             "module": "Lich.sc UGens",
+            "submodule": "Oscillators",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 501,
+            "line": 1414,
             "description": "Output a constant value",
             "is_constructor": 1,
             "params": [
@@ -296,8 +2034,7 @@
             ],
             "example": [
                 "\nlet test value => dc value >> out 0<br>\nlet t = test 1<br>\nstop t"
-            ],
-            "submodule": "Oscillators"
+            ]
         },
         "sin": {
             "name": "sin",
@@ -311,7 +2048,7 @@
             "submodule": "Oscillators",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 522,
+            "line": 1435,
             "description": "A sine wave oscillator.",
             "is_constructor": 1,
             "params": [
@@ -336,7 +2073,7 @@
             "submodule": "Oscillators",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 538,
+            "line": 1451,
             "description": "A saw wave oscillator.",
             "is_constructor": 1,
             "params": [
@@ -361,7 +2098,7 @@
             "submodule": "Oscillators",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 554,
+            "line": 1467,
             "description": "A triangle wave oscillator.",
             "is_constructor": 1,
             "params": [
@@ -386,7 +2123,7 @@
             "submodule": "Oscillators",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 570,
+            "line": 1483,
             "description": "A square wave oscillator.",
             "is_constructor": 1,
             "params": [
@@ -411,7 +2148,7 @@
             "submodule": "Oscillators",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 586,
+            "line": 1499,
             "description": "A pulse wave oscillator with variable duty cycle.",
             "is_constructor": 1,
             "params": [
@@ -440,7 +2177,7 @@
             "submodule": "Oscillators",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 603,
+            "line": 1516,
             "description": "An oscillator with a variable number of harmonics of equal amplitude.",
             "is_constructor": 1,
             "params": [
@@ -469,7 +2206,7 @@
             "submodule": "Oscillators",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 620,
+            "line": 1533,
             "description": "Generates a set of harmonics around a formant frequency at a given fundamental frequency.",
             "is_constructor": 1,
             "params": [
@@ -502,7 +2239,7 @@
             "submodule": "Oscillators",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 638,
+            "line": 1551,
             "description": "Generates single sample impulses at a frequency.",
             "is_constructor": 1,
             "params": [
@@ -527,7 +2264,7 @@
             "submodule": "Noise",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 654,
+            "line": 1567,
             "description": "White noise generator.",
             "is_constructor": 1,
             "params": [
@@ -552,7 +2289,7 @@
             "submodule": "Noise",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 675,
+            "line": 1588,
             "description": "Pink noise generator.",
             "is_constructor": 1,
             "params": [
@@ -577,7 +2314,7 @@
             "submodule": "Noise",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 691,
+            "line": 1604,
             "description": "Brownian noise generator.",
             "is_constructor": 1,
             "params": [
@@ -602,7 +2339,7 @@
             "submodule": "Noise",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 707,
+            "line": 1620,
             "description": "Gray noise generator.",
             "is_constructor": 1,
             "params": [
@@ -627,7 +2364,7 @@
             "submodule": "Noise",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 723,
+            "line": 1636,
             "description": "Generates noise whose values are either -1 or 1.",
             "is_constructor": 1,
             "params": [
@@ -652,7 +2389,7 @@
             "submodule": "Noise",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 739,
+            "line": 1652,
             "description": "A noise generator based on a chaotic function.",
             "is_constructor": 1,
             "params": [
@@ -677,7 +2414,7 @@
             "submodule": "Noise",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 756,
+            "line": 1669,
             "description": "Generates random impulses from 0 to +1.",
             "is_constructor": 1,
             "params": [
@@ -702,7 +2439,7 @@
             "submodule": "Noise",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 772,
+            "line": 1685,
             "description": "A stepped random number generator",
             "is_constructor": 1,
             "params": [
@@ -727,7 +2464,7 @@
             "submodule": "Noise",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 788,
+            "line": 1701,
             "description": "A linearly interpolated random number generator",
             "is_constructor": 1,
             "params": [
@@ -752,7 +2489,7 @@
             "submodule": "Noise",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 804,
+            "line": 1717,
             "description": "A cubic interpolated random number generator",
             "is_constructor": 1,
             "params": [
@@ -777,7 +2514,7 @@
             "submodule": "Chaos",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 820,
+            "line": 1733,
             "description": "A non-interpolating sound generator based on the difference equation: x[n+1] = a - b * sqrt(abs(x[n]))",
             "is_constructor": 1,
             "params": [
@@ -814,7 +2551,7 @@
             "submodule": "Chaos",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 844,
+            "line": 1757,
             "description": "A linearly interpolating sound generator based on the difference equation: x[n+1] = a - b * sqrt(abs(x[n]))",
             "is_constructor": 1,
             "params": [
@@ -851,7 +2588,7 @@
             "submodule": "Chaos",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 863,
+            "line": 1776,
             "description": "A non-interpolating sound generator based on the difference equation: x[n+1] = 1 - y[n] + abs(x[n]); y[n+1] = x[n];",
             "is_constructor": 1,
             "params": [
@@ -884,7 +2621,7 @@
             "submodule": "Chaos",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 881,
+            "line": 1794,
             "description": "A linearly interpolating sound generator based on the difference equation: x[n+1] = 1 - y[n] + abs(x[n]); y[n+1] = x[n];",
             "is_constructor": 1,
             "params": [
@@ -917,7 +2654,7 @@
             "submodule": "Filters",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 899,
+            "line": 1812,
             "description": "A low pass filter.",
             "is_constructor": 1,
             "params": [
@@ -946,7 +2683,7 @@
             "submodule": "Filters",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 921,
+            "line": 1834,
             "description": "A high pass filter.",
             "is_constructor": 1,
             "params": [
@@ -975,7 +2712,7 @@
             "submodule": "Filters",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 938,
+            "line": 1851,
             "description": "A band pass filter.",
             "is_constructor": 1,
             "params": [
@@ -1004,7 +2741,7 @@
             "submodule": "Filters",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 955,
+            "line": 1868,
             "description": "Ramp a signal between two values over time.",
             "is_constructor": 1,
             "params": [
@@ -1029,7 +2766,7 @@
             "submodule": "Filters",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 971,
+            "line": 1884,
             "description": "Bit crush a signal.",
             "is_constructor": 1,
             "params": [
@@ -1054,7 +2791,7 @@
             "submodule": "Filters",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 986,
+            "line": 1899,
             "description": "Sample rate reduction on a signal.",
             "is_constructor": 1,
             "params": [
@@ -1076,10 +2813,10 @@
             "plugin_for": [],
             "extension_for": [],
             "module": "Lich.sc UGens",
-            "submodule": "Delays",
+            "submodule": "Filters",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1002,
+            "line": 1915,
             "description": "An allpass delay line with no interpolation.",
             "is_constructor": 1,
             "params": [
@@ -1100,6 +2837,39 @@
                 "\nlet test del => impulse 1 >> allpassN del del 1 >> out 0<br>\nlet t = test 0.1<br>\nstop t"
             ]
         },
+        "bufAllpassN": {
+            "name": "bufAllpassN",
+            "shortname": "bufAllpassN",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Delays",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 1933,
+            "description": "An allpass delay line with no interpolation. This version uses a localBuf.",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "buf",
+                    "description": "LocalBuf to use for the delay"
+                },
+                {
+                    "name": "del",
+                    "description": "Delay time in seconds"
+                },
+                {
+                    "name": "decay",
+                    "description": "Time for the echoes to decay by 60 decibels."
+                }
+            ],
+            "example": [
+                "\nlet test del => impulse 1 >> bufAllpassN (localBuf 44100 1) del 1 >> out 0<br>\nlet t = test 0.1<br>\nstop t"
+            ]
+        },
         "allpassL": {
             "name": "allpassL",
             "shortname": "allpassL",
@@ -1112,7 +2882,7 @@
             "submodule": "Delays",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1025,
+            "line": 1956,
             "description": "An allpass delay line with linear interpolation.",
             "is_constructor": 1,
             "params": [
@@ -1133,6 +2903,39 @@
                 "\nlet test del => impulse 1 >> allpassL del del 1 >> out 0<br>\nlet t = test 0.1<br>\nstop t"
             ]
         },
+        "bufAllpassL": {
+            "name": "bufAllpassL",
+            "shortname": "bufAllpassL",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Delays",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 1974,
+            "description": "An allpass delay line with linear interpolation. This version uses a localBuf.",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "buf",
+                    "description": "LocalBuf to use for the delay"
+                },
+                {
+                    "name": "del",
+                    "description": "Delay time in seconds"
+                },
+                {
+                    "name": "decay",
+                    "description": "Time for the echoes to decay by 60 decibels."
+                }
+            ],
+            "example": [
+                "\nlet test del => impulse 1 >> bufAllpassL (localBuf 44100 1) del 1 >> out 0<br>\nlet t = test 0.1<br>\nstop t"
+            ]
+        },
         "allpassC": {
             "name": "allpassC",
             "shortname": "allpassC",
@@ -1145,7 +2948,7 @@
             "submodule": "Delays",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1043,
+            "line": 1992,
             "description": "An allpass delay line with cubic interpolation.",
             "is_constructor": 1,
             "params": [
@@ -1166,6 +2969,39 @@
                 "\nlet test del => impulse 1 >> allpassC del del 1 >> out 0<br>\nlet t = test 0.1<br>\nstop t"
             ]
         },
+        "bufAllpassC": {
+            "name": "bufAllpassC",
+            "shortname": "bufAllpassC",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Delays",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 2010,
+            "description": "An allpass delay line with cubic interpolation. This version uses a localBuf.",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "buf",
+                    "description": "LocalBuf to use for the delay"
+                },
+                {
+                    "name": "del",
+                    "description": "Delay time in seconds"
+                },
+                {
+                    "name": "decay",
+                    "description": "Time for the echoes to decay by 60 decibels."
+                }
+            ],
+            "example": [
+                "\nlet test del => impulse 1 >> bufAllpassC (localBuf 44100 1) del 1 >> out 0<br>\nlet t = test 0.1<br>\nstop t"
+            ]
+        },
         "combN": {
             "name": "combN",
             "shortname": "combN",
@@ -1178,7 +3014,7 @@
             "submodule": "Delays",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1061,
+            "line": 2028,
             "description": "A comb delay line with no interpolation.",
             "is_constructor": 1,
             "params": [
@@ -1199,6 +3035,39 @@
                 "\nlet test del => impulse 1 >> combN del del 1 >> out 0<br>\nlet t = test 0.1<br>\nstop t"
             ]
         },
+        "bufCombN": {
+            "name": "bufCombN",
+            "shortname": "bufCombN",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Delays",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 2046,
+            "description": "A comb delay line with no interpolation. This version uses a localBuf.",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "buf",
+                    "description": "LocalBuf to use for the delay"
+                },
+                {
+                    "name": "del",
+                    "description": "Delay time in seconds"
+                },
+                {
+                    "name": "decay",
+                    "description": "Time in seconds for the echoes to decay by 60 decibels."
+                }
+            ],
+            "example": [
+                "\nlet test del => impulse 1 >> bufCombN (localBuf 44100 1) del 1 >> out 0<br>\nlet t = test 0.1<br>\nstop t"
+            ]
+        },
         "combL": {
             "name": "combL",
             "shortname": "combL",
@@ -1211,7 +3080,7 @@
             "submodule": "Delays",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1079,
+            "line": 2064,
             "description": "A comb delay line with linear interpolation.",
             "is_constructor": 1,
             "params": [
@@ -1232,6 +3101,39 @@
                 "\nlet test del => impulse 1 >> combL del del 1 >> out 0<br>\nlet t = test 0.1<br>\nstop t"
             ]
         },
+        "bufCombL": {
+            "name": "bufCombL",
+            "shortname": "bufCombL",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Delays",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 2082,
+            "description": "A comb delay line with cubic linear interpolation. This version uses a localBuf.",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "buf",
+                    "description": "LocalBuf to use for the delay"
+                },
+                {
+                    "name": "del",
+                    "description": "Delay time in seconds"
+                },
+                {
+                    "name": "decay",
+                    "description": "Time in seconds for the echoes to decay by 60 decibels."
+                }
+            ],
+            "example": [
+                "\nlet test del => impulse 1 >> bufCombL (localBuf 44100 1) del 1 >> out 0<br>\nlet t = test 0.1<br>\nstop t"
+            ]
+        },
         "combC": {
             "name": "combC",
             "shortname": "combC",
@@ -1244,7 +3146,7 @@
             "submodule": "Delays",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1097,
+            "line": 2100,
             "description": "A comb delay line with cubic interpolation.",
             "is_constructor": 1,
             "params": [
@@ -1265,6 +3167,39 @@
                 "\nlet test del => impulse 1 >> combC del del 1 >> out 0<br>\nlet t = test 0.1<br>\nstop t"
             ]
         },
+        "bufCombC": {
+            "name": "bufCombC",
+            "shortname": "bufCombC",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Delays",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 2118,
+            "description": "A comb delay line with cubic interpolation. This version uses a localBuf.",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "buf",
+                    "description": "LocalBuf to use for the delay"
+                },
+                {
+                    "name": "del",
+                    "description": "Delay time in seconds"
+                },
+                {
+                    "name": "decay",
+                    "description": "Time in seconds for the echoes to decay by 60 decibels."
+                }
+            ],
+            "example": [
+                "\nlet test del => impulse 1 >> bufCombC (localBuf 44100 1) del 1 >> out 0<br>\nlet t = test 0.1<br>\nstop t"
+            ]
+        },
         "delayN": {
             "name": "delayN",
             "shortname": "delayN",
@@ -1277,7 +3212,7 @@
             "submodule": "Delays",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1115,
+            "line": 2136,
             "description": "A simple delay with no interpolation.",
             "is_constructor": 1,
             "params": [
@@ -1294,6 +3229,35 @@
                 "\nlet test del => impulse 1 >> delayN del del >> out 0<br>\nlet t = test 0.1<br>\nstop t"
             ]
         },
+        "bufDelayN": {
+            "name": "bufDelayN",
+            "shortname": "bufDelayN",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Delays",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 2153,
+            "description": "A simple delay with no interpolation. This version uses a localBuf.",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "buf",
+                    "description": "LocalBuf to use for the delay"
+                },
+                {
+                    "name": "del",
+                    "description": "Delay time in seconds"
+                }
+            ],
+            "example": [
+                "\nlet test del => impulse 1 >> bufDelayN (localBuf 44100 1) del >> out 0<br>\nlet t = test 0.1<br>\nstop t"
+            ]
+        },
         "delayL": {
             "name": "delayL",
             "shortname": "delayL",
@@ -1306,7 +3270,7 @@
             "submodule": "Delays",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1132,
+            "line": 2170,
             "description": "A simple delay with linear interpolation.",
             "is_constructor": 1,
             "params": [
@@ -1323,6 +3287,35 @@
                 "\nlet test del => impulse 1 >> delayL del del >> out 0<br>\nlet t = test 0.1<br>\nstop t"
             ]
         },
+        "bufDelayL": {
+            "name": "bufDelayL",
+            "shortname": "bufDelayL",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Delays",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 2187,
+            "description": "A simple delay with linear interpolation. This version uses a localBuf.",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "buf",
+                    "description": "LocalBuf to use for the delay"
+                },
+                {
+                    "name": "del",
+                    "description": "Delay time in seconds"
+                }
+            ],
+            "example": [
+                "\nlet test del => impulse 1 >> bufDelayL (localBuf 44100 1) del >> out 0<br>\nlet t = test 0.1<br>\nstop t"
+            ]
+        },
         "delayC": {
             "name": "delayC",
             "shortname": "delayC",
@@ -1335,7 +3328,7 @@
             "submodule": "Delays",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1149,
+            "line": 2204,
             "description": "A simple delay with cubic interpolation.",
             "is_constructor": 1,
             "params": [
@@ -1352,6 +3345,35 @@
                 "\nlet test del => impulse 1 >> delayC del del >> out 0<br>\nlet t = test 0.1<br>\nstop t"
             ]
         },
+        "bufDelayC": {
+            "name": "bufDelayC",
+            "shortname": "bufDelayC",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Delays",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 2221,
+            "description": "A simple delay with cubic interpolation. This version uses a localBuf.",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "buf",
+                    "description": "LocalBuf to use for the delay"
+                },
+                {
+                    "name": "del",
+                    "description": "Delay time in seconds"
+                }
+            ],
+            "example": [
+                "\nlet test del => impulse 1 >> bufDelayC (localBuf 44100 1) del >> out 0<br>\nlet t = test 0.1<br>\nstop t"
+            ]
+        },
         "env": {
             "name": "env",
             "shortname": "env",
@@ -1364,7 +3386,7 @@
             "submodule": "Envelopes",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1213,
+            "line": 2285,
             "description": "Envelope generator. Used for amplitude envelopes, will automatically free the synth when finished.",
             "is_constructor": 1,
             "params": [
@@ -1401,7 +3423,7 @@
             "submodule": "Envelopes",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1236,
+            "line": 2308,
             "description": "Envelope generator. Used for amplitude envelopes, will NOT automatically free the synth when finished.",
             "is_constructor": 1,
             "params": [
@@ -1438,7 +3460,7 @@
             "submodule": "Envelopes",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1254,
+            "line": 2326,
             "description": "Envelope generator. Used for amplitude envelopes, will automatically free the synth when finished.",
             "is_constructor": 1,
             "params": [
@@ -1471,7 +3493,7 @@
             "submodule": "Envelopes",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1270,
+            "line": 2342,
             "description": "Envelope generator. Used for amplitude envelopes, will NOT automatically free the synth when finished.",
             "is_constructor": 1,
             "params": [
@@ -1501,7 +3523,7 @@
             "submodule": "InputOutput",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1283,
+            "line": 2355,
             "description": "Send a signal to an output bus.",
             "is_constructor": 1,
             "params": [
@@ -1513,8 +3535,1186 @@
             "example": [
                 "\nlet test bus => white 1 >> out bus<br>\nlet t = test 0<br>\nstop t"
             ]
+        },
+        "auxIn": {
+            "name": "auxIn",
+            "shortname": "auxIn",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "InputOutput",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 2386,
+            "description": "Reads audio from a range of audio buses.",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "busNum",
+                    "description": "The bus index to start reading from."
+                },
+                {
+                    "name": "numChannels",
+                    "description": "The number of channels to read from."
+                }
+            ],
+            "example": [
+                "\nlet simpleSynth freq => sin freq \\* square (2\\*tempoSeconds) * 0.25 >> out 20<br>\nlet sSynth = simpleSynth 440<br>\nlet fxSynth => auxIn 20 1 >> combC tempoSeconds [tempoSeconds/1, tempoSeconds/2] 10 >> out 0<br>\nlet fx = Synth::after \"fxSynth\" [] server<br>\nstop sSynth<br>\nstop fx"
+            ]
+        },
+        "pan": {
+            "name": "pan",
+            "shortname": "pan",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Panning",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 2414,
+            "description": "Pans a single channel input across a stereo field using equal power panning.",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "position",
+                    "description": "The position in the stereo field where the input will be panned. Range of -1 (left) to 1 (right)."
+                },
+                {
+                    "name": "input",
+                    "description": "The audio input to be panned."
+                }
+            ],
+            "example": [
+                "\nlet test pos => white 1 >> pan pos >> out 0<br>\nlet t = test-0.3 <br>\nstop t"
+            ]
+        },
+        "dup": {
+            "name": "dup",
+            "shortname": "dup",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Panning",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 2438,
+            "description": "Duplicates an input across a 2 index array.",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "input",
+                    "description": "The audio input to be expanded."
+                }
+            ],
+            "example": [
+                "\nlet test freq => sin freq >> dup >> out 0<br>\nlet t = test 440 <br>\nstop t"
+            ]
+        },
+        "localBuf": {
+            "name": "localBuf",
+            "shortname": "localBuf",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Buffers",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 2481,
+            "description": "A buffer local to a synth.",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "frames",
+                    "description": "Size of the buffer in samples"
+                },
+                {
+                    "name": "channels",
+                    "description": "Number of channels for the buffer"
+                }
+            ],
+            "example": [
+                "\nlet test del => impulse 1 >> bufCombC (localBuf 44100 1) del 1 >> out 0<br>\nlet t = test 0.1<br>\nstop t"
+            ]
         }
     },
-    "classitems": [],
-    "warnings": []
+    "classitems": [
+        {
+            "file": "CloudChamber.js/CloudChamber.js",
+            "line": 212,
+            "description": "CloudChamber - Basic graphics app class.\ncanvasElementName\nframerate - Frames per second. ie. 30 will be 1000 / 30 = 33.333 ms between frames\ndrawCallback\nprintCallback",
+            "class": "scDistort"
+        },
+        {
+            "file": "Compiler/Compiler.js",
+            "line": 86,
+            "description": "Takes `f` function and returns wrapper in return, that may be\nused for tail recursive algorithms. Note that returned funciton\nis not side effect free and should not be called from anywhere\nelse during tail recursion. In other words if\n`var f = tco(function foo() { ... bar() ... })`, then `bar`\nshould never call `f`. It is ok though for `bar` to call `tco(foo)`\ninstead.\n\n## Examples\nvar sum = tco(function(x, y) {\n  return y > 0 ? sum(x + 1, y - 1) :\n         y < 0 ? sum(x - 1, y + 1) :\n         x\n})\nsum(20, 100000) // => 100020",
+            "class": "scDistort"
+        },
+        {
+            "file": "third-party/codemirror-3.20/addon/edit/closetag.js",
+            "line": 1,
+            "description": "Tag-closer extension for CodeMirror.\n\nThis extension adds an \"autoCloseTags\" option that can be set to\neither true to get the default behavior, or an object to further\nconfigure its behavior.\n\nThese are supported options:\n\n`whenClosing` (default true)\n  Whether to autoclose when the '/' of a closing tag is typed.\n`whenOpening` (default true)\n  Whether to autoclose the tag when the final '>' of an opening\n  tag is typed.\n`dontCloseTags` (default is empty tags for HTML, none for XML)\n  An array of tag names that should not be autoclosed.\n`indentTags` (default is block tags for HTML, none for XML)\n  An array of tag names that should, when opened, cause a\n  blank line to be added inside the tag, and the blank line and\n  closing line to be indented.\n\nSee demos/closetag.html for a usage example.",
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/codemirror-3.20/keymap/vim.js",
+            "line": 1,
+            "description": "Supported keybindings:\n\n  Motion:\n  h, j, k, l\n  gj, gk\n  e, E, w, W, b, B, ge, gE\n  f<character>, F<character>, t<character>, T<character>\n  $, ^, 0, -, +, _\n  gg, G\n  %\n  '<character>, `<character>\n\n  Operator:\n  d, y, c\n  dd, yy, cc\n  g~, g~g~\n  >, <, >>, <<\n\n  Operator-Motion:\n  x, X, D, Y, C, ~\n\n  Action:\n  a, i, s, A, I, S, o, O\n  zz, z., z<CR>, zt, zb, z-\n  J\n  u, Ctrl-r\n  m<character>\n  r<character>\n\n  Modes:\n  ESC - leave insert mode, visual mode, and clear input state.\n  Ctrl-[, Ctrl-c - same as ESC.\n\nRegisters: unamed, -, a-z, A-Z, 0-9\n  (Does not respect the special case for number registers when delete\n   operator is made with these commands: %, (, ),  , /, ?, n, N, {, } )\n  TODO: Implement the remaining registers.\nMarks: a-z, A-Z, and 0-9\n  TODO: Implement the remaining special marks. They have more complex\n      behavior.\n\nEvents:\n 'vim-mode-change' - raised on the editor anytime the current mode changes,\n                     Event object: {mode: \"visual\", subMode: \"linewise\"}\n\nCode structure:\n 1. Default keymap\n 2. Variable declarations and short basic helpers\n 3. Instance (External API) implementation\n 4. Internal state tracking objects (input state, counter) implementation\n    and instanstiation\n 5. Key handler (the main command dispatcher) implementation\n 6. Motion, operator, and action implementations\n 7. Helper functions for the key handler, motions, operators, and actions\n 8. Set up Vim to work as a keymap for CodeMirror.",
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/codemirror-3.20/keymap/vim.js",
+            "line": 1225,
+            "description": "typedef {Object{line:number,ch:number}} Cursor An object containing the\n    position of the cursor.",
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/codemirror-3.20/keymap/vim.js",
+            "line": 1985,
+            "description": "Clips cursor to ensure that line is within the buffer's range\nIf includeLineBreak is true, then allow cur.ch == lineLength.",
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/codemirror-3.20/keymap/vim.js",
+            "line": 2398,
+            "params": [
+                {
+                    "name": "cm",
+                    "description": "CodeMirror object.",
+                    "type": "CodeMirror"
+                },
+                {
+                    "name": "repeat",
+                    "description": "Number of words to move past.",
+                    "type": "Int"
+                },
+                {
+                    "name": "forward",
+                    "description": "True to search forward. False to search\n    backward.",
+                    "type": "Boolean"
+                },
+                {
+                    "name": "wordEnd",
+                    "description": "True to move to end of word. False to move to\n    beginning of word.",
+                    "type": "Boolean"
+                },
+                {
+                    "name": "bigWord",
+                    "description": "True if punctuation count as part of the word.\n    False if only alphabet characters count as part of the word.",
+                    "type": "Boolean"
+                }
+            ],
+            "return": {
+                "description": "The position the cursor should move to.",
+                "type": "Cursor"
+            },
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/codemirror-3.20/keymap/vim.js",
+            "line": 2690,
+            "description": "Extract the regular expression from the query and return a Regexp object.\nReturns null if the query is blank.\nIf ignoreCase is passed in, the Regexp object will have the 'i' flag set.\nIf smartCase is passed in, and the query contains upper case letters,\n  then ignoreCase is overridden, and the 'i' flag will not be set.\nIf the query contains the /i in the flag part of the regular expression,\n  then both ignoreCase and smartCase are ignored, and 'i' will be passed\n  through to the Regex object.",
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/codemirror-3.20/keymap/vim.js",
+            "line": 2858,
+            "description": "Check if pos is in the specified range, INCLUSIVE.\nRange can be specified with 1 or 2 arguments.\nIf the first range argument is an array, treat it as an array of line\nnumbers. Match pos against any of the lines.\nIf the first range argument is a number,\n  if there is only 1 range argument, check if pos has the same line\n      number\n  if there are 2 range arguments, then check if pos is in between the two\n      range arguments.",
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/codemirror-3.20/keymap/vim.js",
+            "line": 3318,
+            "params": [
+                {
+                    "name": "cm",
+                    "description": "CodeMirror instance we are in.",
+                    "type": "CodeMirror"
+                },
+                {
+                    "name": "confirm",
+                    "description": "Whether to confirm each replace.",
+                    "type": "Boolean"
+                },
+                {
+                    "name": "lineStart",
+                    "description": "Line to start replacing from.",
+                    "type": "Cursor"
+                },
+                {
+                    "name": "lineEnd",
+                    "description": "Line to stop replacing at.",
+                    "type": "Cursor"
+                },
+                {
+                    "name": "query",
+                    "description": "Query for performing matches with.",
+                    "type": "RegExp"
+                },
+                {
+                    "name": "replaceWith",
+                    "description": "Text to replace matches with. May contain $1,\n    $2, etc for replacing captured groups using Javascript replace.",
+                    "type": "String"
+                }
+            ],
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/codemirror-3.20/keymap/vim.js",
+            "line": 3411,
+            "description": "Handle the raw key event from CodeMirror. Translate the\nShift + key modifier to the resulting letter, while preserving other\nmodifers.",
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/codemirror-3.20/keymap/vim.js",
+            "line": 3561,
+            "description": "Listens for changes made in insert mode.\nShould only be active in insert mode.",
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/codemirror-3.20/keymap/vim.js",
+            "line": 3580,
+            "description": "Listens for any kind of cursor activity on CodeMirror.\n- For tracking cursor activity in insert mode.\n- Should only be active in insert mode.",
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/codemirror-3.20/keymap/vim.js",
+            "line": 3596,
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/codemirror-3.20/keymap/vim.js",
+            "line": 3601,
+            "description": "Handles raw key down events from the text area.\n- Should only be active in insert mode.\n- For recording deletes in insert mode.",
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/codemirror-3.20/keymap/vim.js",
+            "line": 3619,
+            "description": "Repeats the last edit, which includes exactly 1 command and at most 1\ninsert. Operator and motion commands are read from lastEditInputState,\nwhile action commands are read from lastEditActionCommand.\n\nIf repeatForInsert is true, then the function was called by\nexitInsertMode to repeat the insert mode changes the user just made. The\ncorresponding enterInsertMode call was made with a count.",
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/codemirror-3.20/mode/clojure/clojure.js",
+            "line": 1,
+            "description": "Author: Hans Engel\nBranched from CodeMirror's Scheme mode (by Koh Zi Han, based on implementation by Koh Zi Chun)",
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/codemirror-3.20/mode/clojure/clojure.js",
+            "line": 163,
+            "description": "Either\n(indent-word ..\n(non-indent-word ..\n(;something else, bracket, etc.",
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/codemirror-3.20/mode/cobol/cobol.js",
+            "line": 1,
+            "description": "Author: Gautam Mehta\nBranched from CodeMirror's Scheme mode",
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/codemirror-3.20/mode/coffeescript/coffeescript.js",
+            "line": 1,
+            "description": "Link to the project's GitHub page:\nhttps://github.com/pickhardt/coffeescript-codemirror-mode",
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/codemirror-3.20/mode/livescript/livescript.js",
+            "line": 1,
+            "description": "Link to the project's GitHub page:\nhttps://github.com/duralog/CodeMirror",
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/codemirror-3.20/mode/nginx/nginx.js",
+            "line": 42,
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/codemirror-3.20/mode/ntriples/ntriples.js",
+            "line": 1,
+            "description": "This script provides syntax highlighting support for\nthe Ntriples format.\nNtriples format specification:\n    http://www.w3.org/TR/rdf-testcases/#ntriples",
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/codemirror-3.20/mode/scheme/scheme.js",
+            "line": 1,
+            "description": "Author: Koh Zi Han, based on implementation by Koh Zi Chun",
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/codemirror-3.20/mode/scheme/scheme.js",
+            "line": 170,
+            "description": "Either\n(indent-word ..\n(non-indent-word ..\n(;something else, bracket, etc.",
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/codemirror-3.20/mode/smarty/smarty.js",
+            "line": 1,
+            "description": "Smarty 2 and 3 mode.",
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "smartymixed.js",
+            "line": 1,
+            "brief": "Smarty Mixed Codemirror mode (Smarty + Mixed HTML)",
+            "author": "Ruslan Osmanov <rrosmanov at gmail dot com>",
+            "version": "3.0",
+            "date": "05.07.2013",
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/codemirror-3.20/mode/tiddlywiki/tiddlywiki.js",
+            "line": 1,
+            "description": "|''Name''|tiddlywiki.js|\n|''Description''|Enables TiddlyWikiy syntax highlighting using CodeMirror|\n|''Author''|PMario|\n|''Version''|0.1.7|\n|''Status''|''stable''|\n|''Source''|[[GitHub|https://github.com/pmario/CodeMirror2/blob/tw-syntax/mode/tiddlywiki]]|\n|''Documentation''|http://codemirror.tiddlyspace.com/|\n|''License''|[[MIT License|http://www.opensource.org/licenses/mit-license.php]]|\n|''CoreVersion''|2.5.0|\n|''Requires''|codemirror.js|\n|''Keywords''|syntax highlighting color code mirror codemirror|\n! Info\nCoreVersion parameter is needed for TiddlyWiki only!",
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/codemirror-3.20/test/mode_test.js",
+            "line": 1,
+            "description": "Helper to test CodeMirror highlighting modes. It pretty prints output of the\nhighlighter and can check against expected styles.\n\nMode tests are registered by calling test.mode(testName, mode,\ntokens), where mode is a mode object as returned by\nCodeMirror.getMode, and tokens is an array of lines that make up\nthe test.\n\nThese lines are strings, in which styled stretches of code are\nenclosed in brackets `[]`, and prefixed by their style. For\nexample, `[keyword if]`. Brackets in the code itself must be\nduplicated to prevent them from being interpreted as token\nboundaries. For example `a[[i]]` for `a[i]`. If a token has\nmultiple styles, the styles must be separated by ampersands, for\nexample `[tag&error </hmtl>]`.\n\nSee the test.js files in the css, markdown, gfm, and stex mode\ndirectories for examples.",
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/codemirror-3.20/test/mode_test.js",
+            "line": 114,
+            "description": "Emulation of CodeMirror's internal highlight routine for testing. Multi-line\ninput is supported.",
+            "params": [
+                {
+                    "name": "string",
+                    "description": "to highlight"
+                },
+                {
+                    "name": "mode",
+                    "description": "the mode that will do the actual highlighting"
+                }
+            ],
+            "return": {
+                "description": "array of [style, token] pairs"
+            },
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/codemirror-3.20/test/mode_test.js",
+            "line": 157,
+            "description": "Compare two arrays of output from highlight.",
+            "params": [
+                {
+                    "name": "o1",
+                    "description": "array of [style, token] pairs"
+                },
+                {
+                    "name": "o2",
+                    "description": "array of [style, token] pairs"
+                }
+            ],
+            "return": {
+                "description": "boolean; true iff outputs equal"
+            },
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/codemirror-3.20/test/mode_test.js",
+            "line": 173,
+            "description": "Print tokens and corresponding styles in a table. Spaces in the token are\nreplaced with 'interpunct' dots (&middot;).",
+            "params": [
+                {
+                    "name": "output",
+                    "description": "array of [style, token] pairs"
+                }
+            ],
+            "return": {
+                "description": "html string"
+            },
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/codemirror-3.20/test/vim_test.js",
+            "line": 264,
+            "params": [
+                {
+                    "name": "name",
+                    "description": "Name of the test"
+                },
+                {
+                    "name": "keys",
+                    "description": "An array of keys or a string with a single key to simulate."
+                },
+                {
+                    "name": "endPos",
+                    "description": "The expected end position of the cursor."
+                },
+                {
+                    "name": "startPos",
+                    "description": "The position the cursor should start at, defaults to 0, 0."
+                }
+            ],
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/three.js/postprocessing/BloomPass.js",
+            "line": 1,
+            "author": "alteredq / http://alteredqualia.com/",
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/three.js/postprocessing/DotScreenPass.js",
+            "line": 1,
+            "author": "alteredq / http://alteredqualia.com/",
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/three.js/postprocessing/EffectComposer.js",
+            "line": 1,
+            "author": "alteredq / http://alteredqualia.com/",
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/three.js/postprocessing/FilmPass.js",
+            "line": 1,
+            "author": "alteredq / http://alteredqualia.com/",
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/three.js/postprocessing/MaskPass.js",
+            "line": 1,
+            "author": "alteredq / http://alteredqualia.com/",
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/three.js/postprocessing/RenderPass.js",
+            "line": 1,
+            "author": "alteredq / http://alteredqualia.com/",
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/three.js/postprocessing/SavePass.js",
+            "line": 1,
+            "author": "alteredq / http://alteredqualia.com/",
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/three.js/postprocessing/ShaderPass.js",
+            "line": 1,
+            "author": "alteredq / http://alteredqualia.com/",
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/three.js/postprocessing/TexturePass.js",
+            "line": 1,
+            "author": "alteredq / http://alteredqualia.com/",
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/three.js/shaders/BasicShader.js",
+            "line": 1,
+            "author": "mrdoob / http://www.mrdoob.com\n\nSimple test shader",
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/three.js/shaders/BleachBypassShader.js",
+            "line": 1,
+            "author": "alteredq / http://alteredqualia.com/\n\nBleach bypass shader [http://en.wikipedia.org/wiki/Bleach_bypass]\n- based on Nvidia example\nhttp://developer.download.nvidia.com/shaderlibrary/webpages/shader_library.html#post_bleach_bypass",
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/three.js/shaders/BlendShader.js",
+            "line": 1,
+            "author": "alteredq / http://alteredqualia.com/\n\nBlend two textures",
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/three.js/shaders/BokehShader.js",
+            "line": 1,
+            "author": "alteredq / http://alteredqualia.com/\n\nDepth-of-field shader with bokeh\nported from GLSL shader by Martins Upitis\nhttp://artmartinsh.blogspot.com/2010/02/glsl-lens-blur-filter-with-bokeh.html",
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/three.js/shaders/BrightnessContrastShader.js",
+            "line": 1,
+            "author": "tapio / http://tapio.github.com/\n\nBrightness and contrast adjustment\nhttps://github.com/evanw/glfx.js\nbrightness: -1 to 1 (-1 is solid black, 0 is no change, and 1 is solid white)\ncontrast: -1 to 1 (-1 is solid gray, 0 is no change, and 1 is maximum contrast)",
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/three.js/shaders/ColorCorrectionShader.js",
+            "line": 1,
+            "author": "alteredq / http://alteredqualia.com/\n\nColor correction",
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/three.js/shaders/ColorifyShader.js",
+            "line": 1,
+            "author": "alteredq / http://alteredqualia.com/\n\nColorify shader",
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/three.js/shaders/ConvolutionShader.js",
+            "line": 1,
+            "author": "alteredq / http://alteredqualia.com/\n\nConvolution shader\nported from o3d sample to WebGL / GLSL\nhttp://o3d.googlecode.com/svn/trunk/samples/convolution.html",
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/three.js/shaders/CopyShader.js",
+            "line": 1,
+            "author": "alteredq / http://alteredqualia.com/\n\nFull-screen textured quad shader",
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/three.js/shaders/DOFMipMapShader.js",
+            "line": 1,
+            "author": "alteredq / http://alteredqualia.com/\n\nDepth-of-field shader using mipmaps\n- from Matt Handley @applmak\n- requires power-of-2 sized render target with enabled mipmaps",
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/three.js/shaders/DotScreenShader.js",
+            "line": 1,
+            "author": "alteredq / http://alteredqualia.com/\n\nDot screen shader\nbased on glfx.js sepia shader\nhttps://github.com/evanw/glfx.js",
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/three.js/shaders/EdgeShader.js",
+            "line": 1,
+            "author": "zz85 / https://github.com/zz85 | https://www.lab4games.net/zz85/blog\n\nEdge Detection Shader using Frei-Chen filter\nBased on http://rastergrid.com/blog/2011/01/frei-chen-edge-detector\n\naspect: vec2 of (1/width, 1/height)",
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/three.js/shaders/EdgeShader2.js",
+            "line": 1,
+            "author": "zz85 / https://github.com/zz85 | https://www.lab4games.net/zz85/blog\n\nEdge Detection Shader using Sobel filter\nBased on http://rastergrid.com/blog/2011/01/frei-chen-edge-detector\n\naspect: vec2 of (1/width, 1/height)",
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/three.js/shaders/FXAAShader.js",
+            "line": 1,
+            "author": "davidedc / http://www.sketchpatch.net/\n\nNVIDIA FXAA by Timothy Lottes\nhttp://timothylottes.blogspot.com/2011/06/fxaa3-source-released.html\n- WebGL port by @supereggbert\nhttp://www.glge.org/demos/fxaa/",
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/three.js/shaders/FilmShader.js",
+            "line": 1,
+            "author": "alteredq / http://alteredqualia.com/\n\nFilm grain & scanlines shader\n\n- ported from HLSL to WebGL / GLSL\nhttp://www.truevision3d.com/forums/showcase/staticnoise_colorblackwhite_scanline_shaders-t18698.0.html\n\nScreen Space Static Postprocessor\n\nProduces an analogue noise overlay similar to a film grain / TV static\n\nOriginal implementation and noise algorithm\nPat 'Hawthorne' Shearon\n\nOptimized scanlines + noise version with intensity scaling\nGeorg 'Leviathan' Steinrohder\n\nThis version is provided under a Creative Commons Attribution 3.0 License\nhttp://creativecommons.org/licenses/by/3.0/",
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/three.js/shaders/FocusShader.js",
+            "line": 1,
+            "author": "alteredq / http://alteredqualia.com/\n\nFocus shader\nbased on PaintEffect postprocess from ro.me\nhttp://code.google.com/p/3-dreams-of-black/source/browse/deploy/js/effects/PaintEffect.js",
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/three.js/shaders/FresnelShader.js",
+            "line": 1,
+            "author": "alteredq / http://alteredqualia.com/\n\nBased on Nvidia Cg tutorial",
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/three.js/shaders/HorizontalBlurShader.js",
+            "line": 1,
+            "author": "zz85 / http://www.lab4games.net/zz85/blog\n\nTwo pass Gaussian blur filter (horizontal and vertical blur shaders)\n- described in http://www.gamerendering.com/2008/10/11/gaussian-blur-filter-shader/\n  and used in http://www.cake23.de/traveling-wavefronts-lit-up.html\n\n- 9 samples per pass\n- standard deviation 2.7\n- \"h\" and \"v\" parameters should be set to \"1 / width\" and \"1 / height\"",
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/three.js/shaders/HorizontalTiltShiftShader.js",
+            "line": 1,
+            "author": "alteredq / http://alteredqualia.com/\n\nSimple fake tilt-shift effect, modulating two pass Gaussian blur (see above) by vertical position\n\n- 9 samples per pass\n- standard deviation 2.7\n- \"h\" and \"v\" parameters should be set to \"1 / width\" and \"1 / height\"\n- \"r\" parameter control where \"focused\" horizontal line lies",
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/three.js/shaders/HueSaturationShader.js",
+            "line": 1,
+            "author": "tapio / http://tapio.github.com/\n\nHue and saturation adjustment\nhttps://github.com/evanw/glfx.js\nhue: -1 to 1 (-1 is 180 degrees in the negative direction, 0 is no change, etc.\nsaturation: -1 to 1 (-1 is solid gray, 0 is no change, and 1 is maximum contrast)",
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/three.js/shaders/KaleidoShader.js",
+            "line": 1,
+            "author": "felixturner / http://airtight.cc/\n\nKaleidoscope Shader\nRadial reflection around center point\nPorted from: http://pixelshaders.com/editor/\nby Toby Schachman / http://tobyschachman.com/\n\nsides: number of reflections\nangle: initial angle in radians",
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/three.js/shaders/LuminosityShader.js",
+            "line": 1,
+            "author": "alteredq / http://alteredqualia.com/\n\nLuminosity\nhttp://en.wikipedia.org/wiki/Luminosity",
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/three.js/shaders/MirrorShader.js",
+            "line": 1,
+            "author": "felixturner / http://airtight.cc/\n\nMirror Shader\nCopies half the input to the other half\n\nside: side of input to mirror (0 = left, 1 = right, 2 = top, 3 = bottom)",
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/three.js/shaders/NormalMapShader.js",
+            "line": 1,
+            "author": "alteredq / http://alteredqualia.com/\n\nNormal map shader\n- compute normals from heightmap",
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/three.js/shaders/RGBShiftShader.js",
+            "line": 1,
+            "author": "felixturner / http://airtight.cc/\n\nRGB Shift Shader\nShifts red and blue channels from center in opposite directions\nPorted from http://kriss.cx/tom/2009/05/rgb-shift/\nby Tom Butterworth / http://kriss.cx/tom/\n\namount: shift distance (1 is width of input)\nangle: shift angle in radians",
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/three.js/shaders/SSAOShader.js",
+            "line": 1,
+            "author": "alteredq / http://alteredqualia.com/\n\nScreen-space ambient occlusion shader\n- ported from\n  SSAO GLSL shader v1.2\n  assembled by Martins Upitis (martinsh) (http://devlog-martinsh.blogspot.com)\n  original technique is made by ArKano22 (http://www.gamedev.net/topic/550699-ssao-no-halo-artifacts/)\n- modifications\n- modified to use RGBA packed depth texture (use clear color 1,1,1,1 for depth pass)\n- made fog more compatible with three.js linear fog\n- refactoring and optimizations",
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/three.js/shaders/SepiaShader.js",
+            "line": 1,
+            "author": "alteredq / http://alteredqualia.com/\n\nSepia tone shader\nbased on glfx.js sepia shader\nhttps://github.com/evanw/glfx.js",
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/three.js/shaders/TriangleBlurShader.js",
+            "line": 1,
+            "author": "zz85 / http://www.lab4games.net/zz85/blog\n\nTriangle blur shader\nbased on glfx.js triangle blur shader\nhttps://github.com/evanw/glfx.js\n\nA basic blur filter, which convolves the image with a\npyramid filter. The pyramid filter is separable and is applied as two\nperpendicular triangle filters.",
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/three.js/shaders/UnpackDepthRGBAShader.js",
+            "line": 1,
+            "author": "alteredq / http://alteredqualia.com/\n\nUnpack RGBA depth shader\n- show RGBA encoded depth as monochrome color",
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/three.js/shaders/VerticalBlurShader.js",
+            "line": 1,
+            "author": "zz85 / http://www.lab4games.net/zz85/blog\n\nTwo pass Gaussian blur filter (horizontal and vertical blur shaders)\n- described in http://www.gamerendering.com/2008/10/11/gaussian-blur-filter-shader/\n  and used in http://www.cake23.de/traveling-wavefronts-lit-up.html\n\n- 9 samples per pass\n- standard deviation 2.7\n- \"h\" and \"v\" parameters should be set to \"1 / width\" and \"1 / height\"",
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/three.js/shaders/VerticalTiltShiftShader.js",
+            "line": 1,
+            "author": "alteredq / http://alteredqualia.com/\n\nSimple fake tilt-shift effect, modulating two pass Gaussian blur (see above) by vertical position\n\n- 9 samples per pass\n- standard deviation 2.7\n- \"h\" and \"v\" parameters should be set to \"1 / width\" and \"1 / height\"\n- \"r\" parameter control where \"focused\" horizontal line lies",
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/three.js/shaders/VignetteShader.js",
+            "line": 1,
+            "author": "alteredq / http://alteredqualia.com/\n\nVignette shader\nbased on PaintEffect postprocess from ro.me\nhttp://code.google.com/p/3-dreams-of-black/source/browse/deploy/js/effects/PaintEffect.js",
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/webgl-utils.js",
+            "line": 33,
+            "fileoverview": "This file contains functions every webgl program will need\na version of one way or another.\n\nInstead of setting up a context manually it is recommended to\nuse. This will check for success or failure. On failure it\nwill attempt to present an approriate message to the user.\n\n      gl = WebGLUtils.setupWebGL(canvas);\n\nFor animated WebGL apps use of setTimeout or setInterval are\ndiscouraged. It is recommended you structure your rendering\nloop like this.\n\n      function render() {\n        window.requestAnimFrame(render, canvas);\n\n        // do rendering\n        ...\n      }\n      render();\n\nThis will call your rendering function up to the refresh rate\nof your display but will stop rendering if your app is not\nvisible.",
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/webgl-utils.js",
+            "line": 62,
+            "description": "Creates the HTLM for a failure message",
+            "params": [
+                {
+                    "name": "canvasContainerId",
+                    "description": "id of container of th\n       canvas.",
+                    "type": "String"
+                }
+            ],
+            "return": {
+                "description": "The html.",
+                "type": "String"
+            },
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/webgl-utils.js",
+            "line": 78,
+            "description": "Mesasge for getting a webgl browser",
+            "type": "{string}",
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/webgl-utils.js",
+            "line": 86,
+            "description": "Mesasge for need better hardware",
+            "type": "{string}",
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/webgl-utils.js",
+            "line": 94,
+            "description": "Creates a webgl context. If creation fails it will\nchange the contents of the container of the <canvas>\ntag to an error message with the correct links for WebGL.",
+            "params": [
+                {
+                    "name": "canvas.",
+                    "description": "The canvas element to create a\n    context from.",
+                    "type": "Element"
+                },
+                {
+                    "name": "opt_attribs",
+                    "description": "Any\n    creation attributes you want to pass in.",
+                    "type": "WebGLContextCreationAttirbutes"
+                },
+                {
+                    "name": "opt_onError",
+                    "description": "An function to call\n    if there is an error during creation.",
+                    "type": "Function:(msg)"
+                }
+            ],
+            "return": {
+                "description": "The created context.",
+                "type": "WebGLRenderingContext"
+            },
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/webgl-utils.js",
+            "line": 136,
+            "description": "Creates a webgl context.",
+            "params": [
+                {
+                    "name": "canvas",
+                    "description": "The canvas tag to get context\n    from. If one is not passed in one will be created.",
+                    "type": "!Canvas"
+                }
+            ],
+            "return": {
+                "description": "The created context.",
+                "type": "!WebGLContext"
+            },
+            "class": "",
+            "module": "Lich.sc UGens"
+        },
+        {
+            "file": "third-party/webgl-utils.js",
+            "line": 162,
+            "description": "Provides requestAnimationFrame in a cross browser way.",
+            "class": "",
+            "module": "Lich.sc UGens"
+        }
+    ],
+    "warnings": [
+        {
+            "message": "unknown tag: brief",
+            "line": "  smartymixed.js:1"
+        },
+        {
+            "message": "unknown tag: version",
+            "line": "  smartymixed.js:1"
+        },
+        {
+            "message": "unknown tag: date",
+            "line": "  smartymixed.js:1"
+        },
+        {
+            "message": "unknown tag: fileoverview",
+            "line": " third-party/webgl-utils.js:33"
+        },
+        {
+            "message": "Missing item type\nCloudChamber - Basic graphics app class.\ncanvasElementName\nframerate - Frames per second. ie. 30 will be 1000 / 30 = 33.333 ms between frames\ndrawCallback\nprintCallback",
+            "line": " CloudChamber.js/CloudChamber.js:212"
+        },
+        {
+            "message": "Missing item type\nTakes `f` function and returns wrapper in return, that may be\nused for tail recursive algorithms. Note that returned funciton\nis not side effect free and should not be called from anywhere\nelse during tail recursion. In other words if\n`var f = tco(function foo() { ... bar() ... })`, then `bar`\nshould never call `f`. It is ok though for `bar` to call `tco(foo)`\ninstead.\n\n## Examples\nvar sum = tco(function(x, y) {\n  return y > 0 ? sum(x + 1, y - 1) :\n         y < 0 ? sum(x - 1, y + 1) :\n         x\n})\nsum(20, 100000) // => 100020",
+            "line": " Compiler/Compiler.js:86"
+        },
+        {
+            "message": "Missing item type\nTag-closer extension for CodeMirror.\n\nThis extension adds an \"autoCloseTags\" option that can be set to\neither true to get the default behavior, or an object to further\nconfigure its behavior.\n\nThese are supported options:\n\n`whenClosing` (default true)\n  Whether to autoclose when the '/' of a closing tag is typed.\n`whenOpening` (default true)\n  Whether to autoclose the tag when the final '>' of an opening\n  tag is typed.\n`dontCloseTags` (default is empty tags for HTML, none for XML)\n  An array of tag names that should not be autoclosed.\n`indentTags` (default is block tags for HTML, none for XML)\n  An array of tag names that should, when opened, cause a\n  blank line to be added inside the tag, and the blank line and\n  closing line to be indented.\n\nSee demos/closetag.html for a usage example.",
+            "line": " third-party/codemirror-3.20/addon/edit/closetag.js:1"
+        },
+        {
+            "message": "Missing item type\nSupported keybindings:\n\n  Motion:\n  h, j, k, l\n  gj, gk\n  e, E, w, W, b, B, ge, gE\n  f<character>, F<character>, t<character>, T<character>\n  $, ^, 0, -, +, _\n  gg, G\n  %\n  '<character>, `<character>\n\n  Operator:\n  d, y, c\n  dd, yy, cc\n  g~, g~g~\n  >, <, >>, <<\n\n  Operator-Motion:\n  x, X, D, Y, C, ~\n\n  Action:\n  a, i, s, A, I, S, o, O\n  zz, z., z<CR>, zt, zb, z-\n  J\n  u, Ctrl-r\n  m<character>\n  r<character>\n\n  Modes:\n  ESC - leave insert mode, visual mode, and clear input state.\n  Ctrl-[, Ctrl-c - same as ESC.\n\nRegisters: unamed, -, a-z, A-Z, 0-9\n  (Does not respect the special case for number registers when delete\n   operator is made with these commands: %, (, ),  , /, ?, n, N, {, } )\n  TODO: Implement the remaining registers.\nMarks: a-z, A-Z, and 0-9\n  TODO: Implement the remaining special marks. They have more complex\n      behavior.\n\nEvents:\n 'vim-mode-change' - raised on the editor anytime the current mode changes,\n                     Event object: {mode: \"visual\", subMode: \"linewise\"}\n\nCode structure:\n 1. Default keymap\n 2. Variable declarations and short basic helpers\n 3. Instance (External API) implementation\n 4. Internal state tracking objects (input state, counter) implementation\n    and instanstiation\n 5. Key handler (the main command dispatcher) implementation\n 6. Motion, operator, and action implementations\n 7. Helper functions for the key handler, motions, operators, and actions\n 8. Set up Vim to work as a keymap for CodeMirror.",
+            "line": " third-party/codemirror-3.20/keymap/vim.js:1"
+        },
+        {
+            "message": "Missing item type\ntypedef {Object{line:number,ch:number}} Cursor An object containing the\n    position of the cursor.",
+            "line": " third-party/codemirror-3.20/keymap/vim.js:1225"
+        },
+        {
+            "message": "Missing item type\nClips cursor to ensure that line is within the buffer's range\nIf includeLineBreak is true, then allow cur.ch == lineLength.",
+            "line": " third-party/codemirror-3.20/keymap/vim.js:1985"
+        },
+        {
+            "message": "Missing item type",
+            "line": " third-party/codemirror-3.20/keymap/vim.js:2398"
+        },
+        {
+            "message": "Missing item type\nExtract the regular expression from the query and return a Regexp object.\nReturns null if the query is blank.\nIf ignoreCase is passed in, the Regexp object will have the 'i' flag set.\nIf smartCase is passed in, and the query contains upper case letters,\n  then ignoreCase is overridden, and the 'i' flag will not be set.\nIf the query contains the /i in the flag part of the regular expression,\n  then both ignoreCase and smartCase are ignored, and 'i' will be passed\n  through to the Regex object.",
+            "line": " third-party/codemirror-3.20/keymap/vim.js:2690"
+        },
+        {
+            "message": "Missing item type\nCheck if pos is in the specified range, INCLUSIVE.\nRange can be specified with 1 or 2 arguments.\nIf the first range argument is an array, treat it as an array of line\nnumbers. Match pos against any of the lines.\nIf the first range argument is a number,\n  if there is only 1 range argument, check if pos has the same line\n      number\n  if there are 2 range arguments, then check if pos is in between the two\n      range arguments.",
+            "line": " third-party/codemirror-3.20/keymap/vim.js:2858"
+        },
+        {
+            "message": "Missing item type",
+            "line": " third-party/codemirror-3.20/keymap/vim.js:3318"
+        },
+        {
+            "message": "Missing item type\nHandle the raw key event from CodeMirror. Translate the\nShift + key modifier to the resulting letter, while preserving other\nmodifers.",
+            "line": " third-party/codemirror-3.20/keymap/vim.js:3411"
+        },
+        {
+            "message": "Missing item type\nListens for changes made in insert mode.\nShould only be active in insert mode.",
+            "line": " third-party/codemirror-3.20/keymap/vim.js:3561"
+        },
+        {
+            "message": "Missing item type\nListens for any kind of cursor activity on CodeMirror.\n- For tracking cursor activity in insert mode.\n- Should only be active in insert mode.",
+            "line": " third-party/codemirror-3.20/keymap/vim.js:3580"
+        },
+        {
+            "message": "Missing item type",
+            "line": " third-party/codemirror-3.20/keymap/vim.js:3596"
+        },
+        {
+            "message": "Missing item type\nHandles raw key down events from the text area.\n- Should only be active in insert mode.\n- For recording deletes in insert mode.",
+            "line": " third-party/codemirror-3.20/keymap/vim.js:3601"
+        },
+        {
+            "message": "Missing item type\nRepeats the last edit, which includes exactly 1 command and at most 1\ninsert. Operator and motion commands are read from lastEditInputState,\nwhile action commands are read from lastEditActionCommand.\n\nIf repeatForInsert is true, then the function was called by\nexitInsertMode to repeat the insert mode changes the user just made. The\ncorresponding enterInsertMode call was made with a count.",
+            "line": " third-party/codemirror-3.20/keymap/vim.js:3619"
+        },
+        {
+            "message": "Missing item type\nAuthor: Hans Engel\nBranched from CodeMirror's Scheme mode (by Koh Zi Han, based on implementation by Koh Zi Chun)",
+            "line": " third-party/codemirror-3.20/mode/clojure/clojure.js:1"
+        },
+        {
+            "message": "Missing item type\nEither\n(indent-word ..\n(non-indent-word ..\n(;something else, bracket, etc.",
+            "line": " third-party/codemirror-3.20/mode/clojure/clojure.js:163"
+        },
+        {
+            "message": "Missing item type\nAuthor: Gautam Mehta\nBranched from CodeMirror's Scheme mode",
+            "line": " third-party/codemirror-3.20/mode/cobol/cobol.js:1"
+        },
+        {
+            "message": "Missing item type\nLink to the project's GitHub page:\nhttps://github.com/pickhardt/coffeescript-codemirror-mode",
+            "line": " third-party/codemirror-3.20/mode/coffeescript/coffeescript.js:1"
+        },
+        {
+            "message": "Missing item type\nLink to the project's GitHub page:\nhttps://github.com/duralog/CodeMirror",
+            "line": " third-party/codemirror-3.20/mode/livescript/livescript.js:1"
+        },
+        {
+            "message": "Missing item type",
+            "line": " third-party/codemirror-3.20/mode/nginx/nginx.js:42"
+        },
+        {
+            "message": "Missing item type\nThis script provides syntax highlighting support for\nthe Ntriples format.\nNtriples format specification:\n    http://www.w3.org/TR/rdf-testcases/#ntriples",
+            "line": " third-party/codemirror-3.20/mode/ntriples/ntriples.js:1"
+        },
+        {
+            "message": "Missing item type\nAuthor: Koh Zi Han, based on implementation by Koh Zi Chun",
+            "line": " third-party/codemirror-3.20/mode/scheme/scheme.js:1"
+        },
+        {
+            "message": "Missing item type\nEither\n(indent-word ..\n(non-indent-word ..\n(;something else, bracket, etc.",
+            "line": " third-party/codemirror-3.20/mode/scheme/scheme.js:170"
+        },
+        {
+            "message": "Missing item type\nSmarty 2 and 3 mode.",
+            "line": " third-party/codemirror-3.20/mode/smarty/smarty.js:1"
+        },
+        {
+            "message": "Missing item type",
+            "line": " smartymixed.js:1"
+        },
+        {
+            "message": "Missing item type\n|''Name''|tiddlywiki.js|\n|''Description''|Enables TiddlyWikiy syntax highlighting using CodeMirror|\n|''Author''|PMario|\n|''Version''|0.1.7|\n|''Status''|''stable''|\n|''Source''|[[GitHub|https://github.com/pmario/CodeMirror2/blob/tw-syntax/mode/tiddlywiki]]|\n|''Documentation''|http://codemirror.tiddlyspace.com/|\n|''License''|[[MIT License|http://www.opensource.org/licenses/mit-license.php]]|\n|''CoreVersion''|2.5.0|\n|''Requires''|codemirror.js|\n|''Keywords''|syntax highlighting color code mirror codemirror|\n! Info\nCoreVersion parameter is needed for TiddlyWiki only!",
+            "line": " third-party/codemirror-3.20/mode/tiddlywiki/tiddlywiki.js:1"
+        },
+        {
+            "message": "Missing item type\nHelper to test CodeMirror highlighting modes. It pretty prints output of the\nhighlighter and can check against expected styles.\n\nMode tests are registered by calling test.mode(testName, mode,\ntokens), where mode is a mode object as returned by\nCodeMirror.getMode, and tokens is an array of lines that make up\nthe test.\n\nThese lines are strings, in which styled stretches of code are\nenclosed in brackets `[]`, and prefixed by their style. For\nexample, `[keyword if]`. Brackets in the code itself must be\nduplicated to prevent them from being interpreted as token\nboundaries. For example `a[[i]]` for `a[i]`. If a token has\nmultiple styles, the styles must be separated by ampersands, for\nexample `[tag&error </hmtl>]`.\n\nSee the test.js files in the css, markdown, gfm, and stex mode\ndirectories for examples.",
+            "line": " third-party/codemirror-3.20/test/mode_test.js:1"
+        },
+        {
+            "message": "Missing item type\nEmulation of CodeMirror's internal highlight routine for testing. Multi-line\ninput is supported.",
+            "line": " third-party/codemirror-3.20/test/mode_test.js:114"
+        },
+        {
+            "message": "Missing item type\nCompare two arrays of output from highlight.",
+            "line": " third-party/codemirror-3.20/test/mode_test.js:157"
+        },
+        {
+            "message": "Missing item type\nPrint tokens and corresponding styles in a table. Spaces in the token are\nreplaced with 'interpunct' dots (&middot;).",
+            "line": " third-party/codemirror-3.20/test/mode_test.js:173"
+        },
+        {
+            "message": "Missing item type",
+            "line": " third-party/codemirror-3.20/test/vim_test.js:264"
+        },
+        {
+            "message": "Missing item type",
+            "line": " third-party/three.js/postprocessing/BloomPass.js:1"
+        },
+        {
+            "message": "Missing item type",
+            "line": " third-party/three.js/postprocessing/DotScreenPass.js:1"
+        },
+        {
+            "message": "Missing item type",
+            "line": " third-party/three.js/postprocessing/EffectComposer.js:1"
+        },
+        {
+            "message": "Missing item type",
+            "line": " third-party/three.js/postprocessing/FilmPass.js:1"
+        },
+        {
+            "message": "Missing item type",
+            "line": " third-party/three.js/postprocessing/MaskPass.js:1"
+        },
+        {
+            "message": "Missing item type",
+            "line": " third-party/three.js/postprocessing/RenderPass.js:1"
+        },
+        {
+            "message": "Missing item type",
+            "line": " third-party/three.js/postprocessing/SavePass.js:1"
+        },
+        {
+            "message": "Missing item type",
+            "line": " third-party/three.js/postprocessing/ShaderPass.js:1"
+        },
+        {
+            "message": "Missing item type",
+            "line": " third-party/three.js/postprocessing/TexturePass.js:1"
+        },
+        {
+            "message": "Missing item type",
+            "line": " third-party/three.js/shaders/BasicShader.js:1"
+        },
+        {
+            "message": "Missing item type",
+            "line": " third-party/three.js/shaders/BleachBypassShader.js:1"
+        },
+        {
+            "message": "Missing item type",
+            "line": " third-party/three.js/shaders/BlendShader.js:1"
+        },
+        {
+            "message": "Missing item type",
+            "line": " third-party/three.js/shaders/BokehShader.js:1"
+        },
+        {
+            "message": "Missing item type",
+            "line": " third-party/three.js/shaders/BrightnessContrastShader.js:1"
+        },
+        {
+            "message": "Missing item type",
+            "line": " third-party/three.js/shaders/ColorCorrectionShader.js:1"
+        },
+        {
+            "message": "Missing item type",
+            "line": " third-party/three.js/shaders/ColorifyShader.js:1"
+        },
+        {
+            "message": "Missing item type",
+            "line": " third-party/three.js/shaders/ConvolutionShader.js:1"
+        },
+        {
+            "message": "Missing item type",
+            "line": " third-party/three.js/shaders/CopyShader.js:1"
+        },
+        {
+            "message": "Missing item type",
+            "line": " third-party/three.js/shaders/DOFMipMapShader.js:1"
+        },
+        {
+            "message": "Missing item type",
+            "line": " third-party/three.js/shaders/DotScreenShader.js:1"
+        },
+        {
+            "message": "Missing item type",
+            "line": " third-party/three.js/shaders/EdgeShader.js:1"
+        },
+        {
+            "message": "Missing item type",
+            "line": " third-party/three.js/shaders/EdgeShader2.js:1"
+        },
+        {
+            "message": "Missing item type",
+            "line": " third-party/three.js/shaders/FXAAShader.js:1"
+        },
+        {
+            "message": "Missing item type",
+            "line": " third-party/three.js/shaders/FilmShader.js:1"
+        },
+        {
+            "message": "Missing item type",
+            "line": " third-party/three.js/shaders/FocusShader.js:1"
+        },
+        {
+            "message": "Missing item type",
+            "line": " third-party/three.js/shaders/FresnelShader.js:1"
+        },
+        {
+            "message": "Missing item type",
+            "line": " third-party/three.js/shaders/HorizontalBlurShader.js:1"
+        },
+        {
+            "message": "Missing item type",
+            "line": " third-party/three.js/shaders/HorizontalTiltShiftShader.js:1"
+        },
+        {
+            "message": "Missing item type",
+            "line": " third-party/three.js/shaders/HueSaturationShader.js:1"
+        },
+        {
+            "message": "Missing item type",
+            "line": " third-party/three.js/shaders/KaleidoShader.js:1"
+        },
+        {
+            "message": "Missing item type",
+            "line": " third-party/three.js/shaders/LuminosityShader.js:1"
+        },
+        {
+            "message": "Missing item type",
+            "line": " third-party/three.js/shaders/MirrorShader.js:1"
+        },
+        {
+            "message": "Missing item type",
+            "line": " third-party/three.js/shaders/NormalMapShader.js:1"
+        },
+        {
+            "message": "Missing item type",
+            "line": " third-party/three.js/shaders/RGBShiftShader.js:1"
+        },
+        {
+            "message": "Missing item type",
+            "line": " third-party/three.js/shaders/SSAOShader.js:1"
+        },
+        {
+            "message": "Missing item type",
+            "line": " third-party/three.js/shaders/SepiaShader.js:1"
+        },
+        {
+            "message": "Missing item type",
+            "line": " third-party/three.js/shaders/TriangleBlurShader.js:1"
+        },
+        {
+            "message": "Missing item type",
+            "line": " third-party/three.js/shaders/UnpackDepthRGBAShader.js:1"
+        },
+        {
+            "message": "Missing item type",
+            "line": " third-party/three.js/shaders/VerticalBlurShader.js:1"
+        },
+        {
+            "message": "Missing item type",
+            "line": " third-party/three.js/shaders/VerticalTiltShiftShader.js:1"
+        },
+        {
+            "message": "Missing item type",
+            "line": " third-party/three.js/shaders/VignetteShader.js:1"
+        },
+        {
+            "message": "Missing item type",
+            "line": " third-party/webgl-utils.js:33"
+        },
+        {
+            "message": "Missing item type\nCreates the HTLM for a failure message",
+            "line": " third-party/webgl-utils.js:62"
+        },
+        {
+            "message": "Missing item type\nMesasge for getting a webgl browser",
+            "line": " third-party/webgl-utils.js:78"
+        },
+        {
+            "message": "Missing item type\nMesasge for need better hardware",
+            "line": " third-party/webgl-utils.js:86"
+        },
+        {
+            "message": "Missing item type\nCreates a webgl context. If creation fails it will\nchange the contents of the container of the <canvas>\ntag to an error message with the correct links for WebGL.",
+            "line": " third-party/webgl-utils.js:94"
+        },
+        {
+            "message": "Missing item type\nCreates a webgl context.",
+            "line": " third-party/webgl-utils.js:136"
+        },
+        {
+            "message": "Missing item type\nProvides requestAnimationFrame in a cross browser way.",
+            "line": " third-party/webgl-utils.js:162"
+        }
+    ]
 }
