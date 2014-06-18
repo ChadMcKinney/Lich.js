@@ -1266,6 +1266,152 @@ function scBitRightShift(a, b)
 }
 
 /**
+ * Generate a random number with uniform distribution when synth starts playing.
+ *
+ * @class scRand
+ * @constructor
+ * @param lo Lowest possible value
+ * @param hi Highest possible value
+ * @example
+ * let test a => sin (scRand 220 440) >> out 0<br>
+ * let t = test 1<br>
+ * stop t
+ */
+function scRand(lo,hi)
+{
+	return multiNewUGen("Rand", ScalarRate, [lo,hi], 1, 0);
+}
+
+/**
+ * Generate a random number with distribution based on the sum of n random numbers when synth starts playing.
+ *
+ * @class scNRand
+ * @constructor
+ * @param lo Lowest possible value
+ * @param hi Highest possible value
+ * @param n Number of random numbers to sum. 1 = uniform distribution, 2 = triangular, etc. Higher numbers approach gaussian
+ * @example
+ * let test a => sin (scNRand 220 440 4) >> out 0<br>
+ * let t = test 1<br>
+ * stop t
+ */
+function scNRand(lo,hi,n)
+{
+	return multiNewUGen("NRand", ScalarRate, [lo,hi,n], 1, 0);
+}
+
+/**
+ * Random Number Generators.
+ * @submodule Random
+ */
+
+/**
+ * Generate a random number with linear distribution when synth starts playing.
+ *
+ * @class scLinRand
+ * @constructor
+ * @param lo Lowest possible value
+ * @param hi Highest possible value
+ * @example
+ * let test a => sin (scLinRand 220 440) >> out 0<br>
+ * let t = test 1<br>
+ * stop t
+ */
+function scLinRand(lo,hi)
+{
+    return multiNewUGen("LinRand", ScalarRate, [lo,hi], 1, 0);
+}
+
+/**
+ * Generate a random integer with uniform distribution when synth starts playing.
+ *
+ * @class scIRand
+ * @constructor
+ * @param lo Lowest possible value
+ * @param hi Highest possible value
+ * @example
+ * let test a => sin (scIRand 220 440) >> out 0<br>
+ * let t = test 1<br>
+ * stop t
+ */
+function scIRand(lo,hi)
+{
+	return multiNewUGen("IRand", ScalarRate, [lo,hi], 1, 0);
+}
+
+
+/**
+ * Generate a random number with exponential distribution when synth starts playing.
+ *
+ * @class scExpRand
+ * @constructor
+ * @param lo Lowest possible value
+ * @param hi Highest possible value
+ * @example
+ * let test a => sin (scExpRand 220 440) >> out 0<br>
+ * let t = test 1<br>
+ * stop t
+ */
+function scExpRand(lo,hi)
+{
+    return multiNewUGen("ExpRand", ScalarRate, [lo,hi], 1, 0);
+}
+
+/**
+ * Generate a random number with uniform distribution on each trigger.
+ *
+ * @class scTRand
+ * @constructor
+ * @param lo Lowest possible value
+ * @param hi Highest possible value
+ * @param trigger A trigger happens when the signal changes from non-positive to positive
+ * @example
+ * let test a => sin (scTRand 220 440 (impulse 1)) >> out 0<br>
+ * let t = test 1<br>
+ * stop t
+ */
+function scTRand(lo,hi,trigger)
+{
+	return multiNewUGen("TRand", AudioRate, [lo,hi,trigger], 1, 0);
+}
+
+/**
+ * Generate a random integer with uniform distribution on each trigger.
+ *
+ * @class scTIRand
+ * @constructor
+ * @param lo Lowest possible value
+ * @param hi Highest possible value
+ * @param trigger A trigger happens when the signal changes from non-positive to positive
+ * @example
+ * let test a => sin (scTIRand 220 440 (impulse 1)) >> out 0<br>
+ * let t = test 1<br>
+ * stop t
+ */
+function scTIRand(lo,hi,trigger)
+{
+	return multiNewUGen("TIRand", AudioRate, [lo,hi,trigger], 1, 0);
+}
+
+/**
+ * Generate a random number with exponential distribution on each trigger.
+ *
+ * @class scTExpRand
+ * @constructor
+ * @param lo Lowest possible value
+ * @param hi Highest possible value
+ * @param trigger A trigger happens when the signal changes from non-positive to positive
+ * @example
+ * let test a => sin (scTExpRand 220 440 (impulse 1)) >> out 0<br>
+ * let t = test 1<br>
+ * stop t
+ */
+function scTExpRand(lo,hi,trigger)
+{
+	return multiNewUGen("TExpRand", AudioRate, [lo,hi,trigger], 1, 0);
+}
+
+/**
  * Output a constant value
  *
  * @class dc
