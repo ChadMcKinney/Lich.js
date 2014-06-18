@@ -1412,6 +1412,68 @@ function scTExpRand(lo,hi,trigger)
 }
 
 /**
+ * Triggerable steps at a given interval between minimum and maximum values.
+ *
+ * @class stepper
+ * @constructor
+ * @param min Lowest possible value
+ * @param max Highest possible value
+ * @param step The range by which each step will jump.
+ * @param trigger A trigger happens when the signal changes from non-positive to positive
+ * @example
+ * let stepSynth stepFreq => sin freq >> dup >> gain 0.3 >> out 0
+ *   where
+ *       freq = stepper 220 440 20 (impulse stepFreq)
+ *
+ * let stSynth = stepSynth 4
+ * stop stSynth
+ */
+function stepper(min, max, step, trig)
+{
+	return multiNewUGen("Stepper", AudioRate, [trig, 0, min, max, step, min], 1, 0); 
+}
+
+function _findName(input)
+{
+	var label = "";
+
+	if(input instanceof Array)
+		label = input.map(function(e) { return _findName(e); });
+	else if(input instanceof UGen || input instanceof MultiOutUGen)
+		label = input.name;
+	else
+		label += input;
+
+	if(label instanceof Array)
+		return label.join(", ");
+	else
+		return label;
+}
+
+/**
+ * Prints values from a UGen, but passes the input back out. This expensive, so only use for testing.
+ *
+ * @class poll
+ * @constructor
+ * @param input The input to poll.
+ * @example
+ * let pollSynth freq => sin freq >> poll >> out 0
+ * let ps = pollSynth 0.5
+ * stop ps
+ */
+function poll(input)
+{
+	var label = _findName(input);
+
+	label = label.split("").map(function(e){ return e.charCodeAt(0)});
+
+	var pollUGen = multiNewUGen("Poll", AudioRate, [impulse(5), input, -1, label.length].concat(label), 1, 0);
+
+	// make pull ugen reachable by using it in a function (pollUGen * 0), but only input will output values.
+	return _binaryOpUGen(_BIN_PLUS, _binaryOpUGen(_BIN_MUL, pollUGen, 0), input); 
+}
+
+/**
  * Output a constant value
  *
  * @class dc
@@ -3027,8 +3089,9 @@ function stop(object)
 function freeAll()
 {
 	s.sendMsg('/clearSched', []);
-    s.sendMsg('/g_freeAll', [1]);
+    s.sendMsg('/g_freeAll', [0]);
 	Lich.scheduler.freeScheduledEvents();
+	s.sendMsg("/g_new", [1, 0, 0]); // default group
 }
 
 // Redefine Lich.compileSynthDef to use SuperCollider behavior instead of web audio
