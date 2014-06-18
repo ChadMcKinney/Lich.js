@@ -72,13 +72,19 @@
             
                 <li><a href="../classes/bufDelayN.html">bufDelayN</a></li>
             
+                <li><a href="../classes/clip.html">clip</a></li>
+            
                 <li><a href="../classes/clipNoise.html">clipNoise</a></li>
+            
+                <li><a href="../classes/coingate.html">coingate</a></li>
             
                 <li><a href="../classes/combC.html">combC</a></li>
             
                 <li><a href="../classes/combL.html">combL</a></li>
             
                 <li><a href="../classes/combN.html">combN</a></li>
+            
+                <li><a href="../classes/compander.html">compander</a></li>
             
                 <li><a href="../classes/crackle.html">crackle</a></li>
             
@@ -102,11 +108,19 @@
             
                 <li><a href="../classes/dust.html">dust</a></li>
             
+                <li><a href="../classes/dust2.html">dust2</a></li>
+            
                 <li><a href="../classes/env.html">env</a></li>
             
                 <li><a href="../classes/env2.html">env2</a></li>
             
+                <li><a href="../classes/fold.html">fold</a></li>
+            
                 <li><a href="../classes/formant.html">formant</a></li>
+            
+                <li><a href="../classes/freqshift.html">freqshift</a></li>
+            
+                <li><a href="../classes/gausstrig.html">gausstrig</a></li>
             
                 <li><a href="../classes/gbmanL.html">gbmanL</a></li>
             
@@ -119,6 +133,12 @@
                 <li><a href="../classes/impulse.html">impulse</a></li>
             
                 <li><a href="../classes/lag.html">lag</a></li>
+            
+                <li><a href="../classes/leakdc.html">leakdc</a></li>
+            
+                <li><a href="../classes/leakdc1.html">leakdc1</a></li>
+            
+                <li><a href="../classes/limiter.html">limiter</a></li>
             
                 <li><a href="../classes/localBuf.html">localBuf</a></li>
             
@@ -139,6 +159,10 @@
                 <li><a href="../classes/perc2.html">perc2</a></li>
             
                 <li><a href="../classes/pink.html">pink</a></li>
+            
+                <li><a href="../classes/pitchshift.html">pitchshift</a></li>
+            
+                <li><a href="../classes/poll.html">poll</a></li>
             
                 <li><a href="../classes/pulse.html">pulse</a></li>
             
@@ -238,9 +262,13 @@
             
                 <li><a href="../classes/square.html">square</a></li>
             
+                <li><a href="../classes/stepper.html">stepper</a></li>
+            
                 <li><a href="../classes/tri.html">tri</a></li>
             
                 <li><a href="../classes/white.html">white</a></li>
+            
+                <li><a href="../classes/wrap.html">wrap</a></li>
             
             </ul>
 
@@ -1057,6 +1085,22 @@ function scFold(lo, hi, input)
 }
 
 /**
+ * Foldback distortion.
+ * 
+ * @class fold
+ * @constructor
+ * @param level Boundry to fold at
+ * @example
+ * let test l =&gt; white 1 &gt;&gt; fold l &gt;&gt; out 0&lt;br&gt;
+ * let t = test 0.5&lt;br&gt;
+ * stop t
+ */
+function fold(level, input)
+{
+	return multiNewUGen(&quot;Fold&quot;, AudioRate, [input,-1*level,level], 1, 0);
+}
+
+/**
  * Wrap distortion.
  * 
  * @class scWrap
@@ -1074,6 +1118,22 @@ function scWrap(lo, hi, input)
 }
 
 /**
+ * Wrap distortion.
+ * 
+ * @class wrap
+ * @constructor
+ * @param level Boundry to wrap at
+ * @example
+ * let test l =&gt; white 1 &gt;&gt; wrap l &gt;&gt; out 0&lt;br&gt;
+ * let t = test 0.5&lt;br&gt;
+ * stop t
+ */
+function wrap(level, input)
+{
+	return multiNewUGen(&quot;Wrap&quot;, AudioRate, [input,-1*level,level], 1, 0);
+}
+
+/**
  * Clip distortion.
  * 
  * @class scClip
@@ -1088,6 +1148,22 @@ function scWrap(lo, hi, input)
 function scClip(lo, hi, input)
 {
 	return multiNewUGen(&quot;Clip&quot;, AudioRate, [input,lo,hi], 1, 0);
+}
+
+/**
+ * Clip distortion.
+ * 
+ * @class clip
+ * @constructor
+ * @param level Boundry to clip at
+ * @example
+ * let test l =&gt; white 1 &gt;&gt; clip l &gt;&gt; out 0&lt;br&gt;
+ * let t = test 0.5&lt;br&gt;
+ * stop t
+ */
+function clip(level, input)
+{
+	return multiNewUGen(&quot;Clip&quot;, AudioRate, [input,-1*level,level], 1, 0);
 }
 
 /**
@@ -1727,6 +1803,68 @@ function scTExpRand(lo,hi,trigger)
 }
 
 /**
+ * Triggerable steps at a given interval between minimum and maximum values.
+ *
+ * @class stepper
+ * @constructor
+ * @param min Lowest possible value
+ * @param max Highest possible value
+ * @param step The range by which each step will jump.
+ * @param trigger A trigger happens when the signal changes from non-positive to positive
+ * @example
+ * let stepSynth stepFreq =&gt; sin freq &gt;&gt; dup &gt;&gt; gain 0.3 &gt;&gt; out 0
+ *   where
+ *       freq = stepper 220 440 20 (impulse stepFreq)
+ *
+ * let stSynth = stepSynth 4
+ * stop stSynth
+ */
+function stepper(min, max, step, trig)
+{
+	return multiNewUGen(&quot;Stepper&quot;, AudioRate, [trig, 0, min, max, step, min], 1, 0); 
+}
+
+function _findName(input)
+{
+	var label = &quot;&quot;;
+
+	if(input instanceof Array)
+		label = input.map(function(e) { return _findName(e); });
+	else if(input instanceof UGen || input instanceof MultiOutUGen)
+		label = input.name;
+	else
+		label += input;
+
+	if(label instanceof Array)
+		return label.join(&quot;, &quot;);
+	else
+		return label;
+}
+
+/**
+ * Prints values from a UGen, but passes the input back out. This expensive, so only use for testing.
+ *
+ * @class poll
+ * @constructor
+ * @param input The input to poll.
+ * @example
+ * let pollSynth freq =&gt; sin freq &gt;&gt; poll &gt;&gt; out 0
+ * let ps = pollSynth 0.5
+ * stop ps
+ */
+function poll(input)
+{
+	var label = _findName(input);
+
+	label = label.split(&quot;&quot;).map(function(e){ return e.charCodeAt(0)});
+
+	var pollUGen = multiNewUGen(&quot;Poll&quot;, AudioRate, [impulse(5), input, -1, label.length].concat(label), 1, 0);
+
+	// make pull ugen reachable by using it in a function (pollUGen * 0), but only input will output values.
+	return _binaryOpUGen(_BIN_PLUS, _binaryOpUGen(_BIN_MUL, pollUGen, 0), input); 
+}
+
+/**
  * Output a constant value
  *
  * @class dc
@@ -1975,10 +2113,26 @@ function clipNoise(amp)
  * let t = test 1.5&lt;br&gt;
  * stop t
  */
-// fix this?
 function crackle(chaos)
 {
 	return multiNewUGen(&quot;Crackle&quot;, AudioRate, [chaos], 1, 0);
+}
+
+/**
+ * When CoinGate receives a trigger, it tosses a coin and either passes the trigger or doesn&#x27;t.
+ *
+ * @class coingate
+ * @constructor
+ * @param probability Value between 0.0 and 1.0 for chance of passing the trigger
+ * @param input The trigger
+ * @example
+ * let test p =&gt; sin (scTRand 440 880 (coingate p (impulse 2))) &gt;&gt; out 0&lt;br&gt;
+ * let t = test 0.5&lt;br&gt;
+ * stop t
+ */
+function coingate(probability,input)
+{
+	return multiNewUGen(&quot;CoinGate&quot;, AudioRate, [probability,input], 1, 0);
 }
 
 /**
@@ -1995,6 +2149,39 @@ function crackle(chaos)
 function dust(density)
 {
 	return multiNewUGen(&quot;Dust&quot;, AudioRate, [density], 1, 0);
+}
+
+/**
+ * Generates random impulses from -1 to +1.
+ *
+ * @class dust2
+ * @constructor
+ * @param density Average number of impulses per second.
+ * @example
+ * let test d =&gt; dust2 d &gt;&gt; out 0&lt;br&gt;
+ * let t = test 1.5&lt;br&gt;
+ * stop t
+ */
+function dust2(density)
+{
+	return multiNewUGen(&quot;Dust2&quot;, AudioRate, [density], 1, 0);
+}
+
+/**
+ * Generates impulses centered around a frequency with gaussian distribution.
+ *
+ * @class gausstrig
+ * @constructor
+ * @param freq Mean frequency
+ * @param dev Random deviation from mean (0 &lt;= dev &lt; 1)
+ * @example
+ * let test d =&gt; sin (scTRand 440 880 (gausstrig 2 d)) &gt;&gt; out 0&lt;br&gt;
+ * let t = test 0.2&lt;br&gt;
+ * stop t
+ */
+function gausstrig(freq,dev)
+{
+	return multiNewUGen(&quot;GaussTrig&quot;, AudioRate, [freq,dev], 1, 0);
 }
 
 /**
@@ -2147,6 +2334,39 @@ function lowpass(freq, q, input)
  */
 
 /**
+ * Removes DC offset from a signal.
+ * 
+ * @class leakdc
+ * @constructor
+ * @param coef Leak coefficient
+ * @param input Input signal
+ * @example
+ * let test c =&gt; white 1 &gt;&gt; leakdc c &gt;&gt; out 0&lt;br&gt;
+ * let t = test 0.995&lt;br&gt;
+ * stop t
+ */
+function leakdc(coef, input)
+{
+	return multiNewUGen(&quot;LeakDC&quot;, AudioRate, [input,coef], 1, 0);
+}
+
+/**
+ * Removes DC offset from a signal with a default coefficient.
+ * 
+ * @class leakdc1
+ * @constructor
+ * @param input Input signal
+ * @example
+ * let test a =&gt; white a &gt;&gt; leakdc &gt;&gt; out 0&lt;br&gt;
+ * let t = test 0.5&lt;br&gt;
+ * stop t
+ */
+function leakdc1(input)
+{
+	return multiNewUGen(&quot;LeakDC&quot;, AudioRate, [input,0.995], 1, 0);
+}
+
+/**
  * A high pass filter.
  * 
  * @class highpass
@@ -2211,6 +2431,7 @@ function crush(bits, input)
 {
 	return multiNewUGen(&quot;Decimator&quot;, AudioRate, [input,44100,bits], 1, 0);
 }
+
 /**
  * Sample rate reduction on a signal.
  *
@@ -2228,6 +2449,76 @@ function decimate(rate, input)
 }
 
 /**
+ * General purpose (hard-knee) dynamics processor.
+ *
+ * @class compander
+ * @constructor
+ * @param control Control signal. Same as input for compression, different for ducking.
+ * @param thresh Control signal amplitude threshold.
+ * @param slopeBelow Compression slope below the threshold
+ * @param slopeAbove Compression slope above the threshold
+ * @param clampTime Time until compression fully active
+ * @param relaxTime Time until compression fully inactive
+ * @param input The signal to be compressed
+ * @example
+ * TODO
+ */
+ function compander(control,thresh,slopeBelow,slopeAbove,clampTime,relaxTime,input)
+{
+	return multiNewUGen(&quot;Compander&quot;, AudioRate, [control,thresh,slopeBelow,slopeAbove,clampTime,relaxTime,input], 1, 0);
+}
+
+/**
+ * Limits the amplitude of the the input to a given level.
+ *
+ * @class limiter 
+ * @constructor
+ * @param level Amplitude level to limit input to
+ * @param dur Lookahead time
+ * @param input Signal to be limited
+ * @example
+ * TODO
+ */
+function limiter(level,dur,input)
+{
+	return multiNewUGen(&quot;Limiter&quot;, AudioRate, [input,level,dur], 1, 0);
+}
+
+/**
+ * A time domain granular pitch shifter. Grains have a triangular amplitude envelope and an overlap of 4:1.
+ *
+ * @class pitchshift
+ * @constructor
+ * @param windowSize Grain window size
+ * @param pitchRatio Ratio of the pitch shift. Between 0 and 4
+ * @param pitchDispersion Maximum random deviation from the pitchRatio
+ * @param timeDispersion Random time offset of each grain
+ * @param input Signal to be pitch shifted
+ * @example
+ * TODO
+ */
+function pitchshift(windowSize,pitchRatio,pitchDispersion,timeDispersion,input)
+{
+	return multiNewUGen(&quot;PitchShift&quot;, AudioRate, [windowSize,pitchRatio,pitchDispersion,timeDispersion,input], 1, 0);
+}
+
+/**
+ * Single sideband amplitude modulation based frequency shifting.
+ *
+ * @class freqshift
+ * @constructor
+ * @param freq Shift amount in Hz
+ * @param phase Amount of phase
+ * @param input Signal to be limited
+ * @example
+ * TODO
+ */
+function freqshift(freq,phase,input)
+{
+	return multiNewUGen(&quot;FreqShift&quot;, AudioRate, [input,freq,phase], 1, 0);
+}
+
+/**
  * An allpass delay line with no interpolation.
  * 
  * @class allpassN
@@ -2240,6 +2531,7 @@ function decimate(rate, input)
  * let t = test 0.1&lt;br&gt;
  * stop t
  */
+
 function allpassN(maxDel, del, decay, input)
 {
 	return multiNewUGen(&quot;AllpassN&quot;, AudioRate, [input,maxDel,del,decay], 1, 0);
@@ -3188,8 +3480,9 @@ function stop(object)
 function freeAll()
 {
 	s.sendMsg(&#x27;/clearSched&#x27;, []);
-    s.sendMsg(&#x27;/g_freeAll&#x27;, [1]);
+    s.sendMsg(&#x27;/g_freeAll&#x27;, [0]);
 	Lich.scheduler.freeScheduledEvents();
+	s.sendMsg(&quot;/g_new&quot;, [1, 0, 0]); // default group
 }
 
 // Redefine Lich.compileSynthDef to use SuperCollider behavior instead of web audio
