@@ -74,15 +74,24 @@ let fx = Synth::after "fxSynth" [] server
 
 stop testMel
 
+let pollSynth freq => sin freq >> poll >> out 0
+let ps = pollSynth 0.5
+stop ps
 
+let stepSynth stepFreq => sin freq >> dup >> gain 0.3 >> out 0
+    where
+        freq = stepper 220 440 20 (impulse stepFreq)
 
-let simpleSynth freq => sin freq * square (2*tempoSeconds) * 0.25 >> out 20
+let stSynth = stepSynth 4
+stop stSynth
+
+let simpleSynth freq => sin freq * sin (1/tempoSeconds) * 0.25 >> poll >> out 0
 
 let sSynth = simpleSynth 440
 
 let fxSynth => auxIn 20 1 >> combC tempoSeconds [tempoSeconds/1, tempoSeconds/2] 10 >> out 0
 
-let fx = Synth::after "fxSynth" [] server
+llet fx = Synth::after "fxSynth" [] server
 
 stop sSynth
 stop fx
