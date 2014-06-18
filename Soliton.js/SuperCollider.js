@@ -746,8 +746,8 @@ function scFold(lo, hi, input)
  * 
  * @class scWrap
  * @constructor
- * @param lo Low boundry to fold at
- * @param hi High boundry to fold at
+ * @param lo Low boundry to wrap at
+ * @param hi High boundry to wrap at
  * @example
  * let test l h => white 1 >> scWrap l h >> out 0<br>
  * let t = test -0.5 0.5<br>
@@ -763,8 +763,8 @@ function scWrap(lo, hi, input)
  * 
  * @class scClip
  * @constructor
- * @param lo Low boundry to fold at
- * @param hi High boundry to fold at
+ * @param lo Low boundry to clip at
+ * @param hi High boundry to clip at
  * @example
  * let test l h => white 1 >> scClip l h >> out 0<br>
  * let t = test -0.5 0.5<br>
@@ -1346,6 +1346,24 @@ function allpassN(maxDel, del, decay, input)
 }
 
 /**
+ * An allpass delay line with no interpolation. This version uses a localBuf.
+ *
+ * @class bufAllpassN 
+ * @constructor
+ * @param buf LocalBuf to use for the delay
+ * @param del Delay time in seconds
+ * @param decay Time for the echoes to decay by 60 decibels.
+ * @example
+ * let test del => impulse 1 >> bufAllpassN (localBuf 44100 1) del 1 >> out 0<br>
+ * let t = test 0.1<br>
+ * stop t
+ */
+function bufAllpassN(buf, del, decay, input)
+{
+	return multiNewUGen("BufAllpassN", AudioRate, [input,buf,del,decay], 1, 0);
+}
+
+/**
  * Delays.
  * @submodule Delays
  */
@@ -1369,6 +1387,24 @@ function allpassL(maxDel, del, decay, input)
 }
 
 /**
+ * An allpass delay line with linear interpolation. This version uses a localBuf.
+ *
+ * @class bufAllpassL 
+ * @constructor
+ * @param buf LocalBuf to use for the delay
+ * @param del Delay time in seconds
+ * @param decay Time for the echoes to decay by 60 decibels.
+ * @example
+ * let test del => impulse 1 >> bufAllpassL (localBuf 44100 1) del 1 >> out 0<br>
+ * let t = test 0.1<br>
+ * stop t
+ */
+function bufAllpassL(buf, del, decay, input)
+{
+	return multiNewUGen("BufAllpassL", AudioRate, [input,buf,del,decay], 1, 0);
+}
+
+/**
  * An allpass delay line with cubic interpolation.
  *
  * @class allpassC 
@@ -1384,6 +1420,24 @@ function allpassL(maxDel, del, decay, input)
 function allpassC(maxDel, del, decay, input)
 {
 	return multiNewUGen("AllpassC", AudioRate, [input,maxDel,del,decay], 1, 0);
+}
+
+/**
+ * An allpass delay line with cubic interpolation. This version uses a localBuf.
+ *
+ * @class bufAllpassC 
+ * @constructor
+ * @param buf LocalBuf to use for the delay
+ * @param del Delay time in seconds
+ * @param decay Time for the echoes to decay by 60 decibels.
+ * @example
+ * let test del => impulse 1 >> bufAllpassC (localBuf 44100 1) del 1 >> out 0<br>
+ * let t = test 0.1<br>
+ * stop t
+ */
+function bufAllpassC(buf, del, decay, input)
+{
+	return multiNewUGen("BufAllpassC", AudioRate, [input,buf,del,decay], 1, 0);
 }
 
 /**
@@ -1405,6 +1459,24 @@ function combN(maxDel, del, decay, input)
 }
 
 /**
+ * A comb delay line with no interpolation. This version uses a localBuf.
+ *
+ * @class bufCombN
+ * @constructor
+ * @param buf LocalBuf to use for the delay
+ * @param del Delay time in seconds
+ * @param decay Time in seconds for the echoes to decay by 60 decibels.
+ * @example
+ * let test del => impulse 1 >> bufCombN (localBuf 44100 1) del 1 >> out 0<br>
+ * let t = test 0.1<br>
+ * stop t
+ */
+function bufCombN(buf, del, decay, input)
+{
+	return multiNewUGen("BufCombN", AudioRate, [buf, input, del, decay], 1, 0);
+}
+
+/**
  * A comb delay line with linear interpolation.
  *
  * @class combL
@@ -1420,6 +1492,24 @@ function combN(maxDel, del, decay, input)
 function combL(maxDel, del, decay, input)
 {
 	return multiNewUGen("CombL", AudioRate, [input,maxDel,del,decay], 1, 0);
+}
+
+/**
+ * A comb delay line with cubic linear interpolation. This version uses a localBuf.
+ *
+ * @class bufCombL
+ * @constructor
+ * @param buf LocalBuf to use for the delay
+ * @param del Delay time in seconds
+ * @param decay Time in seconds for the echoes to decay by 60 decibels.
+ * @example
+ * let test del => impulse 1 >> bufCombL (localBuf 44100 1) del 1 >> out 0<br>
+ * let t = test 0.1<br>
+ * stop t
+ */
+function bufCombL(buf, del, decay, input)
+{
+	return multiNewUGen("BufCombL", AudioRate, [buf, input, del, decay], 1, 0);
 }
 
 /**
@@ -1440,6 +1530,19 @@ function combC(maxDel, del, decay, input)
 	return multiNewUGen("CombC", AudioRate, [input,maxDel,del,decay], 1, 0);
 }
 
+/**
+ * A comb delay line with cubic interpolation. This version uses a localBuf.
+ *
+ * @class bufCombC
+ * @constructor
+ * @param buf LocalBuf to use for the delay
+ * @param del Delay time in seconds
+ * @param decay Time in seconds for the echoes to decay by 60 decibels.
+ * @example
+ * let test del => impulse 1 >> bufCombC (localBuf 44100 1) del 1 >> out 0<br>
+ * let t = test 0.1<br>
+ * stop t
+ */
 function bufCombC(buf, del, decay, input)
 {
 	return multiNewUGen("BufCombC", AudioRate, [buf, input, del, decay], 1, 0);
@@ -1463,6 +1566,23 @@ function delayN(maxDel, del, input)
 }
 
 /**
+ * A simple delay with no interpolation. This version uses a localBuf.
+ *
+ * @class bufDelayN
+ * @constructor
+ * @param buf LocalBuf to use for the delay
+ * @param del Delay time in seconds
+ * @example
+ * let test del => impulse 1 >> bufDelayN (localBuf 44100 1) del >> out 0<br>
+ * let t = test 0.1<br>
+ * stop t
+ */
+function bufDelayN(buf, del, input)
+{
+	return multiNewUGen("BufDelayN", AudioRate, [input,buf,del], 1, 0);
+}
+
+/**
  * A simple delay with linear interpolation.
  *
  * @class delayL
@@ -1480,6 +1600,23 @@ function delayL(maxDel, del, input)
 }
 
 /**
+ * A simple delay with linear interpolation. This version uses a localBuf.
+ *
+ * @class bufDelayL
+ * @constructor
+ * @param buf LocalBuf to use for the delay
+ * @param del Delay time in seconds
+ * @example
+ * let test del => impulse 1 >> bufDelayL (localBuf 44100 1) del >> out 0<br>
+ * let t = test 0.1<br>
+ * stop t
+ */
+function bufDelayL(buf, del, input)
+{
+	return multiNewUGen("BufDelayL", AudioRate, [input,buf,del], 1, 0);
+}
+
+/**
  * A simple delay with cubic interpolation.
  *
  * @class delayC
@@ -1494,6 +1631,23 @@ function delayL(maxDel, del, input)
 function delayC(maxDel, del, input)
 {
 	return multiNewUGen("DelayC", AudioRate, [input,maxDel,del], 1, 0);
+}
+
+/**
+ * A simple delay with cubic interpolation. This version uses a localBuf.
+ *
+ * @class bufDelayC
+ * @constructor
+ * @param buf LocalBuf to use for the delay
+ * @param del Delay time in seconds
+ * @example
+ * let test del => impulse 1 >> bufDelayC (localBuf 44100 1) del >> out 0<br>
+ * let t = test 0.1<br>
+ * stop t
+ */
+function bufDelayC(buf, del, input)
+{
+	return multiNewUGen("BufDelayC", AudioRate, [input,buf,del], 1, 0);
 }
 
 var _shapeNames = {
@@ -1650,10 +1804,10 @@ function out(busNum, value)
  * @class pan
  * @constructor
  * @param position The position in the stereo field where the input will be panned. Range of -1 (left) to 1 (right).
- * @param input. The audio input to be panned.
+ * @param input The audio input to be panned.
  * @example
- * let test panSynth pos => white 1 >> pan pos >> out 0<br>
- * let t = panSynth -0.3 <br>
+ * let test pos => white 1 >> pan pos >> out 0<br>
+ * let t = test-0.3 <br>
  * stop t
  */
 
@@ -1673,13 +1827,12 @@ function pan(position, input)
  *
  * @class dup
  * @constructor
- * @param input. The audio input to be expanded.
+ * @param input The audio input to be expanded.
  * @example
- * let test dupSynth freq => sin freq >> dup >> out 0<br>
- * let t = dupSynth 440 <br>
+ * let test freq => sin freq >> dup >> out 0<br>
+ * let t = test 440 <br>
  * stop t
  */
-
 function dup(input)
 {
 	return [input, input];
