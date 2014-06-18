@@ -1780,7 +1780,7 @@ function perc2(attackTime, peak, decayTime, input)
  */
 function out(busNum, value)
 {
-	var outGen =  multiNewUGen("Out", AudioRate, [busNum, value], 0, 0); // Out has not outputs
+	var outGen = multiNewUGen("Out", AudioRate, [busNum, value], 0, 0); // Out has not outputs
 
 	if(outGen instanceof Array)
 	{
@@ -1791,6 +1791,34 @@ function out(busNum, value)
 	}
 
 	return outGen;
+}
+
+/**
+ * Reads audio from a range of audio buses.
+ *
+ * @class auxIn
+ * @constructor
+ * @param busNum The bus index to start reading from.
+ * @param numChannels The number of channels to read from.
+ * @example
+ * let simpleSynth freq => sin freq * square (2*tempoSeconds) * 0.25 >> out 20
+ * let sSynth = simpleSynth 440
+ * let fxSynth => auxIn 20 1 >> combC tempoSeconds [tempoSeconds/1, tempoSeconds/2] 10 >> out 0
+ * let fx = Synth::after "fxSynth" [] server
+ * stop sSynth
+ * stop fx
+ */
+function auxIn(busNum, numChannels)
+{
+	var rates = [];
+
+	for(var i = 0; i < numChannels; ++i)
+	{
+		rates.push(AudioRate);
+	}
+
+	// !!! We indicate number of outputs using an array of rates. !!!
+	return newMultiOutUGen("In", rates, [busNum], 0);
 }
 
 /**
@@ -2245,7 +2273,6 @@ function freeAll()
 	s.sendMsg('/clearSched', []);
     s.sendMsg('/g_freeAll', [1]);
 	Lich.scheduler.freeScheduledEvents();
-	_currentNodeID = 1000;
 }
 
 // Redefine Lich.compileSynthDef to use SuperCollider behavior instead of web audio
