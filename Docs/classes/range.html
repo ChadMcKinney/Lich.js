@@ -2,7 +2,7 @@
 <html lang="en" class="yui-overrride">
 <head>
     <meta charset="utf-8">
-    <title>third-party/three.js/shaders/MirrorShader.js - Lich.sc</title>
+    <title>range - Lich.sc</title>
     <link rel="stylesheet" href="http://yui.yahooapis.com/3.9.1/build/cssgrids/cssgrids-min.css">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
     <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700' rel='stylesheet' type='text/css'>
@@ -341,71 +341,169 @@
             <div class="apidocs">
                 <div id="docs-main">
                     <div class="content">
-                        <h1 class="file-heading">File: third-party/three.js/shaders/MirrorShader.js</h1>
+                        <h1>range</h1>
 
-<div class="file">
-    <pre class="code prettyprint linenums">
-/**
- * @author felixturner / http://airtight.cc/
- *
- * Mirror Shader
- * Copies half the input to the other half
- *
- * side: side of input to mirror (0 = left, 1 = right, 2 = top, 3 = bottom)
- */
 
-THREE.MirrorShader = {
+<div class="intro">
+    <p>Map a UGen&#39;s output to between lo and hi</p>
 
-	uniforms: {
-
-		&quot;tDiffuse&quot;: { type: &quot;t&quot;, value: null },
-		&quot;side&quot;:     { type: &quot;i&quot;, value: 1 }
-
-	},
-
-	vertexShader: [
-
-		&quot;varying vec2 vUv;&quot;,
-
-		&quot;void main() {&quot;,
-
-			&quot;vUv = uv;&quot;,
-			&quot;gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );&quot;,
-
-		&quot;}&quot;
-
-	].join(&quot;\n&quot;),
-
-	fragmentShader: [
-
-		&quot;uniform sampler2D tDiffuse;&quot;,
-		&quot;uniform int side;&quot;,
-		
-		&quot;varying vec2 vUv;&quot;,
-
-		&quot;void main() {&quot;,
-
-			&quot;vec2 p = vUv;&quot;,
-			&quot;if (side == 0){&quot;,
-				&quot;if (p.x &gt; 0.5) p.x = 1.0 - p.x;&quot;,
-			&quot;}else if (side == 1){&quot;,
-				&quot;if (p.x &lt; 0.5) p.x = 1.0 - p.x;&quot;,
-			&quot;}else if (side == 2){&quot;,
-				&quot;if (p.y &lt; 0.5) p.y = 1.0 - p.y;&quot;,
-			&quot;}else if (side == 3){&quot;,
-				&quot;if (p.y &gt; 0.5) p.y = 1.0 - p.y;&quot;,
-			&quot;} &quot;,
-			&quot;vec4 color = texture2D(tDiffuse, p);&quot;,
-			&quot;gl_FragColor = color;&quot;,
-
-		&quot;}&quot;
-
-	].join(&quot;\n&quot;)
-
-};
-
-    </pre>
 </div>
+
+
+    <div class="constructor">
+        <div id="method_range" class="method item">
+
+  <h3>Syntax</h3>
+  <div class="blue-method-syntax">
+  <h3 class="name"><code>range</code></h3>
+
+    
+        <div class="args">
+            <span class="paren"></span><ul class="args-list inline">
+            
+                <li class="arg">
+                    
+                        <code>lo</code>
+                    
+                </li>
+            
+                <li class="arg">
+                    
+                        <code>hi</code>
+                    
+                </li>
+            
+                <li class="arg">
+                    
+                        <code>input</code>
+                    
+                </li>
+            
+            </ul><span class="paren"></span>
+        </div>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+  </div>
+    <div class="description">
+        
+    </div>
+
+    
+        <div class="params">
+            <h4>Arguments:</h4>
+
+            <ul class="params-list">
+            
+                <li class="param">
+                    
+                        <code class="param-name">lo</code>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>Lowest mapped value</p>
+
+                    </div>
+
+                    
+                </li>
+            
+                <li class="param">
+                    
+                        <code class="param-name">hi</code>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>Highest mapped value</p>
+
+                    </div>
+
+                    
+                </li>
+            
+                <li class="param">
+                    
+                        <code class="param-name">input</code>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>UGen to be mapped</p>
+
+                    </div>
+
+                    
+                </li>
+            
+            </ul>
+        </div>
+    
+
+    
+
+    
+        <div class="example">
+            <h3>Example:</h3>
+
+            <div class="example-content">
+            <pre class="code prettyprint"
+               <p>let test l h =&gt; sin (sin 1 &gt;&gt; range l h) &gt;&gt; out 0<br> 
+let t = test 440 880<br>
+stop t</p>
+
+               </pre>
+            </div>
+        </div>
+    
+
+    
+
+</div>
+
+    </div>
+
+
+<hr>
+    <div>
+        <div id="index" class="api-class-tabpanel index">
+            
+        <div class="foundat">
+            Defined in: <a href="../files/Soliton.js_SuperCollider.js.html#l1236"><code>Soliton.js&#x2F;SuperCollider.js:1236</code></a>
+        </div>
+    
+
+    
+        
+            Module: <a href="../modules/Signal Math.html">Signal Math</a><br>
+            Parent Module: <a href="../modules/Lich.sc UGens.html">Lich.sc UGens</a>
+        
+    
+
+</div>
+
+
+
+
+
+
 
                     </div>
                 </div>

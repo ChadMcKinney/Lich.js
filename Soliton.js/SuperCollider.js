@@ -1242,8 +1242,8 @@ function scPow(a, b)
  * @param hi Highest mapped value
  * @param input UGen to be mapped
  * @example
- * let test l h => sin (sin 1 >> range l h) >> out 0 
- * let t = test 440 880
+ * let test l h => sin (sin 1 >> range l h) >> out 0<br> 
+ * let t = test 440 880<br>
  * stop t
  */
 function range(lo,hi,input)
