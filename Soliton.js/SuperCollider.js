@@ -1234,6 +1234,27 @@ function scPow(a, b)
 }
 
 /**
+ * Map a UGen's output to between lo and hi
+ *
+ * @class range
+ * @constructor
+ * @param lo Lowest mapped value
+ * @param hi Highest mapped value
+ * @param input UGen to be mapped
+ * @example
+ * let test l h => sin (sin 1 >> range l h) >> out 0 
+ * let t = test 440 880
+ * stop t
+ */
+function range(lo,hi,input)
+{
+    var mul;
+    mul = _binaryOpUGen( _BIN_MUL, _binaryOpUGen( _BIN_MINUS, hi, lo ), 0.5 );
+
+	return _binaryOpUGen( _BIN_PLUS, _binaryOpUGen( _BIN_MUL, input, mul ) ,lo );
+}
+
+/**
  * Bitwise & a signal.
  *
  * @class scBitAnd
@@ -1556,6 +1577,21 @@ function dc(value)
 function sin(freq)
 {
 	return multiNewUGen("SinOsc", AudioRate, [freq, 0], 1, 0);
+}
+
+/**
+ * A sine wave oscillator with phase input.
+ *
+ * @class sinP
+ * @constructor
+ * @param freq Frequency
+ * @param phase Phase
+ * @example
+ * TODO
+ */
+function sinP(freq,phase)
+{
+	return multiNewUGen("SinOsc", AudioRate, [freq, phase], 1, 0);
 }
 
 /**
