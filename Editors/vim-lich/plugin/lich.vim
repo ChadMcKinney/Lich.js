@@ -101,7 +101,7 @@ fun! s:send_text(mode, all)
     " get current buffer name
     let buffer_name = expand('%')
     " get most recent/relevant terminal
-    let term = conque_term#get_instance()
+    let term = g:lich_term "conque_term#get_instance()
     " Test the current mode to paste correctly in the term
     if a:mode == 2
         " Visual mode, get lines selected and if needed, strip the start/end 
@@ -115,25 +115,32 @@ fun! s:send_text(mode, all)
         if a:all
             let text = getline(1,'$')
         else
-            "let text = [getline('.')]
-            "block compilation (should totally replace single line compilation)
-            let tmp_pos = getpos(".")
-            exe "?^$"
-            normal "j0"
-            let [lnum1, col1] = getpos(".")[1:2]
-            exe "/^$"
-            normal "k$"
-            let [lnum2, col2] = getpos(".")[1:2]
-            let text = getline(lnum1, lnum2)
-            let text[0] = text[0][col1-1 :]
-            let text[-1] = text[-1][: col2-1]
-            call setpos(".",tmp_pos)
+            if match(getline("."),'^\s*$') != 0
+                "let text = [getline('.')]
+                "block compilation (should totally replace single line compilation)
+                "save the cursor position for later
+                let tmp_pos = getpos(".")
+                exe "normal Go--<ESC>"
+                call setpos(".",tmp_pos)
+                set wrapscan!
+                normal $
+                exe "normal ?^[^[:blank:]\\n\\r\\t]\<CR>"
+                let [lnum1,col1] = getpos(".")[1:2]
+                exe "normal /^[^[:blank:]\\n\\r\\t]\<CR>"
+                normal k$
+                set wrapscan!
+                let [lnum2,col2] = getpos(".")[1:2]
+                let text = getline(lnum1, lnum2)
+                normal Gdd
+                "let text[0] = text[0][col1-1 :]
+                "let text[-1] = text[-1][: col2-1]
+                call setpos(".",tmp_pos)
+            else
+                let text = [getline('.')]
+            endif
         endif
     endif
     call term.focus()
-    for line in text
-        "call term.write("\n" . line)
-    endfor
 python << EOF
 import vim
 
@@ -144,8 +151,8 @@ code = ""
 for i in range(len(lines)):
     if str(lines[i]).isspace() == False:
         code = code + str(lines[i])
-    if i < len(lines)-1:
-        code = code + "\n"
+        if i < len(lines)-1:
+            code = code + "\n"
 
 code = code.lstrip()
 code = code.rstrip()
