@@ -1255,6 +1255,55 @@ function range(lo,hi,input)
 }
 
 /**
+ * Map a linear range to an other linear range
+ *
+ * @class linlin
+ * @constructor
+ * @param inlo Lowest input value
+ * @param inhi Highest input value
+ * @param outlo Lowest output value
+ * @param outhi Highest output value
+ * @param input UGen to be mapped
+ * @example
+ * let test l h => sin (sin 1 >> linlin -0.1 0.1 l h) >> out 0<br> 
+ * let t = test 440 880<br>
+ * stop t
+ */
+function linlin(inlo,inhi,outlo,outhi,input)
+{
+    var scale, offset;
+    scale = _binaryOpUGen(
+            _BIN_DIV,
+            _binaryOpUGen( _BIN_MINUS, outhi,outlo),
+            _binaryOpUGen( _BIN_MINUS, inhi,inlo)
+            );
+
+    offset = _binaryOpUGen( _BIN_MINUS, outlo, _binaryOpUGen( _BIN_MUL, scale, inlo ) );
+
+    return _binaryOpUGen( _BIN_PLUS, _binaryOpUGen( _BIN_MUL, input, scale ) ,offset );
+}
+
+/**
+ * Map a liner range to an exponential range.
+ *
+ * @class linexp
+ * @constructor
+ * @param inlo Lowest input value
+ * @param inhi Highest input value
+ * @param outlo Lowest output value
+ * @param outhi Highest output value
+ * @param input UGen to be mapped
+ * @example
+ * let test l h => sin (sin 1 >> linexp -0.1 0.1 l h) >> out 0<br> 
+ * let t = test 440 880<br>
+ * stop t
+ */
+function linexp(inlo,inhi,outlo,outhi,input)
+{
+	return multiNewUGen("LinExp", AudioRate, [input,inlo,inhi,outlo,outhi], 1, 0);
+}
+
+/**
  * Bitwise & a signal.
  *
  * @class scBitAnd
