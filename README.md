@@ -69,7 +69,9 @@ either expressed or implied, of the FreeBSD Project.
 USAGE
 =====
 
-At the moment Lich.js is not officially released. If you still want to try it out you can get it up and running on your own computer but it will require a little work. There are still bugs, missing features, and essentially no documentation so don't expect a finished product. All that said, here are the instructions to try out Lich.js for yourself.
+At the moment Lich.js is in open Beta. If you want try it out you can go to www.chadmckinneyaudio.com/lich.
+
+If you want to get a server up and running on your own computer it will require a little work. There are still bugs, missing features, and essentially no documentation so don't expect a finished product. All that said, here are the instructions to try out Lich.js for yourself.
 
 Lich.js is divided into two parts: a server and a client. To create a server you will first need Node.js installed on your computer. Node can be found here: http://nodejs.org/. If you're on Linux it should likely be in your standard repo, for instance in Ubuntu you can install it with: 
 <!--- The ```bash and ``` at the end is for markdown rendering. Please ignore if you're reading this from a text editor or the like. -->
