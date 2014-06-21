@@ -2143,6 +2143,25 @@ function bandpass(freq, q, input)
 }
 
 /**
+ * Digitally modeled analog filter.
+ * 
+ * @class dfm1
+ * @constructor
+ * @param freq Cutoff frequency for the filter
+ * @param q Quality of the filter
+ * @param inputgain Gain on the input signal
+ * @param type 0 for lowpass, 1 for highpass
+ * @param noiselevel Amplitude of noise added to the model
+ * @param input Signal to be filtered
+ * @example
+ * TODO
+ */
+function dfm1(freq, q, inputgain, type, noiselevel, input)
+{
+	return multiNewUGen("DFM1", AudioRate, [input,freq,1/q,inputgain,type,noiselevel], 1, 0);
+}
+
+/**
  * Ramp a signal between two values over time.
  *
  * @class lag
@@ -2260,6 +2279,22 @@ function freqshift(freq,phase,input)
 	return multiNewUGen("FreqShift", AudioRate, [input,freq,phase], 1, 0);
 }
 
+/**
+ * Simple single channel reverb.
+ *
+ * @class freeverb
+ * @constructor
+ * @param mix Dry/wet balanece from 0-1
+ * @param room Room size from 0-1
+ * @param damp High frequency damping from 0-1
+ * @param input Input signal
+ * @example
+ * TODO
+ */
+function freeverb(mix,room,damp,input)
+{
+	return multiNewUGen("FreeVerb", AudioRate, [input,mix,room,damp], 1, 0);
+}
 /**
  * Two channel reverb.
  *

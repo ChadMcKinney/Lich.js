@@ -2,7 +2,7 @@
 <html lang="en" class="yui-overrride">
 <head>
     <meta charset="utf-8">
-    <title>xline - Lich.sc</title>
+    <title>freeverb - Lich.sc</title>
     <link rel="stylesheet" href="http://yui.yahooapis.com/3.9.1/build/cssgrids/cssgrids-min.css">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
     <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700' rel='stylesheet' type='text/css'>
@@ -355,21 +355,21 @@
             <div class="apidocs">
                 <div id="docs-main">
                     <div class="content">
-                        <h1>xline</h1>
+                        <h1>freeverb</h1>
 
 
 <div class="intro">
-    <p>An exponential envelope between two values</p>
+    <p>Simple single channel reverb.</p>
 
 </div>
 
 
     <div class="constructor">
-        <div id="method_xline" class="method item">
+        <div id="method_freeverb" class="method item">
 
   <h3>Syntax</h3>
   <div class="blue-method-syntax">
-  <h3 class="name"><code>xline</code></h3>
+  <h3 class="name"><code>freeverb</code></h3>
 
     
         <div class="args">
@@ -377,19 +377,25 @@
             
                 <li class="arg">
                     
-                        <code>start</code>
+                        <code>mix</code>
                     
                 </li>
             
                 <li class="arg">
                     
-                        <code>end</code>
+                        <code>room</code>
                     
                 </li>
             
                 <li class="arg">
                     
-                        <code>dur</code>
+                        <code>damp</code>
+                    
+                </li>
+            
+                <li class="arg">
+                    
+                        <code>input</code>
                     
                 </li>
             
@@ -424,13 +430,13 @@
             
                 <li class="param">
                     
-                        <code class="param-name">start</code>
+                        <code class="param-name">mix</code>
                     
 
                     
 
                     <div class="param-description">
-                        <p>Starting value</p>
+                        <p>Dry/wet balanece from 0-1</p>
 
                     </div>
 
@@ -439,13 +445,13 @@
             
                 <li class="param">
                     
-                        <code class="param-name">end</code>
+                        <code class="param-name">room</code>
                     
 
                     
 
                     <div class="param-description">
-                        <p>Ending value</p>
+                        <p>Room size from 0-1</p>
 
                     </div>
 
@@ -454,13 +460,28 @@
             
                 <li class="param">
                     
-                        <code class="param-name">dur</code>
+                        <code class="param-name">damp</code>
                     
 
                     
 
                     <div class="param-description">
-                        <p>Duration in seconds</p>
+                        <p>High frequency damping from 0-1</p>
+
+                    </div>
+
+                    
+                </li>
+            
+                <li class="param">
+                    
+                        <code class="param-name">input</code>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>Input signal</p>
 
                     </div>
 
@@ -479,9 +500,7 @@
 
             <div class="example-content">
             <pre class="code prettyprint"
-               <p>let test dur =&gt; impulse (xline 1 10 dur) &gt;&gt; out 0<br>
-let t = test 10<br>
-stop t</p>
+               <p>TODO</p>
 
                </pre>
             </div>
@@ -500,13 +519,13 @@ stop t</p>
         <div id="index" class="api-class-tabpanel index">
             
         <div class="foundat">
-            Defined in: <a href="../files/Soliton.js_SuperCollider.js.html#l2783"><code>Soliton.js&#x2F;SuperCollider.js:2783</code></a>
+            Defined in: <a href="../files/Soliton.js_SuperCollider.js.html#l2282"><code>Soliton.js&#x2F;SuperCollider.js:2282</code></a>
         </div>
     
 
     
         
-            Module: <a href="../modules/Envelopes.html">Envelopes</a><br>
+            Module: <a href="../modules/Filters.html">Filters</a><br>
             Parent Module: <a href="../modules/Lich.sc UGens.html">Lich.sc UGens</a>
         
     
