@@ -42,8 +42,11 @@
                 "scDistort": 1,
                 "scSoftClip": 1,
                 "scFold": 1,
+                "fold": 1,
                 "scWrap": 1,
+                "wrap": 1,
                 "scClip": 1,
+                "clip": 1,
                 "scNeg": 1,
                 "scAbs": 1,
                 "scCeil": 1,
@@ -71,6 +74,9 @@
                 "scMod": 1,
                 "scRound": 1,
                 "scPow": 1,
+                "range": 1,
+                "linlin": 1,
+                "linexp": 1,
                 "scBitAnd": 1,
                 "scBitOr": 1,
                 "scBitXor": 1,
@@ -84,8 +90,11 @@
                 "scTRand": 1,
                 "scTIRand": 1,
                 "scTExpRand": 1,
+                "stepper": 1,
+                "poll": 1,
                 "dc": 1,
                 "sin": 1,
+                "sinP": 1,
                 "saw": 1,
                 "tri": 1,
                 "square": 1,
@@ -99,7 +108,10 @@
                 "gray": 1,
                 "clipNoise": 1,
                 "crackle": 1,
+                "coingate": 1,
                 "dust": 1,
+                "dust2": 1,
+                "gausstrig": 1,
                 "noiseN": 1,
                 "noiseL": 1,
                 "noiseX": 1,
@@ -108,11 +120,20 @@
                 "gbmanN": 1,
                 "gbmanL": 1,
                 "lowpass": 1,
+                "leakdc": 1,
+                "leakdc1": 1,
                 "highpass": 1,
                 "bandpass": 1,
+                "dfm1": 1,
                 "lag": 1,
                 "crush": 1,
                 "decimate": 1,
+                "compander": 1,
+                "limiter": 1,
+                "pitchshift": 1,
+                "freqshift": 1,
+                "freeverb": 1,
+                "gverb": 1,
                 "allpassN": 1,
                 "bufAllpassN": 1,
                 "allpassL": 1,
@@ -135,6 +156,8 @@
                 "env2": 1,
                 "perc": 1,
                 "perc2": 1,
+                "line": 1,
+                "xline": 1,
                 "out": 1,
                 "auxIn": 1,
                 "pan": 1,
@@ -559,8 +582,11 @@
                 "scDistort": 1,
                 "scSoftClip": 1,
                 "scFold": 1,
+                "fold": 1,
                 "scWrap": 1,
+                "wrap": 1,
                 "scClip": 1,
+                "clip": 1,
                 "scNeg": 1,
                 "scAbs": 1,
                 "scCeil": 1,
@@ -588,6 +614,9 @@
                 "scMod": 1,
                 "scRound": 1,
                 "scPow": 1,
+                "range": 1,
+                "linlin": 1,
+                "linexp": 1,
                 "scBitAnd": 1,
                 "scBitOr": 1,
                 "scBitXor": 1,
@@ -601,8 +630,11 @@
                 "scTRand": 1,
                 "scTIRand": 1,
                 "scTExpRand": 1,
+                "stepper": 1,
+                "poll": 1,
                 "dc": 1,
                 "sin": 1,
+                "sinP": 1,
                 "saw": 1,
                 "tri": 1,
                 "square": 1,
@@ -616,7 +648,10 @@
                 "gray": 1,
                 "clipNoise": 1,
                 "crackle": 1,
+                "coingate": 1,
                 "dust": 1,
+                "dust2": 1,
+                "gausstrig": 1,
                 "noiseN": 1,
                 "noiseL": 1,
                 "noiseX": 1,
@@ -625,11 +660,20 @@
                 "gbmanN": 1,
                 "gbmanL": 1,
                 "lowpass": 1,
+                "leakdc": 1,
+                "leakdc1": 1,
                 "highpass": 1,
                 "bandpass": 1,
+                "dfm1": 1,
                 "lag": 1,
                 "crush": 1,
                 "decimate": 1,
+                "compander": 1,
+                "limiter": 1,
+                "pitchshift": 1,
+                "freqshift": 1,
+                "freeverb": 1,
+                "gverb": 1,
                 "allpassN": 1,
                 "bufAllpassN": 1,
                 "allpassL": 1,
@@ -652,6 +696,8 @@
                 "env2": 1,
                 "perc": 1,
                 "perc2": 1,
+                "line": 1,
+                "xline": 1,
                 "out": 1,
                 "auxIn": 1,
                 "pan": 1,
@@ -662,7 +708,7 @@
             "namespaces": {},
             "tag": "module",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2481,
+            "line": 2927,
             "description": "Lich.sc UGen bindings."
         },
         "Distortions": {
@@ -672,8 +718,11 @@
                 "scDistort": 1,
                 "scSoftClip": 1,
                 "scFold": 1,
+                "fold": 1,
                 "scWrap": 1,
-                "scClip": 1
+                "wrap": 1,
+                "scClip": 1,
+                "clip": 1
             },
             "fors": {},
             "is_submodule": 1,
@@ -681,7 +730,7 @@
             "module": "Lich.sc UGens",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 761,
+            "line": 810,
             "description": "Distortions."
         },
         "Signal Math": {
@@ -714,7 +763,10 @@
                 "scTanh": 1,
                 "scMod": 1,
                 "scRound": 1,
-                "scPow": 1
+                "scPow": 1,
+                "range": 1,
+                "linlin": 1,
+                "linexp": 1
             },
             "fors": {},
             "is_submodule": 1,
@@ -722,7 +774,7 @@
             "module": "Lich.sc UGens",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1173,
+            "line": 1286,
             "description": "Signal Math. TODO: fix all the examples"
         },
         "Bitwise Operators": {
@@ -742,7 +794,7 @@
             "module": "Lich.sc UGens",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1268,
+            "line": 1386,
             "description": "Bitwise Operators. TODO: fix all examples"
         },
         "Random": {
@@ -755,7 +807,9 @@
                 "scExpRand": 1,
                 "scTRand": 1,
                 "scTIRand": 1,
-                "scTExpRand": 1
+                "scTExpRand": 1,
+                "stepper": 1,
+                "poll": 1
             },
             "fors": {},
             "is_submodule": 1,
@@ -763,7 +817,7 @@
             "module": "Lich.sc UGens",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1396,
+            "line": 1571,
             "description": "Random Number Generators."
         },
         "Oscillators": {
@@ -772,6 +826,7 @@
             "classes": {
                 "dc": 1,
                 "sin": 1,
+                "sinP": 1,
                 "saw": 1,
                 "tri": 1,
                 "square": 1,
@@ -786,7 +841,7 @@
             "module": "Lich.sc UGens",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1551,
+            "line": 1746,
             "description": "Oscillators."
         },
         "Noise": {
@@ -799,7 +854,10 @@
                 "gray": 1,
                 "clipNoise": 1,
                 "crackle": 1,
+                "coingate": 1,
                 "dust": 1,
+                "dust2": 1,
+                "gausstrig": 1,
                 "noiseN": 1,
                 "noiseL": 1,
                 "noiseX": 1
@@ -810,7 +868,7 @@
             "module": "Lich.sc UGens",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1717,
+            "line": 1961,
             "description": "Noise."
         },
         "Chaos": {
@@ -828,7 +886,7 @@
             "module": "Lich.sc UGens",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1794,
+            "line": 2038,
             "description": "Chaotic Oscillators."
         },
         "Filters": {
@@ -836,12 +894,20 @@
             "submodules": {},
             "classes": {
                 "lowpass": 1,
+                "leakdc": 1,
+                "leakdc1": 1,
                 "highpass": 1,
                 "bandpass": 1,
+                "dfm1": 1,
                 "lag": 1,
                 "crush": 1,
                 "decimate": 1,
-                "allpassN": 1
+                "compander": 1,
+                "limiter": 1,
+                "pitchshift": 1,
+                "freqshift": 1,
+                "freeverb": 1,
+                "gverb": 1
             },
             "fors": {},
             "is_submodule": 1,
@@ -849,13 +915,14 @@
             "module": "Lich.sc UGens",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1915,
+            "line": 2298,
             "description": "Filters."
         },
         "Delays": {
             "name": "Delays",
             "submodules": {},
             "classes": {
+                "allpassN": 1,
                 "bufAllpassN": 1,
                 "allpassL": 1,
                 "bufAllpassL": 1,
@@ -880,7 +947,7 @@
             "module": "Lich.sc UGens",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2221,
+            "line": 2631,
             "description": "Delays."
         },
         "Envelopes": {
@@ -890,7 +957,9 @@
                 "env": 1,
                 "env2": 1,
                 "perc": 1,
-                "perc2": 1
+                "perc2": 1,
+                "line": 1,
+                "xline": 1
             },
             "fors": {},
             "is_submodule": 1,
@@ -898,7 +967,7 @@
             "module": "Lich.sc UGens",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2342,
+            "line": 2783,
             "description": "Envelopes."
         },
         "InputOutput": {
@@ -914,7 +983,7 @@
             "module": "Lich.sc UGens",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2386,
+            "line": 2832,
             "description": "Inputs and Outputs"
         },
         "Panning": {
@@ -930,7 +999,7 @@
             "module": "Lich.sc UGens",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2438,
+            "line": 2884,
             "description": "Panning UGens"
         },
         "Buffers": {
@@ -945,7 +1014,7 @@
             "module": "Lich.sc UGens",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2481,
+            "line": 2927,
             "description": "Buffers."
         }
     },
@@ -1017,6 +1086,31 @@
                 "\nlet test l h => white 1 >> scFold l h >> out 0<br>\nlet t = test -0.5 0.5<br>\nstop t"
             ]
         },
+        "fold": {
+            "name": "fold",
+            "shortname": "fold",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Distortions",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 744,
+            "description": "Foldback distortion.",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "level",
+                    "description": "Boundry to fold at"
+                }
+            ],
+            "example": [
+                "\nlet test l => white 1 >> fold l >> out 0<br>\nlet t = test 0.5<br>\nstop t"
+            ]
+        },
         "scWrap": {
             "name": "scWrap",
             "shortname": "scWrap",
@@ -1029,7 +1123,7 @@
             "submodule": "Distortions",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 744,
+            "line": 760,
             "description": "Wrap distortion.",
             "is_constructor": 1,
             "params": [
@@ -1046,6 +1140,31 @@
                 "\nlet test l h => white 1 >> scWrap l h >> out 0<br>\nlet t = test -0.5 0.5<br>\nstop t"
             ]
         },
+        "wrap": {
+            "name": "wrap",
+            "shortname": "wrap",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Distortions",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 777,
+            "description": "Wrap distortion.",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "level",
+                    "description": "Boundry to wrap at"
+                }
+            ],
+            "example": [
+                "\nlet test l => white 1 >> wrap l >> out 0<br>\nlet t = test 0.5<br>\nstop t"
+            ]
+        },
         "scClip": {
             "name": "scClip",
             "shortname": "scClip",
@@ -1058,7 +1177,7 @@
             "submodule": "Distortions",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 761,
+            "line": 793,
             "description": "Clip distortion.",
             "is_constructor": 1,
             "params": [
@@ -1075,6 +1194,31 @@
                 "\nlet test l h => white 1 >> scClip l h >> out 0<br>\nlet t = test -0.5 0.5<br>\nstop t"
             ]
         },
+        "clip": {
+            "name": "clip",
+            "shortname": "clip",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Distortions",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 810,
+            "description": "Clip distortion.",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "level",
+                    "description": "Boundry to clip at"
+                }
+            ],
+            "example": [
+                "\nlet test l => white 1 >> clip l >> out 0<br>\nlet t = test 0.5<br>\nstop t"
+            ]
+        },
         "scNeg": {
             "name": "scNeg",
             "shortname": "scNeg",
@@ -1087,7 +1231,7 @@
             "submodule": "Signal Math",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 778,
+            "line": 826,
             "description": "Return the inverse of a signal.",
             "is_constructor": 1,
             "example": [
@@ -1106,7 +1250,7 @@
             "submodule": "Signal Math",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 798,
+            "line": 846,
             "description": "Return the absolute value of a signal.",
             "is_constructor": 1,
             "example": [
@@ -1125,7 +1269,7 @@
             "submodule": "Signal Math",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 813,
+            "line": 861,
             "description": "Return the ceil of a signal.",
             "is_constructor": 1,
             "example": [
@@ -1144,7 +1288,7 @@
             "submodule": "Signal Math",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 828,
+            "line": 876,
             "description": "Return the floor of a signal.",
             "is_constructor": 1,
             "example": [
@@ -1163,7 +1307,7 @@
             "submodule": "Signal Math",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 843,
+            "line": 891,
             "description": "Return the square of a signal.",
             "is_constructor": 1,
             "example": [
@@ -1182,7 +1326,7 @@
             "submodule": "Signal Math",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 858,
+            "line": 906,
             "description": "Return the cube of a signal.",
             "is_constructor": 1,
             "example": [
@@ -1201,7 +1345,7 @@
             "submodule": "Signal Math",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 873,
+            "line": 921,
             "description": "Return the square root of a signal.",
             "is_constructor": 1,
             "example": [
@@ -1220,7 +1364,7 @@
             "submodule": "Signal Math",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 888,
+            "line": 936,
             "description": "Return the reciprocal of a signal.",
             "is_constructor": 1,
             "example": [
@@ -1239,7 +1383,7 @@
             "submodule": "Signal Math",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 903,
+            "line": 951,
             "description": "Convert a value from cycles per second to MIDI.",
             "is_constructor": 1,
             "example": [
@@ -1258,7 +1402,7 @@
             "submodule": "Signal Math",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 918,
+            "line": 966,
             "description": "Convert a value from MIDI to cycles per second.",
             "is_constructor": 1,
             "example": [
@@ -1277,7 +1421,7 @@
             "submodule": "Signal Math",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 933,
+            "line": 981,
             "description": "Convert a value dB to RMS amplitude.",
             "is_constructor": 1,
             "example": [
@@ -1296,7 +1440,7 @@
             "submodule": "Signal Math",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 948,
+            "line": 996,
             "description": "Convert a value RMS amplitude to dB.",
             "is_constructor": 1,
             "example": [
@@ -1315,7 +1459,7 @@
             "submodule": "Signal Math",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 963,
+            "line": 1011,
             "description": "Return the log of a signal.",
             "is_constructor": 1,
             "example": [
@@ -1334,7 +1478,7 @@
             "submodule": "Signal Math",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 978,
+            "line": 1026,
             "description": "Return the log2 of a signal.",
             "is_constructor": 1,
             "example": [
@@ -1353,7 +1497,7 @@
             "submodule": "Signal Math",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 993,
+            "line": 1041,
             "description": "Return the log10 of a signal.",
             "is_constructor": 1,
             "example": [
@@ -1372,7 +1516,7 @@
             "submodule": "Signal Math",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1008,
+            "line": 1056,
             "description": "Return the sin of a signal.",
             "is_constructor": 1,
             "example": [
@@ -1391,7 +1535,7 @@
             "submodule": "Signal Math",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1023,
+            "line": 1071,
             "description": "Return the cos of a signal.",
             "is_constructor": 1,
             "example": [
@@ -1410,7 +1554,7 @@
             "submodule": "Signal Math",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1038,
+            "line": 1086,
             "description": "Return the tan of a signal.",
             "is_constructor": 1,
             "example": [
@@ -1429,7 +1573,7 @@
             "submodule": "Signal Math",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1053,
+            "line": 1101,
             "description": "Return the arc sin of a signal.",
             "is_constructor": 1,
             "example": [
@@ -1448,7 +1592,7 @@
             "submodule": "Signal Math",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1068,
+            "line": 1116,
             "description": "Return the arc cos of a signal.",
             "is_constructor": 1,
             "example": [
@@ -1467,7 +1611,7 @@
             "submodule": "Signal Math",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1083,
+            "line": 1131,
             "description": "Return the arc tan of a signal.",
             "is_constructor": 1,
             "example": [
@@ -1486,7 +1630,7 @@
             "submodule": "Signal Math",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1098,
+            "line": 1146,
             "description": "Return the sinh of a signal.",
             "is_constructor": 1,
             "example": [
@@ -1505,7 +1649,7 @@
             "submodule": "Signal Math",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1113,
+            "line": 1161,
             "description": "Return the cosh of a signal.",
             "is_constructor": 1,
             "example": [
@@ -1524,7 +1668,7 @@
             "submodule": "Signal Math",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1128,
+            "line": 1176,
             "description": "Return the tanh of a signal.",
             "is_constructor": 1,
             "example": [
@@ -1543,7 +1687,7 @@
             "submodule": "Signal Math",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1143,
+            "line": 1191,
             "description": "Return the modulo of two signals. a % b",
             "is_constructor": 1,
             "params": [
@@ -1572,7 +1716,7 @@
             "submodule": "Signal Math",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1158,
+            "line": 1206,
             "description": "Return the signal rounded to the nearest value of b.",
             "is_constructor": 1,
             "params": [
@@ -1601,7 +1745,7 @@
             "submodule": "Signal Math",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1173,
+            "line": 1221,
             "description": "Return the signal to the power of b.",
             "is_constructor": 1,
             "params": [
@@ -1618,6 +1762,121 @@
                 "\nTODO"
             ]
         },
+        "range": {
+            "name": "range",
+            "shortname": "range",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Signal Math",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 1236,
+            "description": "Map a UGen's output to between lo and hi",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "lo",
+                    "description": "Lowest mapped value"
+                },
+                {
+                    "name": "hi",
+                    "description": "Highest mapped value"
+                },
+                {
+                    "name": "input",
+                    "description": "UGen to be mapped"
+                }
+            ],
+            "example": [
+                "\nlet test l h => sin (sin 1 >> range l h) >> out 0<br> \nlet t = test 440 880<br>\nstop t"
+            ]
+        },
+        "linlin": {
+            "name": "linlin",
+            "shortname": "linlin",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Signal Math",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 1257,
+            "description": "Map a linear range to an other linear range",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "inlo",
+                    "description": "Lowest input value"
+                },
+                {
+                    "name": "inhi",
+                    "description": "Highest input value"
+                },
+                {
+                    "name": "outlo",
+                    "description": "Lowest output value"
+                },
+                {
+                    "name": "outhi",
+                    "description": "Highest output value"
+                },
+                {
+                    "name": "input",
+                    "description": "UGen to be mapped"
+                }
+            ],
+            "example": [
+                "\nlet test l h => sin (sin 1 >> linlin -0.1 0.1 l h) >> out 0<br> \nlet t = test 440 880<br>\nstop t"
+            ]
+        },
+        "linexp": {
+            "name": "linexp",
+            "shortname": "linexp",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Signal Math",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 1286,
+            "description": "Map a liner range to an exponential range.",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "inlo",
+                    "description": "Lowest input value"
+                },
+                {
+                    "name": "inhi",
+                    "description": "Highest input value"
+                },
+                {
+                    "name": "outlo",
+                    "description": "Lowest output value"
+                },
+                {
+                    "name": "outhi",
+                    "description": "Highest output value"
+                },
+                {
+                    "name": "input",
+                    "description": "UGen to be mapped"
+                }
+            ],
+            "example": [
+                "\nlet test l h => sin (sin 1 >> linexp -0.1 0.1 l h) >> out 0<br> \nlet t = test 440 880<br>\nstop t"
+            ]
+        },
         "scBitAnd": {
             "name": "scBitAnd",
             "shortname": "scBitAnd",
@@ -1630,7 +1889,7 @@
             "submodule": "Bitwise Operators",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1188,
+            "line": 1306,
             "description": "Bitwise & a signal.",
             "is_constructor": 1,
             "params": [
@@ -1659,7 +1918,7 @@
             "submodule": "Bitwise Operators",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1208,
+            "line": 1326,
             "description": "Bitwise | a signal.",
             "is_constructor": 1,
             "params": [
@@ -1688,7 +1947,7 @@
             "submodule": "Bitwise Operators",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1223,
+            "line": 1341,
             "description": "Bitwise xor a signal.",
             "is_constructor": 1,
             "params": [
@@ -1717,7 +1976,7 @@
             "submodule": "Bitwise Operators",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1238,
+            "line": 1356,
             "description": "Bitwise << a signal.",
             "is_constructor": 1,
             "params": [
@@ -1746,7 +2005,7 @@
             "submodule": "Bitwise Operators",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1253,
+            "line": 1371,
             "description": "Bitwise >> a signal.",
             "is_constructor": 1,
             "params": [
@@ -1775,7 +2034,7 @@
             "submodule": "Bitwise Operators",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1268,
+            "line": 1386,
             "description": "Generate a random number with uniform distribution when synth starts playing.",
             "is_constructor": 1,
             "params": [
@@ -1804,7 +2063,7 @@
             "submodule": "Random",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1285,
+            "line": 1403,
             "description": "Generate a random number with distribution based on the sum of n random numbers when synth starts playing.",
             "is_constructor": 1,
             "params": [
@@ -1837,7 +2096,7 @@
             "submodule": "Random",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1308,
+            "line": 1426,
             "description": "Generate a random number with linear distribution when synth starts playing.",
             "is_constructor": 1,
             "params": [
@@ -1866,7 +2125,7 @@
             "submodule": "Random",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1325,
+            "line": 1443,
             "description": "Generate a random integer with uniform distribution when synth starts playing.",
             "is_constructor": 1,
             "params": [
@@ -1895,7 +2154,7 @@
             "submodule": "Random",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1343,
+            "line": 1461,
             "description": "Generate a random number with exponential distribution when synth starts playing.",
             "is_constructor": 1,
             "params": [
@@ -1924,7 +2183,7 @@
             "submodule": "Random",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1360,
+            "line": 1478,
             "description": "Generate a random number with uniform distribution on each trigger.",
             "is_constructor": 1,
             "params": [
@@ -1957,7 +2216,7 @@
             "submodule": "Random",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1378,
+            "line": 1496,
             "description": "Generate a random integer with uniform distribution on each trigger.",
             "is_constructor": 1,
             "params": [
@@ -1990,7 +2249,7 @@
             "submodule": "Random",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1396,
+            "line": 1514,
             "description": "Generate a random number with exponential distribution on each trigger.",
             "is_constructor": 1,
             "params": [
@@ -2011,6 +2270,68 @@
                 "\nlet test a => sin (scTExpRand 220 440 (impulse 1)) >> out 0<br>\nlet t = test 1<br>\nstop t"
             ]
         },
+        "stepper": {
+            "name": "stepper",
+            "shortname": "stepper",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Random",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 1532,
+            "description": "Triggerable steps at a given interval between minimum and maximum values.",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "min",
+                    "description": "Lowest possible value"
+                },
+                {
+                    "name": "max",
+                    "description": "Highest possible value"
+                },
+                {
+                    "name": "step",
+                    "description": "The range by which each step will jump."
+                },
+                {
+                    "name": "trigger",
+                    "description": "A trigger happens when the signal changes from non-positive to positive"
+                }
+            ],
+            "example": [
+                "\nlet stepSynth stepFreq => sin freq >> dup >> gain 0.3 >> out 0\n  where\n      freq = stepper 220 440 20 (impulse stepFreq)\n\nlet stSynth = stepSynth 4\nstop stSynth"
+            ]
+        },
+        "poll": {
+            "name": "poll",
+            "shortname": "poll",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Random",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 1571,
+            "description": "Prints values from a UGen, but passes the input back out. This expensive, so only use for testing.",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "input",
+                    "description": "The input to poll."
+                }
+            ],
+            "example": [
+                "\nlet pollSynth freq => sin freq >> poll >> out 0\nlet ps = pollSynth 0.5\nstop ps"
+            ]
+        },
         "dc": {
             "name": "dc",
             "shortname": "dc",
@@ -2023,7 +2344,7 @@
             "submodule": "Oscillators",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1414,
+            "line": 1594,
             "description": "Output a constant value",
             "is_constructor": 1,
             "params": [
@@ -2048,7 +2369,7 @@
             "submodule": "Oscillators",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1435,
+            "line": 1615,
             "description": "A sine wave oscillator.",
             "is_constructor": 1,
             "params": [
@@ -2059,6 +2380,35 @@
             ],
             "example": [
                 "\nlet test f => sin f >> out 0<br>\nlet t = test 440<br>\nstop t"
+            ]
+        },
+        "sinP": {
+            "name": "sinP",
+            "shortname": "sinP",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Oscillators",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 1631,
+            "description": "A sine wave oscillator with phase input.",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "freq",
+                    "description": "Frequency"
+                },
+                {
+                    "name": "phase",
+                    "description": "Phase"
+                }
+            ],
+            "example": [
+                "\nTODO"
             ]
         },
         "saw": {
@@ -2073,7 +2423,7 @@
             "submodule": "Oscillators",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1451,
+            "line": 1646,
             "description": "A saw wave oscillator.",
             "is_constructor": 1,
             "params": [
@@ -2098,7 +2448,7 @@
             "submodule": "Oscillators",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1467,
+            "line": 1662,
             "description": "A triangle wave oscillator.",
             "is_constructor": 1,
             "params": [
@@ -2123,7 +2473,7 @@
             "submodule": "Oscillators",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1483,
+            "line": 1678,
             "description": "A square wave oscillator.",
             "is_constructor": 1,
             "params": [
@@ -2148,7 +2498,7 @@
             "submodule": "Oscillators",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1499,
+            "line": 1694,
             "description": "A pulse wave oscillator with variable duty cycle.",
             "is_constructor": 1,
             "params": [
@@ -2177,7 +2527,7 @@
             "submodule": "Oscillators",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1516,
+            "line": 1711,
             "description": "An oscillator with a variable number of harmonics of equal amplitude.",
             "is_constructor": 1,
             "params": [
@@ -2206,7 +2556,7 @@
             "submodule": "Oscillators",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1533,
+            "line": 1728,
             "description": "Generates a set of harmonics around a formant frequency at a given fundamental frequency.",
             "is_constructor": 1,
             "params": [
@@ -2239,7 +2589,7 @@
             "submodule": "Oscillators",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1551,
+            "line": 1746,
             "description": "Generates single sample impulses at a frequency.",
             "is_constructor": 1,
             "params": [
@@ -2264,7 +2614,7 @@
             "submodule": "Noise",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1567,
+            "line": 1762,
             "description": "White noise generator.",
             "is_constructor": 1,
             "params": [
@@ -2289,7 +2639,7 @@
             "submodule": "Noise",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1588,
+            "line": 1783,
             "description": "Pink noise generator.",
             "is_constructor": 1,
             "params": [
@@ -2314,7 +2664,7 @@
             "submodule": "Noise",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1604,
+            "line": 1799,
             "description": "Brownian noise generator.",
             "is_constructor": 1,
             "params": [
@@ -2339,7 +2689,7 @@
             "submodule": "Noise",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1620,
+            "line": 1815,
             "description": "Gray noise generator.",
             "is_constructor": 1,
             "params": [
@@ -2364,7 +2714,7 @@
             "submodule": "Noise",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1636,
+            "line": 1831,
             "description": "Generates noise whose values are either -1 or 1.",
             "is_constructor": 1,
             "params": [
@@ -2389,7 +2739,7 @@
             "submodule": "Noise",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1652,
+            "line": 1847,
             "description": "A noise generator based on a chaotic function.",
             "is_constructor": 1,
             "params": [
@@ -2400,6 +2750,35 @@
             ],
             "example": [
                 "\nlet test c => crackle c >> out 0<br>\nlet t = test 1.5<br>\nstop t"
+            ]
+        },
+        "coingate": {
+            "name": "coingate",
+            "shortname": "coingate",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Noise",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 1863,
+            "description": "When CoinGate receives a trigger, it tosses a coin and either passes the trigger or doesn't.",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "probability",
+                    "description": "Value between 0.0 and 1.0 for chance of passing the trigger"
+                },
+                {
+                    "name": "input",
+                    "description": "The trigger"
+                }
+            ],
+            "example": [
+                "\nlet test p => sin (scTRand 440 880 (coingate p (impulse 2))) >> out 0<br>\nlet t = test 0.5<br>\nstop t"
             ]
         },
         "dust": {
@@ -2414,7 +2793,7 @@
             "submodule": "Noise",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1669,
+            "line": 1880,
             "description": "Generates random impulses from 0 to +1.",
             "is_constructor": 1,
             "params": [
@@ -2425,6 +2804,60 @@
             ],
             "example": [
                 "\nlet test d => dust d >> out 0<br>\nlet t = test 1.5<br>\nstop t"
+            ]
+        },
+        "dust2": {
+            "name": "dust2",
+            "shortname": "dust2",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Noise",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 1896,
+            "description": "Generates random impulses from -1 to +1.",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "density",
+                    "description": "Average number of impulses per second."
+                }
+            ],
+            "example": [
+                "\nlet test d => dust2 d >> out 0<br>\nlet t = test 1.5<br>\nstop t"
+            ]
+        },
+        "gausstrig": {
+            "name": "gausstrig",
+            "shortname": "gausstrig",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Noise",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 1912,
+            "description": "Generates impulses centered around a frequency with gaussian distribution.",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "freq",
+                    "description": "Mean frequency"
+                },
+                {
+                    "name": "dev",
+                    "description": "Random deviation from mean (0 <= dev < 1)"
+                }
+            ],
+            "example": [
+                "\nlet test d => sin (scTRand 440 880 (gausstrig 2 d)) >> out 0<br>\nlet t = test 0.2<br>\nstop t"
             ]
         },
         "noiseN": {
@@ -2439,7 +2872,7 @@
             "submodule": "Noise",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1685,
+            "line": 1929,
             "description": "A stepped random number generator",
             "is_constructor": 1,
             "params": [
@@ -2464,7 +2897,7 @@
             "submodule": "Noise",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1701,
+            "line": 1945,
             "description": "A linearly interpolated random number generator",
             "is_constructor": 1,
             "params": [
@@ -2489,7 +2922,7 @@
             "submodule": "Noise",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1717,
+            "line": 1961,
             "description": "A cubic interpolated random number generator",
             "is_constructor": 1,
             "params": [
@@ -2514,7 +2947,7 @@
             "submodule": "Chaos",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1733,
+            "line": 1977,
             "description": "A non-interpolating sound generator based on the difference equation: x[n+1] = a - b * sqrt(abs(x[n]))",
             "is_constructor": 1,
             "params": [
@@ -2551,7 +2984,7 @@
             "submodule": "Chaos",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1757,
+            "line": 2001,
             "description": "A linearly interpolating sound generator based on the difference equation: x[n+1] = a - b * sqrt(abs(x[n]))",
             "is_constructor": 1,
             "params": [
@@ -2588,7 +3021,7 @@
             "submodule": "Chaos",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1776,
+            "line": 2020,
             "description": "A non-interpolating sound generator based on the difference equation: x[n+1] = 1 - y[n] + abs(x[n]); y[n+1] = x[n];",
             "is_constructor": 1,
             "params": [
@@ -2621,7 +3054,7 @@
             "submodule": "Chaos",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1794,
+            "line": 2038,
             "description": "A linearly interpolating sound generator based on the difference equation: x[n+1] = 1 - y[n] + abs(x[n]); y[n+1] = x[n];",
             "is_constructor": 1,
             "params": [
@@ -2654,7 +3087,7 @@
             "submodule": "Filters",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1812,
+            "line": 2056,
             "description": "A low pass filter.",
             "is_constructor": 1,
             "params": [
@@ -2671,6 +3104,60 @@
                 "\nlet test f q => white 1 >> lowpass f q >> out 0<br>\nlet t = test 440 10<br>\nstop t"
             ]
         },
+        "leakdc": {
+            "name": "leakdc",
+            "shortname": "leakdc",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Filters",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 2078,
+            "description": "Removes DC offset from a signal.",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "coef",
+                    "description": "Leak coefficient"
+                },
+                {
+                    "name": "input",
+                    "description": "Input signal"
+                }
+            ],
+            "example": [
+                "\nlet test c => white 1 >> leakdc c >> out 0<br>\nlet t = test 0.995<br>\nstop t"
+            ]
+        },
+        "leakdc1": {
+            "name": "leakdc1",
+            "shortname": "leakdc1",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Filters",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 2095,
+            "description": "Removes DC offset from a signal with a default coefficient.",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "input",
+                    "description": "Input signal"
+                }
+            ],
+            "example": [
+                "\nlet test a => white a >> leakdc >> out 0<br>\nlet t = test 0.5<br>\nstop t"
+            ]
+        },
         "highpass": {
             "name": "highpass",
             "shortname": "highpass",
@@ -2683,7 +3170,7 @@
             "submodule": "Filters",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1834,
+            "line": 2111,
             "description": "A high pass filter.",
             "is_constructor": 1,
             "params": [
@@ -2712,7 +3199,7 @@
             "submodule": "Filters",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1851,
+            "line": 2128,
             "description": "A band pass filter.",
             "is_constructor": 1,
             "params": [
@@ -2729,6 +3216,51 @@
                 "\nlet test f q => white 1 >> bandpass f q >> out 0<br>\nlet t = test 440 10<br>\nstop t"
             ]
         },
+        "dfm1": {
+            "name": "dfm1",
+            "shortname": "dfm1",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Filters",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 2145,
+            "description": "Digitally modeled analog filter.",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "freq",
+                    "description": "Cutoff frequency for the filter"
+                },
+                {
+                    "name": "q",
+                    "description": "Quality of the filter"
+                },
+                {
+                    "name": "inputgain",
+                    "description": "Gain on the input signal"
+                },
+                {
+                    "name": "type",
+                    "description": "0 for lowpass, 1 for highpass"
+                },
+                {
+                    "name": "noiselevel",
+                    "description": "Amplitude of noise added to the model"
+                },
+                {
+                    "name": "input",
+                    "description": "Signal to be filtered"
+                }
+            ],
+            "example": [
+                "\nTODO"
+            ]
+        },
         "lag": {
             "name": "lag",
             "shortname": "lag",
@@ -2741,7 +3273,7 @@
             "submodule": "Filters",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1868,
+            "line": 2164,
             "description": "Ramp a signal between two values over time.",
             "is_constructor": 1,
             "params": [
@@ -2766,7 +3298,7 @@
             "submodule": "Filters",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1884,
+            "line": 2180,
             "description": "Bit crush a signal.",
             "is_constructor": 1,
             "params": [
@@ -2791,7 +3323,7 @@
             "submodule": "Filters",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1899,
+            "line": 2196,
             "description": "Sample rate reduction on a signal.",
             "is_constructor": 1,
             "params": [
@@ -2804,9 +3336,9 @@
                 "\nlet test r => sin 440 >> decimate r >> out 0<br>\nlet t = test 11000<br>\nstop t"
             ]
         },
-        "allpassN": {
-            "name": "allpassN",
-            "shortname": "allpassN",
+        "compander": {
+            "name": "compander",
+            "shortname": "compander",
             "classitems": [],
             "plugins": [],
             "extensions": [],
@@ -2816,7 +3348,261 @@
             "submodule": "Filters",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1915,
+            "line": 2212,
+            "description": "General purpose (hard-knee) dynamics processor.",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "control",
+                    "description": "Control signal. Same as input for compression, different for ducking."
+                },
+                {
+                    "name": "thresh",
+                    "description": "Control signal amplitude threshold."
+                },
+                {
+                    "name": "slopeBelow",
+                    "description": "Compression slope below the threshold"
+                },
+                {
+                    "name": "slopeAbove",
+                    "description": "Compression slope above the threshold"
+                },
+                {
+                    "name": "clampTime",
+                    "description": "Time until compression fully active"
+                },
+                {
+                    "name": "relaxTime",
+                    "description": "Time until compression fully inactive"
+                },
+                {
+                    "name": "input",
+                    "description": "The signal to be compressed"
+                }
+            ],
+            "example": [
+                "\nTODO"
+            ]
+        },
+        "limiter": {
+            "name": "limiter",
+            "shortname": "limiter",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Filters",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 2232,
+            "description": "Limits the amplitude of the the input to a given level.",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "level",
+                    "description": "Amplitude level to limit input to"
+                },
+                {
+                    "name": "dur",
+                    "description": "Lookahead time"
+                },
+                {
+                    "name": "input",
+                    "description": "Signal to be limited"
+                }
+            ],
+            "example": [
+                "\nTODO"
+            ]
+        },
+        "pitchshift": {
+            "name": "pitchshift",
+            "shortname": "pitchshift",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Filters",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 2248,
+            "description": "A time domain granular pitch shifter. Grains have a triangular amplitude envelope and an overlap of 4:1.",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "windowSize",
+                    "description": "Grain window size"
+                },
+                {
+                    "name": "pitchRatio",
+                    "description": "Ratio of the pitch shift. Between 0 and 4"
+                },
+                {
+                    "name": "pitchDispersion",
+                    "description": "Maximum random deviation from the pitchRatio"
+                },
+                {
+                    "name": "timeDispersion",
+                    "description": "Random time offset of each grain"
+                },
+                {
+                    "name": "input",
+                    "description": "Signal to be pitch shifted"
+                }
+            ],
+            "example": [
+                "\nTODO"
+            ]
+        },
+        "freqshift": {
+            "name": "freqshift",
+            "shortname": "freqshift",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Filters",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 2266,
+            "description": "Single sideband amplitude modulation based frequency shifting.",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "freq",
+                    "description": "Shift amount in Hz"
+                },
+                {
+                    "name": "phase",
+                    "description": "Amount of phase"
+                },
+                {
+                    "name": "input",
+                    "description": "Signal to be limited"
+                }
+            ],
+            "example": [
+                "\nTODO"
+            ]
+        },
+        "freeverb": {
+            "name": "freeverb",
+            "shortname": "freeverb",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Filters",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 2282,
+            "description": "Simple single channel reverb.",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "mix",
+                    "description": "Dry/wet balanece from 0-1"
+                },
+                {
+                    "name": "room",
+                    "description": "Room size from 0-1"
+                },
+                {
+                    "name": "damp",
+                    "description": "High frequency damping from 0-1"
+                },
+                {
+                    "name": "input",
+                    "description": "Input signal"
+                }
+            ],
+            "example": [
+                "\nTODO"
+            ]
+        },
+        "gverb": {
+            "name": "gverb",
+            "shortname": "gverb",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Filters",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 2298,
+            "description": "Two channel reverb.",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "roomsize",
+                    "description": "In squared meters"
+                },
+                {
+                    "name": "revtime",
+                    "description": "In seconds"
+                },
+                {
+                    "name": "damping",
+                    "description": "0 to 1, high frequency rolloff, 0 damps the reverb signal completely, 1 not at all"
+                },
+                {
+                    "name": "inputbw",
+                    "description": "0 to 1, same as damping control, but on the input signal"
+                },
+                {
+                    "name": "spread",
+                    "description": "A control on the stereo spread and diffusion of the reverb signal"
+                },
+                {
+                    "name": "drylevel",
+                    "description": "Amount of dry signal"
+                },
+                {
+                    "name": "earlyreflevel",
+                    "description": "Amount of early reflection level"
+                },
+                {
+                    "name": "taillevel",
+                    "description": "Amount of tail level"
+                },
+                {
+                    "name": "maxroomsize",
+                    "description": "To set the size of the delay lines"
+                },
+                {
+                    "name": "input",
+                    "description": ""
+                }
+            ],
+            "example": [
+                "\nlet test f => impulse f >> gverb 10 3 0.5 0.5 15 1 0.7 0.5 11 >> out 0\nlet t = test 1\nstop t"
+            ]
+        },
+        "allpassN": {
+            "name": "allpassN",
+            "shortname": "allpassN",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Delays",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 2324,
             "description": "An allpass delay line with no interpolation.",
             "is_constructor": 1,
             "params": [
@@ -2849,7 +3635,7 @@
             "submodule": "Delays",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1933,
+            "line": 2348,
             "description": "An allpass delay line with no interpolation. This version uses a localBuf.",
             "is_constructor": 1,
             "params": [
@@ -2882,7 +3668,7 @@
             "submodule": "Delays",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1956,
+            "line": 2366,
             "description": "An allpass delay line with linear interpolation.",
             "is_constructor": 1,
             "params": [
@@ -2915,7 +3701,7 @@
             "submodule": "Delays",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1974,
+            "line": 2384,
             "description": "An allpass delay line with linear interpolation. This version uses a localBuf.",
             "is_constructor": 1,
             "params": [
@@ -2948,7 +3734,7 @@
             "submodule": "Delays",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 1992,
+            "line": 2402,
             "description": "An allpass delay line with cubic interpolation.",
             "is_constructor": 1,
             "params": [
@@ -2981,7 +3767,7 @@
             "submodule": "Delays",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2010,
+            "line": 2420,
             "description": "An allpass delay line with cubic interpolation. This version uses a localBuf.",
             "is_constructor": 1,
             "params": [
@@ -3014,7 +3800,7 @@
             "submodule": "Delays",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2028,
+            "line": 2438,
             "description": "A comb delay line with no interpolation.",
             "is_constructor": 1,
             "params": [
@@ -3047,7 +3833,7 @@
             "submodule": "Delays",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2046,
+            "line": 2456,
             "description": "A comb delay line with no interpolation. This version uses a localBuf.",
             "is_constructor": 1,
             "params": [
@@ -3080,7 +3866,7 @@
             "submodule": "Delays",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2064,
+            "line": 2474,
             "description": "A comb delay line with linear interpolation.",
             "is_constructor": 1,
             "params": [
@@ -3113,7 +3899,7 @@
             "submodule": "Delays",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2082,
+            "line": 2492,
             "description": "A comb delay line with cubic linear interpolation. This version uses a localBuf.",
             "is_constructor": 1,
             "params": [
@@ -3146,7 +3932,7 @@
             "submodule": "Delays",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2100,
+            "line": 2510,
             "description": "A comb delay line with cubic interpolation.",
             "is_constructor": 1,
             "params": [
@@ -3179,7 +3965,7 @@
             "submodule": "Delays",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2118,
+            "line": 2528,
             "description": "A comb delay line with cubic interpolation. This version uses a localBuf.",
             "is_constructor": 1,
             "params": [
@@ -3212,7 +3998,7 @@
             "submodule": "Delays",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2136,
+            "line": 2546,
             "description": "A simple delay with no interpolation.",
             "is_constructor": 1,
             "params": [
@@ -3241,7 +4027,7 @@
             "submodule": "Delays",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2153,
+            "line": 2563,
             "description": "A simple delay with no interpolation. This version uses a localBuf.",
             "is_constructor": 1,
             "params": [
@@ -3270,7 +4056,7 @@
             "submodule": "Delays",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2170,
+            "line": 2580,
             "description": "A simple delay with linear interpolation.",
             "is_constructor": 1,
             "params": [
@@ -3299,7 +4085,7 @@
             "submodule": "Delays",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2187,
+            "line": 2597,
             "description": "A simple delay with linear interpolation. This version uses a localBuf.",
             "is_constructor": 1,
             "params": [
@@ -3328,7 +4114,7 @@
             "submodule": "Delays",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2204,
+            "line": 2614,
             "description": "A simple delay with cubic interpolation.",
             "is_constructor": 1,
             "params": [
@@ -3357,7 +4143,7 @@
             "submodule": "Delays",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2221,
+            "line": 2631,
             "description": "A simple delay with cubic interpolation. This version uses a localBuf.",
             "is_constructor": 1,
             "params": [
@@ -3386,7 +4172,7 @@
             "submodule": "Envelopes",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2285,
+            "line": 2695,
             "description": "Envelope generator. Used for amplitude envelopes, will automatically free the synth when finished.",
             "is_constructor": 1,
             "params": [
@@ -3423,7 +4209,7 @@
             "submodule": "Envelopes",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2308,
+            "line": 2718,
             "description": "Envelope generator. Used for amplitude envelopes, will NOT automatically free the synth when finished.",
             "is_constructor": 1,
             "params": [
@@ -3460,7 +4246,7 @@
             "submodule": "Envelopes",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2326,
+            "line": 2736,
             "description": "Envelope generator. Used for amplitude envelopes, will automatically free the synth when finished.",
             "is_constructor": 1,
             "params": [
@@ -3493,7 +4279,7 @@
             "submodule": "Envelopes",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2342,
+            "line": 2752,
             "description": "Envelope generator. Used for amplitude envelopes, will NOT automatically free the synth when finished.",
             "is_constructor": 1,
             "params": [
@@ -3511,6 +4297,72 @@
                 }
             ]
         },
+        "line": {
+            "name": "line",
+            "shortname": "line",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Envelopes",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 2765,
+            "description": "A linear envelope between two values",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "start",
+                    "description": "Starting value"
+                },
+                {
+                    "name": "end",
+                    "description": "Ending value"
+                },
+                {
+                    "name": "dur",
+                    "description": "Duration in seconds"
+                }
+            ],
+            "example": [
+                "\nlet test dur => impulse (line 1 10 dur) >> out 0<br>\nlet t = test 10<br>\nstop t"
+            ]
+        },
+        "xline": {
+            "name": "xline",
+            "shortname": "xline",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Envelopes",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 2783,
+            "description": "An exponential envelope between two values",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "start",
+                    "description": "Starting value"
+                },
+                {
+                    "name": "end",
+                    "description": "Ending value"
+                },
+                {
+                    "name": "dur",
+                    "description": "Duration in seconds"
+                }
+            ],
+            "example": [
+                "\nlet test dur => impulse (xline 1 10 dur) >> out 0<br>\nlet t = test 10<br>\nstop t"
+            ]
+        },
         "out": {
             "name": "out",
             "shortname": "out",
@@ -3523,7 +4375,7 @@
             "submodule": "InputOutput",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2355,
+            "line": 2801,
             "description": "Send a signal to an output bus.",
             "is_constructor": 1,
             "params": [
@@ -3548,7 +4400,7 @@
             "submodule": "InputOutput",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2386,
+            "line": 2832,
             "description": "Reads audio from a range of audio buses.",
             "is_constructor": 1,
             "params": [
@@ -3577,7 +4429,7 @@
             "submodule": "Panning",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2414,
+            "line": 2860,
             "description": "Pans a single channel input across a stereo field using equal power panning.",
             "is_constructor": 1,
             "params": [
@@ -3606,7 +4458,7 @@
             "submodule": "Panning",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2438,
+            "line": 2884,
             "description": "Duplicates an input across a 2 index array.",
             "is_constructor": 1,
             "params": [
@@ -3631,7 +4483,7 @@
             "submodule": "Buffers",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2481,
+            "line": 2927,
             "description": "A buffer local to a synth.",
             "is_constructor": 1,
             "params": [

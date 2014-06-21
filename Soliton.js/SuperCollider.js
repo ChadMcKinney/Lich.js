@@ -742,6 +742,22 @@ function scFold(lo, hi, input)
 }
 
 /**
+ * Foldback distortion.
+ * 
+ * @class fold
+ * @constructor
+ * @param level Boundry to fold at
+ * @example
+ * let test l => white 1 >> fold l >> out 0<br>
+ * let t = test 0.5<br>
+ * stop t
+ */
+function fold(level, input)
+{
+	return multiNewUGen("Fold", AudioRate, [input,-1*level,level], 1, 0);
+}
+
+/**
  * Wrap distortion.
  * 
  * @class scWrap
@@ -759,6 +775,22 @@ function scWrap(lo, hi, input)
 }
 
 /**
+ * Wrap distortion.
+ * 
+ * @class wrap
+ * @constructor
+ * @param level Boundry to wrap at
+ * @example
+ * let test l => white 1 >> wrap l >> out 0<br>
+ * let t = test 0.5<br>
+ * stop t
+ */
+function wrap(level, input)
+{
+	return multiNewUGen("Wrap", AudioRate, [input,-1*level,level], 1, 0);
+}
+
+/**
  * Clip distortion.
  * 
  * @class scClip
@@ -773,6 +805,22 @@ function scWrap(lo, hi, input)
 function scClip(lo, hi, input)
 {
 	return multiNewUGen("Clip", AudioRate, [input,lo,hi], 1, 0);
+}
+
+/**
+ * Clip distortion.
+ * 
+ * @class clip
+ * @constructor
+ * @param level Boundry to clip at
+ * @example
+ * let test l => white 1 >> clip l >> out 0<br>
+ * let t = test 0.5<br>
+ * stop t
+ */
+function clip(level, input)
+{
+	return multiNewUGen("Clip", AudioRate, [input,-1*level,level], 1, 0);
 }
 
 /**
@@ -1186,6 +1234,76 @@ function scPow(a, b)
 }
 
 /**
+ * Map a UGen's output to between lo and hi
+ *
+ * @class range
+ * @constructor
+ * @param lo Lowest mapped value
+ * @param hi Highest mapped value
+ * @param input UGen to be mapped
+ * @example
+ * let test l h => sin (sin 1 >> range l h) >> out 0<br> 
+ * let t = test 440 880<br>
+ * stop t
+ */
+function range(lo,hi,input)
+{
+    var mul;
+    mul = _binaryOpUGen( _BIN_MUL, _binaryOpUGen( _BIN_MINUS, hi, lo ), 0.5 );
+
+	return _binaryOpUGen( _BIN_PLUS, _binaryOpUGen( _BIN_MUL, input, mul ) ,lo );
+}
+
+/**
+ * Map a linear range to an other linear range
+ *
+ * @class linlin
+ * @constructor
+ * @param inlo Lowest input value
+ * @param inhi Highest input value
+ * @param outlo Lowest output value
+ * @param outhi Highest output value
+ * @param input UGen to be mapped
+ * @example
+ * let test l h => sin (sin 1 >> linlin -0.1 0.1 l h) >> out 0<br> 
+ * let t = test 440 880<br>
+ * stop t
+ */
+function linlin(inlo,inhi,outlo,outhi,input)
+{
+    var scale, offset;
+    scale = _binaryOpUGen(
+            _BIN_DIV,
+            _binaryOpUGen( _BIN_MINUS, outhi,outlo),
+            _binaryOpUGen( _BIN_MINUS, inhi,inlo)
+            );
+
+    offset = _binaryOpUGen( _BIN_MINUS, outlo, _binaryOpUGen( _BIN_MUL, scale, inlo ) );
+
+    return _binaryOpUGen( _BIN_PLUS, _binaryOpUGen( _BIN_MUL, input, scale ) ,offset );
+}
+
+/**
+ * Map a liner range to an exponential range.
+ *
+ * @class linexp
+ * @constructor
+ * @param inlo Lowest input value
+ * @param inhi Highest input value
+ * @param outlo Lowest output value
+ * @param outhi Highest output value
+ * @param input UGen to be mapped
+ * @example
+ * let test l h => sin (sin 1 >> linexp -0.1 0.1 l h) >> out 0<br> 
+ * let t = test 440 880<br>
+ * stop t
+ */
+function linexp(inlo,inhi,outlo,outhi,input)
+{
+	return multiNewUGen("LinExp", AudioRate, [input,inlo,inhi,outlo,outhi], 1, 0);
+}
+
+/**
  * Bitwise & a signal.
  *
  * @class scBitAnd
@@ -1511,6 +1629,21 @@ function sin(freq)
 }
 
 /**
+ * A sine wave oscillator with phase input.
+ *
+ * @class sinP
+ * @constructor
+ * @param freq Frequency
+ * @param phase Phase
+ * @example
+ * TODO
+ */
+function sinP(freq,phase)
+{
+	return multiNewUGen("SinOsc", AudioRate, [freq, phase], 1, 0);
+}
+
+/**
  * A saw wave oscillator.
  *
  * @class saw 
@@ -1722,10 +1855,26 @@ function clipNoise(amp)
  * let t = test 1.5<br>
  * stop t
  */
-// fix this?
 function crackle(chaos)
 {
 	return multiNewUGen("Crackle", AudioRate, [chaos], 1, 0);
+}
+
+/**
+ * When CoinGate receives a trigger, it tosses a coin and either passes the trigger or doesn't.
+ *
+ * @class coingate
+ * @constructor
+ * @param probability Value between 0.0 and 1.0 for chance of passing the trigger
+ * @param input The trigger
+ * @example
+ * let test p => sin (scTRand 440 880 (coingate p (impulse 2))) >> out 0<br>
+ * let t = test 0.5<br>
+ * stop t
+ */
+function coingate(probability,input)
+{
+	return multiNewUGen("CoinGate", AudioRate, [probability,input], 1, 0);
 }
 
 /**
@@ -1742,6 +1891,39 @@ function crackle(chaos)
 function dust(density)
 {
 	return multiNewUGen("Dust", AudioRate, [density], 1, 0);
+}
+
+/**
+ * Generates random impulses from -1 to +1.
+ *
+ * @class dust2
+ * @constructor
+ * @param density Average number of impulses per second.
+ * @example
+ * let test d => dust2 d >> out 0<br>
+ * let t = test 1.5<br>
+ * stop t
+ */
+function dust2(density)
+{
+	return multiNewUGen("Dust2", AudioRate, [density], 1, 0);
+}
+
+/**
+ * Generates impulses centered around a frequency with gaussian distribution.
+ *
+ * @class gausstrig
+ * @constructor
+ * @param freq Mean frequency
+ * @param dev Random deviation from mean (0 <= dev < 1)
+ * @example
+ * let test d => sin (scTRand 440 880 (gausstrig 2 d)) >> out 0<br>
+ * let t = test 0.2<br>
+ * stop t
+ */
+function gausstrig(freq,dev)
+{
+	return multiNewUGen("GaussTrig", AudioRate, [freq,dev], 1, 0);
 }
 
 /**
@@ -1894,6 +2076,39 @@ function lowpass(freq, q, input)
  */
 
 /**
+ * Removes DC offset from a signal.
+ * 
+ * @class leakdc
+ * @constructor
+ * @param coef Leak coefficient
+ * @param input Input signal
+ * @example
+ * let test c => white 1 >> leakdc c >> out 0<br>
+ * let t = test 0.995<br>
+ * stop t
+ */
+function leakdc(coef, input)
+{
+	return multiNewUGen("LeakDC", AudioRate, [input,coef], 1, 0);
+}
+
+/**
+ * Removes DC offset from a signal with a default coefficient.
+ * 
+ * @class leakdc1
+ * @constructor
+ * @param input Input signal
+ * @example
+ * let test a => white a >> leakdc >> out 0<br>
+ * let t = test 0.5<br>
+ * stop t
+ */
+function leakdc1(input)
+{
+	return multiNewUGen("LeakDC", AudioRate, [input,0.995], 1, 0);
+}
+
+/**
  * A high pass filter.
  * 
  * @class highpass
@@ -1928,6 +2143,25 @@ function bandpass(freq, q, input)
 }
 
 /**
+ * Digitally modeled analog filter.
+ * 
+ * @class dfm1
+ * @constructor
+ * @param freq Cutoff frequency for the filter
+ * @param q Quality of the filter
+ * @param inputgain Gain on the input signal
+ * @param type 0 for lowpass, 1 for highpass
+ * @param noiselevel Amplitude of noise added to the model
+ * @param input Signal to be filtered
+ * @example
+ * TODO
+ */
+function dfm1(freq, q, inputgain, type, noiselevel, input)
+{
+	return multiNewUGen("DFM1", AudioRate, [input,freq,1/q,inputgain,type,noiselevel], 1, 0);
+}
+
+/**
  * Ramp a signal between two values over time.
  *
  * @class lag
@@ -1958,6 +2192,7 @@ function crush(bits, input)
 {
 	return multiNewUGen("Decimator", AudioRate, [input,44100,bits], 1, 0);
 }
+
 /**
  * Sample rate reduction on a signal.
  *
@@ -1975,6 +2210,118 @@ function decimate(rate, input)
 }
 
 /**
+ * General purpose (hard-knee) dynamics processor.
+ *
+ * @class compander
+ * @constructor
+ * @param control Control signal. Same as input for compression, different for ducking.
+ * @param thresh Control signal amplitude threshold.
+ * @param slopeBelow Compression slope below the threshold
+ * @param slopeAbove Compression slope above the threshold
+ * @param clampTime Time until compression fully active
+ * @param relaxTime Time until compression fully inactive
+ * @param input The signal to be compressed
+ * @example
+ * TODO
+ */
+ function compander(control,thresh,slopeBelow,slopeAbove,clampTime,relaxTime,input)
+{
+	return multiNewUGen("Compander", AudioRate, [control,thresh,slopeBelow,slopeAbove,clampTime,relaxTime,input], 1, 0);
+}
+
+/**
+ * Limits the amplitude of the the input to a given level.
+ *
+ * @class limiter 
+ * @constructor
+ * @param level Amplitude level to limit input to
+ * @param dur Lookahead time
+ * @param input Signal to be limited
+ * @example
+ * TODO
+ */
+function limiter(level,dur,input)
+{
+	return multiNewUGen("Limiter", AudioRate, [input,level,dur], 1, 0);
+}
+
+/**
+ * A time domain granular pitch shifter. Grains have a triangular amplitude envelope and an overlap of 4:1.
+ *
+ * @class pitchshift
+ * @constructor
+ * @param windowSize Grain window size
+ * @param pitchRatio Ratio of the pitch shift. Between 0 and 4
+ * @param pitchDispersion Maximum random deviation from the pitchRatio
+ * @param timeDispersion Random time offset of each grain
+ * @param input Signal to be pitch shifted
+ * @example
+ * TODO
+ */
+function pitchshift(windowSize,pitchRatio,pitchDispersion,timeDispersion,input)
+{
+	return multiNewUGen("PitchShift", AudioRate, [windowSize,pitchRatio,pitchDispersion,timeDispersion,input], 1, 0);
+}
+
+/**
+ * Single sideband amplitude modulation based frequency shifting.
+ *
+ * @class freqshift
+ * @constructor
+ * @param freq Shift amount in Hz
+ * @param phase Amount of phase
+ * @param input Signal to be limited
+ * @example
+ * TODO
+ */
+function freqshift(freq,phase,input)
+{
+	return multiNewUGen("FreqShift", AudioRate, [input,freq,phase], 1, 0);
+}
+
+/**
+ * Simple single channel reverb.
+ *
+ * @class freeverb
+ * @constructor
+ * @param mix Dry/wet balanece from 0-1
+ * @param room Room size from 0-1
+ * @param damp High frequency damping from 0-1
+ * @param input Input signal
+ * @example
+ * TODO
+ */
+function freeverb(mix,room,damp,input)
+{
+	return multiNewUGen("FreeVerb", AudioRate, [input,mix,room,damp], 1, 0);
+}
+/**
+ * Two channel reverb.
+ *
+ * @class gverb
+ * @constructor
+ * @param roomsize In squared meters
+ * @param revtime In seconds
+ * @param damping 0 to 1, high frequency rolloff, 0 damps the reverb signal completely, 1 not at all
+ * @param inputbw 0 to 1, same as damping control, but on the input signal
+ * @param spread A control on the stereo spread and diffusion of the reverb signal
+ * @param drylevel Amount of dry signal
+ * @param earlyreflevel Amount of early reflection level
+ * @param taillevel Amount of tail level
+ * @param maxroomsize To set the size of the delay lines
+ * @param input
+ * @example
+ * let test f => impulse f >> gverb 10 3 0.5 0.5 15 1 0.7 0.5 11 >> out 0
+ * let t = test 1
+ * stop t
+ */
+
+function gverb(roomsize, revtime, damping, inputbw, spread, drylevel, earlyreflevel, taillevel, maxroomsize, input)
+{
+	return newMultiOutUGen("GVerb", [AudioRate, AudioRate], [input, roomsize, revtime, damping, inputbw, spread, drylevel, earlyreflevel, taillevel, maxroomsize], 0);
+}
+
+/**
  * An allpass delay line with no interpolation.
  * 
  * @class allpassN
@@ -1987,10 +2334,16 @@ function decimate(rate, input)
  * let t = test 0.1<br>
  * stop t
  */
+
 function allpassN(maxDel, del, decay, input)
 {
 	return multiNewUGen("AllpassN", AudioRate, [input,maxDel,del,decay], 1, 0);
 }
+
+/**
+ * Delays.
+ * @submodule Delays
+ */
 
 /**
  * An allpass delay line with no interpolation. This version uses a localBuf.
@@ -2009,11 +2362,6 @@ function bufAllpassN(buf, del, decay, input)
 {
 	return multiNewUGen("BufAllpassN", AudioRate, [input,buf,del,decay], 1, 0);
 }
-
-/**
- * Delays.
- * @submodule Delays
- */
 
 /**
  * An allpass delay line with linear interpolation.
@@ -2412,6 +2760,42 @@ function perc(attackTime, peak, decayTime, input)
 function perc2(attackTime, peak, decayTime, input)
 {
 	return env2([0,peak,0], [attackTime, decayTime], -4, input);
+}
+
+/**
+ * A linear envelope between two values
+ *
+ * @class line
+ * @constructor
+ * @param start Starting value
+ * @param end Ending value
+ * @param dur Duration in seconds
+ * @example
+ * let test dur => impulse (line 1 10 dur) >> out 0<br>
+ * let t = test 10<br>
+ * stop t
+ */
+function line(start,end,dur)
+{
+	return multiNewUGen("Line", AudioRate, [start,end,dur,0], 1, 0);
+}
+
+/**
+ * An exponential envelope between two values
+ *
+ * @class xline
+ * @constructor
+ * @param start Starting value
+ * @param end Ending value
+ * @param dur Duration in seconds
+ * @example
+ * let test dur => impulse (xline 1 10 dur) >> out 0<br>
+ * let t = test 10<br>
+ * stop t
+ */
+function line(start,end,dur)
+{
+	return multiNewUGen("Line", AudioRate, [start,end,dur,0], 1, 0);
 }
 
 /**
