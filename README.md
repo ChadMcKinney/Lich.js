@@ -2,11 +2,6 @@ Lich.js
 =======
 
 Lich.js - A Networked Audio / Visual Live Coding Language. 
-	
-Beta
-==========
-
-Lich.js is in beta!! You can try it out for yourself by going to: www.chadmckinneyaudio.com/lich
 
 Copyright © 2012-2014 Chad McKinney. All Rights Reserved.
 
@@ -18,12 +13,24 @@ chad@chadmckinneyaudio.com
 Additional Contributions by
 
 Curtis McKinney -- Networking, Emacs Integration
+
 	   www.curtismckinney.com
+
 	   casiosk1@gmail.com
 	   
 Cole Ingraham -- scsynth ugen bindings, VIM Integration
+
 	 www.coleingraham.com
+
 	 coledingraham@gmail.com
+
+
+Beta
+==========
+
+Lich.js is in beta!! You can try it out for yourself by going to:
+
+www.chadmckinneyaudio.com/lich
 
 
 LICENSE
