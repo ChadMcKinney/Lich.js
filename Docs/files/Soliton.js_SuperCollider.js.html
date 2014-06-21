@@ -140,6 +140,10 @@
             
                 <li><a href="../classes/limiter.html">limiter</a></li>
             
+                <li><a href="../classes/linexp.html">linexp</a></li>
+            
+                <li><a href="../classes/linlin.html">linlin</a></li>
+            
                 <li><a href="../classes/localBuf.html">localBuf</a></li>
             
                 <li><a href="../classes/lowpass.html">lowpass</a></li>
@@ -1599,6 +1603,55 @@ function range(lo,hi,input)
     mul = _binaryOpUGen( _BIN_MUL, _binaryOpUGen( _BIN_MINUS, hi, lo ), 0.5 );
 
 	return _binaryOpUGen( _BIN_PLUS, _binaryOpUGen( _BIN_MUL, input, mul ) ,lo );
+}
+
+/**
+ * Map a linear range to an other linear range
+ *
+ * @class linlin
+ * @constructor
+ * @param inlo Lowest input value
+ * @param inhi Highest input value
+ * @param outlo Lowest output value
+ * @param outhi Highest output value
+ * @param input UGen to be mapped
+ * @example
+ * let test l h =&gt; sin (sin 1 &gt;&gt; linlin -0.1 0.1 l h) &gt;&gt; out 0&lt;br&gt; 
+ * let t = test 440 880&lt;br&gt;
+ * stop t
+ */
+function linlin(inlo,inhi,outlo,outhi,input)
+{
+    var scale, offset;
+    scale = _binaryOpUGen(
+            _BIN_DIV,
+            _binaryOpUGen( _BIN_MINUS, outhi,outlo),
+            _binaryOpUGen( _BIN_MINUS, inhi,inlo)
+            );
+
+    offset = _binaryOpUGen( _BIN_MINUS, outlo, _binaryOpUGen( _BIN_MUL, scale, inlo ) );
+
+    return _binaryOpUGen( _BIN_PLUS, _binaryOpUGen( _BIN_MUL, input, scale ) ,offset );
+}
+
+/**
+ * Map a liner range to an exponential range.
+ *
+ * @class linexp
+ * @constructor
+ * @param inlo Lowest input value
+ * @param inhi Highest input value
+ * @param outlo Lowest output value
+ * @param outhi Highest output value
+ * @param input UGen to be mapped
+ * @example
+ * let test l h =&gt; sin (sin 1 &gt;&gt; linexp -0.1 0.1 l h) &gt;&gt; out 0&lt;br&gt; 
+ * let t = test 440 880&lt;br&gt;
+ * stop t
+ */
+function linexp(inlo,inhi,outlo,outhi,input)
+{
+	return multiNewUGen(&quot;LinExp&quot;, AudioRate, [input,inlo,inhi,outlo,outhi], 1, 0);
 }
 
 /**

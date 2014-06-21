@@ -2,7 +2,7 @@
 <html lang="en" class="yui-overrride">
 <head>
     <meta charset="utf-8">
-    <title>scMod - Lich.sc</title>
+    <title>linlin - Lich.sc</title>
     <link rel="stylesheet" href="http://yui.yahooapis.com/3.9.1/build/cssgrids/cssgrids-min.css">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
     <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700' rel='stylesheet' type='text/css'>
@@ -345,21 +345,21 @@
             <div class="apidocs">
                 <div id="docs-main">
                     <div class="content">
-                        <h1>scMod</h1>
+                        <h1>linlin</h1>
 
 
 <div class="intro">
-    <p>Return the modulo of two signals. a % b</p>
+    <p>Map a linear range to an other linear range</p>
 
 </div>
 
 
     <div class="constructor">
-        <div id="method_scMod" class="method item">
+        <div id="method_linlin" class="method item">
 
   <h3>Syntax</h3>
   <div class="blue-method-syntax">
-  <h3 class="name"><code>scMod</code></h3>
+  <h3 class="name"><code>linlin</code></h3>
 
     
         <div class="args">
@@ -367,13 +367,31 @@
             
                 <li class="arg">
                     
-                        <code>a</code>
+                        <code>inlo</code>
                     
                 </li>
             
                 <li class="arg">
                     
-                        <code>b</code>
+                        <code>inhi</code>
+                    
+                </li>
+            
+                <li class="arg">
+                    
+                        <code>outlo</code>
+                    
+                </li>
+            
+                <li class="arg">
+                    
+                        <code>outhi</code>
+                    
+                </li>
+            
+                <li class="arg">
+                    
+                        <code>input</code>
                     
                 </li>
             
@@ -408,13 +426,13 @@
             
                 <li class="param">
                     
-                        <code class="param-name">a</code>
+                        <code class="param-name">inlo</code>
                     
 
                     
 
                     <div class="param-description">
-                        <p>Signal a</p>
+                        <p>Lowest input value</p>
 
                     </div>
 
@@ -423,13 +441,58 @@
             
                 <li class="param">
                     
-                        <code class="param-name">b</code>
+                        <code class="param-name">inhi</code>
                     
 
                     
 
                     <div class="param-description">
-                        <p>Signal b</p>
+                        <p>Highest input value</p>
+
+                    </div>
+
+                    
+                </li>
+            
+                <li class="param">
+                    
+                        <code class="param-name">outlo</code>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>Lowest output value</p>
+
+                    </div>
+
+                    
+                </li>
+            
+                <li class="param">
+                    
+                        <code class="param-name">outhi</code>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>Highest output value</p>
+
+                    </div>
+
+                    
+                </li>
+            
+                <li class="param">
+                    
+                        <code class="param-name">input</code>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>UGen to be mapped</p>
 
                     </div>
 
@@ -448,7 +511,9 @@
 
             <div class="example-content">
             <pre class="code prettyprint"
-               <p>TODO</p>
+               <p>let test l h =&gt; sin (sin 1 &gt;&gt; linlin -0.1 0.1 l h) &gt;&gt; out 0<br> 
+let t = test 440 880<br>
+stop t</p>
 
                </pre>
             </div>
@@ -467,7 +532,7 @@
         <div id="index" class="api-class-tabpanel index">
             
         <div class="foundat">
-            Defined in: <a href="../files/Soliton.js_SuperCollider.js.html#l1191"><code>Soliton.js&#x2F;SuperCollider.js:1191</code></a>
+            Defined in: <a href="../files/Soliton.js_SuperCollider.js.html#l1257"><code>Soliton.js&#x2F;SuperCollider.js:1257</code></a>
         </div>
     
 

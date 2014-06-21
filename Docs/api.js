@@ -51,6 +51,8 @@ YUI.add("yuidoc-meta", function(Y) {
         "leakdc",
         "leakdc1",
         "limiter",
+        "linexp",
+        "linlin",
         "localBuf",
         "lowpass",
         "noiseL",

@@ -6,9 +6,6 @@ au BufNewFile,BufRead *.lich set filetype=haskell
 au BufNewFile,BufRead *.lich nnoremap <Leader>l :call LichToggle()<CR>
 au BufNewFile,BufRead *.lich nnoremap <F12> :call LichHardStop()<CR>
 
-" line ending for the interpreter
-"let lichi_endl = "␄\n";
-
 let g:lichmode_active = 0
 
 " toggle in/out of Lich mode
