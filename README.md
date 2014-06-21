@@ -12,17 +12,20 @@ chad@chadmckinneyaudio.com
 
 Additional Contributions by
 
+
 Curtis McKinney -- Networking, Emacs Integration
 
-	   www.curtismckinney.com
+www.curtismckinney.com
 
-	   casiosk1@gmail.com
+casiosk1@gmail.com
 	   
+
+
 Cole Ingraham -- scsynth ugen bindings, VIM Integration
 
-	 www.coleingraham.com
+www.coleingraham.com
 
-	 coledingraham@gmail.com
+coledingraham@gmail.com
 
 
 Beta
