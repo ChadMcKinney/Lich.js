@@ -153,6 +153,8 @@
                 "env2": 1,
                 "perc": 1,
                 "perc2": 1,
+                "line": 1,
+                "xline": 1,
                 "out": 1,
                 "auxIn": 1,
                 "pan": 1,
@@ -688,6 +690,8 @@
                 "env2": 1,
                 "perc": 1,
                 "perc2": 1,
+                "line": 1,
+                "xline": 1,
                 "out": 1,
                 "auxIn": 1,
                 "pan": 1,
@@ -698,7 +702,7 @@
             "namespaces": {},
             "tag": "module",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2830,
+            "line": 2866,
             "description": "Lich.sc UGen bindings."
         },
         "Distortions": {
@@ -944,7 +948,9 @@
                 "env": 1,
                 "env2": 1,
                 "perc": 1,
-                "perc2": 1
+                "perc2": 1,
+                "line": 1,
+                "xline": 1
             },
             "fors": {},
             "is_submodule": 1,
@@ -952,7 +958,7 @@
             "module": "Lich.sc UGens",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2691,
+            "line": 2722,
             "description": "Envelopes."
         },
         "InputOutput": {
@@ -968,7 +974,7 @@
             "module": "Lich.sc UGens",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2735,
+            "line": 2771,
             "description": "Inputs and Outputs"
         },
         "Panning": {
@@ -984,7 +990,7 @@
             "module": "Lich.sc UGens",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2787,
+            "line": 2823,
             "description": "Panning UGens"
         },
         "Buffers": {
@@ -999,7 +1005,7 @@
             "module": "Lich.sc UGens",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2830,
+            "line": 2866,
             "description": "Buffers."
         }
     },
@@ -4139,6 +4145,72 @@
                 }
             ]
         },
+        "line": {
+            "name": "line",
+            "shortname": "line",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Envelopes",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 2704,
+            "description": "A linear envelope between two values",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "start",
+                    "description": "Starting value"
+                },
+                {
+                    "name": "end",
+                    "description": "Ending value"
+                },
+                {
+                    "name": "dur",
+                    "description": "Duration in seconds"
+                }
+            ],
+            "example": [
+                "\nlet test dur => impulse (line 1 10 dur) >> out 0<br>\nlet t = test 10<br>\nstop t"
+            ]
+        },
+        "xline": {
+            "name": "xline",
+            "shortname": "xline",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Envelopes",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 2722,
+            "description": "An exponential envelope between two values",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "start",
+                    "description": "Starting value"
+                },
+                {
+                    "name": "end",
+                    "description": "Ending value"
+                },
+                {
+                    "name": "dur",
+                    "description": "Duration in seconds"
+                }
+            ],
+            "example": [
+                "\nlet test dur => impulse (xline 1 10 dur) >> out 0<br>\nlet t = test 10<br>\nstop t"
+            ]
+        },
         "out": {
             "name": "out",
             "shortname": "out",
@@ -4151,7 +4223,7 @@
             "submodule": "InputOutput",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2704,
+            "line": 2740,
             "description": "Send a signal to an output bus.",
             "is_constructor": 1,
             "params": [
@@ -4176,7 +4248,7 @@
             "submodule": "InputOutput",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2735,
+            "line": 2771,
             "description": "Reads audio from a range of audio buses.",
             "is_constructor": 1,
             "params": [
@@ -4205,7 +4277,7 @@
             "submodule": "Panning",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2763,
+            "line": 2799,
             "description": "Pans a single channel input across a stereo field using equal power panning.",
             "is_constructor": 1,
             "params": [
@@ -4234,7 +4306,7 @@
             "submodule": "Panning",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2787,
+            "line": 2823,
             "description": "Duplicates an input across a 2 index array.",
             "is_constructor": 1,
             "params": [
@@ -4259,7 +4331,7 @@
             "submodule": "Buffers",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2830,
+            "line": 2866,
             "description": "A buffer local to a synth.",
             "is_constructor": 1,
             "params": [

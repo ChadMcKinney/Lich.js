@@ -51,6 +51,7 @@ YUI.add("yuidoc-meta", function(Y) {
         "leakdc",
         "leakdc1",
         "limiter",
+        "line",
         "linexp",
         "linlin",
         "localBuf",
@@ -119,7 +120,8 @@ YUI.add("yuidoc-meta", function(Y) {
         "stepper",
         "tri",
         "white",
-        "wrap"
+        "wrap",
+        "xline"
     ],
     "modules": [
         "Bitwise Operators",

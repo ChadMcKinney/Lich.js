@@ -2,7 +2,7 @@
 <html lang="en" class="yui-overrride">
 <head>
     <meta charset="utf-8">
-    <title>env2 - Lich.sc</title>
+    <title>line - Lich.sc</title>
     <link rel="stylesheet" href="http://yui.yahooapis.com/3.9.1/build/cssgrids/cssgrids-min.css">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
     <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700' rel='stylesheet' type='text/css'>
@@ -349,21 +349,21 @@
             <div class="apidocs">
                 <div id="docs-main">
                     <div class="content">
-                        <h1>env2</h1>
+                        <h1>line</h1>
 
 
 <div class="intro">
-    <p>Envelope generator. Used for amplitude envelopes, will NOT automatically free the synth when finished.</p>
+    <p>A linear envelope between two values</p>
 
 </div>
 
 
     <div class="constructor">
-        <div id="method_env2" class="method item">
+        <div id="method_line" class="method item">
 
   <h3>Syntax</h3>
   <div class="blue-method-syntax">
-  <h3 class="name"><code>env2</code></h3>
+  <h3 class="name"><code>line</code></h3>
 
     
         <div class="args">
@@ -371,25 +371,19 @@
             
                 <li class="arg">
                     
-                        <code>levels</code>
+                        <code>start</code>
                     
                 </li>
             
                 <li class="arg">
                     
-                        <code>times</code>
+                        <code>end</code>
                     
                 </li>
             
                 <li class="arg">
                     
-                        <code>shape</code>
-                    
-                </li>
-            
-                <li class="arg">
-                    
-                        <code>input</code>
+                        <code>dur</code>
                     
                 </li>
             
@@ -424,13 +418,13 @@
             
                 <li class="param">
                     
-                        <code class="param-name">levels</code>
+                        <code class="param-name">start</code>
                     
 
                     
 
                     <div class="param-description">
-                        <p>The levels that the envelope will move through</p>
+                        <p>Starting value</p>
 
                     </div>
 
@@ -439,13 +433,13 @@
             
                 <li class="param">
                     
-                        <code class="param-name">times</code>
+                        <code class="param-name">end</code>
                     
 
                     
 
                     <div class="param-description">
-                        <p>The times it takes for the env to move between levels. Should be 1 item less than levels</p>
+                        <p>Ending value</p>
 
                     </div>
 
@@ -454,28 +448,13 @@
             
                 <li class="param">
                     
-                        <code class="param-name">shape</code>
+                        <code class="param-name">dur</code>
                     
 
                     
 
                     <div class="param-description">
-                        <p>Either a shape number or string. Some examples: -4, 0, 1, &quot;linear&quot;, &quot;squared&quot;</p>
-
-                    </div>
-
-                    
-                </li>
-            
-                <li class="param">
-                    
-                        <code class="param-name">input</code>
-                    
-
-                    
-
-                    <div class="param-description">
-                        <p>Either a ugen or 1</p>
+                        <p>Duration in seconds</p>
 
                     </div>
 
@@ -494,8 +473,9 @@
 
             <div class="example-content">
             <pre class="code prettyprint"
-               <p>let test f =&gt; sin (env2[f,f*2,f] [1,1] &quot;linear&quot; 1) &gt;&gt; env [0,0.3,0] [2,2] &quot;linear&quot; &gt;&gt; out 0<br>
-test $ random 440 880</p>
+               <p>let test dur =&gt; impulse (line 1 10 dur) &gt;&gt; out 0<br>
+let t = test 10<br>
+stop t</p>
 
                </pre>
             </div>
@@ -514,7 +494,7 @@ test $ random 440 880</p>
         <div id="index" class="api-class-tabpanel index">
             
         <div class="foundat">
-            Defined in: <a href="../files/Soliton.js_SuperCollider.js.html#l2657"><code>Soliton.js&#x2F;SuperCollider.js:2657</code></a>
+            Defined in: <a href="../files/Soliton.js_SuperCollider.js.html#l2704"><code>Soliton.js&#x2F;SuperCollider.js:2704</code></a>
         </div>
     
 

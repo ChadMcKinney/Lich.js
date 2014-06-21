@@ -2702,6 +2702,42 @@ function perc2(attackTime, peak, decayTime, input)
 }
 
 /**
+ * A linear envelope between two values
+ *
+ * @class line
+ * @constructor
+ * @param start Starting value
+ * @param end Ending value
+ * @param dur Duration in seconds
+ * @example
+ * let test dur => impulse (line 1 10 dur) >> out 0<br>
+ * let t = test 10<br>
+ * stop t
+ */
+function line(start,end,dur)
+{
+	return multiNewUGen("Line", AudioRate, [start,end,dur,0], 1, 0);
+}
+
+/**
+ * An exponential envelope between two values
+ *
+ * @class xline
+ * @constructor
+ * @param start Starting value
+ * @param end Ending value
+ * @param dur Duration in seconds
+ * @example
+ * let test dur => impulse (xline 1 10 dur) >> out 0<br>
+ * let t = test 10<br>
+ * stop t
+ */
+function line(start,end,dur)
+{
+	return multiNewUGen("Line", AudioRate, [start,end,dur,0], 1, 0);
+}
+
+/**
  * Send a signal to an output bus.
  *
  * @class out

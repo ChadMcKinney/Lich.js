@@ -140,6 +140,8 @@
             
                 <li><a href="../classes/limiter.html">limiter</a></li>
             
+                <li><a href="../classes/line.html">line</a></li>
+            
                 <li><a href="../classes/linexp.html">linexp</a></li>
             
                 <li><a href="../classes/linlin.html">linlin</a></li>
@@ -277,6 +279,8 @@
                 <li><a href="../classes/white.html">white</a></li>
             
                 <li><a href="../classes/wrap.html">wrap</a></li>
+            
+                <li><a href="../classes/xline.html">xline</a></li>
             
             </ul>
 
@@ -3050,6 +3054,42 @@ function perc(attackTime, peak, decayTime, input)
 function perc2(attackTime, peak, decayTime, input)
 {
 	return env2([0,peak,0], [attackTime, decayTime], -4, input);
+}
+
+/**
+ * A linear envelope between two values
+ *
+ * @class line
+ * @constructor
+ * @param start Starting value
+ * @param end Ending value
+ * @param dur Duration in seconds
+ * @example
+ * let test dur =&gt; impulse (line 1 10 dur) &gt;&gt; out 0&lt;br&gt;
+ * let t = test 10&lt;br&gt;
+ * stop t
+ */
+function line(start,end,dur)
+{
+	return multiNewUGen(&quot;Line&quot;, AudioRate, [start,end,dur,0], 1, 0);
+}
+
+/**
+ * An exponential envelope between two values
+ *
+ * @class xline
+ * @constructor
+ * @param start Starting value
+ * @param end Ending value
+ * @param dur Duration in seconds
+ * @example
+ * let test dur =&gt; impulse (xline 1 10 dur) &gt;&gt; out 0&lt;br&gt;
+ * let t = test 10&lt;br&gt;
+ * stop t
+ */
+function line(start,end,dur)
+{
+	return multiNewUGen(&quot;Line&quot;, AudioRate, [start,end,dur,0], 1, 0);
 }
 
 /**
