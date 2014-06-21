@@ -2,7 +2,7 @@
 <html lang="en" class="yui-overrride">
 <head>
     <meta charset="utf-8">
-    <title>third-party/three.js/shaders/LuminosityShader.js - Lich.sc</title>
+    <title>gverb - Lich.sc</title>
     <link rel="stylesheet" href="http://yui.yahooapis.com/3.9.1/build/cssgrids/cssgrids-min.css">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
     <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700' rel='stylesheet' type='text/css'>
@@ -351,63 +351,315 @@
             <div class="apidocs">
                 <div id="docs-main">
                     <div class="content">
-                        <h1 class="file-heading">File: third-party/three.js/shaders/LuminosityShader.js</h1>
+                        <h1>gverb</h1>
 
-<div class="file">
-    <pre class="code prettyprint linenums">
-/**
- * @author alteredq / http://alteredqualia.com/
- *
- * Luminosity
- * http://en.wikipedia.org/wiki/Luminosity
- */
 
-THREE.LuminosityShader = {
+<div class="intro">
+    <p>Two channel reverb.</p>
 
-	uniforms: {
-
-		&quot;tDiffuse&quot;: { type: &quot;t&quot;, value: null }
-
-	},
-
-	vertexShader: [
-
-		&quot;varying vec2 vUv;&quot;,
-
-		&quot;void main() {&quot;,
-
-			&quot;vUv = uv;&quot;,
-
-			&quot;gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );&quot;,
-
-		&quot;}&quot;
-
-	].join(&quot;\n&quot;),
-
-	fragmentShader: [
-
-		&quot;uniform sampler2D tDiffuse;&quot;,
-
-		&quot;varying vec2 vUv;&quot;,
-
-		&quot;void main() {&quot;,
-
-			&quot;vec4 texel = texture2D( tDiffuse, vUv );&quot;,
-
-			&quot;vec3 luma = vec3( 0.299, 0.587, 0.114 );&quot;,
-
-			&quot;float v = dot( texel.xyz, luma );&quot;,
-
-			&quot;gl_FragColor = vec4( v, v, v, texel.w );&quot;,
-
-		&quot;}&quot;
-
-	].join(&quot;\n&quot;)
-
-};
-
-    </pre>
 </div>
+
+
+    <div class="constructor">
+        <div id="method_gverb" class="method item">
+
+  <h3>Syntax</h3>
+  <div class="blue-method-syntax">
+  <h3 class="name"><code>gverb</code></h3>
+
+    
+        <div class="args">
+            <span class="paren"></span><ul class="args-list inline">
+            
+                <li class="arg">
+                    
+                        <code>roomsize</code>
+                    
+                </li>
+            
+                <li class="arg">
+                    
+                        <code>revtime</code>
+                    
+                </li>
+            
+                <li class="arg">
+                    
+                        <code>damping</code>
+                    
+                </li>
+            
+                <li class="arg">
+                    
+                        <code>inputbw</code>
+                    
+                </li>
+            
+                <li class="arg">
+                    
+                        <code>spread</code>
+                    
+                </li>
+            
+                <li class="arg">
+                    
+                        <code>drylevel</code>
+                    
+                </li>
+            
+                <li class="arg">
+                    
+                        <code>earlyreflevel</code>
+                    
+                </li>
+            
+                <li class="arg">
+                    
+                        <code>taillevel</code>
+                    
+                </li>
+            
+                <li class="arg">
+                    
+                        <code>maxroomsize</code>
+                    
+                </li>
+            
+                <li class="arg">
+                    
+                        <code>input</code>
+                    
+                </li>
+            
+            </ul><span class="paren"></span>
+        </div>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+  </div>
+    <div class="description">
+        
+    </div>
+
+    
+        <div class="params">
+            <h4>Arguments:</h4>
+
+            <ul class="params-list">
+            
+                <li class="param">
+                    
+                        <code class="param-name">roomsize</code>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>In squared meters</p>
+
+                    </div>
+
+                    
+                </li>
+            
+                <li class="param">
+                    
+                        <code class="param-name">revtime</code>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>In seconds</p>
+
+                    </div>
+
+                    
+                </li>
+            
+                <li class="param">
+                    
+                        <code class="param-name">damping</code>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>0 to 1, high frequency rolloff, 0 damps the reverb signal completely, 1 not at all</p>
+
+                    </div>
+
+                    
+                </li>
+            
+                <li class="param">
+                    
+                        <code class="param-name">inputbw</code>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>0 to 1, same as damping control, but on the input signal</p>
+
+                    </div>
+
+                    
+                </li>
+            
+                <li class="param">
+                    
+                        <code class="param-name">spread</code>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>A control on the stereo spread and diffusion of the reverb signal</p>
+
+                    </div>
+
+                    
+                </li>
+            
+                <li class="param">
+                    
+                        <code class="param-name">drylevel</code>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>Amount of dry signal</p>
+
+                    </div>
+
+                    
+                </li>
+            
+                <li class="param">
+                    
+                        <code class="param-name">earlyreflevel</code>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>Amount of early reflection level</p>
+
+                    </div>
+
+                    
+                </li>
+            
+                <li class="param">
+                    
+                        <code class="param-name">taillevel</code>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>Amount of tail level</p>
+
+                    </div>
+
+                    
+                </li>
+            
+                <li class="param">
+                    
+                        <code class="param-name">maxroomsize</code>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>To set the size of the delay lines</p>
+
+                    </div>
+
+                    
+                </li>
+            
+                <li class="param">
+                    
+                        <code class="param-name">input</code>
+                    
+
+                    
+
+                    <div class="param-description">
+                         
+                    </div>
+
+                    
+                </li>
+            
+            </ul>
+        </div>
+    
+
+    
+
+    
+        <div class="example">
+            <h3>Example:</h3>
+
+            <div class="example-content">
+            <pre class="code prettyprint"
+               <p>let test f =&gt; impulse f &gt;&gt; gverb 10 3 0.5 0.5 15 1 0.7 0.5 11 &gt;&gt; out 0
+let t = test 1
+stop t</p>
+
+               </pre>
+            </div>
+        </div>
+    
+
+    
+
+</div>
+
+    </div>
+
+
+<hr>
+    <div>
+        <div id="index" class="api-class-tabpanel index">
+            
+        <div class="foundat">
+            Defined in: <a href="../files/Soliton.js_SuperCollider.js.html#l2263"><code>Soliton.js&#x2F;SuperCollider.js:2263</code></a>
+        </div>
+    
+
+    
+        
+            Module: <a href="../modules/Filters.html">Filters</a><br>
+            Parent Module: <a href="../modules/Lich.sc UGens.html">Lich.sc UGens</a>
+        
+    
+
+</div>
+
+
+
+
+
+
 
                     </div>
                 </div>

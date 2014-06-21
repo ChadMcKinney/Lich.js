@@ -2261,6 +2261,32 @@ function freqshift(freq,phase,input)
 }
 
 /**
+ * Two channel reverb.
+ *
+ * @class gverb
+ * @constructor
+ * @param roomsize In squared meters
+ * @param revtime In seconds
+ * @param damping 0 to 1, high frequency rolloff, 0 damps the reverb signal completely, 1 not at all
+ * @param inputbw 0 to 1, same as damping control, but on the input signal
+ * @param spread A control on the stereo spread and diffusion of the reverb signal
+ * @param drylevel Amount of dry signal
+ * @param earlyreflevel Amount of early reflection level
+ * @param taillevel Amount of tail level
+ * @param maxroomsize To set the size of the delay lines
+ * @param input
+ * @example
+ * let test f => impulse f >> gverb 10 3 0.5 0.5 15 1 0.7 0.5 11 >> out 0
+ * let t = test 1
+ * stop t
+ */
+
+function gverb(roomsize, revtime, damping, inputbw, spread, drylevel, earlyreflevel, taillevel, maxroomsize, input)
+{
+	return newMultiOutUGen("GVerb", [AudioRate, AudioRate], [input, roomsize, revtime, damping, inputbw, spread, drylevel, earlyreflevel, taillevel, maxroomsize], 0);
+}
+
+/**
  * An allpass delay line with no interpolation.
  * 
  * @class allpassN
@@ -2280,6 +2306,11 @@ function allpassN(maxDel, del, decay, input)
 }
 
 /**
+ * Delays.
+ * @submodule Delays
+ */
+
+/**
  * An allpass delay line with no interpolation. This version uses a localBuf.
  *
  * @class bufAllpassN 
@@ -2296,11 +2327,6 @@ function bufAllpassN(buf, del, decay, input)
 {
 	return multiNewUGen("BufAllpassN", AudioRate, [input,buf,del,decay], 1, 0);
 }
-
-/**
- * Delays.
- * @submodule Delays
- */
 
 /**
  * An allpass delay line with linear interpolation.

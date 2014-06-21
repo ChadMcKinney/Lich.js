@@ -45,6 +45,7 @@ YUI.add("yuidoc-meta", function(Y) {
         "gbmanL",
         "gbmanN",
         "gray",
+        "gverb",
         "highpass",
         "impulse",
         "lag",

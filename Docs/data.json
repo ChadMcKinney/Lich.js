@@ -131,6 +131,7 @@
                 "limiter": 1,
                 "pitchshift": 1,
                 "freqshift": 1,
+                "gverb": 1,
                 "allpassN": 1,
                 "bufAllpassN": 1,
                 "allpassL": 1,
@@ -668,6 +669,7 @@
                 "limiter": 1,
                 "pitchshift": 1,
                 "freqshift": 1,
+                "gverb": 1,
                 "allpassN": 1,
                 "bufAllpassN": 1,
                 "allpassL": 1,
@@ -702,7 +704,7 @@
             "namespaces": {},
             "tag": "module",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2866,
+            "line": 2892,
             "description": "Lich.sc UGen bindings."
         },
         "Distortions": {
@@ -899,7 +901,7 @@
                 "limiter": 1,
                 "pitchshift": 1,
                 "freqshift": 1,
-                "allpassN": 1
+                "gverb": 1
             },
             "fors": {},
             "is_submodule": 1,
@@ -914,6 +916,7 @@
             "name": "Delays",
             "submodules": {},
             "classes": {
+                "allpassN": 1,
                 "bufAllpassN": 1,
                 "allpassL": 1,
                 "bufAllpassL": 1,
@@ -938,7 +941,7 @@
             "module": "Lich.sc UGens",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2570,
+            "line": 2596,
             "description": "Delays."
         },
         "Envelopes": {
@@ -958,7 +961,7 @@
             "module": "Lich.sc UGens",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2722,
+            "line": 2748,
             "description": "Envelopes."
         },
         "InputOutput": {
@@ -974,7 +977,7 @@
             "module": "Lich.sc UGens",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2771,
+            "line": 2797,
             "description": "Inputs and Outputs"
         },
         "Panning": {
@@ -990,7 +993,7 @@
             "module": "Lich.sc UGens",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2823,
+            "line": 2849,
             "description": "Panning UGens"
         },
         "Buffers": {
@@ -1005,7 +1008,7 @@
             "module": "Lich.sc UGens",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2866,
+            "line": 2892,
             "description": "Buffers."
         }
     },
@@ -3438,9 +3441,9 @@
                 "\nTODO"
             ]
         },
-        "allpassN": {
-            "name": "allpassN",
-            "shortname": "allpassN",
+        "gverb": {
+            "name": "gverb",
+            "shortname": "gverb",
             "classitems": [],
             "plugins": [],
             "extensions": [],
@@ -3451,6 +3454,67 @@
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
             "line": 2263,
+            "description": "Two channel reverb.",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "roomsize",
+                    "description": "In squared meters"
+                },
+                {
+                    "name": "revtime",
+                    "description": "In seconds"
+                },
+                {
+                    "name": "damping",
+                    "description": "0 to 1, high frequency rolloff, 0 damps the reverb signal completely, 1 not at all"
+                },
+                {
+                    "name": "inputbw",
+                    "description": "0 to 1, same as damping control, but on the input signal"
+                },
+                {
+                    "name": "spread",
+                    "description": "A control on the stereo spread and diffusion of the reverb signal"
+                },
+                {
+                    "name": "drylevel",
+                    "description": "Amount of dry signal"
+                },
+                {
+                    "name": "earlyreflevel",
+                    "description": "Amount of early reflection level"
+                },
+                {
+                    "name": "taillevel",
+                    "description": "Amount of tail level"
+                },
+                {
+                    "name": "maxroomsize",
+                    "description": "To set the size of the delay lines"
+                },
+                {
+                    "name": "input",
+                    "description": ""
+                }
+            ],
+            "example": [
+                "\nlet test f => impulse f >> gverb 10 3 0.5 0.5 15 1 0.7 0.5 11 >> out 0\nlet t = test 1\nstop t"
+            ]
+        },
+        "allpassN": {
+            "name": "allpassN",
+            "shortname": "allpassN",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Lich.sc UGens",
+            "submodule": "Delays",
+            "namespace": "",
+            "file": "Soliton.js/SuperCollider.js",
+            "line": 2289,
             "description": "An allpass delay line with no interpolation.",
             "is_constructor": 1,
             "params": [
@@ -3483,7 +3547,7 @@
             "submodule": "Delays",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2282,
+            "line": 2313,
             "description": "An allpass delay line with no interpolation. This version uses a localBuf.",
             "is_constructor": 1,
             "params": [
@@ -3516,7 +3580,7 @@
             "submodule": "Delays",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2305,
+            "line": 2331,
             "description": "An allpass delay line with linear interpolation.",
             "is_constructor": 1,
             "params": [
@@ -3549,7 +3613,7 @@
             "submodule": "Delays",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2323,
+            "line": 2349,
             "description": "An allpass delay line with linear interpolation. This version uses a localBuf.",
             "is_constructor": 1,
             "params": [
@@ -3582,7 +3646,7 @@
             "submodule": "Delays",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2341,
+            "line": 2367,
             "description": "An allpass delay line with cubic interpolation.",
             "is_constructor": 1,
             "params": [
@@ -3615,7 +3679,7 @@
             "submodule": "Delays",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2359,
+            "line": 2385,
             "description": "An allpass delay line with cubic interpolation. This version uses a localBuf.",
             "is_constructor": 1,
             "params": [
@@ -3648,7 +3712,7 @@
             "submodule": "Delays",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2377,
+            "line": 2403,
             "description": "A comb delay line with no interpolation.",
             "is_constructor": 1,
             "params": [
@@ -3681,7 +3745,7 @@
             "submodule": "Delays",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2395,
+            "line": 2421,
             "description": "A comb delay line with no interpolation. This version uses a localBuf.",
             "is_constructor": 1,
             "params": [
@@ -3714,7 +3778,7 @@
             "submodule": "Delays",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2413,
+            "line": 2439,
             "description": "A comb delay line with linear interpolation.",
             "is_constructor": 1,
             "params": [
@@ -3747,7 +3811,7 @@
             "submodule": "Delays",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2431,
+            "line": 2457,
             "description": "A comb delay line with cubic linear interpolation. This version uses a localBuf.",
             "is_constructor": 1,
             "params": [
@@ -3780,7 +3844,7 @@
             "submodule": "Delays",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2449,
+            "line": 2475,
             "description": "A comb delay line with cubic interpolation.",
             "is_constructor": 1,
             "params": [
@@ -3813,7 +3877,7 @@
             "submodule": "Delays",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2467,
+            "line": 2493,
             "description": "A comb delay line with cubic interpolation. This version uses a localBuf.",
             "is_constructor": 1,
             "params": [
@@ -3846,7 +3910,7 @@
             "submodule": "Delays",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2485,
+            "line": 2511,
             "description": "A simple delay with no interpolation.",
             "is_constructor": 1,
             "params": [
@@ -3875,7 +3939,7 @@
             "submodule": "Delays",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2502,
+            "line": 2528,
             "description": "A simple delay with no interpolation. This version uses a localBuf.",
             "is_constructor": 1,
             "params": [
@@ -3904,7 +3968,7 @@
             "submodule": "Delays",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2519,
+            "line": 2545,
             "description": "A simple delay with linear interpolation.",
             "is_constructor": 1,
             "params": [
@@ -3933,7 +3997,7 @@
             "submodule": "Delays",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2536,
+            "line": 2562,
             "description": "A simple delay with linear interpolation. This version uses a localBuf.",
             "is_constructor": 1,
             "params": [
@@ -3962,7 +4026,7 @@
             "submodule": "Delays",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2553,
+            "line": 2579,
             "description": "A simple delay with cubic interpolation.",
             "is_constructor": 1,
             "params": [
@@ -3991,7 +4055,7 @@
             "submodule": "Delays",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2570,
+            "line": 2596,
             "description": "A simple delay with cubic interpolation. This version uses a localBuf.",
             "is_constructor": 1,
             "params": [
@@ -4020,7 +4084,7 @@
             "submodule": "Envelopes",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2634,
+            "line": 2660,
             "description": "Envelope generator. Used for amplitude envelopes, will automatically free the synth when finished.",
             "is_constructor": 1,
             "params": [
@@ -4057,7 +4121,7 @@
             "submodule": "Envelopes",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2657,
+            "line": 2683,
             "description": "Envelope generator. Used for amplitude envelopes, will NOT automatically free the synth when finished.",
             "is_constructor": 1,
             "params": [
@@ -4094,7 +4158,7 @@
             "submodule": "Envelopes",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2675,
+            "line": 2701,
             "description": "Envelope generator. Used for amplitude envelopes, will automatically free the synth when finished.",
             "is_constructor": 1,
             "params": [
@@ -4127,7 +4191,7 @@
             "submodule": "Envelopes",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2691,
+            "line": 2717,
             "description": "Envelope generator. Used for amplitude envelopes, will NOT automatically free the synth when finished.",
             "is_constructor": 1,
             "params": [
@@ -4157,7 +4221,7 @@
             "submodule": "Envelopes",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2704,
+            "line": 2730,
             "description": "A linear envelope between two values",
             "is_constructor": 1,
             "params": [
@@ -4190,7 +4254,7 @@
             "submodule": "Envelopes",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2722,
+            "line": 2748,
             "description": "An exponential envelope between two values",
             "is_constructor": 1,
             "params": [
@@ -4223,7 +4287,7 @@
             "submodule": "InputOutput",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2740,
+            "line": 2766,
             "description": "Send a signal to an output bus.",
             "is_constructor": 1,
             "params": [
@@ -4248,7 +4312,7 @@
             "submodule": "InputOutput",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2771,
+            "line": 2797,
             "description": "Reads audio from a range of audio buses.",
             "is_constructor": 1,
             "params": [
@@ -4277,7 +4341,7 @@
             "submodule": "Panning",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2799,
+            "line": 2825,
             "description": "Pans a single channel input across a stereo field using equal power panning.",
             "is_constructor": 1,
             "params": [
@@ -4306,7 +4370,7 @@
             "submodule": "Panning",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2823,
+            "line": 2849,
             "description": "Duplicates an input across a 2 index array.",
             "is_constructor": 1,
             "params": [
@@ -4331,7 +4395,7 @@
             "submodule": "Buffers",
             "namespace": "",
             "file": "Soliton.js/SuperCollider.js",
-            "line": 2866,
+            "line": 2892,
             "description": "A buffer local to a synth.",
             "is_constructor": 1,
             "params": [
