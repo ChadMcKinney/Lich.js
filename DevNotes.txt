@@ -71,7 +71,7 @@ treverse pr
 let pgs = pseq [pgeom 1 2, 0.666]
 foldl (\acc t -> print $ pgs t) 0 [0..12]
 
--- pwarp and twarp
+-- pwarp and bwarp
 let si freq => sin freq >> perc 0 0.3 0.15
 siner ~> si (pwarp -1 $ pseq [444,555,666,777]) -- acts like reverse
 stop siner
@@ -97,19 +97,19 @@ stop siner2
 context::currentTime -- get the current time of the audio context
 currentBeat 0 -- get the current beat, given the global tempo
 
--- "t" functions are mirrored after their "p" pattern counter parts, but are based on the current global beat
-tseq [pseq [666,777,888],1,2] -- evaluate multiple times to see the different values
-tshuf [0..5]
-tstutter 3 (pseq [0..4])
-twrap 1 7 $ pseries 1 5
+-- "b" functions are mirrored after their "p" pattern counter parts, but are based on the current global beat
+bseq [pseq [666,777,888],1,2] -- evaluate multiple times to see the different values
+bshuf [0..5]
+bstutter 3 (pseq [0..4])
+bwrap 1 7 $ pseries 1 5
 
 -- This is really useful for synths, especially if you want to use a synth in an impulse stream
-sin (tstutter 2 $ pshuf [555, 666, 777]) >> perc 0 0.3 0.3 >> play
+sin (bstutter 2 $ pshuf [555, 666, 777]) >> perc 0 0.3 0.3 >> play
 sin (twrap 440 777 $ pseries 440 88) >> perc 0 0.3 0.3 >> play
 
 -- we want to declare the shuffled pattern ahead of time otherwise it will get generated anew each time. You can re-evaluate to generate a new seq.
 let shuffled = pseq [preverse ps, ps] where ps = pshuf [3..8]  
-let si => degree2Freq slendro (mul (tseq [1,2,3,2]) $ tstutter 2 shuffled) >> sin >> perc 0 0.2 0.25
+let si => degree2Freq slendro (mul (bseq [1,2,3,2]) $ bstutter 2 shuffled) >> sin >> perc 0 0.2 0.25
 siner +> si
 siner2 +> si [_ si] [_ si] si | (*3)
 stop siner
@@ -1826,3 +1826,655 @@ let chordSynth freqs => map sf freqs
 
 map play $ chordSynth $ blockChord doom
 
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+{-
+    Welcome to Lich.js!
+    Lich.js is a new language for live coding music and graphics directly in a web browser. 
+    This is a little demo page to give you an idea of what's possible. 
+    The language isn't quite done yet (beta!), and there's still some bugs, but there is much fun to be had. 
+    The syntax is similar to Haskell, but if you haven't used it, don't be scared. 
+
+
+    If you want to get the source code or learn more about Lich.js go to https://github.com/ChadMcKinney/Lich.js
+    
+    (If you want to chat with any other players you can use alt-c to enter chat messages)
+
+	Chad McKinney
+	chad@chadmckinneyaudio.com
+-}
+
+
+
+-- Hacker Tip #1: Comments begin with --
+
+-- Lets warm up with some math. Put your cursor on the next line and hold shift, then press enter. You should see 4 post.
+2 + 2
+
+-- Lich.js uses normal order of operations. For example, this will return 7:
+1 + 2 * 3
+
+-- The keyword let is used to declare variables at global scope. The next line defines monster as the string Cthulhu.
+let monster = "Cthulhu"
+
+-- Functions are evaluated simply by supplying arguments with spaces. 
+reverse monster
+
+-- New functions can be composed by using argument names after variable declarations, like so:
+let addFive x = x + 5
+addFive 1
+addFive 2
+addFive 1337
+
+-- One last thing before we make some noise. Let's talk about partial application. 
+-- Partial application is used heavily in Lich.js so it will be good to get used to it.
+-- Normally a language requires you to supply all the arguments for a function for it to work. For example:
+add 2 3 -- Evaluates to 5
+
+-- In Haskell (and Lich) we can actually provide less than the expected number of arguments.
+-- What will return is a new function expecting the rest of the arguments. For example:
+add 2 -- Evaulates to (\r ->)
+add -- Evaulates to (\l r ->)
+
+-- We can assign this to variable and use it like any other function
+let addTwo = add 2
+addTwo 5 -- 7
+
+
+-- This can be done with any function at all. Math operations are so common we have shortcuts
+(/2) 4 -- 4 / 2 = 2
+(*4) 3 -- 3 * 4 = 12
+(3/) 6 -- 3 / 6 = 0.5
+(4-) 2 -- 4 - 2 = 2
+
+-- because of the haskell like syntax (-4) just means negative 4. We have to use subtract to get what we want. 
+(subtract 4) 2 -- 2 - 4 = -2
+
+-- If this is a bit confusing, don't worry, as you go through the examples you'll see how they're used and how useful they are!
+
+------------------------------------------------------------
+-- OK. You came here for music right? Let's make some noise.
+
+let sineWave = play (sin 440)
+stop sineWave -- when you've heard enough
+
+-- Hacker Tip #2: Ctrl-Period will make all the sound stop. 
+-- Sometimes you accidently make zombies. Ctrl-. is your nuclear option.
+
+-- Lich.js makes it easy to get sound going and there's a large collection of custom functions to do just that. 
+-- Evaluate the next line to see the collection of audio functions.
+ugenList
+
+-- Let's try another, how about something a bit more interesting?
+let sawz = saw 40 >> lowpass 792 15 >> play
+stop sawz
+
+-- What's going on hear? We're using the >> operator to chain different functions together.
+-- The >> operator just passes the left hand side to the function on the right. 
+-- This is useful for audio because it makes function chains look like a signal path, like guitar pedals.
+-- In the previous example we have a saw wave at 40hz fed into a lowpass filter with a cutoff of 792 hz and 15 for the res.
+-- If you want to know what arguments a particular function has, just evaluate it with no arguments. For example:
+lowpass
+
+-- If you evaluation lowpass you will see this print: (\freq q input ->)
+
+-- Ok This is fine and all but how about we make a melody?
+-- First we need to make a synth definition, we'll use the new operator =>
+let sawSynth freq => saw freq >> lowpass (freq * 16) 1 >> perc 0 0.3 0.7
+
+
+-- Synth definitions are like functions, they can take arguments and can be evaluated like this:
+play (sawSynth 440) -- You can evaluate this multiple times, it will free itself because of the perc above
+sawSynth 440 >> play -- These are equivelent.
+
+-- Now lets make a melody using a Solo Pattern
+sawMelody ~> sawSynth 110 220 330 440 550 660 770 880
+stop sawMelody
+
+-- We can get a frequency as a degree from a scale by using the degree2Freq function
+degree2Freq major 6
+degree2Freq minor -2
+d2f bartok 10 -- d2f is shorthand for degree2Freq.
+
+-- Choose a scale degree in the bartok scale and play the sawSynth with it. in the Execute this several times.
+sawSynth (d2f bartok (choose [-12..12])) >> play
+
+-- to see a full list of scales evaulate the next line
+scaleList
+
+-- We can use modifiers on a sequence by using a |
+-- After the pipe | we need to provide a function. 
+-- Here we're creating a new function from d2f minor. Partial application FTW!
+sawMelody ~> sawSynth 0 1 2 3 4 5 6 7 | (d2f minor)
+
+-- This isn't a terribly interesting melody. We can change it just be redefining it:
+sawMelody ~> sawSynth 5 5 5 4 4 7 7 1 11 1 12 2 4 0 | (d2f minor)
+stop sawMelody -- When you've heard enough
+
+
+-- The ~> operator creates a new Solo Pattern. The first argument is a synth definition (sawSynth from above)
+-- After that we get a list of numbers. The | pipe indicates that we want to use a modifier on these values.
+-- The d2f function simply translates the numbers as scale degrees into frequencies in hz. 
+-- If that's a bit too much, don't worry, just make your pattern look like above and you're in business.
+
+-- This melody is a little fast, wouldn't it be nice if we could use rests in our melody?
+sawMelody ~> sawSynth 5 5 5 _ 4 4 _ 7 7 _ 1 11 1 12 2 _ 4 0 _ | (d2f minor)
+
+-- The _ is a rest, and no synth will be played on those beats. We can use [] to make faster notes:
+sawMelody ~> sawSynth 0 1 2 3 [4 5] [6 7] | (d2f minor)
+
+-- Note that there's no commas in these []. That's because we're using a special syntax, this is unique to these patterns. 
+-- How about we mix _ and []
+sawMelody ~> sawSynth 0 _ 1 2 3 [_ 4] [_ 5] [6 7] | (d2f minor)
+stop sawMelody -- when you've heard enough
+
+
+
+-- How about some drums?
+-- We can make some very simple drums using the => again.
+-- They don't need arguments for our purpose as you'll see.
+-- Evaluate these lines one at a time.
+let bd => square 39 >> lowpass 1000 0 >> perc 0 1 0.2
+let sn => pink 1 >> perc 0 1 0.2
+let hh => violet 1 >> perc 0 0.3 (wchoose [0.8,0.2] [0.1,0.5])
+
+-- Now we can create an Impulse Pattern using the +> operator
+drums +> bd hh sn hh
+
+
+-- just like before we can edit them on the fly. Evaluating each line in turn will change the pattern
+drums +> bd hh sn hh bd [hh hh] sn [hh sn]
+drums +> [_ hh] hh
+drums +> [bd bd]
+
+-- We can use modifiers to change the durations. 
+-- The | (*2) makes all the durations twice as long
+drums +> bd hh sn hh bd [hh hh] sn [hh sn] | (*2)
+drums +> bd hh sn hh bd [hh hh] sn [hh sn] -- back to normal
+
+-- Hey, we can bring that melody back in
+sawMelody ~> sawSynth 5 5 5 _ 4 4 _ 7 7 _ [1 11] [1 12] 4 0 _ 4 0 _ | (d2f minor)
+
+-- OK what about some cool generative melody?
+sawMelody ~> sawSynth (psin 0.1 >> prange 0 10) | (d2f minor)
+
+-- Lets change it up more
+sawMelody ~> sawSynth (psin 0.2 >> prange 0 10 >> pwarp (psin 0.7)) | (d2f minor)
+
+-- how about some bass? 
+-- HackerTip #3: Head phones or nicer speakers will make everything sound better
+sawBass ~> sawSynth (psin 0.2 >> prange -2 -16 >> pstutter 14) | (d2f minor)
+
+-- And some harmony?
+sawHarmony ~> sawSynth (psaw 0.15 >> prange -2 5 >> pstutter 6)  | (d2f minor)
+
+-- Break it down
+drums +> bd hh sn hh [hh bd] [hh hh] sn [hh [sn sn]] | (*2)
+
+-- When you've heard enough, compile these in turn
+stop drums 
+stop sawMelody
+stop sawBass
+stop sawHarmony
+
+
+{-
+    Pattern functions
+    
+    "p" functions are pattern functions. These functions return lambdas that when given a beat will return a value.
+    Look over the code below to get a feel fro what the different pattern functions can do.
+    Don't worry if you don't completely grok them yet. You'll get a feel for how to use them as you go.
+-}
+
+
+-- There are a plethora of special pattern functions in Lich. Evaluate the next line to see a list
+patternList
+
+-- Each pattern function takes some number of arguments and returns a Pattern data type object.
+pseq [1,2,3] -- evaluates to: Pattern { p = (\t ->) }
+
+-- A pattern object is simply a type wrapper for a function that takes a time argument and returns a value
+-- For example we can assign the previous pattern to a value and then invoke that contained function to get a value.
+let ps = pseq [0,1,2]
+ps::p 0 -- 0
+ps::p 1 -- 1
+ps::p 2 -- 2
+ps::p 3 -- 0, pseq will wrap around to the beginning
+ps::p 4 -- 1
+
+-- Lets look at another pattern function, pseries
+let ps = pseries 1 2
+ps::p 0 -- 1
+ps::p 1 -- 3
+ps::p 2 -- 5
+ps::p 3 -- 7
+
+-- Some pattern functions expect a pattern as one of their arguments.
+-- We call these pattern filters. For example pstutter
+let ps = pseries 1 2 >> pstutter 2
+ps::p 0 -- 1
+ps::p 1 -- 1
+ps::p 2 -- 3
+ps::p 3 -- 3
+ps::p 4 -- 5
+ps::p 5 -- 5
+
+-- Here's some examples of using pattern functions to generate lists of values.
+-- Normally we'd use pattern functions in solo streams or impulse streams like above
+-- You'll see this soon, but the next several examples are just to give you some idea of what they can do.
+
+-- Evaulate a sequence of values
+let s = pseq [pseq [0,pseq [0.5, 666]], pseq [1,10], pseq [2,20]]
+foldl (\acc t -> acc ++ (s::p t)) [0] [0..12]
+
+-- Random selections from array
+let sh = prand [pseq [555,666,777], 1, 2]
+foldl (\acc t -> acc ++ (sh::p t)) [0] [0..12]
+
+-- weighted random selections
+let ws = pwrand [0.5, 0.25, 0.25] [pseq [555,666,777], 1, 2]
+foldl (\acc t -> acc ++ (ws::p t)) [0] [0..12]
+
+-- shuffle array and return a pattern that sequences it
+let ps = pshuf [0..4]
+foldl (\acc t -> acc ++ (ps::p t)) [0] [0..12]
+
+-- a pattern filter. Stutters the output of a pattern
+let st = pstutter 3 $ pseq [0..5]
+foldl (\acc t -> acc ++ (st::p t)) [0] [0..12]
+
+-- Another pattern filter. Wraps a filter within a range
+let pw = pwrap 3 6 (pseq [0..7])
+foldl (\acc t -> acc ++ (pw::p t)) [0] [0..12]
+
+-- Generates a range of values from an initial value and step size
+let ps = pseries 2 5
+foldl (\acc t -> acc ++ (ps::p t)) [0] [0..12]
+
+let ps = pwrap 0 13 $ pseries 0 2
+foldl (\acc t -> acc ++ (ps::p t)) [0] [0..12]
+
+-- Generates a range of values using multiplcation, from an initial value and step size
+let pg = pgeom 1 2
+foldl (\acc t -> acc ++ (pg::p t)) [0] [0..12]
+
+let pg = pwrap 0 13 $ pgeom 1 2
+foldl (\acc t -> acc ++ (pg::p t)) [0] [0..12]
+
+let pr = preverse $ pseq [0..4]
+foldl (\acc t -> acc ++ (pr::p t)) [0] [0..12]
+
+
+-- Now normally you don't have to worry about using the ::p and supplying an argument
+-- When using the patter functions in a pattern stream such as ~> and +> functions this will be done auto-magically
+-- The next few example use patterns to generate values in ~> streams
+
+let si freq => sin freq >> perc 0 0.3 0.15
+siner ~> si (pseq [444,555,666,777])
+
+siner ~> si (pseq [444,555,666,777] >> pstutter 3)
+
+siner ~> si (pseq [444,555,666,777] >> pwarp (pseq [13.5, pseq [-5.3, 1]]))
+stop siner
+
+-- We can also use patterns with +> streams
+-- Here we're using pattern function to select which synth definition to use
+
+let s => sin 444 >> pan 0 >> perc 0 0.5 0.3
+let s2 => sin 666 >> pan -1 >> perc 0 0.5 0.3
+let s3 => sin 777 >> pan 1 >> perc 0 0.5 0.3
+siner2 +> (pseq [s2,s3,s] >> pstutter 2)
+
+siner2 +> (pseq [s,s3,s2] >> pwarp (pseq [(1/3),(1/4)])) | (/2)
+stop siner2
+
+
+
+{-
+    beatPattern
+    
+    
+    You can't use a pattern function such as pseq or pstutter inside a synthdef normally. 
+    However by using the beatPattern function we can embed a pattern func in a synthdef, 
+    and the value according to the current beat will be returned.
+    
+    For ease we can use bp instead of beatPattern.
+-}
+
+
+let bSyn => sin freq >> pan -1 >> perc 0 1 0.25
+    where freq = pseq [1..10] >> bp >> d2f pelog
+
+beatSynthesizer +> bSyn
+
+let bSyn2 => sin freq >> pan 1 >> perc 0 1 0.25
+    where freq = pseq [1..8] >> bp >> d2f pelog
+
+beatSynthesizer +> bSyn bSyn bSyn bSyn2 bSyn2 bSyn2
+stop beatSynthesizer
+
+-- The beat based pattern functions using bp will update independant of the speed of the sequence.
+-- This is because their values are based on the current beat number, this value is found by executing: currentBeat 0
+-- If you evaluate currentBeat 0 several times you'll see the number it returns always rises according to the current tempo.
+currentBeat 0
+
+-- by using this current beat value with a pattern function we can get updated values
+-- Evaluate this several times
+(pseq [0..5])::p (currentBeat 0)
+
+-- All beatPattern (bp) does is exactly that. The next line is effectivly the same as the last
+pseq [0..5] >> bp
+
+
+-- Evaulate the next two lines to see how this separation effects the sampling of values
+beatSynthesizer +> bSyn bSyn bSyn bSyn2 bSyn2 bSyn2 | (*2) -- Slower
+beatSynthesizer +> bSyn bSyn bSyn bSyn2 bSyn2 bSyn2 | (/2) -- Faster
+
+-- More beatPattern fun
+let bSyn => sin freq >> pan -1 >> perc 0 1 0.25
+    where 
+        freq = psin 0.1 >> prange 0 6 >> pmul (pseq [1,2]) >> pwarp (psquare 0.2) >> bp >> d2f pelog
+    
+    
+let bSyn2 => sin freq >> pan 1 >> perc 0 1 0.25
+    where
+        freq = psin 0.075 >> prange 0 6 >> pmul (pseq [1,2,3]) >> pwarp (psquare 0.15) >> bp >> d2f pelog
+
+
+-- Sooo many notes, make it stttoooooppppp
+stop beatSynthesizer
+
+
+{-
+    pbind
+
+    Above we've shown solo streams (~>) and impulse streams (+>), but there's a third kind of stream generator, pbind.
+    
+    pbind is similar to the SuperCollider Pbind and Pdef
+    It takes: 
+        a pattern name (used to store in a global dictionary for updates via redefinition)
+        a synth definition (can be a pattern of synth definitions)
+        an array of arguments (each argument can be a pattern)
+        and a duration (can be pattern)
+        
+    
+    pbind name synthDef arguments duration
+-}
+
+
+let t f dur => sin (d2f slendro f) >> pan -1 >> perc 0 0.5 (dur * 1.5)
+let u f dur => sin (d2f slendro f) >> pan 1 >> perc 0 0.5 (dur * 1.5)
+
+-- pbind name synthDef arguments duration
+let testp = pbind "test" t [5, dur] dur
+    where dur = 2
+
+-- redefine, using patterns to make the sequencing more interesting
+let testp = pbind "test" (pseq [t,u,t,t,u,u,u]) [pshuf [0..5], dur] dur
+    where
+        dur = (pseq [1/2,1/2,1])
+
+-- even more patterning 
+let testp = pbind "test" syn [freqs >> pstutter 3, dur] dur
+    where 
+        syn = pseq [t,u] >> pwarp (psaw 0.3 >> pmul 10)
+        freqs = pseries 0 7 >> pmod (pseq [1..10] >> pwarp (psaw 0.03 >> pmul 20) >> pstutter 2)
+        dur = pseq (map (div 1) [1..6]) >> pwarp (psaw 0.7 >> pmul 10) >> pstutter 3
+
+stop testp
+
+
+
+{-
+    Chord Progressions
+-}
+
+let mc = Chord minor 4
+
+-- chordProgression returns a pbind that just sequences through the chords. They can be queried using ::value
+let doom = chordProgression "doom" [mc [0,2,4], mc [1,3,5], mc [2,4,6], mc [3,5,7], mc [4,6,8], mc [5,7,9]] [8] 
+
+let synth freq => saw freq >> lowpass (freq * 4) 1 >> perc 0 0.6 0.5
+
+-- We can use the progression similar to a scale, with c2f instead of d2f. c2f takes a scale and a chord degree.
+-- The chord degree can be any integer including negative numbers and will scale octaves appropriately
+bass ~> synth (pseries 0 (pseq [-2,5]) >> pfold -2 6) | (c2f doom)
+stop bass
+
+-- We can play block chords by using the map function in conjunction with the blockChord function. 
+-- Make sure the doom progression is playing!
+-- Note: block chords don't work in patterns yet :(
+let chordSynth freqs => map sf freqs
+    where
+        sf freq = saw freq >> lowpass (freq * 16) 0 >> perc 0 0.3 0.3
+
+map play $ chordSynth $ blockChord doom
+
+
+{- 
+    Buffers
+-}
+
+
+-- We can create an audio buffer by using the newBuffer function
+let myBuf = newBuffer sampleRate
+
+-- You can use buffers with the recPlayBuf ugen. This will simultaneously record into and play from a buffer, at variable rates
+let noisySynth = sin 440 >> recPlayBuf (newBuffer sampleRate) (noiseX 1) (noiseX 1 >> gain 2) >> gain 0.5 >> play
+stop noisySynth
+
+-- Even more chaotic
+let noisySynth = sin (noiseL 2 >> exprange 200 2000) >> rec >> gain 0.5 >> play
+    where 
+        rec = recPlayBuf (newBuffer sampleRate) (noiseL 7) (sin (noiseX 1 >> exprange 1 40) >> gain (noiseL 3 >> range 0 4))
+
+stop noisySynth
+
+
+-- You can create a buffer as a variable and have multiple synths share it for interesting effects
+let myBuf = newBuffer (sampleRate * 4)
+let bufSynth freq => square freq >> recPlayBuf myBuf 1 -2 >> perc 0 0.5 2
+recSequence ~> bufSynth (pseq [0..10]) | (d2f koto) -- Generate a sequence of synths that share the same buffer
+stop recSequence
+
+
+
+
+
+{- 
+    Effects and Buses
+    
+    We can route audio using the auxIn and auxOut ugens
+    By default there are 10 global aux buses, but you can also create local buses.
+-}
+
+
+
+let ff = degree2Freq coleJI
+let snare => pink 1 >> delay (1/(ff -8)) 0.1 >> perc 0.0 0.9 0.3 >> auxOut 5
+let ss => violet 1 >> bandpass (ff 3) 30 >> gain 30 >> perc 0.0 0.4 0.1 >> auxOut 5
+let lkick => square (ff -12) >> add (tri 40) >> perc 0 0.3 0.1 >> auxOut 5
+
+-- This won't make sound yet because the synths are writing to bus 5
+lkicker2 +> [lkick lkick] [snare _ ss snare] [ss [lkick lkick]] [_ ss snare _] | (*2)
+
+-- Execute the next line to hear crunchy drums.
+let drumDecimFX = auxIn 5 >> delay 0.125 0.2 >> crush 1 >> decimate (add 8000 (simplex 0.1 >> gain 3500)) >> gain 0.5 >> play
+stop drumDecimFX
+stop lkicker2
+
+
+
+-- We can use aux buses for feedback
+let s3 = auxIn 1 >> exprange 40 160 >> square >> gain 0.2 >> delay 1 0.5 >> auxThrough 1 >> gain 2 >> play
+stop s3
+
+-- We can also use a localBus so as to not collide with anything else that might use a particular auxillary bus
+let s4 = feed >> exprange 40 160 >> square >> gain 0.2 >> delay 1 0.5 >> auxThrough feed >> gain 2 >> play
+    where feed = localBus 1 -- local bus!
+    
+stop s4
+
+-- Filters and feed back go great together. fir is a good choice because it's more stable than an iir.
+-- Stop and execute this several times to hear different harmonics
+let feedSynth = sq >> add (auxIn 0 >> delay (1/6) 0) >> fil >> limiter -3 >> auxThrough 0 >> gain 0.3 >> play
+    where
+        sq = square (saw 1 >> exprange 1 20000)
+        fil = fir [random -0.4 0.4 | x <- [1..10]] -- haskell-like list comprehensions 
+        
+stop feedSynth
+
+
+{-
+    Graphics
+    
+    Careful, the graphics can really bog down the editor! 
+
+    The graphics library is still young and needs more development.
+    At the moment it's very stateful, which isn't ideal, but hey, it works! ...ish
+-}
+
+initGraphics 0 -- MUST DO THIS FIRST!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+setBackground (random 0 255) (random 0 255) (random 0 255)
+let s = sphere [random -100 100, random -100 100, random -10 10] 50 [random 0 255, random 0 255, random 0 255]
+let c = cube [random -100 100, random -100 100, random -100 100] [25, 25, 25] [random 0 (2*pi), random 0 (2*pi), random 0 (2*pi)] [0,200,150] 
+
+setShader $ choose shaders
+deleteMesh s
+deleteMesh c
+
+deleteScene
+shaders
+
+let s = sphere [random -100 100, random -100 100, random -10 10] 50 [random 0 255, random 0 255, random 0 255]
+let c = cube [random -100 100, random -100 100, random -100 100] [25, 25, 25] [random 0 (2*pi), random 0 (2*pi), random 0 (2*pi)] [0,200,150] 
+
+
+setShaders $ map (choose) $ replicate 2 shaders
+clearShaders 0
+wireframe true s
+wireframe true c
+wireframe false s
+wireframe false c
+
+
+wireframeAll (choose [true, false])
+
+move [-1, -10, -2] s
+move [-1, 1, -1] c
+moveAll [random -1 1, random -1 1, random -1 1]
+
+setColor [random 0 255, random 0 255, random 0 255] c
+setColor [random 0 255, random 0 255, random 0 255] s
+setColorAll [random 0 255, random 0 255, random 0 255]
+
+rotate [random -1 1, random -1 1, random -1 1] c
+rotateAll [random -1 1, random -1 1, random -1 1]
+
+linear [0, 0, 1] c
+linearAll [random -1 1, random -1 1, random -1 1]
+
+angular [random -0.1 0.1, random -0.1 0.1, random -0.1 0.1] c
+angularAll [random -0.1 0.1, random -0.1 0.1, random -0.1 0.1]
+
+setPosition [random -50 50, random -50 50, random -50 50] s
+setPositionAll [random -50 50, random -50 50, random -50 50]
+
+scale [random 0.1 1, random 0.1 1, random 0.1 1] s
+scaleAll [random 0.1 1, random 0.1 1, random 0.1 10]
+
+-- supports streaming style syntax
+s >> wireframe (choose [true, false]) >> setPosition [random -10 10, random -10 10, random -10 10] >> setColor [random 0 255, random 0 255, random 0 255] >> linear [random -1 1, random -1 1, random -1 1]
+
+deleteScene 0 -- clear out the scene
+
+cloudMesh (random 10 100) [random 0 255, random 0 255, random 0 255]
+deleteScene 0 -- clear out the scene
+gaussianMesh (random 10 100) [random 0 255, random 0 255, random 0 255]
+deleteScene 0 -- clear out the scene
+sinMesh (random 10 100) [random 0 255, random 0 255, random 0 255]
+deleteScene 0 -- clear out the scene
+
+sinMapMesh 30 30 [random 0 255, random 0 255, random 0 255]
+scaleAll [4, 4, 4]
+deleteScene 0 -- clear out the scene
+
+let n = noiseMapMesh 30 30 [random 0 255, random 0 255, random 0 255]
+scale [4, 4, 4] n
+angular [0.01, 0.01, 0.03] n
+
+deleteMesh n
+
+let g = gaussianMapMesh 30 30 [random 0 255, random 0 255, random 0 255]
+scale [4, 4, 4] g
+angular [0.01, 0.01, 0.03] g
+
+deleteMesh g
+
+
+let s = squareMapMesh 30 30 [random 0 255, random 0 255, random 0 255]
+scale [6,6,6] s
+angular [0.01, 0.01, 0.03] s
+
+deleteMesh s
+
+let s = sawMapMesh 30 30 [random 0 255, random 0 255, random 0 255]
+scale [4, 4, 4] s
+angular [0.01, 0.01, 0.03] s
+
+deleteMesh s
+
+let t = triMapMesh 30 30 [random 0 255, random 0 255, random 0 255]
+scale [10, 10, 10] t
+angular [0.01, 0.01, 0.03] t
+
+deleteMesh t
+
+-- Won't be able to initially see it because of culling, set the angular!
+let f = flatMapMesh 30 30 [random 0 255, random 0 255, random 0 255]
+scale [4, 4, 4] f
+angular [0.01, 0.01, 0.03] f
+
+deleteMesh f
+deleteScene
+
+let s = sawMapMesh 20 20 [random 0 255, random 0 255, random 0 255]
+scale [7, 7, 7] s
+angular [0.01, 0.01, 0.03] s
+
+-- Generate random shader. Potentially very chaotic! Get ready to execute the line below!
+spliceShader $ randomString $ random 1 5
+clearShaders 0
+
+deleteScene 0
+
+-- Patterns are supported as well!
+let s = sphere [random -100 100, random -100 100, random -10 10] 50 [random 0 255, random 0 255, random 0 255]
+let c = cube [random -100 100, random -100 100, random -10 10] [50,50,50] [0.1,0,0] [random 0 255, random 0 255, random 0 255]
+
+-- execute these two "meshSynths", then the pattern below
+let meshSynth => s >> wireframe (choose [true, false]) >> po >> co >> li
+    where
+        po = setPosition [random -10 10, random -10 10, random -10 10]
+        co = setColor [random 0 255, random 0 255, random 0 255]
+        li = linear [random -1 1, random -1 1, random -1 1]
+        
+let meshSynth2 => c >> wireframe (choose [true, false]) >> po >> co >> li
+    where
+        po = setPosition [random -10 10, random -10 10, random -10 10]
+        co = setColor [random 0 255, random 0 255, random 0 255]
+        li = linear [random -1 1, random -1 1, random -1 1] >> angular [random 0 0.1, random 0 0.1, random 0 0.1]
+
+meshSeq +> meshSynth meshSynth2 meshSynth [meshSynth2 meshSynth]
+
+-- Shader sequencing, yay!
+let shaderSynth => spliceShader $ randomString $ random 1 5
+shaderSeq +> shaderSynth | (*2)
+
+stop shaderSeq
+clearShaders 0
+stop meshSeq
+deleteScene 0
