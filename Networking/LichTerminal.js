@@ -132,11 +132,11 @@ function createTextArea(name,num,total)
 		if(name == clientName)
 		{
 			session.selection.on('changeCursor', networkCursor);
-			editor.on('input', function()
-					  {
-						  broadcastTyping(editor.getValue());
-					  });
+			editor.on('input', function() {
+				broadcastTyping(editor.getValue());
+			});
 		}
+		
 		else
 		{
 			editor.setReadOnly(true);
@@ -230,7 +230,9 @@ function createTextArea(name,num,total)
 	if(name == clientName)
 	{
 		nameTag.style.top = (document.documentElement.clientHeight * 1.0 * (num/total)) + "px";
+		runStartUpFunctions(clientName);
 	}
+	
 	else
 	{
 		var half = document.documentElement.clientHeight * 0.5;

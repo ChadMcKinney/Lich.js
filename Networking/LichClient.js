@@ -81,13 +81,13 @@ function login()
 {
 	clientName = getCookie("name");
 
-	if(clientName==null)
+	if(clientName == null)
 	{
-		clientName = prompt("Please enter your name","Noob"+Math.floor((Math.random()*1000)+1));
+		clientName = prompt("Please enter your name","Fledgling Undead "+Math.floor((Math.random()*1000)+1));
 		createCookie("name",clientName,30);
 	}
 
-	if (clientName!=null)
+	if(clientName != null)
   	{
   		socket.emit('LoginInfo',clientName);
   	}
@@ -241,8 +241,9 @@ function clientConnected()
 		//console.log("Connected to server.");
 		connectionStatus.style.color = "rgb(0,130,60)";
 		connectionStatus.value = "Connected";
-		runStartUpFunctions();
+		runStartUpFunctions(clientName);
 	}
+	
 	connected = true;
 }
 
@@ -327,11 +328,14 @@ function getCookie(name) {
 	return (result === null) ? null : result[1];
 }
 
-function runStartUpFunctions()
+function runStartUpFunctions(cName)
 {
+	if(cName == null || typeof cName === "undefined")
+		return;
+	
 	for(var i = 0; i < startUpFunctions.length; ++i)
 	{
-		startUpFunctions[i]();
+		startUpFunctions[i](cName);
 	}
 
 	startUpFunctions = [];
@@ -346,7 +350,7 @@ function fillClientTerminal(text)
 {
 	if(!connected)
 	{
-		startUpFunctions.push(function(){editors[clientName].setValue(text, 0); editors[clientName].navigateFileStart();});
+		startUpFunctions.push(function(cName){editors[cName].setValue(text, 0); editors[cName].navigateFileStart();});
 	}
 
 	else
