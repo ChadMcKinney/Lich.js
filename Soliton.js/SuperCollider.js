@@ -1529,28 +1529,6 @@ function scTExpRand(lo,hi,trigger)
 	return multiNewUGen("TExpRand", AudioRate, [lo,hi,trigger], 1, 0);
 }
 
-/**
- * Triggerable steps at a given interval between minimum and maximum values.
- *
- * @class stepper
- * @constructor
- * @param min Lowest possible value
- * @param max Highest possible value
- * @param step The range by which each step will jump.
- * @param trigger A trigger happens when the signal changes from non-positive to positive
- * @example
- * let stepSynth stepFreq => sin freq >> dup >> gain 0.3 >> out 0
- *   where
- *       freq = stepper 220 440 20 (impulse stepFreq)
- *
- * let stSynth = stepSynth 4
- * stop stSynth
- */
-function stepper(min, max, step, trig)
-{
-	return multiNewUGen("Stepper", AudioRate, [trig, 0, min, max, step, min], 1, 0); 
-}
-
 function _findName(input)
 {
 	var label = "";
@@ -2796,6 +2774,142 @@ function line(start,end,dur)
 function line(start,end,dur)
 {
 	return multiNewUGen("Line", AudioRate, [start,end,dur,0], 1, 0);
+}
+
+/**
+ * Outputs a trigger when input value is changed.
+ *
+ * @class changed
+ * @constructor
+ * @param threshold The minimum change for the trigger. 0 in most cases
+ * @param input Input signal
+ * @example
+ * TODO
+ */
+function changed(threshold,input)
+{
+	return multiNewUGen("Changed", AudioRate, [input,threshold], 1, 0);
+}
+
+/**
+ * Triggers
+ * @submodule Triggers
+ */
+
+/**
+ * Pass when gate is positive, otherwise holds last value.
+ *
+ * @class gate 
+ * @constructor
+ * @param trigger Signal to be used as a gate
+ * @param input Input signal
+ * @example
+ * TODO
+ */
+function gate(trigger,input)
+{
+	return multiNewUGen("Gate", AudioRate, [input,trigger], 1, 0);
+}
+
+/**
+ * Output the last value before the input changed more than a threshhold.
+ *
+ * @class lastvalue
+ * @constructor
+ * @param diff Difference threshhold
+ * @param input Input signal
+ * @example
+ * TODO
+ */
+function lastvalue(diff,input)
+{
+	return multiNewUGen("LastValue", AudioRate, [input,diff], 1, 0);
+}
+
+/**
+ * Sample and hold.
+ *
+ * @class latch
+ * @constructor
+ * @param trigger Signal that causes new value to be sampled
+ * @param input Input signal
+ * @example
+ * TODO
+ */
+function latch(trigger,input)
+{
+	return multiNewUGen("Latch", AudioRate, [input,trigger], 1, 0);
+}
+
+/**
+ * Linear ramp between start and end values. When its trigger input crosses from non-positive to positive, Phasor's output will jump to its reset position. Upon reaching the end of its ramp Phasor will wrap back to its start.
+ *
+ * @class phasor
+ * @constructor
+ * @param rate The amount of change per sample, i.e at a rate of 1 the value of each sample will be 1 greater than the preceding sample.
+ * @param start Start value
+ * @param end End value
+ * @param resetpos Where to jump on reset (0-1)
+ * @param trigger Signal that causes phasor to reset
+ * @example
+ * TODO
+ */
+function phasor(rate,start,end,resetpos,trigger)
+{
+	return multiNewUGen("Phasor", AudioRate, [trigge,rrate,start,end,resetpos], 1, 0);
+}
+
+/**
+ * Each trigger increments a counter which is output as a signal.
+ *
+ * @class pulsecount
+ * @constructor
+ * @param reset Signal which resets the counter
+ * @param trigger Signal that increments the counter
+ * @example
+ * TODO
+ */
+function pulsecount(reset,trigger)
+{
+	return multiNewUGen("PulseCount", AudioRate, [trigger,reset], 1, 0);
+}
+
+/**
+ * Outputs one impulse each time it receives a certain number of triggers at its input.
+ *
+ * @class pulsedivider
+ * @constructor
+ * @param div Dumber of pulses to divide by
+ * @param start Starting value for the trigger count. This lets you start somewhere in the middle of a count, or if startCount is negative it adds that many counts to the first time the output is triggers.
+ * @param trigger Signal that increments the counter
+ * @example
+ * TODO
+ */
+function pulsedivider(div,start,trigger)
+{
+	return multiNewUGen("PulseDivider", AudioRate, [trigger,div,start], 1, 0);
+}
+
+/**
+ * Triggerable steps at a given interval between minimum and maximum values.
+ *
+ * @class stepper
+ * @constructor
+ * @param min Lowest possible value
+ * @param max Highest possible value
+ * @param step The range by which each step will jump.
+ * @param trigger A trigger happens when the signal changes from non-positive to positive
+ * @example
+ * let stepSynth stepFreq => sin freq >> dup >> gain 0.3 >> out 0
+ *   where
+ *       freq = stepper 220 440 20 (impulse stepFreq)
+ *
+ * let stSynth = stepSynth 4
+ * stop stSynth
+ */
+function stepper(min, max, step, trig)
+{
+	return multiNewUGen("Stepper", AudioRate, [trig, 0, min, max, step, min], 1, 0); 
 }
 
 /**

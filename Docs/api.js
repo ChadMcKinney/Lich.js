@@ -17,6 +17,7 @@ YUI.add("yuidoc-meta", function(Y) {
         "bufDelayC",
         "bufDelayL",
         "bufDelayN",
+        "changed",
         "clip",
         "clipNoise",
         "coingate",
@@ -43,6 +44,7 @@ YUI.add("yuidoc-meta", function(Y) {
         "formant",
         "freeverb",
         "freqshift",
+        "gate",
         "gausstrig",
         "gbmanL",
         "gbmanN",
@@ -51,6 +53,8 @@ YUI.add("yuidoc-meta", function(Y) {
         "highpass",
         "impulse",
         "lag",
+        "lastvalue",
+        "latch",
         "leakdc",
         "leakdc1",
         "limiter",
@@ -66,10 +70,13 @@ YUI.add("yuidoc-meta", function(Y) {
         "pan",
         "perc",
         "perc2",
+        "phasor",
         "pink",
         "pitchshift",
         "poll",
         "pulse",
+        "pulsecount",
+        "pulsedivider",
         "range",
         "saw",
         "scACos",
@@ -140,7 +147,8 @@ YUI.add("yuidoc-meta", function(Y) {
         "Oscillators",
         "Panning",
         "Random",
-        "Signal Math"
+        "Signal Math",
+        "Triggers"
     ],
     "allModules": [
         {
@@ -212,6 +220,11 @@ YUI.add("yuidoc-meta", function(Y) {
             "displayName": "Signal Math",
             "name": "Signal Math",
             "description": "Signal Math. TODO: fix all the examples"
+        },
+        {
+            "displayName": "Triggers",
+            "name": "Triggers",
+            "description": "Triggers"
         }
     ]
 } };
