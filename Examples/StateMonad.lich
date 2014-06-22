@@ -1,0 +1,58 @@
+/////////////////////
+// State Monad
+/////////////////////
+
+let testdo = do
+    x <- get
+    mprint x -- mprint is a monadic print that allows for easy printing with do syntax
+    put (x + 1)
+    y <- get
+    mprint y
+    mprint "Hello, world."
+    result (y + 1)
+
+runState testdo 0
+evalState testdo 8
+execState testdo 0
+runState (result 5 >>= \x -> mprint x >>= \_ -> mprint "Hello, world.") 0
+let m = (result 5 >>= \x -> mprint x >>= \x -> result x)
+runState m 99
+runState (m >>= \_ -> result 10) 0
+runState (mprint 5 >>= \x -> result x) 0
+
+
+-- lift
+let testdo = do
+    x <- get
+    lift play (sin x >> perc 0 0.7 2)
+    put (x + 13)
+    y <- get
+    lift play (sin y >> perc 0 0.7 2)
+    result (y + 1)
+
+let m = 440
+let m = evalState testdo m -- Continually rises on execution
+
+
+-- Stack example (borrowed from Learn You a Haskell)
+let pop = State (\(x:xs) -> Result x xs)
+let push a = State (\xs -> Result Nothing (a:xs))
+
+let stackManip = do
+    push 3
+    pop
+    pop
+    
+    
+runState stackManip [5,8,2,1]
+
+let stackStuff = do
+    a <- pop
+    if a == 5
+        then push 5
+        else do
+            push 3
+            push 8
+            
+runState stackStuff [9,0,2,1,0]
+
