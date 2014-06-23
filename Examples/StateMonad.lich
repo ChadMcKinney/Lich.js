@@ -1,6 +1,6 @@
-/////////////////////
-// State Monad
-/////////////////////
+{-
+    State Monad Examples
+-}
 
 let testdo = do
     x <- get

@@ -99,15 +99,16 @@
 	<textarea  id="demoCode" style="display:none">
 {-
     Welcome to Lich.js!
+
+    **** Lich.js is designed for collaboration. If nobody is in the server with you, invite a friend! ****
+    If you want to chat with any other players you can use alt-c to enter chat messages.
+
     Lich.js is a new language for live coding music and graphics directly in a web browser. 
     This is a little demo page to give you an idea of what's possible. 
     The language isn't quite done yet (beta!), and there's still some bugs, but there is much fun to be had. 
     The syntax is similar to Haskell, but if you haven't used it, don't be scared. 
 
     If you want to get the source code or learn how to run your own server go to https://github.com/ChadMcKinney/Lich.js
-    
-    Lich.js is designed for collaboration. If nobody is in the server with you, invite a friend!
-    If you want to chat with any other players you can use alt-c to enter chat messages.
 
     When you're done playing with Lich.js please go to http://www.chadmckinneyaudio.com/lich/ and fill out the questionnaire.
 
@@ -121,7 +122,7 @@
 
 -- Hacker Tip #1: Comments begin with --
 
--- Lets warm up with some math. Put your cursor on the next line and hold shift, then press enter. You should see 4 post.
+-- Lets warm up with some math. Put your cursor on the next line and hold shift, then press enter or return. You should see 4 post.
 2 + 2
 
 -- Lich.js uses normal order of operations. For example, this will return 7:
@@ -142,7 +143,7 @@ addFive 1337
 
 -- One last thing before we make some noise. Let's talk about partial application. 
 -- Partial application is used heavily in Lich.js so it will be good to get used to it.
--- Normally a language requires you to supply all the arguments for a function for it to work. For example:
+-- Normally a language requires you to supply all the arguments for a function for it to return a result. For example:
 add 2 3 -- Evaluates to 5
 
 -- In Haskell (and Lich) we can actually provide less than the expected number of arguments.
@@ -152,7 +153,7 @@ add -- Evaulates to (\l r ->)
 
 -- We can assign this to variable and use it like any other function
 let addTwo = add 2
-addTwo 5 -- 7
+addTwo 5 -- returns 7
 
 
 -- This can be done with any function at all. Math operations are so common we have shortcuts
@@ -183,17 +184,17 @@ ugenList
 let sawz = saw 40 >> lowpass 792 15 >> play
 stop sawz
 
--- What's going on hear? We're using the >> operator to chain different functions together.
+-- What's going on here? We're using the >> operator to chain different functions together.
 -- The >> operator just passes the left hand side to the function on the right. 
 -- This is useful for audio because it makes function chains look like a signal path, like guitar pedals.
 -- In the previous example we have a saw wave at 40hz fed into a lowpass filter with a cutoff of 792 hz and 15 for the res.
 -- If you want to know what arguments a particular function has, just evaluate it with no arguments. For example:
 lowpass
 
--- If you evaluation lowpass you will see this print: (\freq q input ->)
+-- If you evaluate lowpass you will see this print: (\freq q input ->)
 
 -- Ok This is fine and all but how about we make a melody?
--- First we need to make a synth definition, we'll use the new operator =>
+-- First we need to make a synth definition, we'll use the operator =>
 let sawSynth freq => saw freq >> lowpass (freq * 16) 1 >> perc 0 0.3 0.7
 
 
@@ -201,7 +202,7 @@ let sawSynth freq => saw freq >> lowpass (freq * 16) 1 >> perc 0 0.3 0.7
 play (sawSynth 440) -- You can evaluate this multiple times, it will free itself because of the perc above
 sawSynth 440 >> play -- These are equivelent.
 
--- Now lets make a melody using a Solo Pattern
+-- Now lets make a melody using a Solo Stream
 sawMelody ~> sawSynth 110 220 330 440 550 660 770 880
 stop sawMelody
 
@@ -217,17 +218,22 @@ sawSynth (d2f bartok (choose [-12..12])) >> play
 -- to see a full list of scales evaulate the next line
 scaleList
 
--- We can use modifiers on a sequence by using a |
+-- We can add modifiers to a sequence by using the pipe character |
 -- After the pipe | we need to provide a function. 
 -- Here we're creating a new function from d2f minor. Partial application FTW!
 sawMelody ~> sawSynth 0 1 2 3 4 5 6 7 | (d2f minor)
 
--- This isn't a terribly interesting melody. We can change it just be redefining it:
+
+-- **** Reminder: Lich.js is designed for collaboration. If nobody is in the server with you, invite a friend! ****
+
+
+-- This isn't a terribly interesting melody. We can change it just be redefining it
+-- Evaluate the next line and you will hear the melody sequence change.
 sawMelody ~> sawSynth 5 5 5 4 4 7 7 1 11 1 12 2 4 0 | (d2f minor)
 stop sawMelody -- When you've heard enough
 
 
--- The ~> operator creates a new Solo Pattern. The first argument is a synth definition (sawSynth from above)
+-- The ~> operator creates a new Solo Stream. The first argument is a synth definition (sawSynth from above)
 -- After that we get a list of numbers. The | pipe indicates that we want to use a modifier on these values.
 -- The d2f function simply translates the numbers as scale degrees into frequencies in hz. 
 -- If that's a bit too much, don't worry, just make your pattern look like above and you're in business.
@@ -238,7 +244,7 @@ sawMelody ~> sawSynth 5 5 5 _ 4 4 _ 7 7 _ 1 11 1 12 2 _ 4 0 _ | (d2f minor)
 -- The _ is a rest, and no synth will be played on those beats. We can use [] to make faster notes:
 sawMelody ~> sawSynth 0 1 2 3 [4 5] [6 7] | (d2f minor)
 
--- Note that there's no commas in these []. That's because we're using a special syntax, this is unique to these patterns. 
+-- Note that there's no commas in these []. That's because we're using a special syntax, this is unique to these pattern streams. 
 -- How about we mix _ and []
 sawMelody ~> sawSynth 0 _ 1 2 3 [_ 4] [_ 5] [6 7] | (d2f minor)
 stop sawMelody -- when you've heard enough
@@ -253,7 +259,7 @@ let bd => square 39 >> lowpass 1000 0 >> perc 0 1 0.2
 let sn => pink 1 >> perc 0 1 0.2
 let hh => violet 1 >> perc 0 0.3 (wchoose [0.8,0.2] [0.1,0.5])
 
--- Now we can create an Impulse Pattern using the +> operator
+-- Now we can create an Impulse Stream using the +> operator
 drums +> bd hh sn hh
 
 
@@ -296,13 +302,14 @@ stop sawHarmony
 {-
     Pattern functions
     
-    "p" functions are pattern functions. These functions return lambdas that when given a beat will return a value.
-    Look over the code below to get a feel fro what the different pattern functions can do.
+    Lich.js contains several functions that begin with the letter p, such as pseq, pstutter, and pwarp.
+    These functions are pattern functions. These functions return lambdas that when given a beat will return a value.
+    Look over the code below to get a feel for what the different pattern functions can do.
     Don't worry if you don't completely grok them yet. You'll get a feel for how to use them as you go.
 -}
 
 
--- There are a plethora of special pattern functions in Lich. Evaluate the next line to see a list
+-- There are a plethora of pattern functions in Lich. Evaluate the next line to see a list
 patternList
 
 -- Each pattern function takes some number of arguments and returns a Pattern data type object.
@@ -318,13 +325,13 @@ ps::p 3 -- 0, pseq will wrap around to the beginning
 ps::p 4 -- 1
 
 -- Lets look at another pattern function, pseries
-let ps = pseries 1 2
+let ps = pseries 1 2 -- this pseries begins with 1 and steps by 2
 ps::p 0 -- 1
 ps::p 1 -- 3
 ps::p 2 -- 5
 ps::p 3 -- 7
 
--- Some pattern functions expect a pattern as one of their arguments.
+-- Some pattern functions expect another pattern function as one of their arguments.
 -- We call these pattern filters. For example pstutter
 let ps = pseries 1 2 >> pstutter 2
 ps::p 0 -- 1
@@ -340,48 +347,48 @@ ps::p 5 -- 5
 
 -- Evaulate a sequence of values
 let s = pseq [pseq [0,pseq [0.5, 666]], pseq [1,10], pseq [2,20]]
-foldl (\acc t -> acc ++ (s::p t)) [0] [0..12]
+foldl (\acc t -> acc ++ (s::p t)) [] [0..12]
 
 -- Random selections from array
 let sh = prand [pseq [555,666,777], 1, 2]
-foldl (\acc t -> acc ++ (sh::p t)) [0] [0..12]
+foldl (\acc t -> acc ++ (sh::p t)) [] [0..12]
 
 -- weighted random selections
 let ws = pwrand [0.5, 0.25, 0.25] [pseq [555,666,777], 1, 2]
-foldl (\acc t -> acc ++ (ws::p t)) [0] [0..12]
+foldl (\acc t -> acc ++ (ws::p t)) [] [0..12]
 
 -- shuffle array and return a pattern that sequences it
 let ps = pshuf [0..4]
-foldl (\acc t -> acc ++ (ps::p t)) [0] [0..12]
+foldl (\acc t -> acc ++ (ps::p t)) [] [0..12]
 
 -- a pattern filter. Stutters the output of a pattern
 let st = pstutter 3 $ pseq [0..5]
-foldl (\acc t -> acc ++ (st::p t)) [0] [0..12]
+foldl (\acc t -> acc ++ (st::p t)) [] [0..12]
 
 -- Another pattern filter. Wraps a filter within a range
 let pw = pwrap 3 6 (pseq [0..7])
-foldl (\acc t -> acc ++ (pw::p t)) [0] [0..12]
+foldl (\acc t -> acc ++ (pw::p t)) [] [0..12]
 
 -- Generates a range of values from an initial value and step size
 let ps = pseries 2 5
-foldl (\acc t -> acc ++ (ps::p t)) [0] [0..12]
+foldl (\acc t -> acc ++ (ps::p t)) [] [0..12]
 
 let ps = pwrap 0 13 $ pseries 0 2
-foldl (\acc t -> acc ++ (ps::p t)) [0] [0..12]
+foldl (\acc t -> acc ++ (ps::p t)) [] [0..12]
 
 -- Generates a range of values using multiplcation, from an initial value and step size
 let pg = pgeom 1 2
-foldl (\acc t -> acc ++ (pg::p t)) [0] [0..12]
+foldl (\acc t -> acc ++ (pg::p t)) [] [0..12]
 
 let pg = pwrap 0 13 $ pgeom 1 2
-foldl (\acc t -> acc ++ (pg::p t)) [0] [0..12]
+foldl (\acc t -> acc ++ (pg::p t)) [] [0..12]
 
 let pr = preverse $ pseq [0..4]
-foldl (\acc t -> acc ++ (pr::p t)) [0] [0..12]
+foldl (\acc t -> acc ++ (pr::p t)) [] [0..12]
 
 
 -- Now normally you don't have to worry about using the ::p and supplying an argument
--- When using the patter functions in a pattern stream such as ~> and +> functions this will be done auto-magically
+-- When using the patter functions in a pattern stream such as with ~> and +> functions this will be done auto-magically
 -- The next few example use patterns to generate values in ~> streams
 
 let si freq => sin freq >> perc 0 0.3 0.15
@@ -409,19 +416,22 @@ stop siner2
     beatPattern
     
     
-    You can't use a pattern function such as pseq or pstutter inside a synthdef normally. 
-    However by using the beatPattern function we can embed a pattern func in a synthdef, 
+    You can't use a pattern function such as pseq or pstutter inside a synth definition normally. 
+    However by using the beatPattern function we can embed a pattern function in a synth definition, 
     and the value according to the current beat will be returned.
     
-    For ease we can use bp instead of beatPattern.
+    For speed we can use bp instead of beatPattern.
 -}
 
-
+-- Every time this synth is invoked bp will evaluate pseq according to the current global beat value
+-- d2f pelog will then turn this value (which is between 1 and 10) into a frequency used by he sin oscillator.
+-- Hacker Tip #4: Multi-line blocks of code will be evaluated if you cursor is anywhere inside the block when you press shift-return.
 let bSyn => sin freq >> pan -1 >> perc 0 1 0.25
     where freq = pseq [1..10] >> bp >> d2f pelog -- Note the use of the bp function!!
 
 beatSynthesizer +> bSyn
 
+-- create a new synth with a different sequence
 let bSyn2 => sin freq >> pan 1 >> perc 0 1 0.25
     where freq = pseq [1..8] >> bp >> d2f pelog
 
@@ -469,7 +479,7 @@ stop beatSynthesizer
     It takes: 
         a pattern name (used to store in a global dictionary for updates via redefinition)
         a synth definition (can be a pattern of synth definitions)
-        an array of arguments (each argument can be a pattern)
+        a list of arguments (each argument can be a pattern)
         and a duration (can be pattern)
         
     
@@ -523,16 +533,22 @@ let chordSynth freqs => map sf freqs
     where
         sf freq = saw freq >> lowpass (freq * 16) 0 >> perc 0 0.3 0.3
 
+								 
 map play $ chordSynth $ blockChord doom
 
 
+-- In haskell we use $ similar to using (), it's just a fast way to separate function application. The next line is the same as the last.
+map play (chordSynth (blockChord doom))
+
+
+		   
 {- 
     Buffers
 -}
 
 
--- We can create buffer by using the newBuffer function
-let myBuf = newBuffer sampleRate
+-- We can create an audio buffer by using the newBuffer function
+let myBuf = newBuffer sampleRate -- Returns a Float32Array
 
 -- You can use buffers with the recPlayBuf ugen. This will simultaneously record into and play from a buffer, at variable rates
 let noisySynth = sin 440 >> recPlayBuf (newBuffer sampleRate) (noiseX 1) (noiseX 1 >> gain 2) >> gain 0.5 >> play
@@ -564,7 +580,7 @@ stop recSequence
 -}
 
 
-
+-- evaluate the next several lines in turn. You won't hurry any sound until you get to the drumDecimFX line below.
 let ff = degree2Freq coleJI
 let snare => pink 1 >> delay (1/(ff -8)) 0.1 >> perc 0.0 0.9 0.3 >> auxOut 5
 let ss => violet 1 >> bandpass (ff 3) 30 >> gain 30 >> perc 0.0 0.4 0.1 >> auxOut 5
@@ -595,7 +611,7 @@ stop s4
 let feedSynth = sq >> add (auxIn 0 >> delay (1/6) 0) >> fil >> limiter -3 >> auxThrough 0 >> gain 0.3 >> play
     where
         sq = square (saw 1 >> exprange 1 20000)
-        fil = fir [random -0.4 0.4 | x <- [1..10]] -- haskell-like list comprehensions 
+        fil = fir [random (-1/x) (1/x) | x <- [1..20]] -- haskell-like list comprehensions 
         
 stop feedSynth
 
