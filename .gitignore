@@ -7,3 +7,4 @@ node_modules/
 Samples/
 /node_modules/*/node-modules/ 
 .DS_Store
+*.swp
