@@ -56,48 +56,61 @@ var users = new Array();
 //Setup websocket code
 io.sockets.on('connection', function (socket) {
     var address = socket.handshake.address;
-    console.log("New connection from " + address.address + ":" + address.port);
+	if(address != null)
+		console.log("New connection from " + address/*.address + ":" + address.port*/);
+	else
+		console.log("New connection from null address");
 
     socket.on('Typing', function (id, text) {
+		// console.log("Typing: " + id + " - " + text);
 		socket.broadcast.emit('TypingClient',id, text);
     });
 
     socket.on('BroadcastCode', function (data) {
+		// console.log("BroadcastCode: " + data);
         socket.broadcast.emit('BroadcastCodeClient',data);
     });
 
     socket.on('BroadcastNetEval', function (data) {
-        io.sockets.emit('BroadcastCodeClient',data);
+		// console.log("BroadcastNetEval: " + data);
+		io.sockets.emit('BroadcastCodeClient',data);
     });
 
     socket.on('StateSync', function (state) {
+		// console.log("StateSync: " + state);
         io.sockets.emit('StateSyncClient',state);
     });
 
     socket.on('Chat', function (data) {
+		// console.log("Chat: " + data);
         io.sockets.emit('ChatClient',data);
     });
 
     socket.on('Login',function (name){
-        socket.emit('LoginClient');
+		// console.log("Login");
+		socket.emit('LoginClient');
     });
 
 	socket.on('CursorPos',function(name,x,y){
+		// console.log("CursorPos: " + name + " - " + x + "," + y);
 		socket.broadcast.emit('CursorPosClient',name,x,y);
 	});
 
     socket.on('LoginInfo', function(name)
     {
+		// console.log("LoginInfo: " + name);
         loginInfo(name,address,socket);
     });
 
     socket.on('disconnect',function()
     {
+		// console.log("DISCONNECT!!");
         disconnect(socket,address);
     });
 
     socket.on('ReadFile',function(fileName)
     {
+		// console.log("ReadFile: " + fileName);
         fs.readFile("./Pieces/"+fileName+".lich", 'utf8', function(err, data) {
             try
             {
@@ -115,6 +128,7 @@ io.sockets.on('connection', function (socket) {
 
     socket.on('CompileLib',function(libName)
     {
+		// console.log("CompileLibL " + libName);
         fs.readFile("./Pieces/"+libName+".lich", 'utf8', function(err, data) {
             try
             {
@@ -133,7 +147,7 @@ io.sockets.on('connection', function (socket) {
 
 function loginInfo(name,address,socket)
 {
-    console.log("Login information received for: " + name);
+    // console.log("Login information received for: " + name);
 
     var newUser = new User(name,address);
 
@@ -158,7 +172,7 @@ function disconnect(socket,address)
         if(users[i].address == address)
         {
             usersToDelete.push(users[i]);
-            console.log("Disconnecting user:" + users[i].name + " - " + users[i].address.address + ":" + users[i].address.port);
+            console.log("Disconnecting user:" + users[i].name + " - " + users[i].address/* + users[i].address.address + ":" + users[i].address.port*/);
         }
     }
 
@@ -192,7 +206,7 @@ function printUsers()
     console.log("CurrentUsers:[\n");
     for (var i=0;i<users.length;i++)
     { 
-        console.log("   " + users[i].name + " - " + users[i].address.address + ":" + users[i].address.port + ",\n");
+        console.log("   " + users[i].name + " - " + users[i].address/* + ":" + users[i].address.port*/ + ",\n");
     }
     console.log("];\n");
 }

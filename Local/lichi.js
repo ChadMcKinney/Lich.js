@@ -34,6 +34,7 @@ eval(
 );
 
 eval(fs.readFileSync("../Library/Prelude.js") + "" + fs.readFileSync("../Soliton.js/SuperCollider.js") + "" + fs.readFileSync("../Soliton.js/Patterns.js") + "");
+eval(fs.readFileSync("../Networking/LichLocalNetworking.js") + ""/* + fs.readFileSync("../Networking/LichClient.js")*/);
 
 // Overwrite global printing so that we can use the console instead of the DOM.
 post = console.log;
@@ -119,6 +120,7 @@ process.stdin.on('readable', function() {
       			_quit();
       			break;*/
 			default:
+				broadcastLichCode(_codeString);
 				_compile(_codeString);
 				break;
 			}

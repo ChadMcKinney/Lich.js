@@ -36,20 +36,26 @@ let test = z where z = 10
 let a = 1
 let b = 2
 
-
+sendChat "TestChat2"
 fst [1,2]
-
+5 * 10
 
 replicateN [3,3,3] 5
 
 setTempo 240
+"Hello world!."
 
+-- Networking tests
+beginNetworking "http://localhost:80" "octopian"
+
+sendChat "Hello from emacs!"
+2 + 2
 
 let testSynth freq => sw >> bufCombC (localBuf sampleRate 2) (tempoSeconds/2) 30 >> add sw >> env [0, 1, 0.6, 0] [0.005, 0.15, 1] -4 >> out 0
     where
         sw = saw freq >> perc2 0.01 0.5 (tempoSeconds/2)
     
-let testSynth2 freq => saw (freq/2) >> env [0, 0.5, 0.3, 0] [0.001, 0.5, 1] -8 >> out 20
+let testSynth2 freq => saw (freq/2) >> env [0, 0.5, 0.3, 0] [0.001, 0.5, 1] -8 >> dup >> out 0
 
 let testSynth3 freq => saw (freq/2) >> env [0, 0.7, 0.3, 0] [0.005, 0.3, 2] -4 >> pan (square $ 1/tempoSeconds) >> out 0
 
@@ -112,8 +118,8 @@ drums2 +> _ sn2 [_ sn2] _ sn2 | (*1)
 let bd => brown 2 >> perc 0.001 0.35 0.2 >> dup >> out 0
 drums3 +> bd _ bd bd bd _ bd _ bd _ bd bd bd _ bd bd bd _ [_ bd] bd | (/1)
 
-let hh => white 1 >> bandpass 4000 0.9 >> perc 0.0001 0.3 0.05 >> out 1
-drums4 +> hh | (/2)
+let hh => white 1 >> bandpass 4000 0.99 >> perc 0.000 0.3 0.0125 >> out 1
+drums4 +> hh | (pseq [(/2), (/2), (/2), (/2), (/2), (/2), (/4), (/8), (/8)] >> pstutter 4)
 
 stop drums
 stop drums2

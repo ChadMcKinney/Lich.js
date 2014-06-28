@@ -27,7 +27,7 @@
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "C-<return>") 'lich-compile-line)
 	(define-key map (kbd "S-<return>") 'lich-compile-line)
-    (define-key map (kbd "C-T") 'lich-chat)
+    (define-key map (kbd "C-T") 'lich-send-chat)
     (define-key map (kbd "C-U") 'lich-add-user)
     (define-key map (kbd "C-<up>") 'lich-backward-paragraph-onto-line)
     (define-key map (kbd "C-<down>") 'lich-forward-paragraph-onto-line)
@@ -71,14 +71,74 @@
 	  (setq lich-folder-path "Lich.js/Local/lichi.js" )
 	  (setenv "PATH" (concat (getenv "PATH") (concat ":" (concat lich-path "Lich.js"))) )))))
 
+;; command constants 
+(setq lichCommandHeader "__LICH_COMMAND__␞")
+(setq lichCommandTail "␞__LICH_END_COMMAND__")
+(setq lich-write-terminal-command 0)
+(setq lich-set-cursor-command 1)
+(setq lich-create-terminal-command 2)
+(setq lich-remove-terminal-command 3)
+(setq lich-chat-message-command 4)
+(setq lich-set-user-name-command 5)
+
+(defun parse-lich-command (string)
+  "Parses a lich command string, calling the appropriate lich-mode commands."
+
+  (let ((commandList (split-string string "␞")))
+	(let ((commandNum (string-to-number (nth 1 commandList))))
+	  (cond
+	   ((= commandNum lich-write-terminal-command) ;; Write text to a terminal
+		(lich-write-terminal (nth 2 commandList) (nth 3 commandList)))
+
+	   ((= commandNum lich-set-cursor-command) ;; Set cursor position for a specific user
+		(lich-move-cursor (nth 2 commandList) (nth 3 commandList) (nth 4 commandList)))
+	   
+	   ((= commandNum lich-create-terminal-command) ;; Create the terminals for the list of current users
+		(mapc 'lich-add-user (butlast (rest (rest commandList)) 1)))
+	   
+	   ((= commandNum lich-remove-terminal-command) ;; remove a terminal for a specific user
+		(lich-remove-user (nth 2 commandList)))
+	   
+	   ((= commandNum lich-chat-message-command) ;; Print a chat message
+		(lich-chat (nth 2 commandList)))
+
+	   ((= commandNum lich-set-user-name-command) ;; Sets the user name of the local user and rebuilds users list and terminal with hooks
+		(setq user-login-name (nth 2 commandList))
+		(setq lich-users (list user-login-name))
+		(setq lich-user-windows (list (list user-login-name lich-code-window)))
+		(save-current-buffer
+		  (set-buffer (window-buffer lich-code-window))
+		  (add-hook 'after-change-functions 'lich-send-terminal nil t)))
+	   ))))
+
+(defun find-lich-command (string)
+  "Searchs a lich output string looking for API commands enclosed via __LICH_COMMAND__ and __LICH_END_COMMAND__"
+
+  (if (string-match lichCommandHeader string)
+	  (progn
+		(parse-lich-command string)
+		"")
+	string))
+
+(defun parse-lich-output (proc string)
+  "Parses the output of lich.js, checking for API commands and calling coordinating emacs functions"
+  (when (buffer-live-p (process-buffer proc))
+	(with-current-buffer (process-buffer proc)
+	  (let ((moving (= (point) (process-mark proc))))
+		(save-excursion
+		  ;; Insert the text, advancing the process marker.
+		  (goto-char (process-mark proc))
+		  (insert (find-lich-command string))
+		  (set-marker (process-mark proc) (point)))
+		(if moving (goto-char (process-mark proc)))))))
 
 
 (defun lich-setup-process ()
   "Sets up the lichi process for lich-mode, assumes node is in path, and the Lich.js folder is in lich-path"
 
   (setq lich-process (start-process "lich-process" "*lich-post*" "node" (concat lich-path lich-folder-path)) )
+  (set-process-filter lich-process `parse-lich-output) ;; set the process filter for the lich.js process
   (set-process-query-on-exit-flag lich-process nil ))
-
 
 
 (defun lich-create-windows ()
@@ -152,7 +212,23 @@
   "Prevent annoying \"Active processes exist\" query when you quit Emacs."
   (flet ((process-list ())) ad-do-it))
 
+(defun lich-move-cursor (user-name x y)
+  "Moves the cursor of a user window to a specific position."
 
+  (save-current-buffer
+	  (set-buffer (concat (concat "*lich-code-" user-name) ".lich*"))
+										;(lich-print (concat (concat (concat (concat "cursor position: " x) ", ") y) "\n"))
+	  (goto-line (string-to-number x))
+	  (move-to-column (+ 1 (string-to-number y)))))
+
+(defun lich-write-terminal (user-name print-string)
+  "Writes the contents of a string to the terminal owned by the user-name."
+  
+  (save-current-buffer
+    (set-buffer (concat (concat "*lich-code-" user-name) ".lich*"))
+
+    (erase-buffer)
+	(insert print-string)))
 
 (defun lich-print (print-string)
   "Prints a string to the lich post window"
@@ -160,7 +236,7 @@
   (save-current-buffer
     (set-buffer "*lich-post*")
 
-    (end-of-buffer)
+    (goto-char (point-max))
 
     ;;clear the buffer if it's too many lines
     (if (> (count-lines (point-min) (point-max)) lich-post-window-height )
@@ -174,7 +250,7 @@
   (save-current-buffer
     (set-buffer "*lich-post*")
 
-    (end-of-buffer)
+    (goto-char (point-max))
 
     ;;clear the buffer if it's too many lines
     (if (> (count-lines (point-min) (point-max)) lich-post-window-height )
@@ -184,75 +260,81 @@
 
 (defun lich-chat (chat-string)
   "Sends out a chat to the network"
-  (interactive "schat: ")
+  ;(interactive "schat: ")
 
   (save-current-buffer
     (set-buffer "*lich-chat*")
 
-    (end-of-buffer)
+    (goto-char (point-max))
     
     ;;clear the buffer if it's too many lines
     (if (> (count-lines (point-min) (point-max)) lich-post-window-height )
 	(delete-region (point-min) (point-max)))
-    (insert (concat (concat (concat user-login-name ": ") chat-string) "\n") )))
+	(insert (concat chat-string "\n"))))
+    ;(insert (concat (concat (concat user-login-name ": ") chat-string) "\n") )))
 
 
 (defun lich-add-user (user-name)
   "Adds a user to the group"
-  (interactive "sUser-name: ")
+										;(interactive "sUser-name: ")
 
+  (lich-print (concat (concat "lich-add-user: " user-name) "\n"))
   (if (not (member user-name lich-users))
-      (setq lich-users (cons user-name lich-users) ))
-  (lich-print-with-break (concat user-name " joined. Current Users: "))
-  (mapcar 'lich-print-with-break lich-users )
-  (lich-print "\n")
+      (progn
+		(setq lich-users (cons user-name lich-users) )
+		(lich-print-with-break (concat user-name " joined. Current Users: "))
+		(mapcar 'lich-print-with-break lich-users )
+		(lich-print "\n")
 
-  ;;split the window
-  (split-window-vertically )
-  
-  ;;do some window juggling
-  (setq lich-user-window (selected-window) )
+		;;split the window
+		(split-window-vertically)
+		
+		;;do some window juggling
+		(setq lich-user-window (selected-window) )
 
-  ;;Setup the new window
-  (get-buffer-create (concat (concat "*lich-code-" user-name) ".lich*") )
-  (switch-to-buffer (concat (concat "*lich-code-" user-name) ".lich*") )
-  (setq mode-line-format  nil )
+		;;Setup the new window
+		(get-buffer-create (concat (concat "*lich-code-" user-name) ".lich*") )
+		(switch-to-buffer (concat (concat "*lich-code-" user-name) ".lich*") )
+		(setq mode-line-format  nil )
 
-  ;;add new window to users window list
-  (add-to-list 'lich-user-windows (list user-name lich-user-window) )
-  
-  ;;Go back to our own code window
-  (other-window 1)
-  ;; (other-window (- (length lich-users) 1) )
-  (setq lich-code-window (selected-window) )
+		;;add new window to users window list
+		(add-to-list 'lich-user-windows (list user-name lich-user-window) )
+		
+		;;Go back to our own code window
+		(other-window 1)
+		;; (other-window (- (length lich-users) 1) )
+		(setq lich-code-window (selected-window) )
 
-  ;;reset our code window in our list
-  ;; (assq-delete-all user-login-name lich-user-windows)
-  (setq lich-user-windows (delq (assoc user-login-name lich-user-windows) lich-user-windows) )
+		;;reset our code window in our list
+		;; (assq-delete-all user-login-name lich-user-windows)
+		(setq lich-user-windows (delq (assoc user-login-name lich-user-windows) lich-user-windows) )
 
-  (add-to-list 'lich-user-windows (list user-login-name lich-code-window) )
+		(add-to-list 'lich-user-windows (list user-login-name lich-code-window) )
 
-  ;;resize all of the windows correctly
-  (mapcar 'lich-resize-window lich-user-windows ))
+		;;resize all of the windows correctly
+		;(mapcar 'lich-resize-window lich-user-windows ))))
+		)))
 
 
 
 (defun lich-remove-user (user-name)
   "Remove a user to the group"
-  (interactive "sUser-name: ")
-  
-  (setq lich-users (remove user-name lich-users) )
-  (lich-print-with-break (concat user-name " left. Current Users: ") )
-  (mapcar 'lich-print-with-break lich-users)
-  (lich-print "\n")
-  
-  (if (window-live-p (car (cdr (assoc user-name lich-user-windows))))
-      (window--delete (car (cdr (assoc user-name lich-user-windows))) ))
-  
-  (setq lich-user-windows (delq (assoc user-name lich-user-windows) lich-user-windows) )
-  
-  ;; (lich-print-alist "lich-user-windows" lich-user-windows )
-  )
+										;(interactive "sUser-name: ")
+
+  (if (member user-name lich-users) 
+	  (progn
+		(setq lich-users (remove user-name lich-users) )
+		(lich-print-with-break (concat user-name " left. Current Users: ") )
+		(mapcar 'lich-print-with-break lich-users)
+		(lich-print "\n")
+		
+		(if (window-live-p (car (cdr (assoc user-name lich-user-windows))))
+			(window--delete (car (cdr (assoc user-name lich-user-windows))) ))
+		
+		(setq lich-user-windows (delq (assoc user-name lich-user-windows) lich-user-windows) )
+		
+		;; (lich-print-alist "lich-user-windows" lich-user-windows )
+		)))
 
 
 
@@ -418,3 +500,20 @@
   (interactive)
   
   (process-send-string lich-process "freeAll 0␄\n"))
+
+(defun lich-send-chat (string)
+  "Send a chat message over the lich network."
+
+  (interactive "schat: ")
+
+  (process-send-string lich-process (concat (concat (concat (concat "sendChat2 \"" user-login-name) "\" \"") string) "\"␄\n")))
+  ;(lich-chat (concat (concat user-login-name ": ") string)))
+  
+
+(defun lich-send-terminal (beg end len)
+  "Send a contents of the local user terminal over the lich network."
+
+  (process-send-string lich-process (concat (concat (concat (concat "broadcastTyping2 \"" user-login-name) "\" \"") (buffer-string)) "\"␄\n")))
+  ;; (save-current-buffer
+  ;; 	(set-buffer (window-buffer lich-code-window))
+  ;; 	(process-send-string lich-process (concat (concat (concat (concat "broadcastTyping2 \"" user-login-name) "\" \"") (buffer-string)) "\"␄\n"))))

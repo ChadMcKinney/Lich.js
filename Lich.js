@@ -503,7 +503,13 @@ function compileLich()
 		else 
 		{
 			Lich.post("Unable to load Prelude module.");
-		}	
+		}
+
+		document.addEventListener("keydown", function(e) {
+  			if (e.keyCode == 27) {
+				toggleFullScreen();
+  			}
+		}, false);
 	}
 	
 	catch(e)

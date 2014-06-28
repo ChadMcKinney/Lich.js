@@ -749,6 +749,30 @@ function setPosition(position, object)
 
 _createPrimitive("setPosition", setPosition);
 
+function setX(xposition, object)
+{
+	object.position = { x:xposition, y:object.position.y, z:object.position.z };
+	return object;
+}
+
+_createPrimitive("setX", setX);
+
+function setY(yposition, object)
+{
+	object.position = { x:object.position.x, y:yposition, z:object.position.z };
+	return object;
+}
+
+_createPrimitive("setY", setY);
+
+function setZ(zposition, object)
+{
+	object.position = { x:object.position.x, y:object.position.y, z:zposition };
+	return object;
+}
+
+_createPrimitive("setZ", setZ);
+
 function setPositionAll(position)
 {
 	for(var i = 0; i < CloudChamber.meshes.length; ++i)
