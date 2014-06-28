@@ -2513,7 +2513,7 @@ function bandpass(freq, q, input)
  */
 function dfm1(freq, q, inputgain, type, noiselevel, input)
 {
-	return multiNewUGen(&quot;DFM1&quot;, AudioRate, [input,freq,1/q,inputgain,type,noiselevel], 1, 0);
+	return multiNewUGen(&quot;DFM1&quot;, AudioRate, [input,freq,q,inputgain,type,noiselevel], 1, 0);
 }
 
 /**
@@ -3888,12 +3888,5 @@ Lich.compileSynthDef = function(ast)
 <script src="../assets/js/api-search.js"></script>
 <script src="../assets/js/apidocs.js"></script>
 <script type="text/javascript" src="../assets/../../third-party/ace/ace.js"></script>
-<!--
-<script>
-    var editor = ace.edit("editor");
-    editor.setTheme("ace/lich3");
-    editor.getSession().setMode("haskell");
-</script>
--->
 </body>
 </html>

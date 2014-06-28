@@ -2136,7 +2136,7 @@ function bandpass(freq, q, input)
  */
 function dfm1(freq, q, inputgain, type, noiselevel, input)
 {
-	return multiNewUGen("DFM1", AudioRate, [input,freq,1/q,inputgain,type,noiselevel], 1, 0);
+	return multiNewUGen("DFM1", AudioRate, [input,freq,q,inputgain,type,noiselevel], 1, 0);
 }
 
 /**
