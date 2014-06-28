@@ -209,7 +209,7 @@ function broadcastTyping2(userName, text)
 {
 	//console.log("Sending Typing: " + text);
 
-	if(username === Lich.clientName)
+	if(userName === Lich.clientName)
 		socket.emit('Typing', Lich.clientName, text);
 }
 
