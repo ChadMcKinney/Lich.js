@@ -48,6 +48,7 @@ setTempo 240
 
 -- Networking tests
 beginNetworking "http://localhost:80" "octopian"
+beginNetworking "http://173.203.102.166:80" "octopian"
 
 sendChat "Hello from emacs!"
 
@@ -56,7 +57,7 @@ let testSynth freq => sw >> bufCombC (localBuf sampleRate 2) (tempoSeconds/2) 30
     where
         sw = saw freq >> perc2 0.01 0.5 (tempoSeconds/2)
     
-let testSynth2 freq => saw (freq/2) >> env [0, 0.5, 0.3, 0] [0.001, 0.5, 1] -8 >> dup >> out 0
+let testSynth2 freq => saw (freq/2) >> env [0, 0.5, 0.3, 0] [0.001, 0.5, 1] -8 >> dup >> out 20
 
 let testSynth3 freq => saw (freq/2) >> env [0, 0.7, 0.3, 0] [0.005, 0.3, 2] -4 >> pan (square $ 1/tempoSeconds) >> out 0
 
@@ -119,7 +120,7 @@ drums2 +> _ sn2 [_ sn2] _ sn2 | (*1)
 let bd => brown 2 >> perc 0.001 0.35 0.2 >> dup >> out 0
 drums3 +> bd _ bd bd bd _ bd _ bd _ bd bd bd _ bd bd bd _ [_ bd] bd | (/1)
 
-let hh => white 1 >> bandpass 4000 0.99 >> perc 0.000 0.3 0.0125 >> out 1
+let hh => white 1 >> highpass 2000 0.99 >> perc 0.000 0.5 0.05 >> out 1
 drums4 +> hh | (pseq [(/2), (/2), (/2), (/2), (/2), (/2), (/4), (/8), (/8)] >> pstutter 4)
 
 stop drums
@@ -128,6 +129,11 @@ stop drums3
 
 map (testSynth . (mul 110)) [8..40]
 
+pi
+
+twoPi
+
+iir
 
 -- coleJI
 let ff = degree2Freq coleJI

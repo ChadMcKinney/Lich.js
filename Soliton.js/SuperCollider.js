@@ -1758,6 +1758,24 @@ function white(amp)
  * @submodule Noise
  */
 
+
+/**
+ * Violet noise generator.
+ *
+ * @class violet 
+ * @constructor
+ * @param amp Amplitude of the noise
+ * @example
+ * let test a => violet a >> out 0<br>
+ * let t = test 1<br>
+ * stop t
+ */
+
+function violet(amp)
+{
+	return hpz1(white(amp));
+}
+
 /**
  * Pink noise generator.
  *
@@ -2120,6 +2138,35 @@ function bandpass(freq, q, input)
 	return multiNewUGen("BPF", AudioRate, [input,freq,1/q], 1, 0);
 }
 
+function hpz1(input)
+{
+	return multiNewUGen("HPZ1", AudioRate, [input], 1, 0);
+}
+
+function lpz1(input)
+{
+	return multiNewUGen("LPZ1", AudioRate, [input], 1, 0);
+}
+
+function hpz2(input)
+{
+	return multiNewUGen("HPZ2", AudioRate, [input], 1, 0);
+}
+
+function lpz2(input)
+{
+	return multiNewUGen("LPZ2", AudioRate, [input], 1, 0);
+}
+
+function fos(a0, a1, b1, input)
+{
+	return multiNewUGen("FOS", AudioRate, [input, a0, a1, b1], 1, 0);
+}
+
+function sos(a0, a1, a2, b1, b2, input)
+{
+	return multiNewUGen("SOS", AudioRate, [input, a0, a1, a2, b1, b2], 1, 0);
+}
 /**
  * Digitally modeled analog filter.
  * 

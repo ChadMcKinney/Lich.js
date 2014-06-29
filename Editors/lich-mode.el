@@ -414,7 +414,7 @@
     ;; grab the string
     (setq code-string (buffer-substring-no-properties p1 p2) )
 
-	(process-send-string lich-process (concat code-string "␄\n") )
+	(process-send-string lich-process (concat code-string "␗\n") )
     ;(process-send-string lich-process (concat code-string "\n") )
 
     (let (temp-buf)
@@ -499,21 +499,21 @@
   "This frees all the nodes running on scsynth"
   (interactive)
   
-  (process-send-string lich-process "freeAll 0␄\n"))
+  (process-send-string lich-process "freeAll 0␗\n"))
 
 (defun lich-send-chat (string)
   "Send a chat message over the lich network."
 
   (interactive "schat: ")
 
-  (process-send-string lich-process (concat (concat (concat (concat "sendChat2 \"" user-login-name) "\" \"") string) "\"␄\n")))
+  (process-send-string lich-process (concat (concat (concat (concat "sendChat2 \"" user-login-name) "\" \"") string) "\"␗\n")))
   ;(lich-chat (concat (concat user-login-name ": ") string)))
   
 
 (defun lich-send-terminal (beg end len)
   "Send a contents of the local user terminal over the lich network."
 
-  (process-send-string lich-process (concat (concat (concat (concat "broadcastTyping2 \"" user-login-name) "\" \"") (buffer-string)) "\"␄\n")))
+  (process-send-string lich-process (concat (concat (concat (concat "broadcastTyping2 \"" user-login-name) "\" \"") (buffer-string)) "\"␗\n")))
   ;; (save-current-buffer
   ;; 	(set-buffer (window-buffer lich-code-window))
-  ;; 	(process-send-string lich-process (concat (concat (concat (concat "broadcastTyping2 \"" user-login-name) "\" \"") (buffer-string)) "\"␄\n"))))
+  ;; 	(process-send-string lich-process (concat (concat (concat (concat "broadcastTyping2 \"" user-login-name) "\" \"") (buffer-string)) "\"␗\n"))))

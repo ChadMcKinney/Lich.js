@@ -41,6 +41,7 @@ module Prelude where
 data Primitive = StringT | NumberT | ListT | DictionaryT | ActorT | FunctionT | NothingT | UnknownT
 
 --| Utility
+twoPi = 2 * pi
 snd [a,b] = b
 fst [a,b] = a
 flip f a b = f b a

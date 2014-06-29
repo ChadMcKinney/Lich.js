@@ -100,7 +100,7 @@ process.stdin.on('readable', function() {
 			return _quit();
 		}
 		
-		var eot = chunk.indexOf('␄');
+		var eot = chunk.indexOf('␗');
 		
 		if(eot != -1)
 		{
