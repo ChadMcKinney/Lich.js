@@ -87,17 +87,17 @@
   (let ((commandList (split-string string "␞")))
 	(let ((commandNum (string-to-number (nth 1 commandList))))
 	  (cond
-	   ((= commandNum lich-write-terminal-command) ;; Write text to a terminal
-		(lich-write-terminal (nth 2 commandList) (nth 3 commandList)))
+	   ;((= commandNum lich-write-terminal-command) ;; Write text to a terminal
+		;(lich-write-terminal (nth 2 commandList) (nth 3 commandList)))
 
-	   ((= commandNum lich-set-cursor-command) ;; Set cursor position for a specific user
-		(lich-move-cursor (nth 2 commandList) (nth 3 commandList) (nth 4 commandList)))
+	   ;((= commandNum lich-set-cursor-command) ;; Set cursor position for a specific user
+		;(lich-move-cursor (nth 2 commandList) (nth 3 commandList) (nth 4 commandList)))
 	   
-	   ((= commandNum lich-create-terminal-command) ;; Create the terminals for the list of current users
-		(mapc 'lich-add-user (butlast (rest (rest commandList)) 1)))
+	   ;((= commandNum lich-create-terminal-command) ;; Create the terminals for the list of current users
+		;(mapc 'lich-add-user (butlast (rest (rest commandList)) 1)))
 	   
-	   ((= commandNum lich-remove-terminal-command) ;; remove a terminal for a specific user
-		(lich-remove-user (nth 2 commandList)))
+	   ;((= commandNum lich-remove-terminal-command) ;; remove a terminal for a specific user
+		;(lich-remove-user (nth 2 commandList)))
 	   
 	   ((= commandNum lich-chat-message-command) ;; Print a chat message
 		(lich-chat (nth 2 commandList)))
@@ -106,10 +106,10 @@
 		(setq user-login-name (nth 2 commandList))
 		(setq lich-users (list user-login-name))
 		(setq lich-user-windows (list (list user-login-name lich-code-window)))
-		(save-current-buffer
-		  (set-buffer (window-buffer lich-code-window))
-		  (add-hook 'after-change-functions 'lich-send-terminal nil t)))
-	   ))))
+		;(save-current-buffer
+		;  (set-buffer (window-buffer lich-code-window))
+		;  (add-hook 'after-change-functions 'lich-send-terminal nil t))
+		)))))
 
 (defun find-lich-command (string)
   "Searchs a lich output string looking for API commands enclosed via __LICH_COMMAND__ and __LICH_END_COMMAND__"
@@ -254,7 +254,7 @@
 
     ;;clear the buffer if it's too many lines
     (if (> (count-lines (point-min) (point-max)) lich-post-window-height )
-	(delete-region (point-min) (point-max)))
+		(delete-region (point-min) (point-max)))
     (insert (concat print-string "\n")) ))
 
 

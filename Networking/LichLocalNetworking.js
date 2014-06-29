@@ -55,6 +55,7 @@ var _CHAT_MESSAGE_ = 4;
 var _SET_USER_NAME_ = 5;
 var location = {host: 'http://localhost:80'};
 var users = new Array();
+var _userNames = {};
 
 var _getElementById = function(id)
 {
@@ -85,10 +86,11 @@ function _lcommand(commandNumber, args)
 
 function writeTextToTerminal(id,text)
 {
+	/*
 	if(id != Lich.clientName && text != null)
 	{
 		_lcommand(_WRITE_TERMINAL_, [id, text]);
-	}
+	}*/
 }
 
 // HTML-like function support for networking
@@ -112,7 +114,7 @@ function sendChat2(userName, chatString)
 
 // dummy functions to make LichClient work, we need to work out LichClient so it isn't so dependent on HTML.
 function initChat() {}
-function prompt(msg) { console.log("Prompt: " + Lich.clientName); return Lich.clientName; }
+function prompt(msg) { /*console.log("Prompt: " + Lich.clientName);*/ return Lich.clientName; }
 
 function containsUser(user, usersToCheck)
 {
@@ -132,8 +134,8 @@ function removeDeadUserTerminals(oldUsers, newUsers)
 		var userToCheck = oldUsers[i];
 		if(!containsUser(userToCheck, newUsers))
        	{
-           	// removeTextArea(userToCheck.name);
-			_lcommand(_REMOVE_TERMINAL_, [userToCheck.name]);
+			console.log("User disconnected: " + userToCheck.name);
+           	//_lcommand(_REMOVE_TERMINAL_, [userToCheck.name]);
        	}
 	}
 }
@@ -142,7 +144,8 @@ function createTextAreas()
 {
 	users = users.sort(function(a,b){return a.name != clientName});
 
-	_lcommand(_CREATE_TERMINAL_, users.map(function(e){ return e.name; }));
+	//_lcommand(_CREATE_TERMINAL_, users.map(function(e){ return e.name; }));
+
 	/*
 	for (var i=0; i < users.length; i++)
 	{
@@ -190,7 +193,7 @@ function broadcastLichCode(code)
 	if(socket != null)
 		socket.emit('BroadcastCode',code);
 	
-	console.log("Sending Code:" + code);
+	// console.log("Sending Code:" + code);
 }
 
 function broadcastNetEval(code)
@@ -232,7 +235,8 @@ function receiveCursorPos(name,x,y)
 {
 	if(name != clientName)
 	{
-		_lcommand(_SET_CURSOR_, [name, x, y]);
+		//_lcommand(_SET_CURSOR_, [name, x, y]);
+
 		//console.log("receiveCursorPos: " + name + "," + x + "," + y);
 		//editors[name].clearSelection();
 		//editors[name].moveCursorTo(x,y);
@@ -285,11 +289,24 @@ function login()
 
 function currentUsers(newUsers)
 {
+	
 	var reorderedNewUsers = reorderUserArray(newUsers);
 	removeDeadUserTerminals(users,reorderedNewUsers);
 	users = reorderedNewUsers;
 	createTextAreas();
+	_printUsers2();
 	socket.emit('Typing',clientName, document.getElementById("terminal" + clientName).value);
+}
+
+function _printUsers2()
+{
+	console.log("Connected Users: [");
+    for (var i = 0; i < users.length; ++i)
+    {
+   		console.log("    " + users[i].name);		
+    }
+	
+    console.log("];");
 }
 
 function printUsers(usersToCheck,string)
@@ -398,7 +415,7 @@ function connectToWebSocketServer(isLocal)
 	}
 
 	socket.on('connect', function() {
-		socket.on('TypingClient', receivedTyping);
+		//socket.on('TypingClient', receivedTyping);
 		socket.on('BroadcastCodeClient', receivedLichCode);
 		socket.on('LoginClient', login);
 		socket.on('CurrentUsers', currentUsers);
@@ -407,7 +424,7 @@ function connectToWebSocketServer(isLocal)
 		socket.on('ReadFileClient',readFileDataFromServer);
 		socket.on('CompileLibClient',compileLibFromServer);
 		socket.on('StateSyncClient',receiveStateSync);
-		socket.on('CursorPosClient',receiveCursorPos);
+		//socket.on('CursorPosClient',receiveCursorPos);
 
 		//socket.on('connect',clientConnected);
 		socket.on('disconnect',clientDisconnected);
