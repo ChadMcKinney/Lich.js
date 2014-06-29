@@ -823,6 +823,24 @@ function clip(level, input)
 	return multiNewUGen("Clip", AudioRate, [input,-1*level,level], 1, 0);
 }
 
+function shaper(shapeBuffer, input)
+{
+	return multiNewUGen("Shaper", AudioRate, [shapeBuffer, input], 1, 0);
+}
+
+function distortion2(amt, input)
+{
+	// Math.sin(inputArray[i] * (1 + amtArray[i] * 100))
+	return scSin(mul(input, add(1, mul(amt, 100))));
+}
+
+/*
+function distortion(amt, input)
+{
+	var sample = inputArray[i] * (1 + amtArray[i] * 300);
+    output[i] = sample / (1 + Math.abs(sample));
+}*/
+
 /**
  * Return the inverse of a signal.
  *
@@ -1248,10 +1266,17 @@ function scPow(a, b)
  */
 function range(lo,hi,input)
 {
-    var mul;
-    mul = _binaryOpUGen( _BIN_MUL, _binaryOpUGen( _BIN_MINUS, hi, lo ), 0.5 );
+    var mul = _binaryOpUGen( _BIN_MUL, _binaryOpUGen( _BIN_MINUS, hi, lo ), 0.5 );
 
 	return _binaryOpUGen( _BIN_PLUS, _binaryOpUGen( _BIN_MUL, input, mul ) ,lo );
+}
+
+function exprange(low, high, input)
+{
+	var mulVal = mul(minus(high, low), 0.5);
+	var addVal = add(mulVal, low);
+
+	return add(addVal, mul(mulVal, input));
 }
 
 /**
@@ -1493,6 +1518,11 @@ function scTRand(lo,hi,trigger)
 	return multiNewUGen("TRand", AudioRate, [lo,hi,trigger], 1, 0);
 }
 
+function trand(min, max, trig)
+{
+	return multiNewUGen("TRand", AudioRate, [min, max, trig], 1, 0);
+}
+
 /**
  * Generate a random integer with uniform distribution on each trigger.
  *
@@ -1527,6 +1557,11 @@ function scTIRand(lo,hi,trigger)
 function scTExpRand(lo,hi,trigger)
 {
 	return multiNewUGen("TExpRand", AudioRate, [lo,hi,trigger], 1, 0);
+}
+
+function trandX(min, max, trig)
+{
+	return multiNewUGen("TExpRand", AudioRate, [min, max, trig], 1, 0);
 }
 
 function _findName(input)
@@ -1735,6 +1770,16 @@ function formant(fundf,formf,bwf)
 function impulse(freq)
 {
 	return multiNewUGen("Impulse", AudioRate, [freq,0], 1, 0);
+}
+
+function pluck(freq, decayTime, coeff, input)
+{
+	return multiNewUGen("Pluck", AudioRate, [input, impulse(0), 1, div(1,freq), decayTime, coeff], 1, 0);
+}
+
+function pluck2(freq, decayTime, coeff, input, trig)
+{
+	return multiNewUGen("Pluck", AudioRate, [input, trig, 1, div(1,freq), decayTime, coeff], 1, 0);
 }
 
 /**
@@ -2158,6 +2203,16 @@ function lpz2(input)
 	return multiNewUGen("LPZ2", AudioRate, [input], 1, 0);
 }
 
+function bpz2(input)
+{
+	return multiNewUGen("BPZ2", AudioRate, [input], 1, 0);
+}
+
+function brz2(input)
+{
+	return multiNewUGen("BRZ2", AudioRate, [input], 1, 0);
+}
+
 function fos(a0, a1, b1, input)
 {
 	return multiNewUGen("FOS", AudioRate, [input, a0, a1, b1], 1, 0);
@@ -2167,6 +2222,44 @@ function sos(a0, a1, a2, b1, b2, input)
 {
 	return multiNewUGen("SOS", AudioRate, [input, a0, a1, a2, b1, b2], 1, 0);
 }
+
+function onepole(coeff, input)
+{
+	return multiNewUGen("OnePole", AudioRate, [input, coeff], 1, 0);
+}
+
+function onezero(coeff, input)
+{
+	return multiNewUGen("OneZero", AudioRate, [input, coeff], 1, 0);
+}
+
+function slope(start, end, time)
+{
+	return multiNewUGen("Line", AudioRate, [start, end, time, 0], 1, 0);
+}
+
+function slopeX(start, end, time)
+{
+	return multiNewUGen("XLine", AudioRate, [start, end, time, 0], 1, 0);
+}
+
+function decay(decayTime, input)
+{
+	return multiNewUGen("Decay", AudioRate, [input, decayTime], 1, 0);
+}
+
+function decay2(attackTime, decayTime, input)
+{
+	return multiNewUGen("Decay2", AudioRate, [input, attackTime, decayTime], 1, 0);
+}
+
+function reson(freq, decayTime, input)
+{
+	return multiNewUGen("Ringz", AudioRate, [input, freq, decayTime], 1, 0);
+}
+
+
+
 /**
  * Digitally modeled analog filter.
  * 
@@ -2937,6 +3030,11 @@ function pulsedivider(div,start,trigger)
 	return multiNewUGen("PulseDivider", AudioRate, [trigger,div,start], 1, 0);
 }
 
+function trigDivider(div, input)
+{
+	return multiNewUGen("PulseDivider", AudioRate, [input, div, 0], 1, 0);
+}
+
 /**
  * Triggerable steps at a given interval between minimum and maximum values.
  *
@@ -2957,6 +3055,16 @@ function pulsedivider(div,start,trigger)
 function stepper(min, max, step, trig)
 {
 	return multiNewUGen("Stepper", AudioRate, [trig, 0, min, max, step, min], 1, 0); 
+}
+
+function timer(trig)
+{
+	return multiNewUGen("Timer", AudioRate, [trig], 1, 0);
+}
+
+function sweep(sweepRate, trig)
+{
+	return multiNewUGen("Sweep", AudioRate, [trig, rate], 1, 0);
 }
 
 /**
@@ -3056,6 +3164,31 @@ function pan(position, input)
 function dup(input)
 {
 	return [input, input];
+}
+
+function select(inputArray, index)
+{
+	return multiNewUGen("Select", AudioRate, [index].concat(inputArray), 1, 0);
+}
+
+function mouseY(low, high, scale)
+{
+	return multiNewUGen("MouseY", ControlRate, [low, high, scale, 0.2], 1, 0);
+}
+
+function mouseX(low, high, scale)
+{
+	return multiNewUGen("MouseX", ControlRate, [low, high, scale, 0.2], 1, 0);
+}
+
+function pitchShift(pitchRatio, input)
+{
+	return multiNewUGen("PitchShift", AudioRate, [input, 0.2, pitchRatio, 0, 0], 1, 0);
+}
+
+function freqShift(freq, input)
+{
+	return multiNewUGen("FreqShift", AudioRate, [input, freq, 0], 1, 0);
 }
 
 // Control is used internally for SynthDef arguments/controls

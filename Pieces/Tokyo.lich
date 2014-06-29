@@ -80,6 +80,26 @@ let fxSynth => auxIn 20 1 >> combC tempoSeconds [tempoSeconds/1, tempoSeconds/2]
 let fx = Synth::after "fxSynth" [] server
 
 
+let selectSynth => select [sin 440, saw 66, impulse 13] (scTRand 0 3 $ dust 1) >> gain 0.3 >> dup >> out 0
+
+
+
+let sel = Synth::head "selectSynth" [] server
+
+stop sel
+
+
+let expSynth freq => sin freq >> exprange (sin 0.1 >> exprange 10 1000) 2000 >> sin >> gain 0.1 >> dup >> out 0
+
+let ex = expSynth 11
+
+stop ex
+
+let freqSynth freq => square freq >> freqShift (sin 0.3 >> exprange 0.1 1000) >> gain 0.1 >> dup >> out 0
+let fs = freqSynth 1300
+
+stop fs
+
 stop testMel
 
 let pollSynth freq => sin freq >> poll >> out 0
