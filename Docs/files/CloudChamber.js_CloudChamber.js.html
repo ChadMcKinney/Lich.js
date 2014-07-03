@@ -296,6 +296,8 @@
             
                 <li><a href="../classes/tri.html">tri</a></li>
             
+                <li><a href="../classes/violet.html">violet</a></li>
+            
                 <li><a href="../classes/white.html">white</a></li>
             
                 <li><a href="../classes/wrap.html">wrap</a></li>
@@ -1125,6 +1127,30 @@ function setPosition(position, object)
 }
 
 _createPrimitive(&quot;setPosition&quot;, setPosition);
+
+function setX(xposition, object)
+{
+	object.position = { x:xposition, y:object.position.y, z:object.position.z };
+	return object;
+}
+
+_createPrimitive(&quot;setX&quot;, setX);
+
+function setY(yposition, object)
+{
+	object.position = { x:object.position.x, y:yposition, z:object.position.z };
+	return object;
+}
+
+_createPrimitive(&quot;setY&quot;, setY);
+
+function setZ(zposition, object)
+{
+	object.position = { x:object.position.x, y:object.position.y, z:zposition };
+	return object;
+}
+
+_createPrimitive(&quot;setZ&quot;, setZ);
 
 function setPositionAll(position)
 {
