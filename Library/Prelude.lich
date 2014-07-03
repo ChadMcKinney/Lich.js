@@ -502,6 +502,8 @@ brange low high p = (prange low high p)::p (currentBeat 0)
 pexprange low high p = Pattern (\t -> linexp (collapse t p) -1 1 (collapse t low) (collapse t high))
 bexprange low high p = (pexprange low high p)::p (currentBeat 0)
 
+pd2f scale p = Pattern (\t -> d2f scale (collapse t p))
+
 beatPattern p = p::p (currentBeat 0)
 bp = beatPattern
 

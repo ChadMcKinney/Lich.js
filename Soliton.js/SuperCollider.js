@@ -426,6 +426,12 @@ Synth.grain = function(name, args, target, action)
 }
 
 
+function fxSynth(name)
+{
+	return Synth.after(name, []);
+}
+
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // UGen
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2111,6 +2117,12 @@ function lowpass(freq, q, input)
 	return multiNewUGen("RLPF", AudioRate, [input,freq,1/q], 1, 0);
 }
 
+
+function lowshelf(freq, boost, input)
+{
+	return multiNewUGen("BLowShelf", AudioRate, [input, freq, 1, boost], 1, 0);
+}
+
 /**
  * Filters.
  * @submodule Filters
@@ -3171,6 +3183,22 @@ function select(inputArray, index)
 	return multiNewUGen("Select", AudioRate, [index].concat(inputArray), 1, 0);
 }
 
+function uchoose(inputArray)
+{
+	return multiNewUGen("Select", AudioRate, [scIRand(0, inputArray.length)].concat(inputArray), 1, 0);
+}
+
+function twindex(weights, input)
+{
+	return multiNewUGen("TWindex", AudioRate, [input, 0].concat(weights), 1, 0);
+}
+
+function uwchoose(weights, inputArray)
+{
+
+	return multiNewUGen("Select", AudioRate, [twindex(weights, impulse(0))].concat(inputArray), 1, 0);
+}
+
 function mouseY(low, high, scale)
 {
 	return multiNewUGen("MouseY", ControlRate, [low, high, scale, 0.2], 1, 0);
@@ -3472,7 +3500,6 @@ function _synthDef(name, def)
 {
 	var offset = 4; // default offset to for becase we always start with the same header
 	var numBytes = 11 + name.length;
-	var buf = new Buffer(1024); // NEED TO FIGURE OUT A WAY TO DYNAMICALLY SET THIS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Initialize controls, constants, and children
@@ -3512,7 +3539,8 @@ function _synthDef(name, def)
 	
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Header
-	
+
+	var buf = new Buffer(1024 + (numChildren * 32));
 	buf.write("SCgf", 0, 4); // SuperCollider synth definition file header
 	buf.writeInt32BE(2, offset); // SC synthdef version number
 	offset += 4;
