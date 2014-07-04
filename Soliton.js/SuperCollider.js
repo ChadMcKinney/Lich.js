@@ -44,6 +44,10 @@
 var spawn = require('child_process').spawn;
 var exec = require('child_process').exec;
 var osc = require("osc");
+var _fxGroup = null;
+var _limitGroup = null;
+var _masterLimiterSynthDef = null;
+var _masterLimiterSynth = null;
 
 function _Server(options) {
 	this.options = options;
@@ -52,6 +56,8 @@ function _Server(options) {
 _Server.prototype.connect = function() {
 	var self = this;
 
+	this.allocatedBuffers = {};
+	
 	this.udp = new osc.UDPPort({
 		localAddress: "0.0.0.0",
 		localPort: 57121
@@ -94,6 +100,16 @@ _Server.prototype.scheduleMsg = function(secondsFromNow, address, args) {
 			args: args
 		}]
 	}, this.options.sHost, this.options.sPortNum);
+}
+
+_Server.prototype.allocateBuffer = function()
+{
+
+}
+
+_Server.prototype.deallocateBuffer = function()
+{
+
 }
 
 function getSCPath()
@@ -206,14 +222,29 @@ process.on('exit', function(code){
 });
 
 
+function _setupSC()
+{
+	s.sendMsg('/clearSched', []);
+    s.sendMsg('/g_freeAll', [0]);
+	Lich.scheduler.freeScheduledEvents();
+	s.sendMsg("/g_new", [1, 0, 0]); // default group
+	_fxGroup = Group.after(s);
+	_limitGroup = Group.after(_fxGroup);
+	_masterLimiterSynthDef = _synthDef("_MasterLimiterSynth", replaceOut(0, limiter(1.0, 0.001, auxIn(0, 2))));
+	setTimeout(function() {
+		_masterLimiterSynth = Synth.head("_MasterLimiterSynth", [], _limitGroup);
+	}, 1000);
+	//var _masterLimiterSynth = null;
+}
+
 // Wait for server to boot ... perhaps there's a better way here.
 setTimeout( // Initial messages
 	function()
 	{
 		s.connect();
-		s.sendMsg("/g_new", [1, 0, 0]); // default group
 		s.sendMsg('/notify', [1]);
 		s.sendMsg('/status', []);
+		_setupSC();
 	},
 	2000
 );
@@ -428,9 +459,21 @@ Synth.grain = function(name, args, target, action)
 
 function fxSynth(name)
 {
-	return Synth.after(name, []);
+	return Synth.head(name, [], _fxGroup);
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Buffer
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/*
+function ScBuffer(numFrames, numChannels, bufnum)
+{
+	this.numFrames = numFrames;
+	this.numChannels = numChannels;
+	this.bufnum = bufnum;
+
+	s.sendMsg("/s_new", [name, this.nodeID, action, target.nodeID].concat(args));
+}*/
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // UGen
@@ -3105,6 +3148,21 @@ function out(busNum, value)
 	return outGen;
 }
 
+function replaceOut(busNum, value)
+{
+	var outGen = multiNewUGen("ReplaceOut", AudioRate, [busNum, value], 0, 0); // Out has not outputs
+
+	if(outGen instanceof Array)
+	{
+		for(var i = 0; i < outGen.length; ++i) // expand the output bus to account for multichannel expansion
+		{
+			outGen[i].inputs[0] = busNum + i;
+		}
+	}
+
+	return outGen;
+}
+
 /**
  * Inputs and Outputs
  * @submodule InputOutput
@@ -3640,10 +3698,11 @@ function stop(object)
 
 function freeAll()
 {
-	s.sendMsg('/clearSched', []);
-    s.sendMsg('/g_freeAll', [0]);
-	Lich.scheduler.freeScheduledEvents();
-	s.sendMsg("/g_new", [1, 0, 0]); // default group
+	//s.sendMsg('/clearSched', []);
+    //s.sendMsg('/g_freeAll', [0]);
+	//Lich.scheduler.freeScheduledEvents();
+	_setupSC();
+	//s.sendMsg("/g_new", [1, 0, 0]); // default group
 }
 
 // Redefine Lich.compileSynthDef to use SuperCollider behavior instead of web audio
