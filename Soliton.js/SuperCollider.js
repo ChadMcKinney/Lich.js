@@ -3139,6 +3139,34 @@ function auxIn(busNum, numChannels)
 }
 
 /**
+ * Reads audio from a range of audio buses, delayed by an audio block, which allows for feedback.
+ *
+ * @class feedbackIn
+ * @constructor
+ * @param busNum The bus index to start reading from.
+ * @param numChannels The number of channels to read from.
+ * @example
+ * let simpleSynth freq => sin freq \* square (2\*tempoSeconds) * 0.25 >> out 20<br>
+ * let sSynth = simpleSynth 440<br>
+ * let fxSynth => feedbackIn 20 1 >> combC tempoSeconds [tempoSeconds/1, tempoSeconds/2] 10 >> out 0<br>
+ * let fx = Synth::after "fxSynth" [] server<br>
+ * stop sSynth<br>
+ * stop fx
+ */
+function feedbackIn(busNum, numChannels)
+{
+	var rates = [];
+
+	for(var i = 0; i < numChannels; ++i)
+	{
+		rates.push(AudioRate);
+	}
+
+	// !!! We indicate number of outputs using an array of rates. !!!
+	return newMultiOutUGen("InFeedback", rates, [busNum], 0);
+}
+
+/**
  * Pans a single channel input across a stereo field using equal power panning.
  *
  * @class pan
@@ -3172,8 +3200,7 @@ function pan(position, input)
  * let test freq => sin freq >> dup >> out 0<br>
  * let t = test 440 <br>
  * stop t
- */
-function dup(input)
+ */function dup(input)
 {
 	return [input, input];
 }
