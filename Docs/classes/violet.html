@@ -2,7 +2,7 @@
 <html lang="en" class="yui-overrride">
 <head>
     <meta charset="utf-8">
-    <title>gbmanL - Lich.sc</title>
+    <title>violet - Lich.sc</title>
     <link rel="stylesheet" href="http://yui.yahooapis.com/3.9.1/build/cssgrids/cssgrids-min.css">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
     <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700' rel='stylesheet' type='text/css'>
@@ -373,21 +373,21 @@
             <div class="apidocs">
                 <div id="docs-main">
                     <div class="content">
-                        <h1>gbmanL</h1>
+                        <h1>violet</h1>
 
 
 <div class="intro">
-    <p>A linearly interpolating sound generator based on the difference equation: x[n+1] = 1 - y[n] + abs(x[n]); y[n+1] = x[n];</p>
+    <p>Violet noise generator.</p>
 
 </div>
 
 
     <div class="constructor">
-        <div id="method_gbmanL" class="method item">
+        <div id="method_violet" class="method item">
 
   <h3>Syntax</h3>
   <div class="blue-method-syntax">
-  <h3 class="name"><code>gbmanL</code></h3>
+  <h3 class="name"><code>violet</code></h3>
 
     
         <div class="args">
@@ -395,19 +395,7 @@
             
                 <li class="arg">
                     
-                        <code>freq</code>
-                    
-                </li>
-            
-                <li class="arg">
-                    
-                        <code>xi</code>
-                    
-                </li>
-            
-                <li class="arg">
-                    
-                        <code>yi</code>
+                        <code>amp</code>
                     
                 </li>
             
@@ -442,43 +430,13 @@
             
                 <li class="param">
                     
-                        <code class="param-name">freq</code>
+                        <code class="param-name">amp</code>
                     
 
                     
 
                     <div class="param-description">
-                        <p>Frequency</p>
-
-                    </div>
-
-                    
-                </li>
-            
-                <li class="param">
-                    
-                        <code class="param-name">xi</code>
-                    
-
-                    
-
-                    <div class="param-description">
-                        <p>Initial value of x</p>
-
-                    </div>
-
-                    
-                </li>
-            
-                <li class="param">
-                    
-                        <code class="param-name">yi</code>
-                    
-
-                    
-
-                    <div class="param-description">
-                        <p>Initial value of y</p>
+                        <p>Amplitude of the noise</p>
 
                     </div>
 
@@ -497,8 +455,8 @@
 
             <div class="example-content">
             <pre class="code prettyprint"
-               <p>let test f xi yi =&gt; gbmanL f xi yi &gt;&gt; out 0<br>
-let t = test 22050 1.2 2.1<br>
+               <p>let test a =&gt; violet a &gt;&gt; out 0<br>
+let t = test 1<br>
 stop t</p>
 
                </pre>
@@ -518,13 +476,13 @@ stop t</p>
         <div id="index" class="api-class-tabpanel index">
             
         <div class="foundat">
-            Defined in: <a href="../files/Soliton.js_SuperCollider.js.html#l2085"><code>Soliton.js&#x2F;SuperCollider.js:2085</code></a>
+            Defined in: <a href="../files/Soliton.js_SuperCollider.js.html#l1813"><code>Soliton.js&#x2F;SuperCollider.js:1813</code></a>
         </div>
     
 
     
         
-            Module: <a href="../modules/Chaos.html">Chaos</a><br>
+            Module: <a href="../modules/Noise.html">Noise</a><br>
             Parent Module: <a href="../modules/Lich.sc UGens.html">Lich.sc UGens</a>
         
     

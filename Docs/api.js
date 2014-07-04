@@ -129,6 +129,7 @@ YUI.add("yuidoc-meta", function(Y) {
         "square",
         "stepper",
         "tri",
+        "violet",
         "white",
         "wrap",
         "xline"
